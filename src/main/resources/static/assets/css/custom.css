@@ -1,0 +1,32 @@
+@charset "UTF-8";
+
+
+/* 사이드바 - 로고 위치 설정 */
+.text-primary {
+	display: block;
+	width: 100%;
+	background-repeat: no-repeat;
+}
+ 	
+.logo-img {
+	width: 100%;
+}
+
+li.menu-inner {
+	padding-top: 0px;
+}
+
+/* 헤더 - 상단 고정*/
+.costom-inner {
+	width: calc(100%-280px);
+	position: sticky;
+	top: 0;
+	left: 0;
+	z-index: 1050;
+}
+
+/* 반응형 여백 설정*/
+.layout-page {
+	margin-left: 260px;
+}
+
