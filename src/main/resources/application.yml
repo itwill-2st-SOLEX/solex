@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: solex
+
+  thymeleaf:
+    cache: false
+
+  datasource:
+    url: jdbc:oracle:thin:@//itwillbs.com:1602/ORCL2412
+    username: c##c4d2505t2
+    password: itwillbs2505t2
+    driver-class-name: oracle.jdbc.OracleDriver
+
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
