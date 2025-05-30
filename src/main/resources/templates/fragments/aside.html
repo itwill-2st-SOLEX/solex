@@ -1,0 +1,142 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:fragment="aside">
+
+	<aside id="layout-menu" class="custom-side layout-menu menu-vertical menu bg-menu-theme">
+          <div class="app-brand demo">
+            <a href="" class="app-brand-link">
+              <span class="app-brand-logo demo">
+                <span class="text-primary">
+                	<img alt="logo" src="/assets/img/solex_logo.png" class="logo-img">
+                </span>
+              </span>
+            </a>
+
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+              <i class="bx bx-chevron-left d-block d-xl-none align-middle"></i>
+            </a>
+          </div>
+
+         <!--  <div class="menu-divider mt-0"></div> -->
+
+          <div class="menu-inner-shadow"></div>
+
+          <ul class="menu-inner py-1">
+            <!-- ERP -->
+            <li class="menu-item">
+              <div class="menu-link ">
+                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                <div class="text-truncate" data-i18n="Dashboards">ERP</div>
+              </div>
+            </li>
+
+            <!-- 인사관리 -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user-circle"></i>
+                <div class="text-truncate" data-i18n="Layouts">인사관리</div>
+              </a>
+
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="layouts-without-menu.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">인사등록</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="layouts-without-navbar.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">조직도</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <!-- 근태관리 -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-calendar"></i>
+                <div class="text-truncate" data-i18n="Layouts">근태관리</div>
+              </a>
+
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="layouts-without-menu.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">출/퇴근 등록</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/attendance/my_attend" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">출/퇴근 현황</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="layouts-without-navbar.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">휴가현황조회</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <!-- 전자결제 -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-file"></i>
+                <div class="text-truncate" data-i18n="Layouts">전자결재</div>
+              </a>
+
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="layouts-without-menu.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">기안서 목록</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="layouts-without-navbar.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">결재 승인</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <!-- 영업관리 -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-briefcase"></i>
+                <div class="text-truncate" data-i18n="Layouts">영업관리</div>
+              </a>
+
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="layouts-without-menu.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">거래처 목록</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="layouts-without-navbar.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">주문 관리</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <!-- 공지사항 -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-bell"></i>
+                <div class="text-truncate" data-i18n="Layouts">공지사항</div>
+              </a>
+
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="layouts-without-menu.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">거래처 목록</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="layouts-without-navbar.html" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">주문 관리</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </aside>
+</th:block>
