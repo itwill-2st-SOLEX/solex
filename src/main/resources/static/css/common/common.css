@@ -17,5 +17,17 @@
 }
 
 .controll-area {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 	padding-bottom: 20px;
+}
+
+.btn-area {
+	
+}
+
+.table-area {
+	border: 1px solid #ddd;
+	width: 100%;
 }
