@@ -8,6 +8,7 @@ public class SolexApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SolexApplication.class, args);
+		aa
 	}
 
 }
