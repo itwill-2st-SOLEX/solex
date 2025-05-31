@@ -37,10 +37,20 @@
     <!-- endbuild -->
 
     <link rel="stylesheet" th:href="@{/assets/vendor/libs/apex-charts/apex-charts.css}" />
+	
+	<!-- ToastUi cdn-->
+	<link rel="stylesheet" href="https://uicdn.toast.com/tui.grid/latest/tui-grid.min.css" />
+	<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+
 
     <!-- Page CSS -->
 
     <!-- Helpers -->
+	
+	<!-- Toast UI Grid cdn-->
+	<script src="https://uicdn.toast.com/tui.grid/latest/tui-grid.min.js"></script>
+	<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
     <script th:src="@{/assets/vendor/js/helpers.js}"></script>
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 
@@ -79,8 +89,7 @@
     <!-- / Layout wrapper -->
    
 </div>
-	
-	
+
 	
 	<!-- 공통 자바스크립트 영역 -->
 <!-- 	<script th:src="@{/js/item_common.js}"></script> -->
@@ -88,7 +97,8 @@
 	<!-- 개별 페이지 자바스크립트 영역 -->
 	<th:block layout:fragment="script"></th:block>
 	
-	
+	<!-- Toast UI Editor  설정 -->
+	<script th:src="@{/js/editor.js}"></script>
 	
 	<script th:src="@{/assets/vendor/libs/jquery/jquery.js}"></script>
 
