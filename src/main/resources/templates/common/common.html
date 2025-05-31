@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<meta charset="UTF-8">
+<title>SOLEX</title>
+
+<link rel="stylesheet" href="/css/common/common.css">
+
+</head>
+<body>
+	<th:block layout:fragment="content">
+		<div class="content-area">
+			<div id="commoncode-area" class="common">
+				<h3 class="c-title">공통코드</h3>
+				
+				<div class="controll-area">
+					<input type="text" placeholder="코드/항목명/설명으로 검색">
+					
+					<div class="btn-area">
+						<button>추가</button>
+						<button>저장</button>
+					</div>
+				</div>
+				<div class="grid-area">
+					<table border="1" class="table-area">
+						<thead>
+							<tr>
+								<th>순번</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<div id="commondetail-area" class="common">
+				<h3 class="c-title">상세공통코드</h3>
+				
+				<div class="controll-area">
+					<input type="text" placeholder="상세코드/항목명으로 검색">
+					
+					<div class="btn-area">
+						<button>추가</button>
+						<button>저장</button>
+					</div>
+				</div>
+				<div class="grid-area">
+					<table class="table-area">
+						<thead>
+							<tr>
+								<th>순번</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</th:block>
+</body>
+</html>
