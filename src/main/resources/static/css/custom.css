@@ -5,7 +5,7 @@
 .text-primary {
 	display: block;
 	width: 100%;
-	background-repeat: no-repeat;
+	text-align: center;
 }
  	
 .logo-img {
@@ -28,5 +28,21 @@ li.menu-inner {
 /* 반응형 여백 설정*/
 .layout-page {
 	margin-left: 260px;
+}
+ 
+/* 공통영역 css */
+.layout-page>.container-xxl {
+	background-color: white;
+	margin-top: 30px;
+	box-sizing: border-box;
+	padding-left: 1.8rem;
+	padding-right: 1.6rem;
+	width: 95%;
+	border-radius: 0.375rem;
+}
+
+.custom-body h2{
+	font-size: 1.8em;
+	margin-bottom: 1.8rem;
 }
 
