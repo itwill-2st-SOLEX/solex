@@ -21387,11 +21387,6 @@ li:not(:first-child) .dropdown-item, .dropdown-menu .dropdown-item:not(:first-ch
 .container-xxl {
   padding-inline: 1.6rem;
 }
-<<<<<<< HEAD
-=======
-
-
->>>>>>> dev
 @media (min-width: 992px) {
   .container,
   .container-fluid,
@@ -22316,11 +22311,7 @@ li:not(:first-child) .dropdown-item, .dropdown-menu .dropdown-item:not(:first-ch
   padding-block: 0;
   padding-inline: 1.5rem;
 }
-<<<<<<< HEAD
-.layout-navbar.navbar-detached.container-xxl {
-=======
 .layout-navbar.navbar-detached.container-xxl, .container-xxl {
->>>>>>> dev
   max-inline-size: calc(1440px - 1.625rem * 2);
 }
 @media (max-width: 991.98px) {
