@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+		<!-- 여기서 부터 작성하시면 됩니다  -->
+			<h2>공지사항</h2>
+			<!-- 본문 영역-->
+			<div class="custom-content">
+				
+				<div id="grid"></div>
+			</div>
+        </div>
+		
+		<th:block layout:fragment="script">
+			<script>
+				
+				let currentPage = 0;	//표시하려는 페이지 번호
+				const pageSize = 20;	//한 화면에 표시할 행의 개수
+				const gridHeight=500;		//그리드 높이
+
+				const grid = new tui.Grid({
+				    el: document.getElementById('grid'),
+				    bodyHeight: gridHeight,
+				    data: [],
+				    columns: [
+				        //{ header: '번호', name: 'notId' },
+				        { header: '제목', name: 'notTt' },
+				        { header: '사번', name: 'empId' },
+				        { header: '등록일', name: 'notRegDate' }
+				    ],
+				    rowHeaders: ['rowNum']
+				});
+
+				async function noticeList(page) {
+				    try {
+						//'/SOLEX/api/notice?page=' + page + '&size=' + pageSize
+				        const res = await fetch(`/SOLEX/api/notice?page=${page}&size=${pageSize}`);
+				        const data = await res.json();
+						
+				        const gridData = data.map(n => ({
+				            notId: n.NOT_ID,
+				            empId: n.EMP_ID,
+				            notTt: n.NOT_TT,
+				            notRegDate: n.NOT_REG_DATE
+				        }));
+						
+				        if (page === 0) {
+				            // 첫 페이지는 그리드 초기화
+				            grid.resetData(gridData);
+				        } else {
+				            // 다음 페이지 데이터는 기존 데이터에 추가
+				            grid.appendRows(gridData);
+				        }
+
+				        // 다음 페이지 증가
+				        currentPage++;
+
+				        // 만약 데이터가 pageSize보다 작으면 더이상 로딩X
+				        if (data.length < pageSize) {
+				            grid.off('scrollEnd'); // 무한스크롤 종료
+				        }
+
+				    } catch (e) {
+				        console.error('fetch 에러 : ', e);
+				    }
+				}
+
+				// 초기 데이터 로드
+				window.addEventListener('DOMContentLoaded', () => {
+				    noticeList(currentPage);
+				});
+
+				// 스크롤 끝나면 다음 페이지 로드
+				grid.on('scrollEnd', () => {
+				    noticeList(currentPage);
+				});
+			   
+			   
+							
+			//무한 스크롤 적용 끝
+			
+			</script> 
+		</th:block>
+	</th:block>
+	
+	
+</body>
+</html>
