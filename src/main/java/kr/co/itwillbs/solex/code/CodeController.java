@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/SOLEX")
+@RequestMapping("/")
 public class CodeController {
 	
 	@Autowired
 	private CodeService codeService;
 
 	@GetMapping("/code")
-	public String showCommonCodeList(Model model) {
+	public String getCodeList(Model model) {
 		
 		List<CodeDTO> codeList = codeService.getCodeList();
 		
