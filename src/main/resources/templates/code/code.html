@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<title>SOLEX</title>
+
+<link rel="stylesheet" href="/css/common/common.css">
+
+</head>
+<body>
+	<th:block layout:fragment="content">
+		<!-- 콘텐츠 영역 -->
+		<div class="content-area">
+			<!-- 공통코드 영역 -->
+			<div id="commoncode-area" class="common">
+				<h3 class="c-title">공통코드</h3>
+				
+				<!-- 컨트롤 영역 -->
+				<div class="controll-area">
+					<input type="text" placeholder="코드/항목명/설명으로 검색">
+					
+					<div class="btn-area">
+						<button>추가</button>
+						<button>저장</button>
+					</div>
+				</div>
+				
+				<!-- 그리드 영역 -->
+				<div class="grid-area">
+					<div id="grid"></div>
+					<th:block layout:fragment="script">
+						<script>
+							const gridData = [
+												{
+													num: '1',
+										         	code: 'A001',
+												 	codeName: '근태',
+												 	disc : '출퇴근관리',
+												 	useYn : 'Y'
+										       	}
+											 ]
+								   
+							const grid = new tui.Grid({
+							     el: document.getElementById('grid'),
+							     data: gridData,
+							     bodyHeight: 500,
+							     columns: [
+							       {
+							         header: '순번',
+							         name: 'num',
+							         filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+							       },
+							       {
+							         header: '코드',
+							         name: 'code',
+							         filter: 'select'
+							       },
+							       {
+							         header: '항목명',
+							         name: 'codeName'
+							       },
+							       {
+							         header: '설명',
+							         name: 'disc'
+							       },
+								   {
+									 header : '사용여부',
+									 name : 'useYn',
+									 filter : 'select'
+								   }
+							     ]
+							   });
+							 
+						</script>
+					</th:block>
+				</div>
+				
+			</div>
+			
+			<!-- 상세공통코드 영역 -->
+			<div id="commondetail-area" class="common">
+				<h3 class="c-title">상세공통코드</h3>
+				
+				<!-- 컨트롤 영역 -->
+				<div class="controll-area">
+					<input type="text" placeholder="상세코드/항목명으로 검색">
+					
+					<div class="btn-area">
+						<button>추가</button>
+						<button>저장</button>
+					</div>
+				</div>
+				
+				<!-- 그리드 영역 -->
+				<div class="grid-area">
+					<div id="grid"></div>
+					<th:block layout:fragment="script">
+						<!--<script>
+							const gridData = [
+												{
+										         name: 'Name',
+										         artist: 'name',
+												 price: 'Name',
+												 genre : 'abc'
+									       },
+									       {
+												 name: 'Name',
+										         artist: 'name',
+												 price: 'Name',
+												 genre : 'abc'
+									       },
+									       {
+												 name: 'Name',
+										         artist: 'name',
+												 price: 'Name',
+												 genre : 'abc'
+								
+									       },
+									       {
+												 name: 'Name',
+										         artist: 'name',
+												 price: 'Name',
+												 genre : 'abc'
+	
+											}
+										]
+								   
+							const grid = new tui.Grid({
+							     el: document.getElementById('grid'),
+							     data: gridData,
+							     bodyHeight: 500,
+							     columns: [
+							       {
+							         header: 'Name',
+							         name: 'name',
+							         filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
+							       },
+							       {
+							         header: 'Artist',
+							         name: 'artist',
+							         filter: 'select'
+							       },
+							       {
+							         header: 'Price',
+							         name: 'price',
+							         filter: 'number'
+							       },
+							       {
+							         header: 'Genre',
+							         name: 'genre',
+							         filter: {
+							           type: 'text',
+							           operator: 'OR'
+							         }
+							       }
+							     ]
+							   });
+							 
+						</script>-->
+					</th:block>
+				</div>
+			</div>
+		</div>
+	</th:block>
+</body>
+</html>
