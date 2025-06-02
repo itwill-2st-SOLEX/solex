@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.attendance.AttendanceMapper">
+	<select id="selectAttendenceList" resultType="java.util.Map">
+        SELECT
+            att_id,
+            emp_id,
+            NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
+ 			NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
+            att_sts,
+            att_day
+        FROM
+            attendance 
+        WHERE emp_id = 'EMP001'
+    </select>
+    
+    <select id="selectAttendenceByMonthList">
+    	SELECT
+            att_id,
+            emp_id,
+            NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
+ 			NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
+            att_sts,
+            att_day
+        FROM
+            attendance 
+        WHERE emp_id = 'EMP001'
+          AND TO_CHAR(att_in_time, 'YYYY') = #{year} 
+          AND TO_CHAR(att_in_time, 'MM') = LPAD(#{month}, 2, '0') 
+     ORDER BY att_day ASC
+    
+    </select>
+</mapper>	
