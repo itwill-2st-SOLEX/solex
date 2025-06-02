@@ -1,0 +1,16 @@
+@charset "UTF-8";
+#docTypeSelect{
+    width: 180px;
+}
+.approval-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+.approval-table th,
+.approval-table td {
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 8px;
+  font-size: 14px;
+}
