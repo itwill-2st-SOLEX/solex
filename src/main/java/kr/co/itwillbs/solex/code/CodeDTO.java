@@ -16,8 +16,8 @@ import lombok.ToString;
 @Getter
 @Setter
 public class CodeDTO {
-	private String COD_ID;
-	private String COD_NM;
-	private Character COD_YN;
-	private LocalDateTime COD_REG_TIME;
+	private String cod_id;
+	private String cod_nm;
+	private Character cod_yn;
+	private LocalDateTime cod_reg_time;
 }

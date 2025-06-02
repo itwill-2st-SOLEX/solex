@@ -1,6 +1,5 @@
 package kr.co.itwillbs.solex.code;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,7 @@ public class CodeService {
 	private CodeMapper codeMapper;
 
 	public List<CodeDTO> getCodeList() {
-		List<CodeDTO> codeList = new ArrayList<>();
-		codeList = codeMapper.getCodeList();
+		List<CodeDTO> codeList = codeMapper.getCodeList();
 		return codeList;
 	}
 

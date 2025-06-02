@@ -21,8 +21,8 @@
 					<input type="text" placeholder="코드/항목명/설명으로 검색">
 					
 					<div class="btn-area">
-						<button>추가</button>
-						<button>저장</button>
+						<button id="code-add" class="add-btn">추가</button>
+						<button id="coda-save" class="save-btn">저장</button>
 					</div>
 				</div>
 				
@@ -42,8 +42,8 @@
 					<input type="text" placeholder="상세코드/항목명으로 검색">
 					
 					<div class="btn-area">
-						<button>추가</button>
-						<button>저장</button>
+						<button id="" class="add-btn">추가</button>
+						<button id="" class="save-btn">저장</button>
 					</div>
 				</div>
 				
@@ -54,13 +54,17 @@
 			</div>
 		</div>
 	</th:block>
-<th:block layout:fragment="script">
-	<script th:inline="javascript">
-    /*<![CDATA[*/
-    window.codeList = [[${codeList}]];
-    /*]]>*/
-  </script>
-	<script th:src="@{/js/code/codeList.js}"></script>
-</th:block>
+	
+	<th:block layout:fragment="script">
+	  <!-- 타임리프 변수 → JS 전역 변수로 전달 -->
+	  <script th:inline="javascript">
+	    /*<![CDATA[*/
+	    window.codeList = [[${codeList}]];
+	    /*]]>*/
+	  </script>
+	
+	  <!-- 외부 JS 로드 -->
+	  <script th:src="@{/js/code/codeList.js}"></script>
+	</th:block>
 </body>
 </html>
