@@ -20,4 +20,10 @@ public class HrController {
 	public String register() {
 		return "hr/hr_registraion";
 	}
+	
+	
+	@GetMapping("/correction")
+	public String correction() {
+		return "hr/hr_correction";
+	}
 }
