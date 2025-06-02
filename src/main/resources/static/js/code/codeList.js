@@ -20,10 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		__isNew: false
 	}));
 	
-	const grid = new tui.Grid({
+	window.grid = new tui.Grid({
 		el: document.getElementById('code-grid'),
 		data: formattedList,
 		bodyHeight: 300,
+		rowHeaders: ['checkbox'],
 		columns: [
 			{ header: '코드', name: 'cod_id', editor: 'text' },
 			{ header: '항목명', name: 'cod_nm', editor: 'text' },
@@ -39,19 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 				}
 			},
-			{ header: '등록일시', name: 'cod_reg_time', editor: 'text' }
+			{ header: '등록일시', name: 'cod_reg_time' }
 		]
 	});
 	
-	// ✅ 추가 버튼
-	document.querySelector('#code-add').addEventListener('click', () => {
-		grid.prependRow({
-			cod_id: '',
-			cod_nm: '',
-			cod_yn: 'Y', // 기본값
-			cod_reg_time: formatDateTime(new Date()),
-			__isNew: true  // 새 행 여부
-		});
-	});
-
+	// 날짜 변환 함수를 전역함수로 등록
+	window.formatDateTime = formatDateTime;
+	
 });
