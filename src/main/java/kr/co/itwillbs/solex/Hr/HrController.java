@@ -2,6 +2,7 @@ package kr.co.itwillbs.solex.Hr;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import lombok.extern.log4j.Log4j2;
@@ -18,8 +19,11 @@ public class HrController {
 	
 	@GetMapping("/registration")
 	public String register() {
-		return "hr/hr_registraion";
+		return "hr/hr_registration";
 	}
+	
+	
+	@PostMapping("/registration")
 	
 	
 	@GetMapping("/correction")

@@ -24,6 +24,14 @@ body {
       align-items: center;
     }
 
+    .form-group1 {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+
     .form-group label {
       width: 100px;
     }

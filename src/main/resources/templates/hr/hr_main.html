@@ -4,9 +4,12 @@
 	  layout:decorate="~{layouts/layout}">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" th:href="@{/assets/css/hr/hr_main.css}" >
+<link rel="stylesheet" th:href="@{/css/hr/hr_main.css}" >
 
 <title>hr_main</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/js/hr/hr_main.js}"></script>
+
 </head>
 <body>
 	<th:block layout:fragment="content">
@@ -21,8 +24,8 @@
 	    <input type="text" placeholder="사원명/사번" />
 	    <button>검색</button>
 	    <button>초기화</button>
-	    <button style="margin-left:auto;" onclick="openModal()" class="registration">사원등록</button>
-	    <button style="margin-left:auto;" onclick="openModal()" class="correction">사원수정</button>
+	    <button style="margin-left:auto;" class="registration">사원등록</button>
+	    <button style="margin-left:auto;" class="correction">사원수정</button>
 	</div>
   
   
@@ -39,7 +42,7 @@
 				<td>재직상태</td>
 			</tr>
 	<!-- 		반복문 사용해서 데이터 들고오기 -->
-	
+			
 				
 		
 		</table>
