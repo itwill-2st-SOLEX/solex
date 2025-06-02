@@ -11,5 +11,5 @@ public interface NoticeMapper {
 	//noticeList();
 	List<Map<String, Object>> getNoticeList(@Param("offset") int offset, @Param("size") int size);
 
-
+	Map<String, Object> getNoticeDetail(@Param("notId") int notId);
 }

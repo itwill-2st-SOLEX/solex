@@ -21,4 +21,8 @@ public class NoticeService {
 		return noticeMapper.getNoticeList(offset, size);
 	}
 	
+	public Map<String, Object> getNoticeDetail(int notId) {
+		return noticeMapper.getNoticeDetail(notId);
+	}
+	
 }
