@@ -30,11 +30,12 @@ public class AttendanceController {
         // 초기 근태 데이터를 가져와 모델에 추가
         List<Map<String, String>> initialAttendanceList = attendanceService.getAttendanceByMonth(year, month);
         model.addAttribute("attendanceList", initialAttendanceList);
+        
+        
 
         // 초기 화면에 현재 월/연도를 표시하기 위해 추가 (선택 사항)
-        // JavaScript가 초기화될 때 currentMonthYearSpan을 업데이트하므로 필수는 아님.
-        // model.addAttribute("initialYear", year);
-        // model.addAttribute("initialMonth", month);
+         model.addAttribute("initialYear", year);
+         model.addAttribute("initialMonth", month);
 
         return "attendance/my_attendance_list"; // 이 뷰 이름을 찾아 HTML을 렌더링하여 페이지 이동
 	}

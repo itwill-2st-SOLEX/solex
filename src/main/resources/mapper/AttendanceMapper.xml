@@ -17,7 +17,7 @@
         WHERE emp_id = 'EMP001'
     </select>
     
-    <select id="selectAttendenceByMonthList">
+    <select id="selectAttendenceByMonthList" resultType="java.util.Map">
     	SELECT
             att_id,
             emp_id,
@@ -28,9 +28,8 @@
         FROM
             attendance 
         WHERE emp_id = 'EMP001'
-          AND TO_CHAR(att_in_time, 'YYYY') = #{year} 
-          AND TO_CHAR(att_in_time, 'MM') = LPAD(#{month}, 2, '0') 
+		  AND TO_CHAR(att_in_time, 'YYYY') = #{year}  
+ 		  AND TO_CHAR(att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0') 
      ORDER BY att_day ASC
-    
     </select>
 </mapper>	
