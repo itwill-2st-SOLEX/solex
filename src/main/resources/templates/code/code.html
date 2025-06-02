@@ -28,52 +28,7 @@
 				
 				<!-- 그리드 영역 -->
 				<div class="grid-area">
-					<div id="grid"></div>
-					<th:block layout:fragment="script">
-						<script>
-							const gridData = [
-												{
-													num: '1',
-										         	code: 'A001',
-												 	codeName: '근태',
-												 	disc : '출퇴근관리',
-												 	useYn : 'Y'
-										       	}
-											 ]
-								   
-							const grid = new tui.Grid({
-							     el: document.getElementById('grid'),
-							     data: gridData,
-							     bodyHeight: 500,
-							     columns: [
-							       {
-							         header: '순번',
-							         name: 'num',
-							         filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
-							       },
-							       {
-							         header: '코드',
-							         name: 'code',
-							         filter: 'select'
-							       },
-							       {
-							         header: '항목명',
-							         name: 'codeName'
-							       },
-							       {
-							         header: '설명',
-							         name: 'disc'
-							       },
-								   {
-									 header : '사용여부',
-									 name : 'useYn',
-									 filter : 'select'
-								   }
-							     ]
-							   });
-							 
-						</script>
-					</th:block>
+					<div id="code-grid"></div>
 				</div>
 				
 			</div>
@@ -94,74 +49,18 @@
 				
 				<!-- 그리드 영역 -->
 				<div class="grid-area">
-					<div id="grid"></div>
-					<th:block layout:fragment="script">
-						<!--<script>
-							const gridData = [
-												{
-										         name: 'Name',
-										         artist: 'name',
-												 price: 'Name',
-												 genre : 'abc'
-									       },
-									       {
-												 name: 'Name',
-										         artist: 'name',
-												 price: 'Name',
-												 genre : 'abc'
-									       },
-									       {
-												 name: 'Name',
-										         artist: 'name',
-												 price: 'Name',
-												 genre : 'abc'
-								
-									       },
-									       {
-												 name: 'Name',
-										         artist: 'name',
-												 price: 'Name',
-												 genre : 'abc'
-	
-											}
-										]
-								   
-							const grid = new tui.Grid({
-							     el: document.getElementById('grid'),
-							     data: gridData,
-							     bodyHeight: 500,
-							     columns: [
-							       {
-							         header: 'Name',
-							         name: 'name',
-							         filter: { type: 'text', showApplyBtn: true, showClearBtn: true }
-							       },
-							       {
-							         header: 'Artist',
-							         name: 'artist',
-							         filter: 'select'
-							       },
-							       {
-							         header: 'Price',
-							         name: 'price',
-							         filter: 'number'
-							       },
-							       {
-							         header: 'Genre',
-							         name: 'genre',
-							         filter: {
-							           type: 'text',
-							           operator: 'OR'
-							         }
-							       }
-							     ]
-							   });
-							 
-						</script>-->
-					</th:block>
+					<div id="codeDetail-grid"></div>
 				</div>
 			</div>
 		</div>
 	</th:block>
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+    /*<![CDATA[*/
+    window.codeList = [[${codeList}]];
+    /*]]>*/
+  </script>
+	<script th:src="@{/js/code/codeList.js}"></script>
+</th:block>
 </body>
 </html>

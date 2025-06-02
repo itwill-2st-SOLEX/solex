@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.code;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/SOLEX")
 public class CodeController {
 	
 	@Autowired
@@ -18,7 +19,8 @@ public class CodeController {
 	@GetMapping("/code")
 	public String getCodeList(Model model) {
 		
-		List<CodeDTO> codeList = codeService.getCodeList();
+		List<CodeDTO> codeList = new ArrayList<>();
+		codeList = codeService.getCodeList();
 		
 		System.out.println("코드리스트 : " + codeList);
 		
