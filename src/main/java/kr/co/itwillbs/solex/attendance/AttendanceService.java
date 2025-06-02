@@ -16,7 +16,7 @@ public class AttendanceService {
 		return attendanceMapper.selectAttendenceList();
 	}
 
-	public List<Map<String, String>> getAttendanceByMonth(int year, int month) {
+	public List<Map<String, Object>> getAttendanceByMonth(int year, int month) {
 		return attendanceMapper.selectAttendenceByMonthList(year, month);
 	}
 

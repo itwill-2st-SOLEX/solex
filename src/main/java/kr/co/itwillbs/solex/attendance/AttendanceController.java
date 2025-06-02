@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,7 @@ public class AttendanceController {
         int month = currentYearMonth.getMonthValue();
 
         // 초기 근태 데이터를 가져와 모델에 추가
-        List<Map<String, String>> initialAttendanceList = attendanceService.getAttendanceByMonth(year, month);
+        List<Map<String, Object>> initialAttendanceList = attendanceService.getAttendanceByMonth(year, month);
         model.addAttribute("attendanceList", initialAttendanceList);
         
         
@@ -43,12 +44,13 @@ public class AttendanceController {
 	// 2. JavaScript (AJAX) 요청을 받아 데이터만 JSON으로 반환하는 메서드
     @GetMapping("/data")
     @ResponseBody
-    public List<Map<String, String>> getAttendanceDataByMonth(
+    public List<Map<String, Object>> getAttendanceDataByMonth(
             @RequestParam("year") int year,
             @RequestParam("month") int month) {
 
         System.out.println("AJAX 요청 수신: " + year + "년 " + month + "월");
-        List<Map<String, String>> attendanceData = attendanceService.getAttendanceByMonth(year, month);
+        List<Map<String, Object>> attendanceData = attendanceService.getAttendanceByMonth(year, month);
+        System.out.println("ADSSAD" + attendanceData);
         return attendanceData;
     }
 	

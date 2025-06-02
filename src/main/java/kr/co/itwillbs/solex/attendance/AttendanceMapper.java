@@ -11,6 +11,6 @@ public interface AttendanceMapper {
 
 	List<Map<String, String>> selectAttendenceList();
 
-	List<Map<String, String>> selectAttendenceByMonthList(@Param("year") int year, @Param("month") int month);
+	List<Map<String, Object>> selectAttendenceByMonthList(@Param("year") int year, @Param("month") int month);
 
 }
