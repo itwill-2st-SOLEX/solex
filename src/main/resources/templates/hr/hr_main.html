@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	  layout:decorate="~{layouts/layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" th:href="@{/assets/css/hr/hr_main.css}" >
+
+<title>hr_main</title>
+</head>
+<body>
+	<th:block layout:fragment="content">
+
+	<h3> enum도 사용해야해</h3>
+	
+	
+	<div class="controls">
+	    <div class="checkbox-container">
+	      <label>
+	        <input type="checkbox"/> 퇴사자 포함
+	      </label>
+	    </div>
+	    
+	    <input type="text" placeholder="사원명/사번" />
+	    <button>검색</button>
+	    <button>초기화</button>
+	    <button style="margin-left:auto;" onclick="openModal()" class="registration">사원등록</button>
+	    <button style="margin-left:auto;" onclick="openModal()" class="correction">사원수정</button>
+	</div>
+  
+  
+		<table border="1">
+			<tr>
+	<!-- 	 체크박스부분 -->
+				<td></td> 
+				<td>사원번호</td>
+				<td>부서</td>
+				<td>사원명</td>
+				<td>직급</td>
+				<td>연락처</td>
+				<td>입사일</td>
+				<td>재직상태</td>
+			</tr>
+	<!-- 		반복문 사용해서 데이터 들고오기 -->
+	
+				
+		
+		</table>
+	
+	</th:block>
+</body>
+</html>

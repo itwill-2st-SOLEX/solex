@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	  layout:decorate="~{layouts/layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="/assets/css/hr/hr_registration.css" type="text/css">
+<title>hr_main</title>
+</head>
+<body>
+	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"></button>
+		<!-- Modal -->
+		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-dialog-scrollable modal-xl">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body big-box">
+		   		<h3>모달창으로 해야해</h3>
+				<div class="container">
+				  <h2>사원등록</h2>
+				  
+				  <div class="section-box">
+				    <div class="form-group">
+				      <div class="flex-col">
+				        <div class="photo-box"></div>
+				        <input type="file" />
+				        <label>사진선택</label>
+				      </div>
+				      <label>사번</label>
+				      <input type="text" value="1234" class="small" readonly />
+				      <label>입사일</label>
+				      <input type="date" />
+				    </div>
+				
+				    <div class="form-group">
+				      <label>부서</label>
+				      <select>
+				        <option>관리부</option>
+				        <option>인사팀</option>
+				        <option>개발팀</option>
+				      </select>
+				
+				      <label>직급</label>
+				      <select>
+				        <option>사원</option>
+				        <option>대리</option>
+				        <option>과장</option>
+				      </select>
+				    </div>
+				  </div>
+				
+				  <div class="form-group">
+				    <label>이름</label>
+				    <input type="text" class="medium" />
+				
+				    <label>주민등록번호</label>
+				    <input type="text" class="small" /> -
+				    <input type="text" class="small" />
+				  </div>
+				
+				  <div class="form-group">
+				    <label>연락처</label>
+				    <input type="text" class="small" value="010" /> -
+				    <input type="text" class="small" value="1111" /> -
+				    <input type="text" class="small" value="2222" />
+				
+				    <label>이메일</label>
+				    <input type="email" class="large" />
+				  </div>
+				
+				  <div class="form-group">
+				    <label>주소</label>
+				    <input type="text" placeholder="우편번호" class="small" />
+				  </div>
+				
+				  <div class="form-group">
+				    <input type="text" placeholder="주소" class="large" />
+				    <input type="text" placeholder="상세주소" class="large" />
+				  </div>
+				
+				  <div class="form-group">
+				    <label>재직상태</label>
+				    <input type="text" class="medium" />
+				
+				    <label>퇴사일</label>
+				    <input type="date" />
+				  </div>
+				
+				  <div class="btn-group">
+				    <button>등록</button>
+				    <button>취소</button>
+				  </div>
+				</div>
+		   
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-primary">Save changes</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+
+	
+</body>
+</html>

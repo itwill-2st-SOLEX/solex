@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	  layout:decorate="layout/default_layout">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="/assets/css/hr/hr_registration.css" type="text/css">
+<title>hr_main</title>
+</head>
+<body>
+	<h3>모달창으로 해야해, 부서랑 직급,재직상태, 퇴직일만 수정하게끔 나머지는 리드온리!</h3>
+	 <div class="container">
+    <h2>사원수정</h2>
+    
+    <div class="section-box">
+      <div class="form-group">
+        <div class="flex-col">
+          <div class="photo-box"></div>
+          <input type="file" />
+          <label>사진선택</label>
+        </div>
+        <label>사번</label>
+        <input type="text" class="small" readonly />
+        <label>입사일</label>
+        <input type="date" readonly />
+      </div>
+
+      <div class="form-group">
+        <label>부서</label>
+        <select>
+          <option>관리부</option>
+          <option>인사팀</option>
+          <option>개발팀</option>
+        </select>
+
+        <label>직급</label>
+        <select>
+          <option>사원</option>
+          <option>대리</option>
+          <option>과장</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>이름</label>
+      <input type="text" class="medium" readonly/>
+
+      <label>주민등록번호</label>
+      <input type="text" class="small" readonly/> -
+      <input type="text" class="small" readonly />
+    </div>
+
+    <div class="form-group">
+      <label>연락처</label>
+      <input type="text" class="small"  readonly/> -
+      <input type="text" class="small"  readonly/> -
+      <input type="text" class="small"  readonly />
+
+      <label>이메일</label>
+      <input type="email" class="large" readonly />
+    </div>
+
+    <div class="form-group">
+      <label>주소</label>
+      <input type="text" placeholder="우편번호" class="small" readonly />
+    </div>
+
+    <div class="form-group">
+      <input type="text" placeholder="주소" class="large" readonly />
+      <input type="text" placeholder="상세주소" class="large" readonly />
+    </div>
+
+    <div class="form-group">
+      <label>재직상태</label>
+      <input type="text" class="medium"/>
+
+      <label>퇴사일</label>
+      <input type="date" />
+    </div>Add commentMore actions
+
+    <div class="btn-group">
+      <button>등록</button>
+      <button>취소</button>
+    </div>
+  </div>
+</body>
+</html>

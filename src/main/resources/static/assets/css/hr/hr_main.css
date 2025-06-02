@@ -1,0 +1,46 @@
+ body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .checkbox-container {
+      flex: 1;
+    }
+
+    input[type="text"] {
+      padding: 4px 8px;
+      border: 1px solid #aaa;
+    }
+
+    button {
+      padding: 6px 12px;
+      border: 1px solid #888;
+      background-color: #f8f8f8;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e0e0e0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
