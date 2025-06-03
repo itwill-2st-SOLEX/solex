@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="kr.co.itwillbs.solex.Hr.HrMapper">
+	<insert id="insertEmp">
+	    INSERT INTO employee (
+	        emp_id, 
+	        emp_num, 
+	        emp_hire, 
+	        emp_nm, 
+	        emp_gd,
+	        emp_phone, 
+	        emp_email, 
+	        emp_add, 
+	        emp_da
+	    ) VALUES (
+	        emp_seq.NEXTVAL,  -- 시퀀스를 쓰는 경우
+	        #{emp_num},
+	        #{emp_hire},
+	        #{emp_nm},
+	        #{emp_gd},
+	        #{emp_phone},
+	        #{emp_email},
+	        #{emp_add},
+	        #{emp_da}
+	    )
+	</insert>
+
+
+</mapper>

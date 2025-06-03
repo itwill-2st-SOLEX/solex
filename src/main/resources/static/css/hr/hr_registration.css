@@ -1,8 +1,22 @@
-body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
+	 body { 
+      margin: 0px;
+      padding: 0px;
     }
+    .big-box {
+      width: 100%;
+      background-color: gray;
+      height: 300px;
+      border-top: 1px solid black;
+    }
+	
+    .modal-dialog{
+        overflow-y: initial !important
+    }
+    .modal-body{
+        overflow-y: auto
+    }
+
+
 
     .container {
       background-color: #fff;

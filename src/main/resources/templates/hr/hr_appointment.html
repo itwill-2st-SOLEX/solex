@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+	  layout:decorate="~{layouts/layout}">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" th:href="@{/css/hr/hr_main.css}" >
+
+<title>hr_main</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/js/hr/hr_main.js}"></script>
+
+</head>
+<body>
+	<th:block layout:fragment="content">
+	
+	<div class="controls">
+	    <button style="margin-left:auto;" class="correction">인사발령 등록</button>
+	</div>
+  
+  
+		<table border="1">
+			<tr>
+	<!-- 	 체크박스부분 -->
+				<td>구분</td> 
+				<td>사원번호</td>
+				<td>사원명</td>
+				<td>부서</td>
+				<td>이전직급</td>
+				<td>발령직급</td>
+				<td>승인일자</td>
+				<td>발령일자</td>
+				<td>비고</td>
+			</tr>
+	<!-- 		반복문 사용해서 데이터 들고오기 -->
+			
+				
+		
+		</table>
+	
+	</th:block>
+</body>
+</html>

@@ -1,0 +1,17 @@
+	 body { 
+      margin: 0px;
+      padding: 0px;
+    }
+    .big-box {
+      width: 100%;
+      background-color: gray;
+      height: 300px;
+      border-top: 1px solid black;
+    }
+	
+    .modal-dialog{
+        overflow-y: initial !important
+    }
+    .modal-body{
+        overflow-y: auto
+    }

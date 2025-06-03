@@ -1,7 +1,13 @@
 $("form").on("submit", function(){
-	let email = $("#email1").val() + "@" + $("#email2").val();
+	//이메일 결합
+	let emp_email = $("#email1").val() + "@" + $("#email2").val();
 	$("input[name=email]").remove();
-	$("form").prepend('<input type="hidden" name="email" value="' + email + '">');
+	$("form").prepend('<input type="hidden" name="emp_email" value="' + emp_email + '">');
+	
+	//휴대폰 결합 
+	let emp_phone = $("#emp_phone1").val() + "-" + $("#emp_phone2").val() + "-" +  $("#emp_phone3").val(); 
+	$("input[name=emp_phone]").remove();
+	$("form").prepend('<input type="hidden" name="emp_phone" value="' + emp_phone + '">');
 });
 
 $(".cancel").on("click", function(){
