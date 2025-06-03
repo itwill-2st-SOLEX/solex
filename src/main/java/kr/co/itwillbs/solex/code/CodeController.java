@@ -24,8 +24,9 @@ public class CodeController {
 	@GetMapping("/code")
 	public String getCodeList(Model model) {
 		
-		List<CodeDTO> codeList = new ArrayList<>();
-		codeList = codeService.getCodeList();
+		List<CodeDTO> codeList = codeService.getCodeList();
+		
+		System.out.println("코드리스트 : " + codeList);
 		
 		model.addAttribute("codeList", codeList);
 		

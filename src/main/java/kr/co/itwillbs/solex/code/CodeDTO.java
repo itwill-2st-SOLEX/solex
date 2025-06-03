@@ -1,6 +1,7 @@
 package kr.co.itwillbs.solex.code;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,5 +20,15 @@ public class CodeDTO {
 	private String cod_id;
 	private String cod_nm;
 	private Character cod_yn;
-	private LocalDate cod_reg_time;
+	private LocalDateTime cod_reg_time;
+	
+	@Override
+	public String toString() {
+	    return "CodeDTO{" +
+	           "cod_id='" + cod_id + '\'' +
+	           ", cod_nm='" + cod_nm + '\'' +
+	           ", cod_yn=" + cod_yn +
+	           ", cod_reg_time=" + cod_reg_time +
+	           '}';
+	}
 }
