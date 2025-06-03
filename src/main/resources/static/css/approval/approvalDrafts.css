@@ -1,16 +1,29 @@
 @charset "UTF-8";
-#docTypeSelect{
-    width: 180px;
+#docTypeSelect {
+	width: 180px;
 }
 .approval-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 16px;
+	border-collapse: collapse;
+	margin-bottom: 16px;
 }
 .approval-table th,
 .approval-table td {
-  border: 1px solid #ccc;
-  text-align: center;
-  padding: 8px;
-  font-size: 14px;
+	border: 1px solid #ccc;
+	text-align: center;
+	padding: 8px;
+	font-size: 14px;
+}
+#dateRange,
+#dept-nm,
+#emp-nm {
+	width: 280px;
+}
+.doc-type01 {
+	display: flex;
+}
+#dept-nm {
+	margin-left: 70px;
+}
+.approval-line{
+	display: flex;
 }

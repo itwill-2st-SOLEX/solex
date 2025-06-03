@@ -3,13 +3,16 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.co.itwillbs.solex.approval.approvalMapper">
-	<select id="getdocTypeList">
+<mapper namespace="kr.co.itwillbs.solex.approval.ApprovalMapper">
+<!--	기안서 종류 공통코드-->
+	<select id="getdocTypeList" resultType="map">
 		SELECT det_id, det_nm
 		  FROM code_detail
 		 WHERE cod_id = 'doc_type'
 		   AND det_yn = 'Y'
 	</select>
+	
+<!--	올린 기안서 목록-->
 	<select id="selectDraftList" resultType="map">
 		SELECT doc_id,
 		       doc_type,

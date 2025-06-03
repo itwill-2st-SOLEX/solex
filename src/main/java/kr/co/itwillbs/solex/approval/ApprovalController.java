@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
 
-@RequestMapping("/approval")
 @Controller
-public class approvalController {
+@RequestMapping("/approval")
+public class ApprovalController {
 	
 	@Autowired
-	private approvalService service;
+	private ApprovalService service;
 	
 	@GetMapping("/drafts")
 	public String approvalDrafts(Model model) {
@@ -27,8 +27,8 @@ public class approvalController {
 		return "approval/approvalDrafts";
 	}
 	
-	@GetMapping("/api/drafts")
 	@ResponseBody
+	@GetMapping("/api/drafts")
     public List<Map<String, Object>> getDraftList(@RequestParam("page") int page, @RequestParam("size") int size) {
 		int offset = page * size;
         return service.getDraftList(offset, size);

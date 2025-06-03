@@ -73,5 +73,80 @@ $(function() {
 		const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 		modal.show();
 	}
+	
+	// 기안서 종류에 따라 변경
+	const formTemplates = {
+			"doc_type01": `
+				<div class="doc-type01">
+					<div id="emp-nm" class="mb-3">
+						<label class="form-label">성명</label>
+						<input type="text" class="form-control" id="docEmp_nm" />
+					</div>
+					<div id="dept-nm" class="mb-3">
+						<label class="form-label">부서</label>
+						<input type="text" class="form-control" id="docdept_nm" />
+					</div>
+				</div>
+				<div class="mb-3">
+					<label class="form-label">날짜</label>
+					<input type="text" id="dateRange" class="form-control" placeholder="휴가기간 선택">
+				</div>
+				<div class="mb-3">
+					<label class="form-label">제목</label>
+					<input type="text" class="form-control" id="docTitle" />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">사유</label>
+					<textarea class="form-control" id="docContent" rows="4"></textarea>
+				</div>
+			`,
+			"doc_type03": `
+				<div class="mb-3">
+					<label class="form-label">승진 대상자</label>
+					<input type="text" class="form-control" />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">승진 일자</label>
+					<input type="date" class="form-control" />
+				</div>
+			`,
+			"doc_type04": `
+				<div class="mb-3">
+					<label class="form-label">사원명</label>
+					<input type="text" class="form-control" />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">발령일자</label>
+					<input type="text" id="dateRange" class="form-control" placeholder="날짜를 선택하세요">
+				</div>
+				<div class="mb-3">
+					<label class="form-label">발령 부서</label>
+					<input type="text" class="form-control" />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">발령후 직급</label>
+					<input type="text" class="form-control" />
+				</div>
+			`
+		};
+
+		$('#docTypeSelect').on('change', function () {
+			const selected = $(this).val();
+			const selectedText = $(this).find('option:selected').text();
+			$('.approval-line h2').text(selectedText);
+			const formHtml = formTemplates[selected] || '<p>지원되지 않는 문서 유형입니다.</p>';
+			
+			$('#dynamicFormArea').html(formHtml);
+
+			flatpickr("#dateRange", {
+			      mode: "range",
+			      enableTime: true,
+			      time_24hr: true,
+			      dateFormat: "Y-m-d H:i",
+			      minuteIncrement: 10
+			});
+		});
+
+		$('#docTypeSelect').trigger('change');
 });
 

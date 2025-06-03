@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class approvalService {
+public class ApprovalService {
 
 	@Autowired
-	private approvalMapper mapper;
+	private ApprovalMapper mapper;
 	
 	// 모달 기안서 공통코드로 불러오기
 	public List<Map<String, String>> getdocTypeList() {

@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 @Mapper
-public interface approvalMapper {
+public interface ApprovalMapper {
 	
 	// 모달 기안서 공통코드로 불러오기
 	List<Map<String, String>> getdocTypeList();

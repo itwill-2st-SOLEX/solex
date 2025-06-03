@@ -4,6 +4,7 @@
 	layout:decorate="~{layouts/layout}">
 <head>
 <title>SOLEX</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" th:href="@{/css/approval/approvalDrafts.css}" />
 </head>
 <body>
@@ -21,22 +22,21 @@
 				<div class="modal-dialog modal-dialog-scrollable modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
-							<!-- 							<h5 class="modal-title mb-3">기안서 종류</h5> -->
 							<select id="docTypeSelect"
 								class="form-select form-select-sm mb-3" aria-label="기안서 종류 선택">
 								<th:block th:each="type : ${docTypes}">
-									<option th:value="${type['DET_ID']}"
-										th:text="${type['DET_NM']}"
+									<option th:value="${type['DET_ID']}" th:text="${type['DET_NM']}"
 										th:selected="${type['DET_NM'] == '반/연차신청서'}"></option>
 								</th:block>
 							</select>
 						</div>
 						<div class="modal-body">
 							<div class="approval-line">
-								<table class="approval-table">
+								<h2></h2> 
+								<table class="approval-table ms-auto">
 									<thead>
 										<tr>
-											<th rowspan="3">결재</th>
+											<th></th>
 											<th>팀장</th>
 											<th>부장</th>
 										</tr>
@@ -44,23 +44,17 @@
 									<!-- 									여기에 결제권자가 들어와야 함 -->
 									<tbody>
 										<tr>
+											<td>결재</td>
 											<td>이수정<br>
-											<span class="approved">결재<br>25/05/27</span></td>
-											<td>배지영<br><span class="pending">대기</span></td>
+											<span>결재<br>25/05/27</span></td>
+											<td>배지영<br>대기</span></td>
 										</tr>
 									</tbody>
 								</table>
 							</div>
-							<!-- 여기에 기안서 등록 form -->
+							<!-- 여기에 기안서 등록 form(JS) -->
 							<form>
-								<div class="mb-3">
-									<label for="docTitle" class="form-label">제목</label> <input
-										type="text" class="form-control" id="docTitle" />
-								</div>
-								<div class="mb-3">
-									<label for="docContent" class="form-label">내용</label>
-									<textarea class="form-control" id="docContent" rows="4"></textarea>
-								</div>
+								<div id="dynamicFormArea"></div>
 							</form>
 						</div>
 						<div class="modal-footer">
@@ -111,6 +105,7 @@
 		<th:block layout:fragment="script">
 			<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 			<script th:src="@{/js/approval/approvalDrafts.js}"></script>
+			<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 		</th:block>
 </body>
 </html>
