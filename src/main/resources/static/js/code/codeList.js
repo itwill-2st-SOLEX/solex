@@ -1,18 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const raw = document.getElementById("code-data")?.dataset.codeList;
-
-	if (!raw) {
-		console.error("codeList 데이터가 없습니다.");
-		return;
-	}
-
-	let codeList;
-	try {
-		codeList = JSON.parse(raw); // ✅ 문제 해결 핵심
-	} catch (e) {
-		console.error("codeList 파싱 오류:", e);
-		return;
-	}
 	
 	// 날짜 포맷 함수
 	function formatDateTime(str) {
@@ -26,18 +12,34 @@ document.addEventListener('DOMContentLoaded', () => {
 	return `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
 	}
 	
-	// 날짜 포맷을 적용한 리스트 만들기
-	const formattedList = codeList.map(item => ({
-		...item,
-		cod_reg_time: formatDateTime(item.cod_reg_time),
-		__isNew: false
-	}));
-	
 	window.grid = new tui.Grid({
 		el: document.getElementById('code-grid'),
 		bodyHeight: 300,
 		rowHeaders: ['checkbox'],
-		data: formattedList,
+		scrollY: true,
+		pageOptions: {
+			useClient: false,
+			type: 'scroll',
+			perPage: 20
+		},
+		data: {
+			api: {
+				readData: {
+					url: '/SOLEX/code/data',
+					method: 'GET',
+					initParams: { cod_yn: '' },
+					responseHandler: function(res) {
+				    	return {
+							data: res.data || [],  // 배열 강제 지정
+							pagination: {
+								page: res.pagination.page,
+								totalCount: Number(res.pagination.totalCount)  // 숫자 변환
+							}
+						};
+					}
+				}
+			}
+		},
 		columns: [
 			{ header: '코드', name: 'cod_id', editor: 'text', sortable: true },
 			{ header: '항목명', name: 'cod_nm', editor: 'text' },
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			{ header: '등록일시', name: 'cod_reg_time' }
 		]
 	});
-	
+
 	// 날짜 변환 함수를 전역함수로 등록
 	window.formatDateTime = formatDateTime;
 	

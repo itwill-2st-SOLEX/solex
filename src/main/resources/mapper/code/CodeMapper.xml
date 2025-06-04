@@ -10,6 +10,39 @@
 		FROM	CODE
 	</select>
 	
+	<!-- 무한스크롤 구현 -->
+	<select id="selectPagedCodeList" resultType="kr.co.itwillbs.solex.code.CodeDTO">
+		SELECT * FROM (
+			SELECT t.*, ROWNUM rnum FROM (
+				SELECT * FROM code
+				<where>
+					<if test="codYn != null and codYn != ''">
+						cod_yn = #{codYn}
+					</if>
+				</where>
+				<choose>
+					<when test="sort != null and dir != null">
+						ORDER BY ${sort} ${dir}
+					</when>
+				<otherwise>
+					ORDER BY cod_id ASC
+				</otherwise>
+				</choose>
+			) t
+			WHERE ROWNUM &lt;= #{offset} + #{perPage}
+		)
+		WHERE rnum &gt; #{offset}
+	</select>
+	
+	<select id="selectTotalCount" resultType="int">
+		SELECT COUNT(*) FROM code
+		<where>
+			<if test="codYn != null and codYn != ''">
+			cod_yn = #{codYn}
+			</if>
+		</where>
+	</select>
+	
 	<!-- 공통코드 신규 행 추가 -->
 	<insert id="insertCodes">
 		INSERT INTO CODE (

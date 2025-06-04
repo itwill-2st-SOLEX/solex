@@ -2,6 +2,7 @@ package kr.co.itwillbs.solex.code;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,19 @@ public class CodeService {
 	public List<CodeDTO> getCodeList() {
 		List<CodeDTO> codeList = codeMapper.getCodeList();
 		return codeList;
+	}
+	
+	// 무한스크롤 구현
+	public List<CodeDTO> getPagedCodeList(@Param("offset") int offset,
+										  @Param("perPage") int perPage,
+										  @Param("sort") String sort,
+										  @Param("dir") String dir,
+										  @Param("codYn") String codYn) {
+	    return codeMapper.selectPagedCodeList(offset, perPage, sort, dir, codYn);
+	}
+	
+	public int getTotalCount(String codYn) {
+	    return codeMapper.selectTotalCount(codYn);
 	}
 
 	// 공통코드 신규 행 추가
