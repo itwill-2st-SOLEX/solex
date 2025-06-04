@@ -44,7 +44,7 @@ public class NoticeController {
 	// 비동기: JSON 데이터 반환 (fetch API 호출용)
     @GetMapping("/api/notice")
     @ResponseBody
-    public List<Map<String, Object>> apiNoticeList(@RequestParam("page") int page, 
+    public Map<String, Object> apiNoticeList(@RequestParam("page") int page, 
     											   @RequestParam("size") int size,
     											   @RequestParam(name="keyword", required = false) String keyword) {
 
@@ -54,7 +54,14 @@ public class NoticeController {
 	    params.put("offset", page * size);// 페이징 계산
 	    params.put("size", size);
     	
-        return noticeService.getNoticeList(params);
+	    List<Map<String, Object>> noticeList = noticeService.getNoticeList(params);
+	    int totalCount = noticeService.getNoticeCount(params);  // ← 키워드 포함된 카운트로 변경
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("list", noticeList);
+	    result.put("totalCount", totalCount);
+	    
+	    return result;
     }
     
     // 공지사항 내용 모달창 띄우기

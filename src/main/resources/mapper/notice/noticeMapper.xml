@@ -27,6 +27,19 @@
 		WHERE n.not_id = #{notId}
 	</select>
 	
+	<!-- 총 개수 계산하기-->
+	<select id="getNoticeCount">
+		SELECT count(*)
+		FROM notice n
+		<where>
+			<if test="keyword != null and keyword != ''">
+				(LOWER(n.not_tt) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(n.not_con) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
+		</where>
+		
+	</select>
+	
 	<!-- 글 등록 -->
 	<insert id="insertNotice" parameterType="map">
 	    INSERT INTO NOTICE (emp_id, not_tt, not_con, not_reg_date)

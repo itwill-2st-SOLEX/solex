@@ -14,6 +14,8 @@ public interface NoticeMapper {
 	//상세내용 조회
 	Map<String, Object> getNoticeDetail(@Param("notId") int notId);
 	
+	int getNoticeCount(Map<String, Object> params);
+	
 	//글 등록
 	int insertNotice(Map<String, Object> param);
 	

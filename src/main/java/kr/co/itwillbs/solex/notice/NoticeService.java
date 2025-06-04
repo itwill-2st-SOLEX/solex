@@ -26,6 +26,10 @@ public class NoticeService {
 		return noticeMapper.getNoticeDetail(notId);
 	}
 	
+	public int getNoticeCount(Map<String, Object> params) {
+		return noticeMapper.getNoticeCount(params);
+	}
+	
 	//글 등록
 	public int insertNotice(Map<String, Object> param) {
 
