@@ -4,20 +4,7 @@
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.attendance.AttendanceMapper">
-	<select id="selectAttendenceList" resultType="java.util.Map">
-        SELECT
-            att_id,
-            emp_id,
-            NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
- 			NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
-            att_sts,
-            att_day
-        FROM
-            attendance 
-        WHERE emp_id = 'EMP001'
-    </select>
-    
-    <select id="selectAttendenceByMonthList" resultType="java.util.Map">
+    <select id="selectMyAttendenceByMonthList" resultType="java.util.Map">
     	SELECT
             att_id,
             emp_id,
@@ -27,9 +14,32 @@
             att_day
         FROM
             attendance 
-        WHERE emp_id = 'EMP001'
+        WHERE emp_id = 11
 		  AND TO_CHAR(att_in_time, 'YYYY') = #{year}  
  		  AND TO_CHAR(att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0') 
      ORDER BY att_day ASC
+    </select>
+    
+    <select id="selectAttendenceByMonthList" resultType="java.util.Map">
+    	SELECT
+		       e.emp_num,         				-- 휘하 직원의 사번    
+		       e.dep_id,          				-- 휘하 직원의 부서
+		       e.dep_position,     				-- 휘하 직원의 직위
+		       
+		       cd_e.det_sort
+		  FROM employee_copy e         			-- 휘하 직원을 나타내는 별칭
+		  JOIN employee_copy m         			-- 매니저(결재권자)를 나타내는 별칭
+		    ON e.dep_id = m.dep_id 				-- 동일 부서인 경우만 조인
+		  JOIN code_detail cd_e 
+		    ON e.dep_position = cd_e.det_id  	-- 휘하 직원의 직위
+		  JOIN code_detail cd_m 
+		    ON m.dep_position = cd_m.det_id  	-- 부서장의 직위 
+		  JOIN attendance a
+            ON e.emp_id = a.emp_id				-- 출퇴근 data
+ 		 WHERE m.emp_id = 11 					-- 결재권자의 id
+		  AND cd_e.det_sort > cd_m.det_sort		-- 결재권자 보다 직급이 아래(dep_sort가 더 높다)
+		  AND TO_CHAR(a.att_in_time, 'YYYY') = #{year}  
+ 		  AND TO_CHAR(a.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
+ 		ORDER BY att_day ASC
     </select>
 </mapper>	
