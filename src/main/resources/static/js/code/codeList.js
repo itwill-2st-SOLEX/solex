@@ -35,11 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	window.grid = new tui.Grid({
 		el: document.getElementById('code-grid'),
-		data: formattedList,
 		bodyHeight: 300,
 		rowHeaders: ['checkbox'],
+		data: formattedList,
 		columns: [
-			{ header: '코드', name: 'cod_id', editor: 'text' },
+			{ header: '코드', name: 'cod_id', editor: 'text', sortable: true },
 			{ header: '항목명', name: 'cod_nm', editor: 'text' },
 			{ header: '사용여부',
 				name: 'cod_yn',
@@ -51,7 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
 							{text: 'N', value : 'N'}
 						]
 					}
-				}
+				},
+			  filter: {
+			      type: 'select',
+			      options: [
+			        { label: '전체', value: '' },
+			        { label: 'Y', value: 'Y' },
+			        { label: 'N', value: 'N' }
+			      ]
+			    }
 			},
 			{ header: '등록일시', name: 'cod_reg_time' }
 		]

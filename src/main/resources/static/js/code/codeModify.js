@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			alert('필수 항목이 입력되지 않은 행이 있습니다.');
 			return;
 		}
-		debugger;
 		// ✅ insert할 행들
 		const newRows = createdRows.map(row => ({
 			cod_id: row.cod_id,
@@ -50,8 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			cod_reg_time: row.cod_reg_time
 		}));
 		
-		console.log("새 행 : ", newRows);
-
 		// ✅ update할 행들 (isNew = false 이면서 수정된 행들만)
 		const modifiedRows = updatedRows.filter(row => !row.__isNew).map(row => ({
 			cod_id: row.cod_id,
@@ -59,8 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			cod_yn: row.cod_yn
 		}));
 
-		console.log("수정한 행 : ", modifiedRows);
-		
 		// ✅ 서버로 데이터 전송 (AJAX)
 		fetch('/SOLEX/code/save', {
 			method: 'POST',
@@ -73,17 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			})
 		})
 		.then(res => {
-			debugger;
 			if (!res.ok) throw new Error('저장 실패');
 			return res.json();
 		})
 		.then(data => {
-			debugger;
 			alert('저장 완료!');
 			location.reload();  // 저장 후 새로고침
 		})
 		.catch(err => {
-			debugger;
 			console.error(err);
 			alert('저장 중 오류 발생');
 		});
@@ -109,8 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		
 		console.log('삭제 대상 rowKeys:', onlyNewRowKeys);
 
-		grid.removeRows(onlyNewRowKeys);  // ✅ 삭제 실행
+		onlyNewRowKeys
+			.sort((a, b) => b - a) // 큰 rowKey부터 삭제 → 안정성 확보
+			.forEach(rowKey => {
+				grid.removeRow(rowKey);	// ✅ 삭제 실행
+			});
 	});
-
 
 });
