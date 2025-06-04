@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.code;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -20,7 +21,7 @@ public class CodeDTO {
 	private String cod_id;
 	private String cod_nm;
 	private Character cod_yn;
-	private LocalDateTime cod_reg_time;
+	private Date cod_reg_time;
 	
 	@Override
 	public String toString() {

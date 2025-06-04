@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Controller
 @RequestMapping("/SOLEX")
 public class CodeController {
@@ -22,13 +24,14 @@ public class CodeController {
 
 	// 공통코드 리스트 조회
 	@GetMapping("/code")
-	public String getCodeList(Model model) {
+	public String getCodeList(Model model) throws Exception {
 		
 		List<CodeDTO> codeList = codeService.getCodeList();
 		
-		System.out.println("코드리스트 : " + codeList);
-		
-		model.addAttribute("codeList", codeList);
+		ObjectMapper mapper = new ObjectMapper();
+	    String json = mapper.writeValueAsString(codeList);
+	    
+		model.addAttribute("codeList", json);
 		
 		return "code/code";
 	}
@@ -37,9 +40,6 @@ public class CodeController {
 	@PostMapping("/code/save")
 	@ResponseBody
 	public Map<String, Object> saveCode(@RequestBody Map<String, List<CodeDTO>> map) {
-		
-		System.out.println("추가 행 : " + map.get("insertList"));
-		System.out.println("수정한 행 : " + map.get("updateList"));
 		
 		List<CodeDTO> insertList = map.get("insertList");
 	    List<CodeDTO> updateList = map.get("updateList");

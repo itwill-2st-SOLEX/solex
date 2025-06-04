@@ -29,7 +29,9 @@
 				
 				<!-- 그리드 영역 -->
 				<div class="grid-area">
-					<div id="code-grid"></div>
+					<div id="code-grid">
+						<div id="code-data" th:attr="data-code-list=${codeList}"></div>
+					</div>
 				</div>
 				
 			</div>
@@ -57,16 +59,8 @@
 	</th:block>
 	
 	<th:block layout:fragment="script">
-	  <!-- 타임리프 변수 → JS 전역 변수로 전달 -->
-	  <script th:inline="javascript">
-	    /*<![CDATA[*/
-	    window.codeList = [[${codeList}]];
-	    /*]]>*/
-	  </script>
-	
-	  <!-- 외부 JS 로드 -->
-	  <script th:src="@{/js/code/codeList.js}"></script>
-	  <script th:src="@{/js/code/codeModify.js}"></script>
+		<script th:src="@{/js/code/codeList.js}"></script>
+		<script th:src="@{/js/code/codeModify.js}"></script>
 	</th:block>
 </body>
 </html>

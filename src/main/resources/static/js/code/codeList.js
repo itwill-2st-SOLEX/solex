@@ -1,5 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const codeList = window.codeList || [];  // HTML에서 넘겨준 데이터 (없으면 빈 배열)
+	const raw = document.getElementById("code-data")?.dataset.codeList;
+
+	if (!raw) {
+		console.error("codeList 데이터가 없습니다.");
+		return;
+	}
+
+	let codeList;
+	try {
+		codeList = JSON.parse(raw); // ✅ 문제 해결 핵심
+	} catch (e) {
+		console.error("codeList 파싱 오류:", e);
+		return;
+	}
 	
 	// 날짜 포맷 함수
 	function formatDateTime(str) {
