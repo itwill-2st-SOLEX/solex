@@ -10,29 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			type: 'scroll',
 			perPage: 20
 		},
-		data: {
-			api: {
-				readData: {
-					url: '/SOLEX/code/data',
-					method: 'GET',
-					initParams: { cod_yn: '' },
-					responseHandler: function(res) {
-				    	return {
-							data: res.data || [],  // 배열 강제 지정
-							pagination: {
-								page: res.pagination.page,
-								totalCount: Number(res.pagination.totalCount)  // 숫자 변환
-							}
-						};
-					}
-				}
-			}
-		},
+		data: [],
 		columns: [
-			{ header: '상세코드', name: 'cod_id', editor: 'text', sortable: true },
-			{ header: '항목명', name: 'cod_nm', editor: 'text' },
+			{ header: '상세코드', name: 'DET_ID', editor: 'text', sortable: true },
+			{ header: '항목명', name: 'DET_NM', editor: 'text' },
 			{ header: '사용여부',
-				name: 'cod_yn',
+				name: 'DET_YN',
 			  editor: {
 					type: 'select',
 					options: {
@@ -51,8 +34,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			      ]
 			    }
 			},
-			{ header: '정렬순서', name: 'cod_reg_time' }
+			{ header: '정렬순서', name: 'DET_SORT', editor: 'text' }
 		]
 	});
+	
+	window.loadDetailCode = function(cod_id) {
+		fetch(`/SOLEX/detailCode/data?cod_id=${encodeURIComponent(cod_id)}`)
+			.then(res => res.json())
+			.then(resData => {
+				// 서버 응답이 { data: { contents: [...] } } 구조라고 가정
+				window.codeDetail_grid.resetData(resData.data.contents || []);
+		});
+	};
 	
 });

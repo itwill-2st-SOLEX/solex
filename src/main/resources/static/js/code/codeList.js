@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	return `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
 	}
 	
+	// 날짜 변환 함수를 전역함수로 등록
+	window.formatDateTime = formatDateTime;
+	
 	window.code_grid = new tui.Grid({
 		el: document.getElementById('code-grid'),
 		bodyHeight: 300,
@@ -66,8 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			{ header: '등록일시', name: 'cod_reg_time' }
 		]
 	});
-
-	// 날짜 변환 함수를 전역함수로 등록
-	window.formatDateTime = formatDateTime;
 	
+	// 행 클릭 시 전역 함수 호출
+	window.selectedCodId = null;
+	
+	code_grid.on('click', ev => {
+		
+		const rowKey = ev.rowKey;
+		const rowData = code_grid.getRow(rowKey);
+		if (rowData && window.loadDetailCode) {
+			selectedCodId = rowData.cod_id;
+			window.loadDetailCode(rowData.cod_id);
+		}
+	});
+
 });

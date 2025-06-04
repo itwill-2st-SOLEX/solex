@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			cod_nm: '',
 			cod_yn: '',
 			__isNew: true  // 새 행 여부
-		});
+		}, { focus: true });
 	});
 	
 	// ✅ 편집 시작 시 제어

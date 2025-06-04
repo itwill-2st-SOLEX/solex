@@ -1,6 +1,7 @@
 package kr.co.itwillbs.solex.code;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -25,5 +26,16 @@ public interface CodeMapper {
 
 	// 공통코드 기존 행 수정
 	void updateCodes(List<CodeDTO> updateList);
+
+	// 상세공통코드 리스트 조회
+	List<Map<String, Object>> getPagedDetailCodeList(@Param("cod_id") String cod_id);
+
+	// 상세공통코드 신규 행 추가
+	void insertDetailCodes(List<Map<String, Object>> insertList);
+
+	// 상세공통코드 기존 행 수정
+	void updateDetailCodes(List<Map<String, Object>> updateList);
+	
+	
 
 }

@@ -82,6 +82,45 @@ public class CodeController {
 		return Map.of("result", "seccess");
 	}
 	
+	// 상세공통코드 리스트 조회
+	@GetMapping("/detailCode/data")
+	@ResponseBody
+	public Map<String, Object> getPagedDetailCodeList(@RequestParam Map<String, String> map) {
+		
+		String cod_id = map.get("cod_id");
+		
+		
+		List<Map<String, Object>> detailList = codeService.getPagedDetailCodeList(cod_id);
+		
+		Map<String, Object> result = new HashMap<>();
+		result.put("data", Map.of("contents", detailList));
+		
+		return result;
+	}
+	
+	// 상세공통코드 저장
+	@PostMapping("/detailCode/save")
+	@ResponseBody
+	public Map<String, Object> saveDetailCode(@RequestBody Map<String, List<Map<String, Object>>> map) {
+		
+		List<Map<String, Object>> insertList = map.get("createdRows");
+	    List<Map<String, Object>> updateList = map.get("updatedRows");
+	    
+	    System.out.println("신규 행 : " + insertList);
+	    System.out.println("수정 행 : " + updateList);
+
+	    // 상세공통코드 신규 행 추가
+	    if (insertList != null && !insertList.isEmpty()) {
+	        codeService.insertDetailCodes(insertList);
+	    }
+
+	    // 상세공통코드 기존 행 수정
+	    if (updateList != null && !updateList.isEmpty()) {
+	        codeService.updateDetailCodes(updateList);
+	    }
+		
+		return Map.of("result", "seccess");
+	}
 	
 	
 }

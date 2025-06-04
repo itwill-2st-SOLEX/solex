@@ -1,6 +1,7 @@
 package kr.co.itwillbs.solex.code;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,5 +41,20 @@ public class CodeService {
 	public void updateCodes(List<CodeDTO> updateList) {
         codeMapper.updateCodes(updateList);
     }
+
+	// 상세공통코드 리스트 조회
+	public List<Map<String, Object>> getPagedDetailCodeList(String cod_id) {
+		return codeMapper.getPagedDetailCodeList(cod_id);
+	}
+
+	// 상세공통코드 신규 행 추가
+	public void insertDetailCodes(List<Map<String, Object>> insertList) {
+		codeMapper.insertDetailCodes(insertList);
+	}
+
+	// 상세공통코드 기존 행 수정
+	public void updateDetailCodes(List<Map<String, Object>> updateList) {
+		codeMapper.updateDetailCodes(updateList);
+	}
 
 }
