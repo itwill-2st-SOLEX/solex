@@ -5,40 +5,14 @@ const currentMonthYearSpan = document.getElementById('currentMonthYear');
 const prevMonthBtn = document.getElementById('prevMonthBtn');
 const nextMonthBtn = document.getElementById('nextMonthBtn');
 
-const myAttendance = '';
-const teamAttendance = '';
-$.ajax({
-//	const url = `/SOLEX/attendance/data?year=${year}&month=${month}`; // empId 추가
-    url: '/SOLEX/attendance/data',
-    type: 'GET',
-    data: { year: `${year}`, month: `${month}` },
-    dataType: 'json',
-    success: function(response) {
-//        console.log('Map 응답:', response);
-
-        // 키 이름을 사용하여 데이터에 접근
-        myAttendance = response.myAttendance;
-        teamAttendance = response.teamAttendance;
-
-        if (myAttendance && myAttendance.length > 0) {
-            console.log('내 근태 데이터 (Map):', myAttendance);
-        }
-        if (teamAttendance && teamAttendance.length > 0) {
-            console.log('팀 근태 데이터 (Map):', teamAttendance);
-        }
-    },
-    error: function(xhr, status, error) {
-        console.error("AJAX 요청 실패:", status, error);
-    }
-});
 
 // JSON 데이터를 받아 HTML 테이블을 업데이트하는 함수
 //function updateAttendanceTable(attendanceData) {
 function updateAttendanceTable(combinedMap) {
-    const tableBody = document.getElementById('attendanceTableBody');
+    const tableBody = document.getElementById('myAttendanceTable');
     tableBody.innerHTML = ''; // 기존 테이블 내용 비우기
 
-    if (!attendanceData || attendanceData.length === 0) {
+    if (!combinedMap.myAttendance || combinedMap.myAttendance.length === 0) {
         // 데이터가 없거나 비어있는 경우
         tableBody.innerHTML = `
             <tr>
@@ -48,7 +22,7 @@ function updateAttendanceTable(combinedMap) {
         return;
     }
     // 데이터를 순회하며 각 항목에 대해 테이블 행 생성
-    attendanceData.forEach(item => {
+    combinedMap.myAttendance.forEach(item => {
         const row = document.createElement('tr'); // 새로운 행 (<tr>) 생성
 
         // 각 컬럼에 대한 데이터 셀 (<td>) 생성

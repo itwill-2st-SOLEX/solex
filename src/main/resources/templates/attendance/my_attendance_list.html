@@ -30,9 +30,25 @@
 <!-- 				<h5 class="card-header"></h5> -->
 				<div  class="card-header" th:text="${attendanceList[0].EMP_NUM}">
 					</div>
+					
+				
 				
 				<div class="card-body">
 					<div class="table-responsive text-nowrap">
+					
+					<table class="table table-bordered" id="myAttendanceTable2">
+						<thead>
+							<tr>
+								<th>사원 ID</th>
+								<th>출근 시간</th>
+								<th>퇴근 시간</th>
+								<th>상태</th>
+								<th>날짜</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+					
 						<table class="table table-bordered">
 							<thead>
 								<tr>
@@ -69,7 +85,7 @@
 	
 	        /*]]>*/
 	    </script>
-	    <script th:src="@{/js/attendance.js}"></script>
+	    <script th:src="@{/js/attendance/attendance.js}"></script>
 	</th:block>
 </body>
 </html>
