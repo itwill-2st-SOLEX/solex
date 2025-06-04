@@ -37,7 +37,7 @@ public class AttendanceController {
          model.addAttribute("initialYear", year);
          model.addAttribute("initialMonth", month);
 
-        return "attendance/my_attendance_list"; 
+        return "/attendance/my_attendance_list"; 
 	}
 	
     // 부하직원의 근태현황 조회
