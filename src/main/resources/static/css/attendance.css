@@ -1,0 +1,28 @@
+@charset "UTF-8";
+
+
+ .date-navigation {
+    display: flex;
+    align-items: center;
+    font-size: 1.5em; /* 글자 크기 조정 */
+    font-weight: bold;
+    color: #333;
+    background-color: #fff;
+    padding: 10px 20px;
+}
+
+.arrow {
+    cursor: pointer; /* 클릭 가능한 모양 */
+    padding: 0 10px;
+    color: #007bff; /* 파란색 화살표 */
+    user-select: none; /* 드래그 방지 */
+}
+
+.arrow:hover {
+    color: #0056b3; /* 호버 시 색상 변경 */
+}
+
+.month-year {
+    margin: 0 15px;
+    white-space: nowrap; /* 줄바꿈 방지 */
+}

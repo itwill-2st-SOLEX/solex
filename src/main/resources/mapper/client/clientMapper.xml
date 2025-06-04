@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.client.ClientMapper">
+  <select id="selectAllClients" resultType="java.util.Map">
+    SELECT * FROM client
+  </select>
+  
+  <insert id="createClients"  parameterType="map" >
+  	insert into client(
+  		emp_id,
+  		cli_nm,
+        cli_type,
+        cli_phone,
+        cli_pc,
+        cli_add,
+        cli_da,
+        cli_ceo,
+        cli_reg_date,
+        cli_mgr_name,
+        cli_mgr_phone,
+        biz_reg_no
+  	) VALUES (
+	  	#{emp_id},
+        #{cli_nm},
+        #{cli_type},
+        #{cli_phone},
+        #{cli_pc},
+        #{cli_add},
+        #{cli_da},
+        #{cli_ceo},
+        SYSDATE,
+        #{cli_mgr_name},
+        #{cli_mgr_phone},
+        #{biz_reg_no}
+  	)
+  </insert>
+  
+ <select id="getClientById" parameterType="int" resultType="map">
+        SELECT
+            cli_id,
+            emp_id,
+            cli_nm,
+            cli_type,
+            cli_phone,
+            cli_pc,
+            cli_add,
+            cli_da,
+            cli_ceo,
+            cli_reg_date,
+            cli_mgr_name,
+            cli_mgr_phone,
+            biz_reg_no
+        FROM
+            client
+        WHERE
+            cli_id = #{clientId}
+    </select>
+  
+  
+  
+</mapper>

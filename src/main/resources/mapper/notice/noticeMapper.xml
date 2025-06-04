@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.itwillbs.solex.notice.NoticeMapper">	
+	
+	<!-- 공지사항 전체 목록 조회-->
+	<select id="getNoticeList" resultType="map">
+		SELECT n.not_id, n.emp_id, n.not_tt, n.not_con, not_reg_date, e.emp_nm, c.det_nm
+		FROM NOTICE n JOIN EMP1 e ON n.emp_id = e.emp_id
+		   			  JOIN code_detail c ON e.dep_id = c.det_id
+		<where>
+			<if test="keyword != null and keyword != ''">
+				(LOWER(n.not_tt) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(n.not_con) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
+		</where>
+		ORDER BY not_reg_date DESC 
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<!-- 공지사항 내용 조회 -->
+	<select id="getNoticeDetail" resultType="map">
+		SELECT n.not_id, n.emp_id, n.not_tt, n.not_con, e.emp_nm, not_reg_date, c.det_nm
+		FROM NOTICE n JOIN EMP1 e ON n.emp_id = e.emp_id
+		   			  JOIN code_detail c ON e.dep_id = c.det_id
+		WHERE n.not_id = #{notId}
+	</select>
+	
+	<!-- 총 개수 계산하기-->
+	<select id="getNoticeCount">
+		SELECT count(*)
+		FROM notice n
+		<where>
+			<if test="keyword != null and keyword != ''">
+				(LOWER(n.not_tt) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(n.not_con) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
+		</where>
+		
+	</select>
+	
+	<!-- 글 등록 -->
+	<insert id="insertNotice" parameterType="map">
+	    INSERT INTO NOTICE (emp_id, not_tt, not_con, not_reg_date)
+	    VALUES (#{empId}, #{notTt}, #{notCon}, SYSDATE)
+	</insert>
+	
+	<!--글 변경 -->
+	<update id="updateNotice"  parameterType="map">
+		UPDATE notice
+		SET not_tt=#{notTt}, not_con=#{notCon}
+		WHERE not_id=#{notId} 
+	</update>
+	
+	<!--글 삭제 -->
+	<delete id="deleteNotice"  parameterType="int">
+		DELETE 
+		FROM notice
+		WHERE not_id=#{notId} 
+	</delete>
+	
+	<!-- 공지사항 글 or 내용 검색 -->
+
+	<select id="searchNotice" resultType="map">
+		SELECT n.not_id, n.emp_id, n.not_tt, n.not_con, e.emp_nm, not_reg_date, c.det_nm
+		FROM NOTICE n JOIN EMP1 e ON n.emp_id = e.emp_id
+		   			  JOIN code_detail c ON e.dep_id = c.det_id
+		WHERE n.not_id = #{notId}
+	</select>
+  </mapper>
+  
+  
+  
+  
+  
+  

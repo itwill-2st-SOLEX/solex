@@ -7,7 +7,7 @@
             <a href="" class="app-brand-link">
               <span class="app-brand-logo demo">
                 <span class="text-primary">
-                	<img alt="logo" src="/assets/img/solex_logo.png" class="logo-img">
+                	<img alt="logo" th:src="@{/assets/img/solex_logo.png}" class="logo-img">
                 </span>
               </span>
             </a>
@@ -65,12 +65,12 @@
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="/attendance/my_attendence/list" class="menu-link">
+                  <a href="/SOLEX/attendance/my_attendance/list" class="menu-link">
                     <div class="text-truncate" data-i18n="Without menu">출/퇴근 현황</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="layouts-without-navbar.html" class="menu-link">
+                  <a href="/SOLEX/attendance/attendance_list" class="menu-link">
                     <div class="text-truncate" data-i18n="Without navbar">휴가현황조회</div>
                   </a>
                 </li>
@@ -119,11 +119,11 @@
             </li>
             <!-- 공지사항 -->
             <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <a th:href="@{/notice}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-bell"></i>
                 <div class="text-truncate" data-i18n="Layouts">공지사항</div>
               </a>
-
+<!-- 
               <ul class="menu-sub">
                 <li class="menu-item">
                   <a href="layouts-without-menu.html" class="menu-link">
@@ -135,7 +135,7 @@
                     <div class="text-truncate" data-i18n="Without navbar">주문 관리</div>
                   </a>
                 </li>
-              </ul>
+              </ul> -->
             </li>
           </ul>
         </aside>
