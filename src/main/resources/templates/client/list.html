@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<!-- 개별페이지 전용 스타일시트 영역 -->
+	<th:block layout:fragment="style">
+		<link rel="stylesheet" th:href="@{/css/client/client.css}" />
+	</th:block>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="container-xxl flex-grow-1 container-p-y" style="background-color: transparent; padding-left: 0; padding-right: 0;">
+			<div class="row">
+				<div class="col-xxl-12 mb-6">
+					<div class="card">
+						<div class="d-flex align-items-start row">
+							<div class="col-sm-12">
+								<div class="card-body">
+									<h5 class="card-title mb-3">거래처 목록</h5>
+									<button type="button" class="btn btn-primary mb-3 float-end" data-bs-toggle="modal" data-bs-target="#myModal" id="openClientModalBtn">거래처 등록</button>
+									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+	            </div>
+			</div>
+        </div>
+		
+	<!-- 배경 + 스피너 컨테이너 -->
+	<div id="loadingOverlay" style="display:none;">
+	  <div class="spinner-border text-primary" role="status">
+	    <span class="visually-hidden">Loading...</span>
+	  </div>
+	</div>
+
+	
+	<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+	        <div class="modal-content" id="modalContentContainer"></div>
+	    </div>
+	</div>
+		
+		
+	<script th:inline="javascript">
+	  const list = /*[[${clientList}]]*/ [];
+	</script>
+		
+	</th:block>
+	
+	<th:block layout:fragment="script">
+		<script type="text/javascript" th:src="@{/js/client/client.js}"></script>
+		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	</th:block>
+	
+</body>
+</html>
