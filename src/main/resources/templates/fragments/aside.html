@@ -7,7 +7,7 @@
             <a href="/SOLEX" class="app-brand-link">
               <span class="app-brand-logo demo">
                 <span class="text-primary">
-                	<img alt="logo" src="/assets/img/solex_logo.png" class="logo-img">
+                	<img alt="logo" th:src="@{/assets/img/solex_logo.png}" class="logo-img">
                 </span>
               </span>
             </a>
@@ -119,11 +119,11 @@
             </li>
             <!-- 공지사항 -->
             <li class="menu-item">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <a th:href="@{/notice}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-bell"></i>
                 <div class="text-truncate" data-i18n="Layouts">공지사항</div>
               </a>
-
+<!-- 
               <ul class="menu-sub">
                 <li class="menu-item">
                   <a href="layouts-without-menu.html" class="menu-link">
@@ -135,7 +135,7 @@
                     <div class="text-truncate" data-i18n="Without navbar">주문 관리</div>
                   </a>
                 </li>
-              </ul>
+              </ul> -->
             </li>
 			<!-- MES -->
 			<li class="menu-item">
