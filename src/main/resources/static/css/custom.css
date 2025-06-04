@@ -46,6 +46,8 @@ li.menu-inner {
 	margin-bottom: 1.8rem;
 }
 
+/* 모달 */
+
 body {
   margin: 0px;
   padding: 0px;
@@ -66,12 +68,28 @@ body {
    border-color: #4169E1 !important;
    color: white !important;
 }
+
+
+.modal-header{
+  padding-bottom: 20px !important;
+
+}
+
 .modal-dialog{
-    overflow-y: initial !important
+    overflow-y: initial !important;
 }
 .modal-body{
-    overflow-y: auto
+    overflow-y: auto;
 }
 
+.modal-footer {
+	display: flex;
+	align-items: center;
+	padding: auto 10px;
+}
 
+.modal-footer button {
+	margin-top: 0 !important;
+	margin-left: 10px;
+}
 

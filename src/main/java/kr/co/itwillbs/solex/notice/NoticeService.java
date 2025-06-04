@@ -16,13 +16,30 @@ public class NoticeService {
         this.noticeMapper = noticeMapper;
     }
 	
-
-	public List<Map<String, Object>> getNoticeList(int offset, int size) {
-		return noticeMapper.getNoticeList(offset, size);
+	//글 목록
+	public List<Map<String, Object>> getNoticeList(Map<String, Object> params) {
+		return noticeMapper.getNoticeList(params);
 	}
 	
+	//글 상세 조회
 	public Map<String, Object> getNoticeDetail(int notId) {
 		return noticeMapper.getNoticeDetail(notId);
+	}
+	
+	//글 등록
+	public int insertNotice(Map<String, Object> param) {
+
+        return noticeMapper.insertNotice(param);
+    }
+	
+	//글 변경
+	public int updateNotice(Map<String, Object> param) {
+		return noticeMapper.updateNotice(param);
+	}
+	
+	//글 삭제
+	public int deleteNotice(int notId) {
+		return noticeMapper.deleteNotice(notId);
 	}
 	
 }
