@@ -25,14 +25,6 @@ public class CodeController {
 	// 공통코드 리스트 조회
 	@GetMapping("/code")
 	public String getCodeList(Model model) throws Exception {
-		
-//		List<CodeDTO> codeList = codeService.getCodeList();
-//		
-//		ObjectMapper mapper = new ObjectMapper();
-//	    String json = mapper.writeValueAsString(codeList);
-//	    
-//		model.addAttribute("codeList", json);
-		
 		return "code/code";
 	}
 	

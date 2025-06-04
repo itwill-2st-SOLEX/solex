@@ -1,19 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 	
-	// 날짜 포맷 함수
-	function formatDateTime(str) {
-	if (!str) return '';
-	const date = new Date(str);
-	const yyyy = date.getFullYear();
-	const MM = String(date.getMonth() + 1).padStart(2, '0');
-	const dd = String(date.getDate()).padStart(2, '0');
-	const hh = String(date.getHours()).padStart(2, '0');
-	const mm = String(date.getMinutes()).padStart(2, '0');
-	return `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
-	}
-	
-	window.code_grid = new tui.Grid({
-		el: document.getElementById('code-grid'),
+	window.codeDetail_grid = new tui.Grid({
+		el: document.getElementById('codeDetail-grid'),
 		bodyHeight: 300,
 		rowHeaders: ['checkbox'],
 		scrollY: true,
@@ -41,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		},
 		columns: [
-			{ header: '코드', name: 'cod_id', editor: 'text', sortable: true },
+			{ header: '상세코드', name: 'cod_id', editor: 'text', sortable: true },
 			{ header: '항목명', name: 'cod_nm', editor: 'text' },
 			{ header: '사용여부',
 				name: 'cod_yn',
@@ -63,11 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			      ]
 			    }
 			},
-			{ header: '등록일시', name: 'cod_reg_time' }
+			{ header: '정렬순서', name: 'cod_reg_time' }
 		]
 	});
-
-	// 날짜 변환 함수를 전역함수로 등록
-	window.formatDateTime = formatDateTime;
 	
 });

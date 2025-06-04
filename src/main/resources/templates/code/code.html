@@ -29,9 +29,7 @@
 				
 				<!-- 그리드 영역 -->
 				<div class="grid-area">
-					<div id="code-grid">
-						<div id="code-data" th:attr="data-code-list=${codeList}"></div>
-					</div>
+					<div id="code-grid"></div>
 				</div>
 				
 			</div>
@@ -61,6 +59,8 @@
 	<th:block layout:fragment="script">
 		<script th:src="@{/js/code/codeList.js}"></script>
 		<script th:src="@{/js/code/codeModify.js}"></script>
+		<script th:src="@{/js/code/codeDetailList.js}"></script>
+		<script th:src="@{/js/code/codeDetailModify.js}"></script>
 	</th:block>
 </body>
 </html>

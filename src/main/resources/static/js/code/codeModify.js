@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	// ✅ 추가 버튼
 	document.querySelector('#code-add').addEventListener('click', () => {
-		grid.prependRow({
+		code_grid.prependRow({
 			cod_id: '',
 			cod_nm: '',
 			cod_yn: '',
@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 	
 	// ✅ 편집 시작 시 제어
-	grid.on('editingStart', ev => {
-		const row = grid.getRow(ev.rowKey);
+	code_grid.on('editingStart', ev => {
+		const row = code_grid.getRow(ev.rowKey);
 		const isNew = row.__isNew;
 
 		// 기존 행은 'cod_yn'만 수정 가능
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	// ✅ 저장 버튼
 	saveBtn.addEventListener('click', () => {
-		const { createdRows, updatedRows } = grid.getModifiedRows();
+		const { createdRows, updatedRows } = code_grid.getModifiedRows();
 
 		// 빈 항목 체크
 		const isValid = [...createdRows, ...updatedRows].every(row =>
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	// ✅ 삭제 버튼
 	document.querySelector('#code-delete').addEventListener('click', () => {
-		const checkedRows = grid.getCheckedRows(); // ✔ row 전체 객체 가져옴
+		const checkedRows = code_grid.getCheckedRows(); // ✔ row 전체 객체 가져옴
 		if (checkedRows.length === 0) {
 			alert('삭제할 행을 선택해주세요.');
 			return;
@@ -99,12 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 		
-		console.log('삭제 대상 rowKeys:', onlyNewRowKeys);
-
 		onlyNewRowKeys
 			.sort((a, b) => b - a) // 큰 rowKey부터 삭제 → 안정성 확보
 			.forEach(rowKey => {
-				grid.removeRow(rowKey);	// ✅ 삭제 실행
+				code_grid.removeRow(rowKey);	// ✅ 삭제 실행
 			});
 	});
 
