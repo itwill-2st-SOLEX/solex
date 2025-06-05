@@ -47,20 +47,20 @@
 											<td>결재</td>
 											<td>이수정<br>
 											<span>결재<br>25/05/27</span></td>
-											<td>배지영<br>대기</span></td>
+											<td><span> 배지영<br>대기</span></td>
 										</tr>
 									</tbody>
 								</table>
 							</div>
 							<!-- 여기에 기안서 등록 form(JS) -->
-							<form>
+							<form id="draftForm" method="post">
 								<div id="dynamicFormArea"></div>
 							</form>
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary"
 								data-bs-dismiss="modal">닫기</button>
-							<button type="button" class="btn custom-btn-blue">등록</button>
+							<button type="button" id="submitApproval" class="btn custom-btn-blue">등록</button>
 						</div>
 					</div>
 				</div>
@@ -79,9 +79,6 @@
 							</p>
 							<p>
 								<strong>종류:</strong> <span id="detailDocType"></span>
-							</p>
-							<p>
-								<strong>제목:</strong> <span id="detailDocTt"></span>
 							</p>
 							<p>
 								<strong>결재상태:</strong> <span id="detailDocSts"></span>

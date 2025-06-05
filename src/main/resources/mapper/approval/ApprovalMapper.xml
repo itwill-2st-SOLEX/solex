@@ -9,18 +9,72 @@
 		SELECT det_id, det_nm
 		  FROM code_detail
 		 WHERE cod_id = 'doc_type'
-		   AND det_yn = 'Y'
+		   AND det_yn = 'y'
 	</select>
 	
 <!--	올린 기안서 목록-->
 	<select id="selectDraftList" resultType="map">
 		SELECT doc_id,
 		       doc_type,
-		       doc_tt,
 		       doc_sts,
 		       TO_CHAR(doc_reg_time, 'YYYY-MM-DD HH24:MI:SS') AS doc_reg_time
 	  	  FROM document
          ORDER BY doc_reg_time DESC
         OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
-  </select>
+  	</select>
+  
+<!--   직급 공통코드 불러오기  -->
+	<select id="getPosition" resultType="map" parameterType="string">
+		SELECT det_id, det_nm
+      FROM code_detail
+     WHERE cod_id = 
+       <choose>
+         <when test="group == 'dep_erp' or group == 'team'">
+           'dept'
+         </when>
+         <otherwise>
+           #{group}
+         </otherwise>
+       </choose>
+       AND det_yn = 'y'
+       <if test="group == 'dep_erp'">
+         AND det_id LIKE 'dept#___' ESCAPE '#'
+       </if>
+       <if test="group == 'team'">
+          AND det_nm like '%팀'
+       </if>
+	</select>
+	
+<!-- 	기안서 등록  반연차 테이블에 doc_id를 넘겨줘야 해서 keyProperty 넘김-->
+	<insert id="registerDocument" parameterType="map">
+		<selectKey keyProperty="doc_id" resultType="int" order="BEFORE">
+		    SELECT doc_seq.NEXTVAL FROM dual
+		</selectKey>
+		INSERT INTO document (doc_id,
+							  doc_type,
+					          emp_id,
+					          doc_reg_time
+    	) VALUES (#{doc_id},
+    		      #{doc_type},
+		          #{emp_id},
+		          SYSDATE
+    	)
+	</insert>
+	
+<!-- 	반연차 등록 -->
+	<insert id="registerLeaveDoc" parameterType="map">
+		INSERT INTO leave_doc (doc_id,
+							   lea_type,
+					           lea_start_date,
+					           lea_end_date,
+					           lea_tt,
+					           lea_con
+    	) VALUES (#{doc_id},
+    			  #{lea_type},
+		          TO_DATE(#{lea_start_date}, 'YYYY-MM-DD HH24:MI'),
+		          TO_DATE(#{lea_end_date}, 'YYYY-MM-DD HH24:MI'),
+		          #{lea_tt},
+		          #{lea_con}
+   		)
+	</insert>
 </mapper>

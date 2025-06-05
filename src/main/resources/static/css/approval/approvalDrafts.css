@@ -15,15 +15,60 @@
 }
 #dateRange,
 #dept-nm,
-#emp-nm {
-	width: 280px;
+#dept-nms,
+#emp-nm,
+#docdept_position,
+#emp-id,
+#emp-nm,
+#curr-rank,
+#transfer-dept,
+#curr-rank,
+#transfer-posi,
+#emp-nms,
+#curr-nm,
+#cost-detail,
+#promotion-posi,
+#dept-team,
+.team,
+#curr-team,
+#promotion-team,
+#transfer-team,
+#curr-ranks,
+#dept-teams {
+	width: 310px;
 }
-.doc-type01 {
+.doc-type01,
+.doc-type02,
+.doc-type04,
+.doc-type05,
+.doc-type03 {
 	display: flex;
 }
-#dept-nm {
+#dept-nm,
+#curr-ranks,
+#emp-nms,
+#cost-detail,
+.date,
+#job-posi,
+#curr-team,
+#promotion-posi,
+#transfer-team,
+#dept-teams {
 	margin-left: 70px;
 }
 .approval-line{
 	display: flex;
 }
+
+.btn-purple {
+   color: #4169E1;
+   background-color: #fff;
+}
+
+.btn-purple:hover,
+.btn-purple:focus,
+.btn-check:checked + .btn-purple {
+  color: #fff;
+  background-color: #365acb; 
+  border-color: #365acb;
+  }
