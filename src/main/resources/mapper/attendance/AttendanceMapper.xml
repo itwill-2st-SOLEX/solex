@@ -40,8 +40,9 @@
 		  JOIN attendance a
             ON e.emp_id = a.emp_id				-- 출퇴근 data
  		 WHERE m.emp_id = 11 					-- 결재권자의 id
-		  AND cd_e.det_sort &gt; cd_m.det_sort		-- 결재권자 보다 직급이 아래(dep_sort가 더 높다)
+		  AND cd_e.det_sort > cd_m.det_sort		-- 결재권자 보다 직급이 아래(dep_sort가 더 높다)
 		  AND TO_CHAR(a.att_in_time, 'YYYY') = #{year}  
  		  AND TO_CHAR(a.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
+ 		
     </select>
 </mapper>	
