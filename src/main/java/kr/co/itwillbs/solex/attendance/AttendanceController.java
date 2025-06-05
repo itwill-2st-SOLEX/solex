@@ -31,13 +31,14 @@ public class AttendanceController {
         
         // 초기 근태 데이터를 가져와 모델에 추가
         List<Map<String, Object>> attendanceList = attendanceService.getAttendanceByMonth(year, month);
+//        System.out.println("attendanceList : " + attendanceList);
         model.addAttribute("attendanceList", attendanceList);
 
          // 초기 화면에 현재 월/연도를 표시하기 위해 추가
          model.addAttribute("initialYear", year);
          model.addAttribute("initialMonth", month);
 
-        return "/attendance/my_attendance_list"; 
+        return "attendance/my_attendance_list"; 
 	}
 	
     // 부하직원의 근태현황 조회
@@ -50,6 +51,8 @@ public class AttendanceController {
 		
 		// 초기 근태 데이터를 가져와 모델에 추가
         List<Map<String, Object>> attendanceList = attendanceService.getAttendanceByMonth(year, month);
+        System.out.println("attendanceList : " + attendanceList);
+        
         model.addAttribute("attendanceList", attendanceList);
 
          // 초기 화면에 현재 월/연도를 표시하기 위해 추가
