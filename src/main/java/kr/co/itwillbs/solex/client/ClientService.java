@@ -37,8 +37,15 @@ public class ClientService {
     private String serviceKey;
 
     
-    public List<Map<String, Object>> getAllClients() {
-        return clientMapper.selectAllClients();
+    public List<Map<String,Object>> selectClients(Map<String, Object> params) {
+    	log.info(params);
+        if (!params.containsKey("limit")) {
+            params.put("limit", 30); // 기본값 설정
+        }
+        if (!params.containsKey("offset")) {
+            params.put("offset", 0); // 기본값 설정
+        }
+        return clientMapper.selectClients(params);
     }
     
     @Transactional  //
@@ -89,10 +96,20 @@ public class ClientService {
 
         return result;
     }
-
+    // 상세조회
     public Map<String, Object> getClientById(int clientId) {
         return clientMapper.getClientById(clientId);
     }
+
+    // 거래처 update
+	public int updateClient(Map<String, Object> param) {
+		return clientMapper.updateClient(param);
+	}
+
+	// 검색된 거래처 목록
+	public List<Map<String, Object>> getSearchClients(Map<String, Object> keyword) {
+		return clientMapper.getSearchClients(keyword);
+	}
 
 	
 }
