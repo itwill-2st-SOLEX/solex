@@ -10,7 +10,7 @@
 		FROM	CODE
 	</select>
 	
-	<!-- 무한스크롤 구현 -->
+	<!-- 공통코드 무한스크롤 -->
 	<select id="selectPagedCodeList" resultType="kr.co.itwillbs.solex.code.CodeDTO">
 		SELECT * FROM (
 			SELECT t.*, ROWNUM rnum FROM (
@@ -53,7 +53,7 @@
 		)
 		VALUES
 		<foreach collection="list" item="code" separator=",">
-			(
+			( 이렇게 하면 안된데~~ 오라클은 안되는거래~
 				#{code.cod_id},
 				#{code.cod_nm},
 				#{code.cod_yn},
@@ -74,30 +74,60 @@
 		</foreach>
 	</update>
 	
-	<!-- 상세공통코드 리스트 조회 -->
-	<select id="getPagedDetailCodeList" parameterType="string" resultType="map">
-		SELECT DET_ID, DET_NM, DET_YN, DET_SORT
-	    FROM CODE_DETAIL
-	    WHERE COD_ID = #{cod_id}
+	<!-- 상세공통코드 무한스크롤 -->
+	<select id="selectPagedDetailCodeList" resultType="map">
+		SELECT	DET_ID, DET_NM, DET_YN, DET_SORT, COD_ID
+		FROM	CODE_DETAIL
+		WHERE	COD_ID = #{codId}
+		<choose>
+			<when test="sortColumn != null and sortDirection != null">
+				ORDER BY
+					<choose>
+						<when test="sortColumn == 'DET_ID'">DET_ID</when>
+						<when test="sortColumn == 'DET_NM'">DET_NM</when>
+						<when test="sortColumn == 'DET_YN'">DET_YN</when>
+						<when test="sortColumn == 'DET_SORT'">DET_SORT</when>
+						<otherwise>DET_SORT</otherwise>
+					</choose>
+					<choose>
+						<when test="sortDirection == 'desc'">DESC</when>
+						<otherwise>ASC</otherwise>
+					</choose>
+			</when>
+			<otherwise>
+				ORDER BY DET_SORT ASC
+			</otherwise>
+		</choose>
+		OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+	</select>
+	
+	<select id="selectDetailCodeTotalCount" resultType="int">
+		SELECT	COUNT(*)
+		FROM	CODE_DETAIL
+		WHERE	COD_ID = #{codId}
 	</select>
 	
 	<!-- 상세공통코드 신규 행 추가 -->
 	<insert id="insertDetailCodes" parameterType="map">
 		INSERT INTO CODE_DETAIL (DET_ID, DET_NM, DET_YN, DET_SORT, COD_ID)
-		<foreach collection="list" item="code" separator=";">
-			VALUES (#{code.DET_ID}, #{code.DET_NM}, #{code.DET_YN}, #{code.DET_SORT}, #{code.COD_ID})
+		<foreach collection="list" item="codeDetail" separator=";">
+			VALUES (#{codeDetail.DET_ID},
+					#{codeDetail.DET_NM},
+					#{codeDetail.DET_YN},
+					#{codeDetail.DET_SORT},
+					#{codeDetail.COD_ID})
 		</foreach>
 	</insert>
 	
 	<!-- 상세공통코드 기존 행 수정 -->
 	<update id="updateDetailCodes" parameterType="map">
-		<foreach collection="list" item="code" separator=";">
+		<foreach collection="list" item="codeDetail" separator=";">
 			UPDATE CODE_DETAIL
-			SET DET_NM = #{code.DET_NM},
-				DET_YN = #{code.DET_YN},
-				DET_SORT = #{code.DET_SORT}
-			WHERE DET_ID = #{code.DET_ID}
-			AND COD_ID = #{code.COD_ID}
+			SET DET_NM = #{codeDetail.DET_NM},
+				DET_YN = #{codeDetail.DET_YN},
+				DET_SORT = #{codeDetail.DET_SORT}
+			WHERE DET_ID = #{codeDetail.DET_ID}
+			AND COD_ID = #{codeDetail.COD_ID}
 		</foreach>
 	</update>
 </mapper>

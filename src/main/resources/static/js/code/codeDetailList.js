@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 	
+	// 상세공통코드 그리드 생성
 	window.codeDetail_grid = new tui.Grid({
 		el: document.getElementById('codeDetail-grid'),
 		bodyHeight: 300,
@@ -10,7 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
 			type: 'scroll',
 			perPage: 20
 		},
-		data: [],
+		data: {
+			api: {
+				readData: {
+					url: '/SOLEX/detailCode/data',
+					method: 'GET'
+				}
+			},
+			initialRequest: false
+		},
 		columns: [
 			{ header: '상세코드', name: 'DET_ID', editor: 'text', sortable: true },
 			{ header: '항목명', name: 'DET_NM', editor: 'text' },
@@ -20,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					type: 'select',
 					options: {
 						listItems : [
-							{text: 'Y', value: 'Y'},
-							{text: 'N', value : 'N'}
+							{text: 'y', value: 'y'},
+							{text: 'n', value : 'n'}
 						]
 					}
 				},
@@ -29,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			      type: 'select',
 			      options: [
 			        { label: '전체', value: '' },
-			        { label: 'Y', value: 'Y' },
-			        { label: 'N', value: 'N' }
+			        { label: 'y', value: 'y' },
+			        { label: 'n', value: 'n' }
 			      ]
 			    }
 			},
@@ -38,13 +47,21 @@ document.addEventListener('DOMContentLoaded', () => {
 		]
 	});
 	
+	// 필터링 시 마다 재조회
+	window.codeDetail_grid.on('filter', () => {
+		codeDetail_grid.readData(1, { cod_id: selectedCodId }); // 필터링 시 cod_id 유지
+	});
+	
+	// ✅ 공통코드 선택 시 호출
 	window.loadDetailCode = function(cod_id) {
-		fetch(`/SOLEX/detailCode/data?cod_id=${encodeURIComponent(cod_id)}`)
-			.then(res => res.json())
-			.then(resData => {
-				// 서버 응답이 { data: { contents: [...] } } 구조라고 가정
-				window.codeDetail_grid.resetData(resData.data.contents || []);
-		});
+		if (!cod_id) return;
+		window.selectedCodId = cod_id;
+
+		// ✅ 기존 데이터 및 내부 상태 초기화
+		window.codeDetail_grid.resetData([]);
+
+		// ✅ 첫 페이지부터 무한스크롤 다시 시작
+		window.codeDetail_grid.readData(1, { cod_id });
 	};
 	
 });

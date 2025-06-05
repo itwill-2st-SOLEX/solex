@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		    return;
 		}
 		
+		const invalidRows = [...changes.createdRows, ...updatedRows].filter(row =>
+		  !row.DET_ID || !row.DET_NM || !row.DET_YN || !row.DET_SORT
+		);
+		if (invalidRows.length > 0) {
+		  alert("필수 항목이 입력되지 않은 행이 있습니다.");
+		  return;
+		}
+		
 		const changes = codeDetail_grid.getModifiedRows();
 		const updatedRows = changes.updatedRows.map(row => {
 			if (!row.COD_ID) {
@@ -45,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		.then(result => {
 			if (result.success) {
 			alert('저장되었습니다!');
-			codeDetail_grid.readData(1); // 데이터 재조회
+			codeDetail_grid.readData(1, { cod_id: selectedCodId }); // 데이터 재조회
 			} else {
 			alert('저장 실패!');
 			}

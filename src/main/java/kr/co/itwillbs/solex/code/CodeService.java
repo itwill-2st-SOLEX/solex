@@ -19,7 +19,7 @@ public class CodeService {
 		return codeList;
 	}
 	
-	// 무한스크롤 구현
+	// 공통코드 무한스크롤
 	public List<CodeDTO> getPagedCodeList(@Param("offset") int offset,
 										  @Param("perPage") int perPage,
 										  @Param("sort") String sort,
@@ -27,7 +27,6 @@ public class CodeService {
 										  @Param("codYn") String codYn) {
 	    return codeMapper.selectPagedCodeList(offset, perPage, sort, dir, codYn);
 	}
-	
 	public int getTotalCount(String codYn) {
 	    return codeMapper.selectTotalCount(codYn);
 	}
@@ -41,10 +40,13 @@ public class CodeService {
 	public void updateCodes(List<CodeDTO> updateList) {
         codeMapper.updateCodes(updateList);
     }
-
-	// 상세공통코드 리스트 조회
-	public List<Map<String, Object>> getPagedDetailCodeList(String cod_id) {
-		return codeMapper.getPagedDetailCodeList(cod_id);
+	
+	// 상세공통코드 무한스크롤
+	public List<Map<String, Object>> getPagedDetailCodeList(String codId, int offset, int limit, String sortColumn, String sortDirection) {
+	    return codeMapper.selectPagedDetailCodeList(codId, offset, limit, sortColumn, sortDirection);
+	}
+	public int getTotalDetailCodeCount(String codId) {
+	    return codeMapper.selectDetailCodeTotalCount(codId);
 	}
 
 	// 상세공통코드 신규 행 추가

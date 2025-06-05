@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// 날짜 변환 함수를 전역함수로 등록
 	window.formatDateTime = formatDateTime;
 	
+	// 공통코드 그리드 생성
 	window.code_grid = new tui.Grid({
 		el: document.getElementById('code-grid'),
 		bodyHeight: 300,
@@ -52,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					type: 'select',
 					options: {
 						listItems : [
-							{text: 'Y', value: 'Y'},
-							{text: 'N', value : 'N'}
+							{text: 'y', value: 'y'},
+							{text: 'n', value : 'n'}
 						]
 					}
 				},
@@ -61,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			      type: 'select',
 			      options: [
 			        { label: '전체', value: '' },
-			        { label: 'Y', value: 'Y' },
-			        { label: 'N', value: 'N' }
+			        { label: 'y', value: 'y' },
+			        { label: 'n', value: 'n' }
 			      ]
 			    }
 			},
@@ -70,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		]
 	});
 	
-	// 행 클릭 시 전역 함수 호출
+	// 행 클릭 시 상세공통코드 리스트 호출 함수 호출
 	window.selectedCodId = null;
 	
 	code_grid.on('click', ev => {

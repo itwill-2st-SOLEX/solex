@@ -22,13 +22,13 @@ public class CodeController {
 	@Autowired
 	private CodeService codeService;
 
-	// 공통코드 리스트 조회
+	// 공통코드 화면 이동
 	@GetMapping("/code")
 	public String getCodeList(Model model) throws Exception {
 		return "code/code";
 	}
 	
-	// 무한스크롤
+	// 공통코드 무한스크롤
 	@GetMapping("/code/data")
 	@ResponseBody
 	public Map<String, Object> getPagedCodeList(
@@ -82,20 +82,27 @@ public class CodeController {
 		return Map.of("result", "seccess");
 	}
 	
-	// 상세공통코드 리스트 조회
+	// 상세공통코드 무한스크롤
 	@GetMapping("/detailCode/data")
 	@ResponseBody
-	public Map<String, Object> getPagedDetailCodeList(@RequestParam Map<String, String> map) {
-		
-		String cod_id = map.get("cod_id");
-		
-		
-		List<Map<String, Object>> detailList = codeService.getPagedDetailCodeList(cod_id);
-		
-		Map<String, Object> result = new HashMap<>();
-		result.put("data", Map.of("contents", detailList));
-		
-		return result;
+	public Map<String, Object> getPagedDetailCodeList(
+	    @RequestParam(name = "cod_id") String cod_id,
+	    @RequestParam(name = "page", defaultValue = "1") int page,
+	    @RequestParam(name = "perPage") int perPage,
+	    @RequestParam(name = "sortColumn", defaultValue = "DET_SORT", required = false) String sortColumn,
+	    @RequestParam(name = "sortDirection", defaultValue = "asc", required = false) String sortDirection
+	) {
+	    int offset = (page - 1) * perPage;
+
+	    List<Map<String, Object>> rows = codeService.getPagedDetailCodeList(cod_id, offset, perPage, sortColumn, sortDirection);
+	    if (rows == null) rows = new ArrayList<>();
+
+	    int totalCount = codeService.getTotalDetailCodeCount(cod_id);
+
+	    Map<String, Object> pagination = Map.of("page", page, "totalCount", totalCount);
+	    Map<String, Object> data = Map.of("contents", rows, "pagination", pagination);
+
+	    return Map.of("result", true, "data", data);
 	}
 	
 	// 상세공통코드 저장
@@ -108,6 +115,10 @@ public class CodeController {
 	    
 	    System.out.println("신규 행 : " + insertList);
 	    System.out.println("수정 행 : " + updateList);
+	    
+	    if ((insertList == null || insertList.isEmpty()) && (updateList == null || updateList.isEmpty())) {
+            return Map.of("success", false, "message", "저장할 데이터가 없습니다.");
+        }
 
 	    // 상세공통코드 신규 행 추가
 	    if (insertList != null && !insertList.isEmpty()) {
@@ -119,7 +130,7 @@ public class CodeController {
 	        codeService.updateDetailCodes(updateList);
 	    }
 		
-		return Map.of("result", "seccess");
+		return Map.of("success", true);
 	}
 	
 	
