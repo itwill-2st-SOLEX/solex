@@ -8,9 +8,14 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface ClientMapper {
 	
-	List<Map<String,Object>> selectAllClients();
+	List<Map<String, Object>> selectClients(Map<String, Object> params);
 
 	int createClients(Map<String , Object>param);
 
 	Map<String, Object> getClientById(int clientId);
+
+	int updateClient(Map<String, Object> param);
+
+	List<Map<String, Object>> getSearchClients(Map<String, Object> keyword);
+
 }
