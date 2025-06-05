@@ -1,59 +1,90 @@
-$("form").on("submit", function(){
-	//이메일 결합
-	let emp_email = $("#email1").val() + "@" + $("#email2").val();
-	$("input[name=email]").remove();
-	$("form").prepend('<input type="hidden" name="emp_email" value="' + emp_email + '">');
+$(document).ready(function(){
+	$("#joinForm").on("submit", function(e){
+		    alert("폼 제출 전에 이게 떠야 함");
 	
-	//휴대폰 결합 
-	let emp_phone = $("#emp_phone1").val() + "-" + $("#emp_phone2").val() + "-" +  $("#emp_phone3").val(); 
-	$("input[name=emp_phone]").remove();
-	$("form").prepend('<input type="hidden" name="emp_phone" value="' + emp_phone + '">');
+		
+		//기존에 숨겨진 값 제거 (중복방지)
+		$("input[name=emp_phone]").remove();
+		$("input[name=emp_email]").remove();
+		
+	    // 1) 이메일 합치기
+	    let emp_email = $("#email1").val() + "@" + $("#email2").val();
+	    $("input[name=emp_email]").remove();
+	    $("<input>").attr({
+	        type: "hidden",
+	        name: "emp_email",
+	        value: emp_email
+	    }).appendTo("form");
+	    
+	    // 2) 휴대폰 합치기
+	    let emp_phone = $("#emp_phone1").val() + "-" + $("#emp_phone2").val() + "-" + $("#emp_phone3").val();
+	    $("input[name=emp_phone]").remove();
+	    $("<input>").attr({
+	        type: "hidden",
+	        name: "emp_phone",
+	        value: emp_phone
+	    }).appendTo("form");
+	    
+	    // 3) 확인용 로그
+	    console.log("emp_email:", emp_email);
+		
+	//     4) submit 계속 진행
+		
+		let birth = $("#emp_birth").val();
+		$("#emp_pw").val(birth);
+	})
 });
 
-$(".cancel").on("click", function(){
-	
-});
 
-$(function(){
-//	alert("제대로 됐나 ㅠ");
-});
 
-//-----------------------------주소api------------------------------------------------
-document.querySelector("#btnSearchAddress").onclick = function() {
-   new daum.Postcode({ // postcode.v2.js 에서 제공하는 daum.Postcode 객체 생성
-    // 주소 검색 창에서 주소 검색 후 검색된 주소를 사용자가 클릭 시
-    // oncomplete 이벤트에 의해 이벤트 뒤의 익명함수가 자동으로 호출됨
-           // 사용자가 클릭한 주소 정보가 익명함수 파라미터 data 로 전달됨
-           // => 주의! 이 익명함수는 개발자가 호출하는 것이 아니라
-           //    API 에 의해 자동으로 호출됨
-           //    (어떤 동작 수행 후 자동으로 호출되는 함수를 콜백(callback) 함수라고 함)
-       oncomplete: function(data) {
-           // 클릭(선택)된 주소 정보(객체)가 익명함수 파라미터 data 에 저장되어 있음
-//            console.log(data);
-           // data 객체 접근을 위해 data.xxx 형식으로 주소 상세정보 접근 가능
-           // ---------------------------------------------------------------
-           // 1) 우편번호(= postcode 이지만, 최근 국가기초구역번호로 변경 = zonecode 사용)
-           document.joinForm.postcode.value = data.zonecode;
-   
-    // 2) 기본주소(address 속성값)
-//            document.joinForm.address1.value = data.address;
-   
-    // 만약, 해당 주소에 건물명(buildingName 속성값)이 존재할 경우(널스트링 아님)
-    // 기본주소 뒤에 건물명을 결합하여 출력
-    // ex) 기본주소 : 부산광역시 부산진구 동천로109
-    //     건물명 : 삼한골든게이트
-    //     => 부산광역시 부산진구 동천로109 (삼한골든게이트)
-    let address = data.address; // 기본 주소 저장
-   
-    if(data.buildingName != "") { // 건물명이 존재할 경우 판별
-    address += " (" + data.buildingName + ")"; // 건물명 결합
-    }
-   
-    document.joinForm.address1.value = address; // 기본 주소 출력
-   
-    // 상세주소 입력 항목(name 속성 address2)에 커서 요청
-    document.joinForm.address2.focus();
-       }
-   }).open(); // 주소검색창 표시(새 창으로 열림)
+
+
+
+
+
+//주소입력 api
+function sample6_execDaumPostcode() {
+    new daum.Postcode({
+        oncomplete: function(data) {
+            // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+            // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+            // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+            var addr = ''; // 주소 변수
+            var extraAddr = ''; // 참고항목 변수
+
+            //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+            if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                addr = data.roadAddress;
+            } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                addr = data.jibunAddress;
+            }
+
+            // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+            if (data.userSelectedType === 'R') {
+                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                    extraAddr += data.bname;
+                }
+                // 건물명이 있고, 공동주택일 경우 추가한다.
+                if (data.buildingName !== '' && data.apartment === 'Y') {
+                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                if (extraAddr !== '') {
+                    extraAddr = ' (' + extraAddr + ')';
+                }
+                // 조합된 참고항목을 해당 필드에 넣는다.
+                document.getElementById("sample6_extraAddress").value = extraAddr;
+            } else {
+                document.getElementById("sample6_extraAddress").value = '';
+            }
+
+            // 우편번호와 주소 정보를 해당 필드에 넣는다.
+            document.getElementById('sample6_postcode').value = data.zonecode;
+            document.getElementById("sample6_address").value = addr;
+            // 커서를 상세주소 필드로 이동한다.
+            document.getElementById("sample6_detailAddress").focus();
+        }
+    }).open();
 }
-

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.Hr.HrMapper">
+
+<!-- 인사등록 -->
+  <insert id="insertEmp" parameterType="map">
+  -- HrMapper.insertEmp
+    INSERT INTO employee (
+      emp_id, 
+      emp_num, 
+      emp_hire, 
+      emp_nm, 
+      emp_gd,
+      emp_birth,
+      emp_pw,
+      emp_phone, 
+      emp_email, 
+      emp_add, 
+      emp_da,
+      emp_sts,
+      dep_id,
+      dep_position,
+      emp_pc
+    ) VALUES (
+      emp_seq.NEXTVAL,
+      #{emp_num},
+	  #{emp_hire},
+	  #{emp_nm},
+	  #{emp_gd},
+	  #{emp_birth},
+	  #{emp_birth},
+	  #{emp_phone},
+	  #{emp_email},
+	  #{emp_add},
+	  #{emp_da},
+      'Y',
+      #{dep_id},
+      #{dep_position},
+      #{emp_pc}
+      
+    )
+  </insert>
+  
+<!--   인사목록 - 재직상태 Y만 표시 -->
+	<select id="selectEmp" resultType="map">
+		SELECT *
+		FROM employee
+		WHERE emp_sts = 'Y'
+		<if test="searchKeyword != null and searchKeyword != ''">
+			AND
+			<choose>
+				<when test="searchType.equals('emp_nm')">
+					 emp_nm LIKE '%' || #{searchKeyword} || '%'
+				</when>
+				<when test="searchType.equals('emp_num')">
+					 emp_num LIKE '%' || #{searchKeyword} || '%'
+				</when>
+			
+			</choose>
+		</if>
+	</select>
+	
+<!-- 	인사목록 - 퇴사자 포함  -->
+	<select id="selectAllEmp" resultType="map">
+		SELECT *
+		FROM employee
+		WHERE
+		<if test="searchKeyword != null and searchKeyword != ''">
+			<choose>
+				<when test="searchType.equals('emp_nm')">
+					 emp_nm LIKE '%' || #{searchKeyword} || '%'
+				</when>
+				<when test="searchType.equals('emp_num')">
+					 emp_num LIKE '%' || #{searchKeyword} || '%'
+				</when>
+			
+			</choose>
+		</if>
+	</select>
+	<resultMap type="map" id="empResultMap">
+		<id property="emp_id" column="emp_id" />
+		<result property="empNum" column="emp_num" />
+		<result property="depId" column="dep_id" />
+		<result property="depPosition" column="dep_position" />
+		<result property="empNm" column="emp_nm" />
+		<result property="empPhone" column="emp_phone" />
+		<result property="empHire" column="emp_hire" />
+		<result property="empSts" column="emp_sts" />
+	</resultMap>
+	
+	
+	<select id="findAllItems" resultMap="empResultMap">
+		SELECT emp_num, dep_id, dep_position, emp_nm, emp_phone, emp_hire, emp_sts
+		FROM employee
+	</select>
+</mapper>

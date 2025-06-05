@@ -44,3 +44,17 @@
     th {
       background-color: #f2f2f2;
     }
+    
+    .form-select{
+    	width: 25% !important;
+    
+    }
+    
+    .form-control d-inline-block w-25{
+    	width: 20% !important;
+    }
+    
+    .inline-container span {
+        display: inline-block !important;
+        margin-right: 10px !important;
+    }
