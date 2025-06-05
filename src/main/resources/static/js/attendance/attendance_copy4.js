@@ -7,7 +7,7 @@ updateMonthYearDisplay();
 
 // updateMonthYearDisplay 함수가 호출될 때 currentDate를 기준으로 화면을 업데이트하고 서버로 데이터 전송
 function updateMonthYearDisplay() {
-//	debugger;
+	debugger;
     const displayYear = currentDate.getFullYear();
     const displayMonth = currentDate.getMonth() + 1;
     currentMonthYearSpan.textContent = `${displayYear}년 ${displayMonth}월`; 
@@ -33,8 +33,6 @@ function updateMonthYearDisplay() {
 
 function sendMonthYearToServer(year, month, requestType) { 
     const url = `/SOLEX/attendance/data?year=${year}&month=${month}&resultType=${requestType}`; 
-	
-	console.log(url);
     
     fetch(url)
         .then(response => {
@@ -69,39 +67,9 @@ function sendMonthYearToServer(year, month, requestType) {
 }
 
 function displayMyAttendance(data) {
-    let tableBody = document.getElementById('myAttendanceTable'); // #myAttendanceTable2 tbody를 직접 선택하는 것이 안전
+    let tableBody = document.getElementById('myAttendanceTable2'); // #myAttendanceTable2 tbody를 직접 선택하는 것이 안전
 	tableBody.innerHTML = ''; 
 	
-	if (!data || data.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center;">해당 월의 데이터가 없습니다.</td>
-            </tr>
-        `;
-        return;
-    }
-	
-    data.forEach(item => {
-        const row = document.createElement('tr'); 
-
-        row.innerHTML = `
-            <td>${item.EMP_NUM || ''}</td>
-            <td>${item.ATT_IN_TIME || ''}</td>
-            <td>${item.ATT_OUT_TIME || ''}</td>
-            <td>${item.ATT_STS || ''}</td>
-            <td>${item.ATT_DAY || ''}</td>
-        `;
-
-        tableBody.appendChild(row); 
-    });
-}
-
-
-function displayTeamAttendance(data) {
-	debugger;
-	let tableBody = document.getElementById('attendanceTable'); // #myAttendanceTable2 tbody를 직접 선택하는 것이 안전
-	tableBody.innerHTML = ''; 
-		
 	if (!data || data.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -124,6 +92,51 @@ function displayTeamAttendance(data) {
 
         tableBody.appendChild(row); 
     });
+}
+
+
+function displayTeamAttendance(data) {
+	let tableBody = document.getElementById('myAttendanceTable2'); // #myAttendanceTable2 tbody를 직접 선택하는 것이 안전
+	tableBody.innerHTML = ''; 
+	
+	if (!data || data.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center;">해당 월의 데이터가 없습니다.</td>
+            </tr>
+        `;
+        return;
+    }
+	
+    data.forEach(item => {
+        const row = document.createElement('tr'); 
+
+        row.innerHTML = `
+            <td>${item.EMP_ID || ''}</td>
+            <td>${item.ATT_IN_TIME || ''}</td>
+            <td>${item.ATT_OUT_TIME || ''}</td>
+            <td>${item.ATT_STS || ''}</td>
+            <td>${item.ATT_DAY || ''}</td>
+        `;
+
+        tableBody.appendChild(row); 
+    });
+//    const tableBody = document.getElementById('myAttendanceTable2'); // 팀 근태 테이블 ID 확인
+//    tableBody.innerHTML = ''; 
+//
+//    if (!data || data.length === 0) {
+//        tableBody.innerHTML = `
+//            <tr>
+//                <td colspan="3" style="text-align: center;">해당 월의 데이터가 없습니다.</td>
+//            </tr>
+//        `;
+//        return;
+//    }
+//    let html = '';
+//    data.forEach(item => {
+//        html += `<tr><td>${item.EMP_ID || ''}</td><td>${item.ATT_IN_TIME || ''}</td><td>${item.ATT_OUT_TIME || ''}</td></tr>`;
+//    });
+//    tableBody.innerHTML = html; 
 }
 
 // 이전 달로 이동하는 함수
