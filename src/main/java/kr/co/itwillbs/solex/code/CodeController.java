@@ -64,22 +64,26 @@ public class CodeController {
 	// 공통코드 저장
 	@PostMapping("/code/save")
 	@ResponseBody
-	public Map<String, Object> saveCode(@RequestBody Map<String, List<CodeDTO>> map) {
-		
-		List<CodeDTO> insertList = map.get("insertList");
-	    List<CodeDTO> updateList = map.get("updateList");
+	public Map<String, Object> saveCode(@RequestBody Map<String, List<Map<String, Object>>> map) {
 
-	    // 공통코드 신규 행 추가
+	    List<Map<String, Object>> insertList = map.get("createdRows");
+	    List<Map<String, Object>> updateList = map.get("updatedRows");
+	    
+	    if ((insertList == null || insertList.isEmpty()) && (updateList == null || updateList.isEmpty())) {
+	        return Map.of("success", false, "message", "저장할 데이터가 없습니다.");
+	    }
+
+	    // 공통코드 신규 등록
 	    if (insertList != null && !insertList.isEmpty()) {
 	        codeService.insertCodes(insertList);
 	    }
 
-	    // 공통코드 기존 행 수정
+	    // 공통코드 기존 수정
 	    if (updateList != null && !updateList.isEmpty()) {
 	        codeService.updateCodes(updateList);
 	    }
-		
-		return Map.of("result", "seccess");
+
+	    return Map.of("success", true);
 	}
 	
 	// 상세공통코드 무한스크롤
@@ -112,9 +116,6 @@ public class CodeController {
 		
 		List<Map<String, Object>> insertList = map.get("createdRows");
 	    List<Map<String, Object>> updateList = map.get("updatedRows");
-	    
-	    System.out.println("신규 행 : " + insertList);
-	    System.out.println("수정 행 : " + updateList);
 	    
 	    if ((insertList == null || insertList.isEmpty()) && (updateList == null || updateList.isEmpty())) {
             return Map.of("success", false, "message", "저장할 데이터가 없습니다.");

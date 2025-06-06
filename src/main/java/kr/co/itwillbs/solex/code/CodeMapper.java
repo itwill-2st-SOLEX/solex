@@ -22,10 +22,10 @@ public interface CodeMapper {
 	int selectTotalCount(@Param("codYn") String codYn);
 
 	// 공통코드 신규 행 추가
-	void insertCodes(List<CodeDTO> insertList);
+	void insertCodes(List<Map<String, Object>> insertList);
 
 	// 공통코드 기존 행 수정
-	void updateCodes(List<CodeDTO> updateList);
+	void updateCodes(List<Map<String, Object>> updateList);
 
 	// 상세공통코드 무한스크롤
 	List<Map<String, Object>> selectPagedDetailCodeList(@Param("codId") String codId,

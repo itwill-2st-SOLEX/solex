@@ -26,46 +26,50 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 	
-	const saveBtn = document.querySelector('#code-save');
-	
 	// ✅ 저장 버튼
-	saveBtn.addEventListener('click', () => {
-		const { createdRows, updatedRows } = code_grid.getModifiedRows();
-
-		// 빈 항목 체크
-		const isValid = [...createdRows, ...updatedRows].every(row =>
-			row.cod_id && row.cod_nm && row.cod_yn
-		);
-
-		if (!isValid) {
-			alert('필수 항목이 입력되지 않은 행이 있습니다.');
-			return;
-		}
-		// ✅ insert할 행들
-		const newRows = createdRows.map(row => ({
-			cod_id: row.cod_id,
-			cod_nm: row.cod_nm,
-			cod_yn: row.cod_yn,
-			cod_reg_time: row.cod_reg_time
-		}));
+	document.querySelector('#code-save').addEventListener('click', () => {
 		
-		// ✅ update할 행들 (isNew = false 이면서 수정된 행들만)
-		const modifiedRows = updatedRows.filter(row => !row.__isNew).map(row => ({
-			cod_id: row.cod_id,
-			cod_nm: row.cod_nm,
-			cod_yn: row.cod_yn
-		}));
+		// 변경사항 추출
+		const changes = code_grid.getModifiedRows();
+	    const { createdRows, updatedRows } = changes;
 
-		// ✅ 서버로 데이터 전송 (AJAX)
+		// 변경사항 없음 체크
+		if (createdRows.length === 0 && updatedRows.length === 0) {
+	        alert('변경된 내용이 없습니다.');
+	        return;
+	    }
+		
+		// 필드 검증
+		const requiredFields = ['cod_id', 'cod_nm', 'cod_yn'];
+	    const invalidRows = [...createdRows, ...updatedRows].filter(row =>
+	        requiredFields.some(field => !row[field])
+	    );
+	    if (invalidRows.length > 0) {
+	        alert('필수 항목이 입력되지 않은 행이 있습니다.');
+	        return;
+	    }
+		
+		// 데이터 가공
+	    const payload = {
+	        createdRows: createdRows.map(row => ({
+	            cod_id: row.cod_id,
+	            cod_nm: row.cod_nm,
+	            cod_yn: row.cod_yn
+	        })),
+	        updatedRows: updatedRows.filter(row => !row.__isNew).map(row => ({
+	            cod_id: row.cod_id,
+	            cod_nm: row.cod_nm,
+	            cod_yn: row.cod_yn
+	        }))
+	    };
+		
+		// ✅ 서버로 데이터 전송
 		fetch('/SOLEX/code/save', {
 			method: 'POST',
 			headers: {
 			'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({
-				insertList: newRows,
-				updateList: modifiedRows
-			})
+			body: JSON.stringify(payload)
 		})
 		.then(res => {
 			if (!res.ok) throw new Error('저장 실패');
@@ -91,8 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		// ✅ 새로 추가된 행만 필터링
 		const onlyNewRowKeys = checkedRows
-			.filter(row => row.__isNew)  // 새로 추가한 행만
-			.map(row => row.rowKey);     // 삭제할 rowKey 추출
+			.filter(row => row.__isNew)
+			.map(row => row.rowKey);
 
 		if (onlyNewRowKeys.length === 0) {
 			alert('추가된 행만 삭제할 수 있습니다.');
@@ -100,9 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		
 		onlyNewRowKeys
-			.sort((a, b) => b - a) // 큰 rowKey부터 삭제 → 안정성 확보
+			.sort((a, b) => b - a)
 			.forEach(rowKey => {
-				code_grid.removeRow(rowKey);	// ✅ 삭제 실행
+				code_grid.removeRow(rowKey);
 			});
 	});
 

@@ -44,34 +44,40 @@
 	</select>
 	
 	<!-- 공통코드 신규 행 추가 -->
-	<insert id="insertCodes">
-		INSERT INTO CODE (
-			COD_ID,
-			COD_NM,
-			COD_YN,
-			COD_REG_TIME
-		)
-		VALUES
-		<foreach collection="list" item="code" separator=",">
-			( 이렇게 하면 안된데~~ 오라클은 안되는거래~
-				#{code.cod_id},
-				#{code.cod_nm},
-				#{code.cod_yn},
-				sysdate
-			)
-		</foreach>
+	<insert id="insertCodes" parameterType="java.util.List">
+	    INSERT ALL
+	    <foreach collection="list" item="code">
+	        INTO CODE (
+	            COD_ID,
+	            COD_NM,
+	            COD_YN,
+	            COD_REG_TIME
+	        ) VALUES (
+	            #{code.cod_id},
+	            #{code.cod_nm},
+	            #{code.cod_yn},
+	            sysdate)
+	    </foreach>
+	    SELECT * FROM dual
 	</insert>
 	
 	<!-- 공통코드 기존 행 수정 -->
-	<update id="updateCodes">
-		<foreach collection="list" item="code" separator=";">
-			UPDATE CODE
-			SET
-			COD_NM = #{code.cod_nm},
-			COD_YN = #{code.cod_yn}
-			WHERE
-			COD_ID = #{code.cod_id}
-		</foreach>
+	<update id="updateCodes" parameterType="java.util.List">
+	    MERGE INTO CODE c
+	    USING (
+	        <foreach collection="list" item="code" separator="UNION ALL">
+	            SELECT 
+	                #{code.cod_id} AS cod_id,
+	                #{code.cod_nm} AS cod_nm,
+	                #{code.cod_yn} AS cod_yn
+	            FROM DUAL
+	        </foreach>
+	    ) src
+	    ON (c.COD_ID = src.cod_id)
+	    WHEN MATCHED THEN
+	    UPDATE SET 
+	        c.COD_NM = src.cod_nm,
+	        c.COD_YN = src.cod_yn
 	</update>
 	
 	<!-- 상세공통코드 무한스크롤 -->
@@ -109,25 +115,37 @@
 	
 	<!-- 상세공통코드 신규 행 추가 -->
 	<insert id="insertDetailCodes" parameterType="map">
-		INSERT INTO CODE_DETAIL (DET_ID, DET_NM, DET_YN, DET_SORT, COD_ID)
-		<foreach collection="list" item="codeDetail" separator=";">
-			VALUES (#{codeDetail.DET_ID},
-					#{codeDetail.DET_NM},
-					#{codeDetail.DET_YN},
-					#{codeDetail.DET_SORT},
-					#{codeDetail.COD_ID})
-		</foreach>
+	    INSERT ALL
+	    <foreach collection="list" item="codeDetail">
+	        INTO CODE_DETAIL (DET_ID, DET_NM, DET_YN, DET_SORT, COD_ID)
+	        VALUES (#{codeDetail.DET_ID},
+	                #{codeDetail.DET_NM},
+	                #{codeDetail.DET_YN},
+	                #{codeDetail.DET_SORT},
+	                #{codeDetail.COD_ID})
+	    </foreach>
+	    SELECT 1 FROM DUAL
 	</insert>
 	
 	<!-- 상세공통코드 기존 행 수정 -->
 	<update id="updateDetailCodes" parameterType="map">
-		<foreach collection="list" item="codeDetail" separator=";">
-			UPDATE CODE_DETAIL
-			SET DET_NM = #{codeDetail.DET_NM},
-				DET_YN = #{codeDetail.DET_YN},
-				DET_SORT = #{codeDetail.DET_SORT}
-			WHERE DET_ID = #{codeDetail.DET_ID}
-			AND COD_ID = #{codeDetail.COD_ID}
-		</foreach>
+	    MERGE INTO CODE_DETAIL target
+	    USING (
+	        <foreach collection="list" item="codeDetail" separator="UNION ALL">
+	            SELECT
+	                #{codeDetail.DET_ID} AS DET_ID,
+	                #{codeDetail.COD_ID} AS COD_ID,
+	                #{codeDetail.DET_NM} AS DET_NM,
+	                #{codeDetail.DET_YN} AS DET_YN,
+	                #{codeDetail.DET_SORT} AS DET_SORT
+	            FROM DUAL
+	        </foreach>
+	    ) src
+	    ON (target.DET_ID = src.DET_ID AND target.COD_ID = src.COD_ID)
+	    WHEN MATCHED THEN
+	        UPDATE SET
+	            target.DET_NM = src.DET_NM,
+	            target.DET_YN = src.DET_YN,
+	            target.DET_SORT = src.DET_SORT
 	</update>
 </mapper>

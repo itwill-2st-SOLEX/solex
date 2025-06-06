@@ -32,12 +32,12 @@ public class CodeService {
 	}
 
 	// 공통코드 신규 행 추가
-	public void insertCodes(List<CodeDTO> insertList) {
-        codeMapper.insertCodes(insertList);
+	public void insertCodes(List<Map<String, Object>> insertList) {
+		codeMapper.insertCodes(insertList);
     }
 
 	// 공통코드 기존 행 수정
-	public void updateCodes(List<CodeDTO> updateList) {
+	public void updateCodes(List<Map<String, Object>> updateList) {
         codeMapper.updateCodes(updateList);
     }
 	
