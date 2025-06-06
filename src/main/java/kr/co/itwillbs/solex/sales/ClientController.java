@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.client;
+package kr.co.itwillbs.solex.sales;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,7 +44,6 @@ public class ClientController {
 	
 	@GetMapping("")
 	public String getAllClients(Model model) throws Exception {
-		log.info("이거 시작됨");
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("limit", 30);
         initialParams.put("offset", 0);
@@ -56,7 +55,7 @@ public class ClientController {
         String clientJsonList = mapper.writeValueAsString(clientList);
         model.addAttribute("clientList", clientJsonList); // JSON 문자열을 Model에 추가
 
-        return "client/list"; // client/list.jsp 또는 client/list.html 뷰 반환
+        return "sales/clientList"; // client/list.jsp 또는 client/list.html 뷰 반환
     }
 	
     @GetMapping("/data") // 예: /clients/data?limit=20&offset=0&search_term=김미
