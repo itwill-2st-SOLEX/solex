@@ -47,11 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		]
 	});
 	
-	// 필터링 시 마다 재조회
-	window.codeDetail_grid.on('filter', () => {
-		codeDetail_grid.readData(1, { cod_id: selectedCodId });
-	});
-	
 	// ✅ 공통코드 선택 시 호출
 	window.loadDetailCode = function(cod_id) {
 		if (!cod_id) return;

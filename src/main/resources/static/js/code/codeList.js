@@ -45,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		},
 		columns: [
-			{ header: '코드', name: 'cod_id', editor: 'text', sortable: true },
-			{ header: '항목명', name: 'cod_nm', editor: 'text' },
+			{ header: '코드', name: 'COD_ID', editor: 'text', sortable: true },
+			{ header: '항목명', name: 'COD_NM', editor: 'text' },
 			{ header: '사용여부',
-				name: 'cod_yn',
+				name: 'COD_YN',
 			  editor: {
 					type: 'select',
 					options: {
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			      ]
 			    }
 			},
-			{ header: '등록일시', name: 'cod_reg_time' }
+			{ header: '등록일시', name: 'COD_REG_TIME' }
 		]
 	});
 	
@@ -75,12 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.selectedCodId = null;
 	
 	code_grid.on('click', ev => {
-		
 		const rowKey = ev.rowKey;
 		const rowData = code_grid.getRow(rowKey);
 		if (rowData && window.loadDetailCode) {
-			selectedCodId = rowData.cod_id;
-			window.loadDetailCode(rowData.cod_id);
+			selectedCodId = rowData.COD_ID;
+			window.loadDetailCode(rowData.COD_ID);
 		}
 	});
 

@@ -41,7 +41,7 @@ public class CodeController {
 		
 	    int offset = (page - 1) * perPage;
 	    
-	    List<CodeDTO> rows = codeService.getPagedCodeList(offset, perPage, sortColumn, sortDirection, cod_yn);
+	    List<Map<String, Object>> rows = codeService.getPagedCodeList(offset, perPage, sortColumn, sortDirection, cod_yn);
 	    if (rows == null) rows = new ArrayList<>();	// 빈 배열 보장
 	    
 	    int totalCount = codeService.getTotalCount(cod_yn);
@@ -53,7 +53,7 @@ public class CodeController {
 	    Map<String, Object> data = new HashMap<>();
 	    data.put("contents", rows);
 	    data.put("pagination", pagination);
-
+	    
 	    Map<String, Object> result = new HashMap<>();
 	    result.put("result", true);
 	    result.put("data", data);

@@ -4,29 +4,29 @@
   
 <mapper namespace="kr.co.itwillbs.solex.code.CodeMapper">
 
-	<!-- 공통코드 리스트 조회 -->
-	<select id="getCodeList" resultType="kr.co.itwillbs.solex.code.CodeDTO">
-		SELECT	*
-		FROM	CODE
-	</select>
-	
 	<!-- 공통코드 무한스크롤 -->
-	<select id="selectPagedCodeList" resultType="kr.co.itwillbs.solex.code.CodeDTO">
+	<select id="selectPagedCodeList" resultType="map">
 		SELECT * FROM (
 			SELECT t.*, ROWNUM rnum FROM (
-				SELECT * FROM code
+				SELECT 
+					COD_ID,
+					COD_NM,
+					COD_YN,
+					COD_REG_TIME
+				FROM code
 				<where>
 					<if test="codYn != null and codYn != ''">
 						cod_yn = #{codYn}
 					</if>
 				</where>
+				ORDER BY
 				<choose>
 					<when test="sort != null and dir != null">
-						ORDER BY ${sort} ${dir}
+						${sort} ${dir}
 					</when>
-				<otherwise>
-					ORDER BY cod_id ASC
-				</otherwise>
+					<otherwise>
+						cod_id ASC
+					</otherwise>
 				</choose>
 			) t
 			WHERE ROWNUM &lt;= #{offset} + #{perPage}

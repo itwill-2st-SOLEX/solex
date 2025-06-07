@@ -13,14 +13,8 @@ public class CodeService {
 	@Autowired
 	private CodeMapper codeMapper;
 
-	// 공통코드 리스트 조회
-	public List<CodeDTO> getCodeList() {
-		List<CodeDTO> codeList = codeMapper.getCodeList();
-		return codeList;
-	}
-	
 	// 공통코드 무한스크롤
-	public List<CodeDTO> getPagedCodeList(@Param("offset") int offset,
+	public List<Map<String, Object>> getPagedCodeList(@Param("offset") int offset,
 										  @Param("perPage") int perPage,
 										  @Param("sort") String sort,
 										  @Param("dir") String dir,

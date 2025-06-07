@@ -9,11 +9,8 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface CodeMapper {
 
-	// 공통코드 리스트 조회
-	List<CodeDTO> getCodeList();
-	
 	// 공통코드 무한스크롤
-	List<CodeDTO> selectPagedCodeList(@Param("offset") int offset,
+	List<Map<String, Object>> selectPagedCodeList(@Param("offset") int offset,
             @Param("perPage") int perPage,
             @Param("sort") String sort,
             @Param("dir") String dir,
