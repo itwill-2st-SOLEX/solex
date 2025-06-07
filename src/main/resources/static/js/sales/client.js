@@ -564,6 +564,10 @@ function getBizRegNoInfo() {
     const input = bizRegNoInput ? bizRegNoInput.value.trim() : '';
     const cleanedInput = input.replace(/[^0-9]/g, '');
 
+	const overlay = document.getElementById('loadingOverlay');
+	// API 호출 전에 스피너를 보여줍니다.
+	overlay.style.display = 'block'; 
+
     if (cleanedInput.length !== 10) {
         alert('사업자등록번호는 숫자 10자리여야 합니다.');
         if (overlay) overlay.style.display = 'none';
