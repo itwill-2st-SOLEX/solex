@@ -10,6 +10,7 @@
 <!-- 개별페이지 전용 스타일시트 영역 -->
 	<th:block layout:fragment="style">
 		<link rel="stylesheet" th:href="@{/css/sales/order.css}" />
+		<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.css" rel="stylesheet">
 	</th:block>
 </head>
 <body>
@@ -30,7 +31,7 @@
 											</span>
 											<input id="searchInput" name="searchInput" style="width: 25%;" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none" type="text" aria-label="검색" placeholder="검색">
 										</div>
-										<button type="button" class="btn btn-primary mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openClientModalBtn">거래처 등록</button>
+										<button type="button" class="btn btn-primary mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openClientModalBtn">주문 등록</button>
 									</div>
 									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
 								</div>
@@ -51,15 +52,116 @@
 	
 	<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	    <div class="modal-dialog modal-dialog-scrollable modal-lg">
-	        <div class="modal-content" id="modalContentContainer"></div>
+	        <div class="modal-content" id="modalContentContainer">
+	        	<div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">주문 등록</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body big-box">
+            <div class="row mb-4">
+                 <div class="col">
+			        <label for="cli_nm_virtual_select" class="form-label">거래처명 <span style="color:red">*</span></label>
+			        <div class="input-group">
+			            <select id="cli_nm_virtual_select" name="cli_nm" placeholder="거래처명을 선택하거나 검색하세요...">
+			                <option value="alpha">㈜알파테크</option>
+			                <option value="beta">베타솔루션</option>
+			                <option value="gamma">감마인더스트리</option>
+			                <option value="delta">델타파트너스</option>
+			                <option value="epsilon">엡실론물산</option>
+			                <option value="theta">세타그룹</option>
+			                <option value="kappa">카파상사</option>
+			                <option value="lambda">람다물류</option>
+			                <option value="mu">뮤시스템즈</option>
+			                <option value="nu">누글로벌</option>
+			                <option value="pi">피인터내셔널</option>
+			                <option value="sigma">시그마전자</option>
+			                <option value="tau">타우건설</option>
+			                <option value="psi">프사이컴퍼니</option>
+			            </select>
+			        </div>
+			    </div>
+                <div class="col">
+			        <label for="prd_nm_virtual_select" class="form-label">상품명 <span style="color:red">*</span></label>
+			        <div class="input-group">
+			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="상품명을 선택하거나 검색하세요...">
+			                <option value="prd001">상품명 A</option>
+			                <option value="prd002">상품명 B</option>
+			                <option value="prd003">상품명 C</option>
+			                <option value="prd004">상품명 D</option>
+			                <option value="prd005">상품명 E</option>
+			            </select>
+			        </div>
+			    </div>
+            </div>
+			<div class="mb-4">
+	            <label for="biz_reg_no" class="form-label">사업자 등록번호</label>
+	            <div class="d-flex align-items-center">
+	                <input type="text" maxlength="10" id="biz_reg_no" name="biz_reg_no" class="form-control" placeholder="사업자 등록번호 (숫자만)" style="width: 48.4%;" value="${actual_biz_reg_no_for_input}" ${biz_reg_input_disabled}>
+	                <button type="button" class="btn btn-primary ms-2" id="getBizRegNoInfo" ${biz_reg_input_disabled}>사업자 등록번호 조회</button>
+	            </div>
+	            <div class="form-check mt-2">
+	                <input type="checkbox" class="form-check-input" id="no_biz_checkbox" name="no_biz_checkbox" ${no_biz_checkbox_checked}>
+	                <label for="no_biz_checkbox" class="form-check-label">사업자 등록번호 미보유</label>
+	                <div class="form-text" style="color: #f35a5a;">
+	                    사업자등록번호 없으면 세금계산서 발행이 제한될 수 있습니다.
+	                </div>
+	            </div>
+	        </div>
+            <div class="mb-4">
+                <div>
+                    <label for="clientTypeSelect" class="form-label">거래처 유형 <span style="color:red;">*</span></label>
+                    <br>
+                    <select id="clientTypeSelect" class="form-select">
+                        </select>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="cli_phone" class="form-label">거래처 연락처 <span style="color:red">*</span></label>
+                <br>
+                <input type="text" id="cli_phone" name="cli_phone" class="form-control" placeholder="거래처 연락처" value="${cli_phone}">
+            </div>
+
+            <div class="row mb-4">
+                <div class="col">
+                    <label for="cli_mgr_name" class="form-label">담당자명 <span style="color:red">*</span></label>
+                    <input type="text" id="cli_mgr_name" class="form-control" placeholder="담당자명" value="${cli_mgr_name}">
+                </div>
+                <div class="col">
+                    <label for="cli_mgr_phone" class="form-label">담당자 연락처 <span style="color:red">*</span></label>
+                    <input type="text" id="cli_mgr_phone" class="form-control" placeholder="담당자 연락처" value="${cli_mgr_phone}">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-label">주소 <span style="color:red">*</span></div>
+                <div class="d-flex align-items-center mb-2">
+                    <input type="text" id="cli_pc" name="cli_pc" class="form-control" style="width: 48.4%;" readonly="readonly" placeholder="우편번호" value="${cli_pc}">
+                    <button type="button" class="btn btn-primary ms-2" onclick="findPostCode()">우편번호 찾기</button>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <input type="text" id="cli_add" name="cli_add" class="form-control" readonly="readonly" placeholder="기본주소" value="${cli_add}">
+                </div>
+                <div class="d-flex align-items-center">
+                    <input type="text" id="cli_da" name="cli_da" class="form-control" placeholder="상세주소" value="${cli_da}">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+<!--             <button type="button" class="btn btn-primary" id="submitBtn" onclick="${submitFunctionCall}">${submitButtonText}</button> -->
+        </div>
+	        </div>
 	    </div>
 	</div>
 			
 	</th:block>
 	
 	<th:block layout:fragment="script">
-		<script type="text/javascript" th:src="@{/js/sales/order.js}"></script>
-		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
+
+    <script th:src="@{/js/sales/order.js}"></script>
 	</th:block>
 	
 </body>

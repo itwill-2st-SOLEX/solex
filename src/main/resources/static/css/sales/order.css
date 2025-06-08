@@ -39,3 +39,265 @@ body {
   align-items: center;      /* 세로 중앙 */
   z-index: 9999;            /* 최상위 표시 */
 }
+
+
+/* Custom CSS */
+
+/* Virtual Select의 주 Wrapper (vscomp-wrapper) */
+
+.vscomp-ele {
+    max-width: 100% !important; /* 부모 요소의 너비에 맞추기 위해 100%로 설정 */
+    /* 또는 특정 고정 너비를 원하면: max-width: 400px !important; */
+}/* 추가적으로, input-group 내에서 flex 동작을 위해 이전에도 넣었던 스타일을 다시 한번 확인합니다. */
+.input-group > .vscomp-wrapper {
+    flex: 1 1 auto;
+    width: 100%; /* 부모의 100%를 차지하도록 명시적으로 설정 */
+    max-width: none; /* 혹시 모를 내부 제한을 위해 추가 (없어도 될 가능성 높음) */
+    /* 기타 border-radius 조정 등 이전 CSS 유지 */
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 0.375rem !important;
+    border-bottom-right-radius: 0.375rem !important;
+}
+.vscomp-wrapper {
+    /* 기존 Bootstrap form-control의 기본 border-radius를 덮어쓰기 */
+    border-radius: 0.375rem; /* 모든 모서리를 둥글게 */
+    border: 1px solid #dee2e6; /* Bootstrap 기본 border 색상 */
+    /* 내부 그림자 제거 (기본적으로 없을 수도 있음) */
+    box-shadow: none;
+    /* 포커스 시 outline 제거 및 box-shadow로 대체할 것이므로 */
+    outline: none;
+}
+
+/* Virtual Select의 토글 버튼 (드롭다운 화살표, Clear 버튼을 포함하는 영역) */
+.vscomp-wrapper .vscomp-toggle-button {
+    height: 100%; /* 부모 wrapper 높이에 맞춤 */
+    border: none; /* 내부 테두리 제거 */
+    background-color: transparent; /* 배경 투명하게 */
+    padding: 0.543rem 0.9375rem; /* 내부 패딩 제거 */
+    display: flex; /* 내부 요소 정렬을 위해 flex 사용 */
+    align-items: center; /* 세로 중앙 정렬 */
+    justify-content: space-between; /* 검색 아이콘과 화살표 간격 조정 */
+}
+
+/* Virtual Select의 실제 입력 필드 (검색 입력창) */
+.vscomp-wrapper .vscomp-search-input {
+    width: 100%; /* 부모의 너비를 가득 채움 */
+    border: none; /* 자체 테두리 제거 */
+    outline: none; /* 포커스 시 기본 outline 제거 */
+    box-shadow: none; /* 자체 그림자 제거 */
+    padding: 0.375rem 0.75rem; /* Bootstrap form-control과 유사한 패딩 */
+    line-height: 1.5; /* 줄 높이 */
+    color: #212529; /* 텍스트 색상 */
+    background-color: transparent; /* 배경 투명하게 */
+    /* 플레이스홀더 텍스트 색상 */
+    &::placeholder {
+        color: #6c7577;
+        opacity: 1; /* 일부 브라우저에서 투명도 적용 */
+    }
+}
+
+/* /* 포커스 시 파란색 테두리/그림자 효과 */ */
+/* .vscomp-wrapper.vscomp-focused { */
+/*     border-color: #696cff; 포커스 시 테두리 색상 (원하시는 파란색 계열) */
+/*     outline: 0; 기본 outline 제거 */
+/*     box-shadow의 네 번째 값(spread-radius)을 조정하여 두께를 조절합니다. */
+/*     원하는 두께에 따라 0.3rem, 0.4rem, 0.5rem 등으로 변경해 보세요. */
+/*     box-shadow: 0 0 0 0.4rem rgba(105, 108, 255, 0.25); #696cff 색상에 맞춰 rgba 값도 조정 */
+/*     (옵션) rgba 색상의 불투명도를 조정하여 더 연하게/진하게 조절 가능 (마지막 값 0.25) */
+/* } */
+
+/* /* 드롭다운 화살표 아이콘 자체 스타일 (필요시) */ */
+/* .vscomp-wrapper .vscomp-arrow-btn { */
+/*     화살표 버튼의 너비 조정 */
+/*     width: 2.25rem; Bootstrap input-group-text 기본 너비와 비슷하게 */
+/*     display: flex; */
+/*     justify-content: center; */
+/*     align-items: center; */
+/*     color: #6c757d; 아이콘 색상 */
+/*     font-size: 0.9rem; 아이콘 크기 */
+/* } */
+
+/* /* Clear 버튼 (X 아이콘) 스타일 (필요시) */ */
+/* .vscomp-wrapper .vscomp-clear-btn { */
+/*     width: 2.25rem; */
+/*     display: flex; */
+/*     justify-content: center; */
+/*     align-items: center; */
+/*     color: #6c757d; */
+/*     font-size: 0.9rem; */
+/* } */
+
+/* /* input-group 내에서의 정렬을 위해 (이전 답변에서 제공했던 부분 유지) */ */
+/* .input-group > .vscomp-wrapper { */
+/*     flex: 1 1 auto; */
+/*     width: 1%; */
+/*     기존 .vscomp-wrapper의 border-radius를 input-group에 맞게 재정의 */
+/*     border-top-left-radius: 0 !important; */
+/*     border-bottom-left-radius: 0 !important; */
+/*     border-top-right-radius: 0.375rem !important; */
+/*     border-bottom-right-radius: 0.375rem !important; */
+/* } */
+
+/* /* input-group-text의 왼쪽 라운딩 유지 (이전 답변에서 제공했던 부분 유지) */ */
+/* .input-group > .input-group-text:first-child { */
+/*     border-top-left-radius: 0.375rem; */
+/*     border-bottom-left-radius: 0.375rem; */
+/* } */
+
+/* /* 선택된 항목 표시 부분 (vscomp-selected-options-wrapper) */ */
+/* .vscomp-wrapper .vscomp-selected-options-wrapper { */
+/*     padding-left: 0.75rem; 왼쪽 패딩 조정 */
+/*     padding-right: 0.75rem; 오른쪽 패딩 조정 (화살표 공간 고려) */
+/*     display: flex; 항목 정렬을 위해 flex 사용 */
+/*     align-items: center; */
+/* } */
+
+/* /* 선택된 항목 텍스트 (vscomp-selected-option) */ */
+/* .vscomp-wrapper .vscomp-selected-option { */
+/*     font-size: 1rem; 기본 텍스트 크기 */
+/*     color: #212529; 텍스트 색상 */
+/*     line-height: 1.5; 줄 높이 */
+/* } */
+
+/* 1. Virtual Select Wrapper의 기본 스타일 */
+.vscomp-wrapper {
+    display: inline-flex; /* 내부 요소 정렬을 위해 flex 사용 */
+    align-items: center; /* 세로 중앙 정렬 */
+    width: 100%; /* 부모의 너비를 채우도록 */
+
+    /* 기본 테두리: Bootstrap form-control과 유사하게 1px 또는 원하는 두께 */
+    border: 2px solid #dee2e6; /* Bootstrap 기본 border 색상 */
+    border-radius: 0.375rem; /* Bootstrap 기본 border-radius */
+
+    /* 기본 그림자 및 아웃라인 제거 (포커스 시 별도 적용) */
+    box-shadow: none;
+    outline: none;
+
+    /* vscomp-ele의 max-width 제한 덮어쓰기 (이전 문제 해결) */
+    max-width: 100% !important; /* 부모 너비에 맞춤 */
+}
+
+/* 2. input-group 내에서의 Virtual Select 스타일 조정 */
+.input-group > .vscomp-wrapper {
+    flex: 1 1 auto; /* Bootstrap input-group에서 공간을 유연하게 차지하도록 */
+    width: 1%; /* flex 아이템으로서 제대로 작동하도록 */
+    /* input-group-text에 맞게 왼쪽 모서리 둥글기 제거 */
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    /* 오른쪽 모서리 둥글기는 유지 */
+    border-top-right-radius: 0.375rem !important;
+    border-bottom-right-radius: 0.375rem !important;
+}
+
+/* input-group-text의 왼쪽 라운딩 유지 (기존 Bootstrap 스타일) */
+.input-group > .input-group-text:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+/* 3. 포커스 시 스타일 (두껍고 파란색 테두리 효과) */
+.vscomp-wrapper.vscomp-focused {
+    border-color: #696cff; /* 포커스 시 테두리 색상 (원하시는 파란색 계열) */
+    outline: 0; /* 브라우저 기본 포커스 아웃라인 제거 */
+
+    /* 실제 테두리 두께는 .vscomp-wrapper에서 조절하고, 여기서는 추가적인 그림자 효과를 줍니다. */
+    /* box-shadow의 네 번째 값 (spread-radius)으로 아웃라인 두께를 조절합니다. */
+    /* '상품명' 입력 필드처럼 더 두꺼운 파란색 아웃라인을 원한다면 0.3rem~0.4rem 정도로 조정 */
+    box-shadow: 0 0 0 0.25rem rgba(105, 108, 255, 0.25); /* #696cff 색상의 투명한 그림자 */
+    /* 그림자 색상의 투명도(마지막 0.25)를 조절하여 진하기 변경 가능 */
+}
+
+/* 4. Virtual Select 내부 요소 스타일 조정 */
+
+/* 선택된 옵션이 표시되는 영역 */
+.vscomp-wrapper .vscomp-selected-options-wrapper {
+    flex: 1; /* 남은 공간을 차지하도록 */
+    min-height: calc(1.5em + 0.75rem * 2); /* Bootstrap form-control 높이와 유사하게 (line-height + padding) */
+    padding: 0.375rem 0.75rem; /* Bootstrap form-control과 유사한 패딩 */
+    display: flex; /* 내부 요소 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    overflow: hidden; /* 텍스트가 넘칠 경우 숨김 */
+}
+
+/* 선택된 옵션 텍스트 */
+.vscomp-wrapper .vscomp-selected-option {
+    font-size: 1rem; /* Bootstrap 기본 폰트 크기 */
+    color: #212529; /* Bootstrap 기본 텍스트 색상 */
+    line-height: 1.5; /* Bootstrap 기본 줄 높이 */
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    overflow: hidden; /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트 ... 처리 */
+}
+
+/* 검색 입력 필드 (드롭다운 열렸을 때) */
+.vscomp-wrapper .vscomp-search-input {
+    width: 100%; /* 부모의 너비를 가득 채움 */
+    border: none; /* 자체 테두리 제거 */
+    outline: none; /* 포커스 시 기본 outline 제거 */
+    box-shadow: none; /* 자체 그림자 제거 */
+    padding: 0.375rem 0.75rem; /* Bootstrap form-control과 유사한 패딩 */
+    line-height: 1.5; /* 줄 높이 */
+    color: #212529; /* 텍스트 색상 */
+    background-color: transparent; /* 배경 투명하게 */
+    font-size: 1rem; /* 폰트 크기 */
+    /* 플레이스홀더 텍스트 색상 */
+    &::placeholder {
+        color: #6c7577; /* Bootstrap 기본 placeholder 색상 */
+        opacity: 1; /* 일부 브라우저에서 투명도 적용 */
+    }
+}
+
+/* 드롭다운 화살표 버튼 */
+.vscomp-wrapper .vscomp-arrow-btn {
+    width: 2.25rem; /* 버튼 영역 너비 조정 */
+    height: 100%; /* 높이 채우기 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #6c757d; /* 아이콘 색상 */
+    font-size: 0.9rem; /* 아이콘 크기 */
+    cursor: pointer;
+    background-color: transparent; /* 배경 투명 */
+    border: none; /* 테두리 제거 */
+}
+
+/* Clear 버튼 (선택 해제 X 아이콘) */
+.vscomp-wrapper .vscomp-clear-btn {
+    width: 2.25rem; /* 버튼 영역 너비 조정 */
+    height: 100%; /* 높이 채우기 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #6c757d; /* 아이콘 색상 */
+    font-size: 0.9rem; /* 아이콘 크기 */
+    cursor: pointer;
+    background-color: transparent; /* 배경 투명 */
+    border: none; /* 테두리 제거 */
+}
+
+/* 드롭다운 목록 컨테이너 (vscomp-options-container) */
+.vscomp-options-container {
+    border-radius: 0.375rem; /* 드롭다운 목록도 둥글게 */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* 드롭다운 그림자 */
+    border: 1px solid rgba(0, 0, 0, 0.15); /* 드롭다운 테두리 */
+}
+
+/* 드롭다운 목록 내의 각 옵션 항목 */
+.vscomp-option-item {
+    padding: 0.375rem 1.25rem; /* 옵션 항목 패딩 */
+    font-size: 1rem;
+    color: #212529;
+}
+
+/* 드롭다운 목록에서 hover 시 배경색 */
+.vscomp-option-item.active,
+.vscomp-option-item:hover {
+    background-color: #e9ecef; /* Bootstrap hover 색상 */
+}
+
+/* 새로운 값 추가 옵션 (allowNew: true 일 때) */
+.vscomp-new-option-item {
+    font-style: italic; /* 이탤릭체로 구분 */
+    color: #6c757d;
+}
