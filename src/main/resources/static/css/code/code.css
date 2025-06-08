@@ -20,11 +20,33 @@
 	display: flex;
     flex-direction: row;
     justify-content: space-between;
+	align-items: center;
 	padding-bottom: 20px;
 }
 
+.searchIp {
+	padding: 5px;
+	width: 250px;
+	height: 35px;
+}
+
 .btn-area {
-	
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+	height: 35px;
+}
+
+.add-btn {
+	height: 100%;
+}
+
+.save-btn {
+	height: 100%;
+}
+
+.delete-btn {
+	height: 100%;
 }
 
 .table-area {

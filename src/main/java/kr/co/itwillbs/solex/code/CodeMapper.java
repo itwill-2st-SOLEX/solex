@@ -14,7 +14,8 @@ public interface CodeMapper {
             @Param("perPage") int perPage,
             @Param("sort") String sort,
             @Param("dir") String dir,
-            @Param("codYn") String codYn);
+            @Param("codYn") String codYn,
+            @Param("keyword") String keyword);
 
 	int selectTotalCount(@Param("codYn") String codYn);
 
@@ -29,7 +30,8 @@ public interface CodeMapper {
             @Param("offset") int offset,
             @Param("limit") int limit,
             @Param("sortColumn") String sortColumn,
-            @Param("sortDirection") String sortDirection);
+            @Param("sortDirection") String sortDirection,
+            @Param("keyword") String keyword);
 
 	int selectDetailCodeTotalCount(@Param("codId") String codId);
 

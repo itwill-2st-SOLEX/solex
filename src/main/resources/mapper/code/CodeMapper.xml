@@ -18,6 +18,12 @@
 					<if test="codYn != null and codYn != ''">
 						cod_yn = #{codYn}
 					</if>
+					<if test="keyword != null and keyword != ''">
+						AND (
+							COD_ID LIKE '%' || #{keyword} || '%'
+							OR COD_NM LIKE '%' || #{keyword} || '%'
+						)
+					</if>
 				</where>
 				ORDER BY
 				<choose>
@@ -85,6 +91,12 @@
 		SELECT	DET_ID, DET_NM, DET_YN, DET_SORT, COD_ID
 		FROM	CODE_DETAIL
 		WHERE	COD_ID = #{codId}
+		<if test="keyword != null and keyword != ''">
+			AND (
+				DET_ID LIKE '%' || #{keyword} || '%'
+				OR DET_NM LIKE '%' || #{keyword} || '%'
+			)
+		</if>
 		<choose>
 			<when test="sortColumn != null and sortDirection != null">
 				ORDER BY

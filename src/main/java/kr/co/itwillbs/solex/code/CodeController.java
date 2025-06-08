@@ -36,12 +36,13 @@ public class CodeController {
 	    @RequestParam(name = "perPage") int perPage,
 	    @RequestParam(name = "sortColumn", defaultValue = "cod_id", required = false) String sortColumn,
 	    @RequestParam(name = "sortDirection", defaultValue = "asc", required = false) String sortDirection,
-	    @RequestParam(name = "cod_yn", defaultValue = "", required = false) String cod_yn
+	    @RequestParam(name = "cod_yn", defaultValue = "", required = false) String cod_yn,
+	    @RequestParam(name = "keyword", defaultValue = "", required = false) String keyword
 	) {
 		
 	    int offset = (page - 1) * perPage;
 	    
-	    List<Map<String, Object>> rows = codeService.getPagedCodeList(offset, perPage, sortColumn, sortDirection, cod_yn);
+	    List<Map<String, Object>> rows = codeService.getPagedCodeList(offset, perPage, sortColumn, sortDirection, cod_yn, keyword);
 	    if (rows == null) rows = new ArrayList<>();	// 빈 배열 보장
 	    
 	    int totalCount = codeService.getTotalCount(cod_yn);
@@ -94,11 +95,12 @@ public class CodeController {
 	    @RequestParam(name = "page", defaultValue = "1") int page,
 	    @RequestParam(name = "perPage") int perPage,
 	    @RequestParam(name = "sortColumn", defaultValue = "DET_SORT", required = false) String sortColumn,
-	    @RequestParam(name = "sortDirection", defaultValue = "asc", required = false) String sortDirection
+	    @RequestParam(name = "sortDirection", defaultValue = "asc", required = false) String sortDirection,
+	    @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword
 	) {
 	    int offset = (page - 1) * perPage;
 
-	    List<Map<String, Object>> rows = codeService.getPagedDetailCodeList(cod_id, offset, perPage, sortColumn, sortDirection);
+	    List<Map<String, Object>> rows = codeService.getPagedDetailCodeList(cod_id, offset, perPage, sortColumn, sortDirection, keyword);
 	    if (rows == null) rows = new ArrayList<>();
 
 	    int totalCount = codeService.getTotalDetailCodeCount(cod_id);

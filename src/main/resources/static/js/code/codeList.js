@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const dd = String(date.getDate()).padStart(2, '0');
 	const hh = String(date.getHours()).padStart(2, '0');
 	const mm = String(date.getMinutes()).padStart(2, '0');
-	return `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
+	return `${yyyy}-${MM}-${dd}`;
 	}
 	
 	// 날짜 변환 함수를 전역함수로 등록
@@ -31,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
 				readData: {
 					url: '/SOLEX/code/data',
 					method: 'GET',
-					initParams: { cod_yn: '' },
+					initParams: {
+						cod_yn: '',
+						keyword: ''
+					},
 					responseHandler: function(res) {
 				    	return {
 							data: res.data || [],  // 배열 강제 지정
@@ -67,7 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			      ]
 			    }
 			},
-			{ header: '등록일시', name: 'COD_REG_TIME' }
+			{
+			  header: '등록일시',
+			  name: 'COD_REG_TIME',
+			  formatter: ({ value }) => window.formatDateTime(value)
+			}
 		]
 	});
 	
@@ -82,5 +89,23 @@ document.addEventListener('DOMContentLoaded', () => {
 			window.loadDetailCode(rowData.COD_ID);
 		}
 	});
+	
+	// 검색기능
+	document.getElementById('code-search').addEventListener('keypress', e => {
+		if (e.key === 'Enter') {
+			triggerCodeSearch();
+		}
+	});
+
+	function triggerCodeSearch() {
+		const keyword = document.getElementById('code-search').value.trim();
+		
+		code_grid.resetData([]);
+
+		code_grid.readData(1, {
+			cod_yn: '',        // 다른 조건 유지
+			keyword: keyword   // 검색 키워드 전달
+		});
+	}
 
 });

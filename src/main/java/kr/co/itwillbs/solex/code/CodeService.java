@@ -18,8 +18,9 @@ public class CodeService {
 										  @Param("perPage") int perPage,
 										  @Param("sort") String sort,
 										  @Param("dir") String dir,
-										  @Param("codYn") String codYn) {
-	    return codeMapper.selectPagedCodeList(offset, perPage, sort, dir, codYn);
+										  @Param("codYn") String codYn,
+										  @Param("keyword") String keyword) {
+	    return codeMapper.selectPagedCodeList(offset, perPage, sort, dir, codYn, keyword);
 	}
 	public int getTotalCount(String codYn) {
 	    return codeMapper.selectTotalCount(codYn);
@@ -36,8 +37,8 @@ public class CodeService {
     }
 	
 	// 상세공통코드 무한스크롤
-	public List<Map<String, Object>> getPagedDetailCodeList(String codId, int offset, int limit, String sortColumn, String sortDirection) {
-	    return codeMapper.selectPagedDetailCodeList(codId, offset, limit, sortColumn, sortDirection);
+	public List<Map<String, Object>> getPagedDetailCodeList(String codId, int offset, int limit, String sortColumn, String sortDirection, String keyword) {
+	    return codeMapper.selectPagedDetailCodeList(codId, offset, limit, sortColumn, sortDirection, keyword);
 	}
 	public int getTotalDetailCodeCount(String codId) {
 	    return codeMapper.selectDetailCodeTotalCount(codId);
