@@ -18,4 +18,8 @@ public interface ApprovalMapper {
 	// 기안서 등록
 	void registerDocument(Map<String, Object> map);
 	void registerLeaveDoc(Map<String, Object> map);
+	void registerbusinessOutworkDoc(Map<String, Object> map);
+	void resignationDoc(Map<String, Object> map);
+	// 기안서 상세조회
+	Map<String, Object> selectDetailDoc(String doc_id);
 }

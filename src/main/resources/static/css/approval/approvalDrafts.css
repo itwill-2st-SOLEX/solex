@@ -34,7 +34,8 @@
 #promotion-team,
 #transfer-team,
 #curr-ranks,
-#dept-teams {
+#dept-teams,
+#job-posit {
 	width: 310px;
 }
 .doc-type01,
@@ -53,7 +54,8 @@
 #curr-team,
 #promotion-posi,
 #transfer-team,
-#dept-teams {
+#dept-teams,
+#last-day {
 	margin-left: 70px;
 }
 .approval-line{

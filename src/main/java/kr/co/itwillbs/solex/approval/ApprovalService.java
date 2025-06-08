@@ -33,6 +33,18 @@ public class ApprovalService {
 	public void registerDarafts(Map<String, Object> map) {
 		mapper.registerDocument(map);
 		System.out.println("생성된 doc_id = " + map.get("doc_id"));
-		mapper.registerLeaveDoc(map);
+		if(map.get("doc_type").equals("doc_type_01")) {
+			mapper.registerLeaveDoc(map);
+		} else if(map.get("doc_type").equals("doc_type_02")) {
+			mapper.registerbusinessOutworkDoc(map);
+		} else if(map.get("doc_type").equals("doc_type_03")) {
+			mapper.resignationDoc(map);
+		}
 	}
+	
+	// 기안서 상세조회
+	public Map<String, Object> selectDetailDoc(String doc_id) {
+		return mapper.selectDetailDoc(doc_id);
+	}
+	
 }

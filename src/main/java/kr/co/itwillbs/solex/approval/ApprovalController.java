@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -34,6 +35,7 @@ public class ApprovalController {
 	@GetMapping("/api/drafts")
     public List<Map<String, Object>> getDraftList(@RequestParam("page") int page, @RequestParam("size") int size) {
 		int offset = page * size;
+		System.out.println("page:" + page + "size: " + size);
         return service.getDraftList(offset, size);
     }
 	
@@ -50,6 +52,13 @@ public class ApprovalController {
 	public void registerDarafts(@RequestBody Map<String, Object> map) {
 		System.out.println("ASDASDSA" + map);
 		service.registerDarafts(map);
+	}
+	
+	// 기안서 상세조회 
+	@ResponseBody
+	@GetMapping("/select/detail/{doc_id}")
+	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id) {
+		return service.selectDetailDoc(doc_id);
 	}
 	
 }

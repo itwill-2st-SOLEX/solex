@@ -15,11 +15,15 @@
 <!--	올린 기안서 목록-->
 	<select id="selectDraftList" resultType="map">
 		SELECT doc_id,
-		       doc_type,
-		       doc_sts,
+		       c.det_nm AS doc_type,
+		       s.det_nm AS doc_sts,
 		       TO_CHAR(doc_reg_time, 'YYYY-MM-DD HH24:MI:SS') AS doc_reg_time
-	  	  FROM document
-         ORDER BY doc_reg_time DESC
+		  FROM document d
+		  LEFT JOIN code_detail c
+		    ON d.doc_type = c.det_id
+		  LEFT JOIN code_detail s 
+		    ON d.doc_sts  = s.det_id
+		 ORDER BY doc_reg_time DESC
         OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
   	</select>
   
@@ -77,4 +81,43 @@
 		          #{lea_con}
    		)
 	</insert>
+<!--	출장/외근 등록-->
+	<insert id="registerbusinessOutworkDoc" parameterType="map">
+		INSERT INTO business_outwork_doc (doc_id,
+									 	  bus_type,
+							           	  bus_start_time,
+							          	  bus_end_time,
+							           	  bus_cost,
+							           	  bus_con
+    	) VALUES (#{doc_id},
+    			  #{bus_type},
+		          TO_DATE(#{bus_start_time}, 'YYYY-MM-DD HH24:MI'),
+		          TO_DATE(#{bus_end_time}, 'YYYY-MM-DD HH24:MI'),
+		          #{bus_cost},
+		          #{bus_con}
+   		)
+	</insert>
+<!--	사직서 등록-->
+	<insert id="resignationDoc" parameterType="map">
+		INSERT INTO resignation_doc (doc_id,
+						           	 res_start_date,
+						          	 res_con
+    	) VALUES (#{doc_id},
+		          TO_DATE(#{res_start_date}, 'YYYY-MM-DD'),
+		          #{res_con}
+   		)
+	</insert>
+	
+<!--	기안서 상세조회-->
+	<select id="selectDetailDoc" resultType="map">
+		SELECT *
+		  FROM document d
+		  LEFT JOIN resignation_doc r
+		    ON d.doc_id = r.doc_id
+		  LEFT JOIN leave_doc l
+		   ON d.doc_id = l.doc_id
+		  LEFT JOIN business_outwork_doc b
+		    ON d.doc_id = b.doc_id
+		 WHERE d.doc_id = #{doc_id}
+	</select>
 </mapper>
