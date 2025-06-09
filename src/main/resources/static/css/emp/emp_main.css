@@ -1,0 +1,69 @@
+ body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+	label{
+		margin: 0% 1% 0% 0% !important;
+	}
+	emp_hire{
+		width: 30% !important;
+	}
+	
+	#email{
+		margin: 0% 1% 0% 0% !important;
+	}
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .checkbox-container {
+      flex: 1;
+    }
+
+    input[type="text"] {
+      padding: 4px 8px;
+      border: 1px solid #aaa;
+    }
+
+    button {
+      padding: 6px 12px;
+      border: 1px solid #888;
+      background-color: #f8f8f8;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e0e0e0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+    
+    .form-select{
+    	width: 53% !important;
+		margin: 1.5% !important;    
+    }
+    
+    .form-control d-inline-block w-25{
+    	width: 20% !important;
+    }
+    
+    .inline-container span {
+        display: inline-block !important;
+        margin-right: 10px !important;
+    }

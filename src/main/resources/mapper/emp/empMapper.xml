@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.Emp.EmpMapper">
+
+<!-- 인사등록 -->
+  <insert id="insertEmp" parameterType="map">
+    INSERT INTO employee (
+        emp_id, emp_num, emp_hire, emp_nm, emp_gd,
+        emp_birth, emp_pw, emp_phone, emp_email, emp_add,
+        emp_da, emp_sts, emp_pc, emp_cat_cd, emp_pos_cd,
+        emp_dep_cd, emp_team_cd
+    ) VALUES (
+        emp_seq.NEXTVAL,
+        #{emp_num, jdbcType=VARCHAR},
+        #{emp_hire, jdbcType=DATE},     #{emp_nm, jdbcType=VARCHAR},
+        #{emp_gd, jdbcType=VARCHAR},
+        #{emp_birth, jdbcType=DATE},    #{emp_pw, jdbcType=VARCHAR},
+        #{emp_phone, jdbcType=VARCHAR},
+        #{emp_email, jdbcType=VARCHAR},
+        #{emp_add, jdbcType=VARCHAR},
+        #{emp_da, jdbcType=VARCHAR},
+        'sts_01',
+        #{emp_pc, jdbcType=NUMERIC},    #{emp_cat_cd, jdbcType=VARCHAR},
+        #{emp_pos_cd, jdbcType=VARCHAR},
+        #{emp_dep_cd, jdbcType=VARCHAR},
+        #{emp_team_cd, jdbcType=VARCHAR}
+    )
+</insert>
+<!--   인사목록 - 재직상태 Y만 표시 -->
+	<select id="selectEmp" resultType="map">
+		SELECT *
+		FROM employee
+		WHERE emp_sts = 'Y'
+		<if test="searchKeyword != null and searchKeyword != ''">
+			AND
+			<choose>
+				<when test="searchType.equals('emp_nm')">
+					 emp_nm LIKE '%' || #{searchKeyword} || '%'
+				</when>
+				<when test="searchType.equals('emp_num')">
+					 emp_num LIKE '%' || #{searchKeyword} || '%'
+				</when>
+			
+			</choose>
+		</if>
+	</select>
+	
+<!-- 	인사목록 - 퇴사자 포함  -->
+	<select id="selectAllEmp" resultType="map">
+		SELECT *
+		FROM employee
+		WHERE
+		<if test="searchKeyword != null and searchKeyword != ''">
+			<choose>
+				<when test="searchType.equals('emp_nm')">
+					 emp_nm LIKE '%' || #{searchKeyword} || '%'
+				</when>
+				<when test="searchType.equals('emp_num')">
+					 emp_num LIKE '%' || #{searchKeyword} || '%'
+				</when>
+			
+			</choose>
+		</if>
+	</select>
+	
+	
+	<resultMap type="map" id="empResultMap">
+		<id property="emp_id" column="emp_id" />
+		<result property="empNum" column="emp_num" />
+		<result property="empNm" column="emp_nm" />
+		<result property="empPhone" column="emp_phone" />
+		<result property="empHire" column="emp_hire" />
+		<result property="empSts" column="emp_sts" />
+	</resultMap>
+	
+	<resultMap type="map" id="codeDetailMap">
+		<result property="empCatCd" column="emp_cat_cd" />
+		<result property="empPosCd" column="emp_pos_cd" />
+		<result property="empDepCd" column="emp_dep_cd" />
+		<result property="empTeamCd" column="emp_team_cd" />
+		<result property="empStsCd" column="emp_sts_cd" />
+	</resultMap>
+	
+	<select id="findAllItems" resultMap="empResultMap">
+		SELECT emp_num, emp_nm, emp_phone, emp_hire
+		FROM employee
+	</select>
+	
+	<select id="findAllCodeDetails" resultMap="codeDetailMap">
+		SELECT emp_cat_cd, emp_pos_cd, emp_dep_cd, emp_team_cd, emp_sts
+		FROM employee
+	</select>
+
+	<select id="getDepCode" resultMap="empResultMap">
+		SELECT det_id, det_nm
+		  FROM code_detail
+		 WHERE cod_id IN ('cat' ,'dep', 'pos', 'team')
+		  OR cod_id LIKE 'dep%'
+	</select>
+	
+</mapper>
