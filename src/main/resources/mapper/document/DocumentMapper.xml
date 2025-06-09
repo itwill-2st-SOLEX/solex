@@ -75,15 +75,15 @@
 		<selectKey keyProperty="doc_id" resultType="int" order="BEFORE">
 		    SELECT doc_seq.NEXTVAL FROM dual
 		</selectKey>
-		INSERT INTO document (doc_id,
-							  doc_type,
-					          emp_id,
-					          doc_reg_time
-    	) VALUES (#{doc_id},
-  				  #{doc_type},
-		          #{emp_id},
-		          SYSDATE
-    	)
+			INSERT INTO document (doc_id,
+								  doc_type,
+						          emp_id,
+						          doc_reg_time
+	    	) VALUES (#{doc_id},
+	  				  #{doc_type},
+			          #{emp_id},
+			          SYSDATE
+	    	)
 	</insert>
 	
 <!-- 	반연차 등록 -->

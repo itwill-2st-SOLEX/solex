@@ -14,19 +14,13 @@
 	</select>
 	
 	<!-- 상위 결재자 후보 목록 조회 -->
-	<select id="selectApprovers" resultType="map">
-		SELECT e.emp_id,
-	         e.emp_pos_cd,
-	         cd.det_sort AS pos_sort
-		FROM employee e
-		JOIN code_detail cd
-			ON e.emp_pos_cd = cd.det_id
-		WHERE cd.det_sort &lt; #{docEmployeePosSort}
-		    AND NVL(e.emp_cat_cd, 'x') = NVL(#{catCd}, 'x')
-		    AND NVL(e.emp_dep_cd, 'x') = NVL(#{depCd}, 'x')
-		    AND NVL(e.emp_team_cd, 'x') = NVL(#{teamCd}, 'x')
-		ORDER BY cd.det_sort ASC
-</select>
+	<select id="selectUpperPositions" resultType="map">
+		SELECT det_id AS pos_cd, det_sort AS pos_sort
+		FROM code_detail
+		WHERE cod_id = 'pos'
+		AND det_sort &lt; #{docEmployeePosSort}
+		ORDER BY det_sort ASC
+	</select>
 	
 	
 	

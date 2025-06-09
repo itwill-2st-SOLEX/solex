@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface EmployeeMapper {
 
 	Map<String, Object> selectJoinCodeDetail(long loginEmpId);
 
-	List<Map<String, Object>> selectApprovers(String catCd, String depCd, String teamCd, int docEmployeePosSort);
+	List<Map<String, Object>> selectUpperPositions(
+				int docEmployeePosSort
+			);
 
 }
