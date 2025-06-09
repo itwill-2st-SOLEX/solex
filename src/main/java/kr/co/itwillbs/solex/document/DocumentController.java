@@ -6,13 +6,13 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 
 @Controller
@@ -51,7 +51,11 @@ public class DocumentController {
 	@PostMapping("register/drafts")
 	public void registerDarafts(@RequestBody Map<String, Object> map) {
 		System.out.println("ASDASDSA" + map);
-		service.registerDarafts(map);
+		
+		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
+    	long loginEmpId = 1L;
+    	
+		service.registerDarafts(map, loginEmpId);
 	}
 	
 	// 기안서 상세조회 

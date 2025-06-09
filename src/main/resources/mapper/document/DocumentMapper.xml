@@ -55,12 +55,10 @@
 		<selectKey keyProperty="doc_id" resultType="int" order="BEFORE">
 		    SELECT doc_seq.NEXTVAL FROM dual
 		</selectKey>
-		INSERT INTO document (doc_id,
-							  doc_type,
+		INSERT INTO document (doc_type,
 					          emp_id,
 					          doc_reg_time
-    	) VALUES (#{doc_id},
-    		      #{doc_type},
+    	) VALUES (#{doc_type},
 		          #{emp_id},
 		          SYSDATE
     	)
@@ -117,10 +115,13 @@
 	           TO_CHAR(l.lea_end_date, 'YYYY-MM-DD') AS lea_end_date,
 	           l.lea_tt,
 	           l.lea_con
-		  FROM document d
-		  LEFT JOIN leave_doc l
-		   ON d.doc_id = l.doc_id
-		 WHERE d.doc_id = #{doc_id}
+	           al.*
+		FROM document d
+		LEFT JOIN leave_doc l
+			ON d.doc_id = l.doc_id
+		LEFT JOIN approval_line al
+			ON d.doc_id = al.doc_id
+		WHERE d.doc_id = #{doc_id}
 	</select>
 	
 <!--	출장/외근 기안서 상세조회-->	
@@ -132,20 +133,32 @@
 		       b.bus_type,
 		       TO_CHAR(b.bus_cost, 'FM999,999,999') AS bus_cost,
 		       b.bus_con
-		  FROM document d
-		  LEFT JOIN business_outwork_doc b
-		    ON d.doc_id = b.doc_id
-		 WHERE d.doc_id = #{doc_id}
+		FROM document d
+		LEFT JOIN business_outwork_doc b
+			ON d.doc_id = b.doc_id
+		LEFT JOIN approval_line al
+			ON d.doc_id = al.doc_id
+		WHERE d.doc_id = #{doc_id}  
 	</select>
 	
 <!--	사직서 기안서 상세조회-->	
 	<select id="selectDetailResignation" resultType="map">
 		SELECT d.emp_id,
 			   TO_CHAR(r.res_start_date, 'YYYY-MM-DD') AS res_start_date,
-		       r.res_con
-		  FROM document d
-		  LEFT JOIN resignation_doc r
-		    ON d.doc_id = r.doc_id
-		 WHERE d.doc_id = #{doc_id}
+		       r.res_con,
+		       al.apl_emp_pos
+		FROM document d
+		LEFT JOIN resignation_doc r
+			ON d.doc_id = r.doc_id
+		LEFT JOIN approval_line al
+			ON d.doc_id = al.doc_id
+		WHERE d.doc_id = #{doc_id}  
 	</select>
+	
+	<select id="findSteps" resultType="int">
+		SELECT upper_steps
+		FROM doc_type_rule
+		WHERE doc_type = #{docType}
+	</select>
+	
 </mapper>
