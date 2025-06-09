@@ -21,7 +21,7 @@
 		FROM employee e
 		JOIN code_detail cd
 			ON e.emp_pos_cd = cd.det_id
-		WHERE cd.det_sort &lt; #{writerPosSort}
+		WHERE cd.det_sort &lt; #{docEmployeePosSort}
 		    AND NVL(e.emp_cat_cd, 'x') = NVL(#{catCd}, 'x')
 		    AND NVL(e.emp_dep_cd, 'x') = NVL(#{depCd}, 'x')
 		    AND NVL(e.emp_team_cd, 'x') = NVL(#{teamCd}, 'x')

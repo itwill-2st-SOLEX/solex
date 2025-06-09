@@ -28,5 +28,5 @@ public interface DocumentMapper {
 	Map<String, Object> selectDetailOutwork(String doc_id);
 	Map<String, Object> selectDetailResignation(String doc_id);
 	
-	int findSteps(String docType);
+	Integer findSteps(String docType);
 }
