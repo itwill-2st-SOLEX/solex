@@ -491,7 +491,7 @@ async function scrollMoreClient(isInitialLoad = false) {
         if (currentSearchTerm) { // 검색어가 있을 경우 추가
             params.append('search_term', currentSearchTerm);
         }
-
+		
         // 백엔드 API 엔드포인트 호출 (새로 정의한 /clients/data 경로)
         const response = await fetch(`/solex/clients/data?${params.toString()}`);
 

@@ -35,16 +35,42 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Log4j2
-@Controller
+@RestController
 @RequestMapping("/orders")
-public class OrderController {
+public class OrderRestController {
 
 	@Autowired
 	OrderService orderService;
 	
-	@GetMapping
-	public String getAllList(){
-        return "sales/orderList"; 
+	@GetMapping("/gridData") // JavaScript에서 이 URL로 요청을 보낼 것임
+	@ResponseBody
+	public List<Map<String, Object>> getPagedGridData(
+        @RequestParam(name = "page", defaultValue = "0") int page, // <-- name 속성 추가
+        @RequestParam(name = "pageSize", defaultValue = "20") int pageSize, // <-- name 속성 추가
+        @RequestParam(name = "searchKeyword", required = false) String searchKeyword // <-- name 속성 추가 (있다면)
+    ) throws Exception {
+        log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}, searchKeyword={}", page, pageSize, searchKeyword);
+        List<Map<String, Object>> list = orderService.getPagedGridDataAsMap(page, pageSize, searchKeyword);
+        log.info("API - 그리드 데이터 조회 결과: list={}",list);
+        
+        return list; 
+    }
+	
+	@GetMapping("/clients")
+	public List<Map<String, Object>> getSearchClientList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
+            @RequestParam(name = "searchKeyword", required = false) String searchKeyword
+    ) throws Exception {
+        log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}, searchKeyword={}", page, pageSize, searchKeyword);
+        
+        // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
+        int emp_id = 200;
+        List<Map<String, Object>> list = orderService.getSearchClientList(page, pageSize, searchKeyword, emp_id);
+        
+        log.info("API - 그리드 데이터 조회 결과 건수: {}", list.size());
+        log.info("API - 그리드 데이터 조회 결과 건수: {}", list);
+        return list;
     }
 	
 	

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.sales.OrderMapper">
+  <select id="selectPagedOrderDataAsMap" parameterType="Map" resultType="Map">
+    SELECT
+        prd.prd_cd,
+        prd.prd_nm,
+        cli.cli_nm,
+        cd.det_nm,
+        ord.ord_reg_date,
+        odd.odd_cnt,
+        NVL(odd.odd_add, '') || ' ' || NVL(odd.odd_da, '') AS ODD_ADDRESS,
+        TO_CHAR(odd.odd_mod_date, 'YYYY-MM-DD') AS ORD_REG_DATE
+    FROM suju_order_detail odd
+    JOIN suju_order ord ON odd.ord_id = ord.ord_id
+    JOIN client cli ON ord.cli_id = cli.cli_id
+    JOIN product prd ON odd.prd_cd = prd.prd_cd
+    JOIN code_detail cd ON odd.odd_sts = cd.det_id
+    <if test="searchKeyword != null and searchKeyword != ''">
+        AND (
+            cli.cli_nm LIKE '%' || #{searchKeyword} || '%' OR  -- 거래처명 검색
+            prd.prd_nm LIKE '%' || #{searchKeyword} || '%' OR  -- 상품명 검색
+            prd.prd_cd LIKE '%' || #{searchKeyword} || '%'     -- 상품코드도 검색에 포함
+        )
+    </if>
+    ORDER BY cd.det_sort asc
+    OFFSET #{offset} ROWS
+    FETCH NEXT #{limit} ROWS ONLY
+</select>
+
+
+<select id="getSearchClientList" parameterType="Map" resultType="Map">
+    SELECT
+    	cli_nm
+    FROM client
+    <where>
+      <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
+      <if test="searchKeyword != null and searchKeyword != ''">
+        AND LOWER(cli_nm) LIKE '%' || #{searchKeyword} || '%'
+      </if>
+    </where>
+    ORDER BY cli_nm
+    OFFSET #{offset} ROWS
+    FETCH NEXT #{limit} ROWS ONLY
+</select>
+
+
+  
+  <select id="countClientsByEmployeeId" resultType="int">
+  	SELECT count(*)
+  	FROM client
+  	WHERE emp_id = #{emp_id}
+  </select>
+  
+  <select id="selectClientsByEmployeeId" resultType="Map">
+  	SELECT client_nm
+  	FROM client
+  	WHERE emp_id = #{emp_id}
+  	ORDER BY client_nm 
+  </select>
+  
+  <select id="selectTop5PopularClients" resultType="Map">
+    SELECT
+    	cli_nm
+    FROM (
+        SELECT
+            cli.cli_nm,
+            COUNT(suju.cli_id) AS order_count
+        FROM client cli 
+        JOIN suju_order suju    
+        ON cli.cli_id = suju.cli_id
+        GROUP BY
+            cli.cli_nm
+        ORDER BY order_count DESC
+    )
+    WHERE ROWNUM <![CDATA[ <= ]]> 5
+   </select>
+  
+	
+  
+  
+  
+</mapper>
