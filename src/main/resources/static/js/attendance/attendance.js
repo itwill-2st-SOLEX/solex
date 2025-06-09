@@ -28,7 +28,7 @@ const grid = new tui.Grid({
         { header: '사원 직위', name: 'dep_position', sortable: true },
         { header: '출근 시간', name: 'att_in_time', width: 200, align: 'center',  sortable: true },
         { header: '퇴근 시간', name: 'att_out_time', width: 200, align: 'center',  sortable: true },
-        { header: '상태', name: 'att_sts', align: 'center',  sortable: true },
+        { header: '상태', name: 'det_nm', align: 'center',  sortable: true },
         { header: '날짜', name: 'att_day', width: 200, align: 'center',  sortable: true }
     ]
 });
@@ -88,7 +88,7 @@ function updateMonthYearDisplay() {
 async function attendanceLists(year, month, requestType, keyword = '') {
 
 	try {
-		let url = `/SOLEX/attendance/data?year=${year}&month=${month}&resultType=${requestType}`;
+		let url = `/SOLEX/attendance/api/data?year=${year}&month=${month}&resultType=${requestType}`;
 
 	    if (keyword) {
 	        url += `&keyword=${encodeURIComponent(keyword)}`;
@@ -137,13 +137,14 @@ function displayMyAttendance(data) {
         grid.setRows([]); // 빈 배열을 설정하여 기존 데이터를 모두 지우고 emptyMessage를 표시
         return; 
     }
+	console.log('내 출퇴근근황의 data' + JSON.stringify(data));
 	
 	gridData = data.map((at, idx) => ({
 		emp_num: at.EMP_NUM,
 	    dep_position: at.DEP_POSITION,
 	    att_in_time: at.ATT_IN_TIME,
 	    att_out_time: at.ATT_OUT_TIME,
-	    att_sts: at.ATT_STS,
+	    det_nm: at.DET_NM,
 	    att_day: at.ATT_DAY
 	}));
 	console.log('내 출퇴근근황의 gridData' + JSON.stringify(gridData));
