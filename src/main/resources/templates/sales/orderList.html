@@ -58,72 +58,91 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body big-box">
-            <div class="row mb-4">
+            <div class="row mb-5">
                  <div class="col">
 			        <label for="cli_nm_virtual_select" class="form-label">거래처명 <span style="color:red">*</span></label>
 			        <div class="input-group">
-			            <select id="cli_nm_virtual_select" name="cli_nm" placeholder="거래처명을 선택하거나 검색하세요...">
+			            <select id="cli_nm_virtual_select" name="cli_nm" placeholder="거래처명을 선택하거나 검색하세요.">
 			            </select>
 			        </div>
 			    </div>
                 <div class="col">
 			        <label for="prd_nm_virtual_select" class="form-label">상품명 <span style="color:red">*</span></label>
 			        <div class="input-group">
-			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="상품명을 선택하거나 검색하세요...">
-			            </select>
+			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="상품명을 선택하거나 검색하세요." ></select>
+			            <div class="form-text ms-4" style="color: #f35a5a;" id="no_biz_text" id="stockCount">
+	                    	(재고 : 35개)
+	                	</div>
 			        </div>
 			    </div>
             </div>
-			<div class="mb-4">
-	            <label for="biz_reg_no" class="form-label">사업자 등록번호</label>
-	            <div class="d-flex align-items-center">
-	                <input type="text" maxlength="10" id="biz_reg_no" name="biz_reg_no" class="form-control" placeholder="사업자 등록번호 (숫자만)" style="width: 48.4%;" value="${actual_biz_reg_no_for_input}" ${biz_reg_input_disabled}>
-	                <button type="button" class="btn btn-primary ms-2" id="getBizRegNoInfo" ${biz_reg_input_disabled}>사업자 등록번호 조회</button>
-	            </div>
-	            <div class="form-check mt-2">
-	                <input type="checkbox" class="form-check-input" id="no_biz_checkbox" name="no_biz_checkbox" ${no_biz_checkbox_checked}>
-	                <label for="no_biz_checkbox" class="form-check-label">사업자 등록번호 미보유</label>
-	                <div class="form-text" style="color: #f35a5a;">
-	                    사업자등록번호 없으면 세금계산서 발행이 제한될 수 있습니다.
-	                </div>
-	            </div>
+            
+            <!-- name , id 등등 손봐야됨 지금은 html만 만짐  -->
+			<div class="row mb-4">
+				<div class="col">
+		            <label for="odd_cnt" class="form-label">선출고 수량</label>
+		            <div class="d-flex align-items-center">
+		                <input type="number" id="odd_cnt" name="odd_cnt" class="form-control" placeholder="선출고 수량 입력하세요." disabled="disabled">
+		            </div>
+				</div>
+				<div class="col">
+		            <label for="odd_cnt" class="form-label">주문 수량 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input type="number" id="odd_cnt" name="odd_cnt" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
+		            </div>
+				</div>
 	        </div>
-            <div class="mb-4">
-                <div>
-                    <label for="clientTypeSelect" class="form-label">거래처 유형 <span style="color:red;">*</span></label>
-                    <br>
-                    <select id="clientTypeSelect" class="form-select">
-                        </select>
-                </div>
+	        <!-- 여기도 value 값 너헝야 됨 -->
+            <div class="row mb-4">
+                <div class="col">
+		            <label for="odd_cnt" class="form-label">주문 마감일 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input class="form-control" type="date" value="2021-06-18" id="html5-date-input">
+		            </div>
+				</div>
+				<div class="col">
+				<!-- 이거는 자동 계산 -->
+		            <label for="odd_cnt" class="form-label">결제 금액 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input type="number" id="odd_cnt" name="odd_cnt" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
+		            </div>
+				</div>
             </div>
+            
+            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐 쿼리 만들어야 됨? 맞음... -->
+            
+            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐 쿼리 만들어야 됨? 맞음... -->
+            
+            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐  -->
             <div class="mb-4">
                 <label for="cli_phone" class="form-label">거래처 연락처 <span style="color:red">*</span></label>
                 <br>
-                <input type="text" id="cli_phone" name="cli_phone" class="form-control" placeholder="거래처 연락처" value="${cli_phone}">
+                <input type="text" id="cli_phone" name="cli_phone" class="form-control" placeholder="거래처 연락처"  readonly="readonly">
             </div>
 
             <div class="row mb-4">
                 <div class="col">
                     <label for="cli_mgr_name" class="form-label">담당자명 <span style="color:red">*</span></label>
-                    <input type="text" id="cli_mgr_name" class="form-control" placeholder="담당자명" value="${cli_mgr_name}">
+                    <input type="text" id="cli_mgr_name" class="form-control" placeholder="담당자명"  readonly="readonly">
                 </div>
                 <div class="col">
                     <label for="cli_mgr_phone" class="form-label">담당자 연락처 <span style="color:red">*</span></label>
-                    <input type="text" id="cli_mgr_phone" class="form-control" placeholder="담당자 연락처" value="${cli_mgr_phone}">
+                    <input type="text" id="cli_mgr_phone" class="form-control" placeholder="담당자 연락처"  readonly="readonly">
                 </div>
             </div>
+            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐  -->
 
             <div class="mb-4">
                 <div class="form-label">주소 <span style="color:red">*</span></div>
                 <div class="d-flex align-items-center mb-2">
-                    <input type="text" id="cli_pc" name="cli_pc" class="form-control" style="width: 48.4%;" readonly="readonly" placeholder="우편번호" value="${cli_pc}">
-                    <button type="button" class="btn btn-primary ms-2" onclick="findPostCode()">우편번호 찾기</button>
+                    <input type="text" id="cli_pc" name="cli_pc" class="form-control" style="width: 48.4%;" readonly="readonly" placeholder="우편번호">
+                    <button type="button" class="btn btn-primary ms-6" onclick="findPostCode()">우편번호 찾기</button>
                 </div>
                 <div class="d-flex align-items-center mb-2">
-                    <input type="text" id="cli_add" name="cli_add" class="form-control" readonly="readonly" placeholder="기본주소" value="${cli_add}">
+                    <input type="text" id="cli_add" name="cli_add" class="form-control" readonly="readonly" placeholder="기본주소" >
                 </div>
                 <div class="d-flex align-items-center">
-                    <input type="text" id="cli_da" name="cli_da" class="form-control" placeholder="상세주소" value="${cli_da}">
+                    <input type="text" id="cli_da" name="cli_da" class="form-control" placeholder="상세주소" >
                 </div>
             </div>
         </div>
@@ -139,7 +158,7 @@
 	
 	<th:block layout:fragment="script">
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
 
     <script th:src="@{/js/sales/order.js}"></script>

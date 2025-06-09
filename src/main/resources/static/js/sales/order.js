@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
                 orderRegisterModalInstance.show(); // Bootstrap 모달 열기
             }
             await loadClientDataForModal(); // 모달 데이터 로드
-//            await loadProductDataForModal(); // 모달 데이터 로드
+            await loadProductDataForModal(); // 모달 데이터 로드
         });
     }
 
@@ -89,7 +89,6 @@ async function fetchGridData(page = currentPage, currentSearchKw = searchKeyword
     if (isLoading) return;
     isLoading = true; // 로딩 시작 플래그 설정 (전역 변수)
 
-    console.log(`그리드 데이터 요청: 페이지 ${page}, 개수 ${pageSize}, 검색어: "${currentSearchKw}"`);
 
     try {
         const params = new URLSearchParams();
@@ -102,7 +101,6 @@ async function fetchGridData(page = currentPage, currentSearchKw = searchKeyword
         
         const url = `/solex/orders/gridData?${params.toString()}`; 
 		
-		console.log(url);
         
         const response = await fetch(url);
 
@@ -117,17 +115,14 @@ async function fetchGridData(page = currentPage, currentSearchKw = searchKeyword
         // 4. 그리드 데이터 업데이트
         if (page === 0) { // 첫 페이지 요청 시 (새로운 검색 또는 초기 로드)
             grid.resetData(data); // 기존 데이터를 모두 지우고 새 데이터로 채움
-            console.log(`첫 페이지 로드 완료. 현재 그리드 행 수: ${grid.getRowCount()}`);
         } else { // 다음 페이지 요청 시 (무한 스크롤)
             grid.appendRows(data); // 기존 데이터에 새 데이터를 추가
-            console.log(`페이지 ${page} 데이터 추가 완료. 현재 그리드 행 수: ${grid.getRowCount()}`);
         }
 
         // 5. 더 불러올 데이터가 있는지 판단 (무한 스크롤 종료 조건)
         // 서버에서 받아온 데이터의 개수가 요청한 pageSize보다 적으면 더 이상 데이터가 없다고 판단
         if (data.length < pageSize) {
             hasMoreData = false; // 더 이상 불러올 데이터 없음 플래그 설정 (전역 변수)
-            console.log('더 이상 불러올 데이터가 없습니다. 무한 스크롤 종료.');
         } else {
             hasMoreData = true; // 더 불러올 데이터가 있을 가능성 (전역 변수)
         }
@@ -172,14 +167,20 @@ async function loadClientDataForModal() {
     autoSelectFirstOption: false,
     value: "",
     onServerSearch: debounce(async (searchValue, virtualSelectInstance) => {
-      await fetchAndSetOptions(searchValue, virtualSelectInstance);
+      await fetchAndSetClientOptions(searchValue, virtualSelectInstance);
     }, 300)
   });
 
+  vsInst.$ele.addEventListener('change', (e) => {
+    // vsInst.getValue() 로 최신 선택값을 가져올 수 있습니다.
+    console.log('선택된 값(on wrapper change):', vsInst.getValue());
+  });
+  
+  
 
   // 3) DOM에 인스턴스 저장
   el.virtualSelectInstance = vsInst;
-
+  
   // 4) input 이벤트 (전역 변수 갱신)
   const inputEl = document.getElementById(vsInst.$searchInput.id);
   inputEl.addEventListener('input', e => {
@@ -188,15 +189,14 @@ async function loadClientDataForModal() {
   });
 
   // 5) ▶️ 초기 데이터 한 번 로드
-  await fetchAndSetOptions("", vsInst);
+  await fetchAndSetClientOptions("", vsInst);
 
 
-  console.log('Virtual Select 설정 및 초기 데이터 로드 완료');
 }
 
 
 // 서버 호출 + 옵션 세팅을 분리한 헬퍼 함수
-async function fetchAndSetOptions(searchValue, virtualSelectInstance) {
+async function fetchAndSetClientOptions(searchValue, virtualSelectInstance) {
   const page     = 0;
   const pageSize = 20;
 
@@ -213,12 +213,11 @@ async function fetchAndSetOptions(searchValue, virtualSelectInstance) {
     const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const json = await resp.json();
-    console.log("초기/검색 로드 결과:", json);
 
     // json이 배열이라 가정
     const options = json.map(item => ({
       label: item.CLI_NM,
-      value: item.CLI_NM
+      value: item.CLI_ID
     }));
     // hasMore 정보가 들어있지 않다면, (json.length === pageSize) 등으로 대체하세요
     const hasMore = Array.isArray(json) && json.length === pageSize;
@@ -228,4 +227,121 @@ async function fetchAndSetOptions(searchValue, virtualSelectInstance) {
     console.error('거래처 초기/검색 오류:', err);
     virtualSelectInstance.setServerOptions([], false);
   }
+}
+
+
+async function loadProductDataForModal() {
+  const el = document.getElementById('prd_nm_virtual_select');
+  if (!el || el.virtualSelectInstance) return;
+
+  const debounce = (fn, delay = 300) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  };
+
+  // 1) VirtualSelect 초기화 (서버 검색 콜백만 설정)
+  const vsInst = VirtualSelect.init({
+    ele: el,
+    placeholder: "거래처명을 검색하세요...",
+    search: true,
+    clearButton: true,
+    autoSelectFirstOption: false,
+    value: "",
+    onServerSearch: debounce(async (searchValue, virtualSelectInstance) => {
+      await fetchAndSetProductOptions(searchValue, virtualSelectInstance);
+    }, 300)
+  });
+
+
+  vsInst.$ele.addEventListener('change', (e) => {
+      // vsInst.getValue() 로 최신 선택값을 가져올 수 있습니다.
+      console.log('선택된 값(on wrapper change):', vsInst.getValue());
+	  getStockCount(vsInst.getValue());
+    });
+	
+	
+	
+  // 3) DOM에 인스턴스 저장
+  el.virtualSelectInstance = vsInst;
+
+  // 4) input 이벤트 (전역 변수 갱신)
+  const inputEl = document.getElementById(vsInst.$searchInput.id);
+  inputEl.addEventListener('input', e => {
+    VirtualSelectClientInput = e.target.value;
+    console.log('현재 입력값:', VirtualSelectClientInput);
+  });
+
+  // 5) ▶️ 초기 데이터 한 번 로드
+  await fetchAndSetProductOptions("", vsInst);
+
+}
+
+
+// 서버 호출 + 옵션 세팅을 분리한 헬퍼 함수
+async function fetchAndSetProductOptions(searchValue, virtualSelectInstance) {
+  const page     = 0;
+  const pageSize = 20;
+
+  const params = new URLSearchParams();
+  params.append('page', page);
+  params.append('pageSize', pageSize);
+  if (searchValue && searchValue.trim()) {
+    params.append('searchKeyword', searchValue.trim());
+  }
+  
+  const url = `/solex/orders/products?${params.toString()}`; // 상품 데이터를 가져오는 URL로 변경
+
+  try {
+    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const json = await resp.json();
+
+    // json이 배열이라 가정
+    const options = json.map(item => ({
+		label: item.PRD_NM, // 상품명으로 변경
+        value: item.PRD_CD // 상품 코드로 변경 (또는 상품명)
+    }));
+    // hasMore 정보가 들어있지 않다면, (json.length === pageSize) 등으로 대체하세요
+    const hasMore = Array.isArray(json) && json.length === pageSize;
+
+    virtualSelectInstance.setServerOptions(options, hasMore);
+  } catch (err) {
+    console.error('거래처 초기/검색 오류:', err);
+    virtualSelectInstance.setServerOptions([], false);
+  }
+}
+
+// 서버 호출
+async function getStockCount(productCode) {
+	if (!productCode || !productCode.trim()) {
+	    return;  
+	  }
+    // 2) URLSearchParams 로 안전하게 쿼리 생성
+    const params = new URLSearchParams({ productCode: productCode.trim() });
+    const url = `/solex/orders/stock?${params.toString()}`;
+
+	try {
+	   const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+	   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+	   const json = await resp.json();
+	   console.log('재고 수량 응답:', json.stockCount);
+	 } catch (err) {
+	   console.error('getStockCount 오류:', err);
+	   throw err;    // 상위 로직에서 처리하려면 다시 throw
+	 }
+}
+
+// 우편번호 찾기 (Daum Postcode API)
+function findPostCode() {
+	new daum.Postcode({
+	            oncomplete: function(data) {
+	            	// 우편번호
+	                $("#cli_pc").val(data.zonecode);
+	                // 도로명 및 지번주소
+	                $("#cli_add").val(data.roadAddress);
+	            }
+	        }).open();
 }

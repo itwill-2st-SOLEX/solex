@@ -29,5 +29,15 @@ public interface OrderMapper {
 	List<Map<String, Object>> getSearchClientList(@Param("offset") int offset, @Param("limit")  int limit, @Param("searchKeyword") String searchKeyword);
 
 	int countClientsByEmployeeId(int emp_id);
+
+	List<Map<String, Object>> getSelectTop5PopularClients();
+
+	List<Map<String, Object>> getSelectClientsByEmployeeId(int emp_id);
+
+	List<Map<String, Object>> getSelectTop5PopularProducts();
+
+	List<Map<String, Object>> getSearchProductList(@Param("offset") int offset, @Param("limit")  int limit, @Param("searchKeyword") String searchKeyword);
+
+	int getStockCount(@Param("productCode") String productCode);
 	
 }

@@ -1,6 +1,7 @@
 package kr.co.itwillbs.solex.sales;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class OrderRestController {
         log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}, searchKeyword={}", page, pageSize, searchKeyword);
         
         // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
-        int emp_id = 200;
+        int emp_id = 2000;
         List<Map<String, Object>> list = orderService.getSearchClientList(page, pageSize, searchKeyword, emp_id);
         
         log.info("API - 그리드 데이터 조회 결과 건수: {}", list.size());
@@ -73,6 +74,38 @@ public class OrderRestController {
         return list;
     }
 	
+	
+	@GetMapping("/products")
+	public List<Map<String, Object>> getSearchProductList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
+            @RequestParam(name = "searchKeyword", required = false) String searchKeyword
+    ) throws Exception {
+        log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}, searchKeyword={}", page, pageSize, searchKeyword);
+        
+        // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
+        int emp_id = 2000;
+        
+        List<Map<String, Object>> list = orderService.getSearchProductList(page, pageSize, searchKeyword);
+        
+        log.info("API - 그리드 데이터 조회 결과 건수: {}", list.size());
+        log.info("API - 그리드 데이터 조회 결과 건수: {}", list);
+        return list;
+    }
+	
+	@GetMapping("/stock")
+	public ResponseEntity<Map<String, Integer>> getStockCount(@RequestParam(name = "productCode") String productCode) {
+        log.info("API - 재고 조회 요청 파라미터: productCode={}", productCode);
+
+        // 서비스는 int를 리턴하도록 변경
+        int count = orderService.getStockCount(productCode);
+        
+        log.info("API - 재고 조회 요청 파라미터: count={} ", count);
+        
+        // 키를 stockCount로 하는 Map 으로 감싸서 반환
+        Map<String, Integer> body = Collections.singletonMap("stockCount", count);
+        return ResponseEntity.ok(body);
+    }
 	
 	
 	

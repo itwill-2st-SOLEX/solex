@@ -33,7 +33,7 @@
 
 <select id="getSearchClientList" parameterType="Map" resultType="Map">
     SELECT
-    	cli_nm
+    	cli_nm, cli_id
     FROM client
     <where>
       <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
@@ -54,29 +54,71 @@
   	WHERE emp_id = #{emp_id}
   </select>
   
-  <select id="selectClientsByEmployeeId" resultType="Map">
-  	SELECT client_nm
+  <select id="getSelectClientsByEmployeeId" resultType="Map">
+  	SELECT cli_nm
   	FROM client
   	WHERE emp_id = #{emp_id}
-  	ORDER BY client_nm 
+  	ORDER BY cli_nm 
   </select>
   
-  <select id="selectTop5PopularClients" resultType="Map">
+  <select id="getSelectTop5PopularClients" resultType="Map">
     SELECT
-    	cli_nm
+    	cli_nm, cli_id
     FROM (
         SELECT
-            cli.cli_nm,
+            cli.cli_nm,cli.cli_id,
             COUNT(suju.cli_id) AS order_count
         FROM client cli 
         JOIN suju_order suju    
         ON cli.cli_id = suju.cli_id
         GROUP BY
-            cli.cli_nm
+            cli.cli_nm,cli.cli_id
         ORDER BY order_count DESC
     )
     WHERE ROWNUM <![CDATA[ <= ]]> 5
    </select>
+   
+   <select id="getSelectTop5PopularProducts" resultType="Map">
+    SELECT
+    	prd_nm, prd_cd
+    FROM (
+        SELECT
+            prd.prd_nm,prd.prd_cd,
+            COUNT(odd.prd_cd) AS order_count
+        FROM product prd 
+        JOIN suju_order_detail odd    
+        ON prd.prd_cd = odd.prd_cd
+        GROUP BY
+            prd.prd_nm,prd.prd_cd
+        ORDER BY order_count DESC
+    )
+    WHERE ROWNUM <![CDATA[ <= ]]> 5
+   </select>
+   
+   
+	<select id="getSearchProductList" parameterType="Map" resultType="Map">
+	    SELECT
+	    	prd_nm, prd_cd
+	    FROM product
+	    <where>
+	      <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
+	      <if test="searchKeyword != null and searchKeyword != ''">
+	        AND LOWER(prd_nm) LIKE '%' || #{searchKeyword} || '%'
+	      </if>
+	    </where>
+	    ORDER BY prd_nm
+	    OFFSET #{offset} ROWS
+	    FETCH NEXT #{limit} ROWS ONLY
+	</select>
+	
+	
+	<select id="getStockCount" resultType="int">
+		select 
+			stk_cnt
+		from stock stk join product prd
+		on stk.prd_cd = prd.prd_cd
+		where stk.prd_cd = #{productCode}
+	</select>
   
 	
   
