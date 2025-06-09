@@ -6,18 +6,20 @@
 <mapper namespace="kr.co.itwillbs.solex.attendance.AttendanceMapper">
     <select id="selectMyAttendenceByMonthList" resultType="java.util.Map">
     	SELECT
-            att_id,
-            emp_id,
-            NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
- 			NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
-            att_sts,
-            att_day
+             att.att_id,
+             att.emp_id,
+             NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
+ 			 NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
+             cd.det_nm,
+             NVL(TO_CHAR(att_day, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_day
         FROM
-            attendance 
-        WHERE emp_id = 11
+             attendance att 
+        JOIN code_detail cd 
+          ON cd.det_id = att.att_sts
+        WHERE att.emp_id = 5
 		  AND TO_CHAR(att_in_time, 'YYYY') = #{year}  
  		  AND TO_CHAR(att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0') 
-     ORDER BY att_day ASC
+     ORDER BY att.att_day ASC
     </select>
     
     <select id="selectAttendenceByMonthList" resultType="java.util.Map">
@@ -43,7 +45,7 @@
             ON e.emp_id = a.emp_id				-- 출퇴근 data
             
         <where>
-               m.emp_id = 11 					-- 결재권자의 id
+               m.emp_id = 5 					-- 결재권자의 id
            AND cd_e.det_sort > cd_m.det_sort		-- 결재권자 보다 직급이 아래(dep_sort가 더 높다)
 		   AND TO_CHAR(a.att_in_time, 'YYYY') = #{year}  
  		   AND TO_CHAR(a.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
@@ -53,4 +55,55 @@
 			</if>
 		</where>    
     </select>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <select id="findByEmpIdAndAttendanceDate" resultType="java.util.Map">
+        SELECT
+              att_id,
+              emp_id,
+              att_day,
+              NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
+ 			  att_out_time,
+              NVL(TO_CHAR(att_day, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_day
+         FROM attendance
+        WHERE
+              emp_id = #{emp_id} AND att_day = #{att_day}
+    </select>
+
+    <insert id="insertPunchIn">
+        INSERT INTO attendance (
+            emp_id,
+            att_day,
+            att_in_time,
+            att_sts
+        ) VALUES (
+            #{emp_id},
+            #{att_day},
+            #{att_in_time},
+            #{att_sts}
+        )
+    </insert>
+    
+    <update id="updatePunchOut" parameterType="java.util.Map">
+        UPDATE attendance
+        SET
+            att_out_time = #{punchOutTime, jdbcType=DATE},
+            att_sts = #{att_sts, jdbcType=VARCHAR}
+<!--             total_work_minutes = #{totalWorkMinutes} -->
+        WHERE
+            emp_id = #{EMP_ID, jdbcType=NUMERIC}
+    </update>
+    
 </mapper>	

@@ -1,0 +1,177 @@
+@charset "UTF-8";
+
+
+ .date-navigation {
+    display: flex;
+    align-items: center;
+    font-size: 1.5em; /* 글자 크기 조정 */
+    font-weight: bold;
+    color: #333;
+    background-color: #fff;
+    padding: 10px 20px;
+}
+
+.arrow {
+    cursor: pointer; /* 클릭 가능한 모양 */
+    padding: 0 10px;
+    color: #007bff; /* 파란색 화살표 */
+    user-select: none; /* 드래그 방지 */
+}
+
+.arrow:hover {
+    color: #0056b3; /* 호버 시 색상 변경 */
+}
+
+.month-year {
+    margin: 0 15px;
+    white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* --------- 출퇴근 등록화면 css  ---------- */
+.attendance-wrapper-att {
+    display: flex;
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: center;    /* 세로 중앙 정렬 */
+    min-height: 80vh;       /* 뷰포트 높이만큼 최소 높이 설정 */
+    width: 100%;             /* 너비를 100%로 설정하여 공간을 확보 */
+/*     background-color: #f4f7f6;   */
+}
+
+.container-att {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+header h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+.main-content-att {
+    margin-bottom: 30px;
+}
+
+.time-button {
+    display: block;
+    width: 90%;
+    padding: 18px;
+    margin: 15px auto;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.3em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    color: white;
+}
+
+.punch-in {
+    background-color: #2ecc71; /* 초록색 */
+}
+
+.punch-in:hover {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+}
+
+.punch-out {
+    background-color: #3498db; /* 파란색 */
+}
+
+.punch-out:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.status-section-att {
+    background-color: #ecf0f1;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.status-section-att h2 {
+    color: #2c3e50;
+    font-size: 1.4em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #bdc3c7;
+    padding-bottom: 10px;
+}
+
+.status-section-att p {
+    margin: 8px 0;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.status-section-att strong {
+    color: #555;
+}
+
+.footer-section-att {
+    margin-top: 20px;
+}
+
+.history-link-att {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+}
+
+.history-link-att:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 600px) {
+    .container-att {
+        width: 95%;
+        padding: 20px;
+    }
+
+    header h1 {
+        font-size: 1.6em;
+    }
+
+    .time-button {
+        padding: 15px;
+        font-size: 1.2em;
+    }
+
+    .status-section-att h2 {
+        font-size: 1.2em;
+    }
+
+    .status-section-att p {
+        font-size: 1em;
+    }
+}
