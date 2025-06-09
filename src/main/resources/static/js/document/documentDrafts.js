@@ -64,8 +64,8 @@ $(function () {
   			<div class="doc-type01">
   				<div id="emp-nm" class="mb-3">
   					<label class="form-label">사번</label>
-					<input type="text" class="form-control" id="docEmp_nm" name="emp_id"/>
-					<input type="hidden" name="emp_id" id="docEmp_nm">
+					<input type="text" class="form-control" id="docEmp_id" name="emp_id"/>
+					<input type="hidden" name="emp_id">
   				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
@@ -77,7 +77,7 @@ $(function () {
   					<label class="form-label">부서</label>
   					<input type="text" class="form-control" id="docdept_nm" />
   				</div>
-  				<div id="dept-team" class="mb-3">
+  				<div id="dept-teams" class="mb-3">
   					<label class="form-label">팀</label>
   					<input type="text" class="form-control" id="docdept_team" />
   				</div>
@@ -87,7 +87,7 @@ $(function () {
 					<label class="form-label">직급</label>
 					<input type="text" class="form-control" id="docdept_position" />
 				</div>
-				<div class="date mb-3">
+				<div id="dates" class="date mb-3">
 					<label class="form-label">날짜</label>
 					<input type="text" id="dateRange" class="form-control" placeholder="휴가기간 선택">
 					<input type="hidden" name="lea_start_date" id="startDate">
@@ -116,7 +116,7 @@ $(function () {
 				<div id="emp-id" class="mb-3">
 					<label class="form-label">사번</label>
 					<input type="text" class="form-control" id="docEmp_id" name="emp_id" />
-					<input type="hidden" name="emp_id" id="docEmp_nm">
+					<input type="hidden" name="emp_id">
 				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
@@ -145,7 +145,7 @@ $(function () {
 			  <label class="btn btn-purple" for="fieldWork">외근</label>
 			</div>
 			<div class="doc-type05">
-				<div id="dates" class="mb-3">
+				<div id="date" class="mb-3">
 					<label class="form-label">기간</label>
 					<input type="text" id="dateRange" class="form-control" placeholder="출장/외근 날짜 선택">
 					<input type="hidden" name="bus_start_time" id="startDate">
@@ -166,7 +166,7 @@ $(function () {
 				<div id="emp-id" class="mb-3">
 					<label class="form-label">사번</label>
 					<input type="text" class="form-control" id="docEmp_id" name="emp_id"/>
-					<input type="hidden" name="emp_id" id="docEmp_nm">
+					<input type="hidden" name="emp_id">
 				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
@@ -332,7 +332,6 @@ $(function () {
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const data = await response.json();
-			debugger;
 			const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 			modal.show();
 			// 값 주입
@@ -399,7 +398,7 @@ function fillEmployeeInfo() {
 			$('#docdept_nm').val(data.EMP_DEP_NM).prop('disabled', true);
 			$('#docdept_team').val(data.EMP_TEAM_NM).prop('disabled', true);
 			$('#docdept_position').val(data.EMP_POS_NM).prop('disabled', true);
-        },
+		},
         error: function() {
             alert('사원 정보를 불러오지 못했습니다.');
         }
