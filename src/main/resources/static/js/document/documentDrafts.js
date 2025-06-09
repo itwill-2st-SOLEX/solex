@@ -1,6 +1,6 @@
 $(function () {
 	let currentPage = 0;
-	const pageSize = 15;
+	const pageSize = 20;
 
   	const grid = new tui.Grid({
 	    el: document.getElementById('grid'),
