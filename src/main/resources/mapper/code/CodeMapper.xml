@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.co.itwillbs.solex.code.CodeMapper">
+
+	<!-- 공통코드 무한스크롤 -->
+	<select id="selectPagedCodeList" resultType="map">
+		SELECT * FROM (
+			SELECT t.*, ROWNUM rnum FROM (
+				SELECT 
+					COD_ID,
+					COD_NM,
+					COD_YN,
+					COD_REG_TIME
+				FROM code
+				<where>
+					<if test="codYn != null and codYn != ''">
+						cod_yn = #{codYn}
+					</if>
+					<if test="keyword != null and keyword != ''">
+						AND (
+							COD_ID LIKE '%' || #{keyword} || '%'
+							OR COD_NM LIKE '%' || #{keyword} || '%'
+						)
+					</if>
+				</where>
+				ORDER BY
+				<choose>
+					<when test="sort != null and dir != null">
+						${sort} ${dir}
+					</when>
+					<otherwise>
+						cod_id ASC
+					</otherwise>
+				</choose>
+			) t
+			WHERE ROWNUM &lt;= #{offset} + #{perPage}
+		)
+		WHERE rnum &gt; #{offset}
+	</select>
+	
+	<select id="selectTotalCount" resultType="int">
+		SELECT COUNT(*) FROM code
+		<where>
+			<if test="codYn != null and codYn != ''">
+			cod_yn = #{codYn}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 공통코드 신규 행 추가 -->
+	<insert id="insertCodes" parameterType="java.util.List">
+	    INSERT ALL
+	    <foreach collection="list" item="code">
+	        INTO CODE (
+	            COD_ID,
+	            COD_NM,
+	            COD_YN,
+	            COD_REG_TIME
+	        ) VALUES (
+	            #{code.cod_id},
+	            #{code.cod_nm},
+	            #{code.cod_yn},
+	            sysdate)
+	    </foreach>
+	    SELECT * FROM dual
+	</insert>
+	
+	<!-- 공통코드 기존 행 수정 -->
+	<update id="updateCodes" parameterType="java.util.List">
+	    MERGE INTO CODE c
+	    USING (
+	        <foreach collection="list" item="code" separator="UNION ALL">
+	            SELECT 
+	                #{code.cod_id} AS cod_id,
+	                #{code.cod_nm} AS cod_nm,
+	                #{code.cod_yn} AS cod_yn
+	            FROM DUAL
+	        </foreach>
+	    ) src
+	    ON (c.COD_ID = src.cod_id)
+	    WHEN MATCHED THEN
+	    UPDATE SET 
+	        c.COD_NM = src.cod_nm,
+	        c.COD_YN = src.cod_yn
+	</update>
+	
+	<!-- 상세공통코드 무한스크롤 -->
+	<select id="selectPagedDetailCodeList" resultType="map">
+		SELECT	DET_ID, DET_NM, DET_YN, DET_SORT, COD_ID
+		FROM	CODE_DETAIL
+		WHERE	COD_ID = #{codId}
+		<if test="keyword != null and keyword != ''">
+			AND (
+				DET_ID LIKE '%' || #{keyword} || '%'
+				OR DET_NM LIKE '%' || #{keyword} || '%'
+			)
+		</if>
+		<choose>
+			<when test="sortColumn != null and sortDirection != null">
+				ORDER BY
+					<choose>
+						<when test="sortColumn == 'DET_ID'">DET_ID</when>
+						<when test="sortColumn == 'DET_NM'">DET_NM</when>
+						<when test="sortColumn == 'DET_YN'">DET_YN</when>
+						<when test="sortColumn == 'DET_SORT'">DET_SORT</when>
+						<otherwise>DET_SORT</otherwise>
+					</choose>
+					<choose>
+						<when test="sortDirection == 'desc'">DESC</when>
+						<otherwise>ASC</otherwise>
+					</choose>
+			</when>
+			<otherwise>
+				ORDER BY DET_SORT ASC
+			</otherwise>
+		</choose>
+		OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+	</select>
+	
+	<select id="selectDetailCodeTotalCount" resultType="int">
+		SELECT	COUNT(*)
+		FROM	CODE_DETAIL
+		WHERE	COD_ID = #{codId}
+	</select>
+	
+	<!-- 상세공통코드 신규 행 추가 -->
+	<insert id="insertDetailCodes" parameterType="map">
+	    INSERT ALL
+	    <foreach collection="list" item="codeDetail">
+	        INTO CODE_DETAIL (DET_ID, DET_NM, DET_YN, DET_SORT, COD_ID)
+	        VALUES (#{codeDetail.DET_ID},
+	                #{codeDetail.DET_NM},
+	                #{codeDetail.DET_YN},
+	                #{codeDetail.DET_SORT},
+	                #{codeDetail.COD_ID})
+	    </foreach>
+	    SELECT 1 FROM DUAL
+	</insert>
+	
+	<!-- 상세공통코드 기존 행 수정 -->
+	<update id="updateDetailCodes" parameterType="map">
+	    MERGE INTO CODE_DETAIL target
+	    USING (
+	        <foreach collection="list" item="codeDetail" separator="UNION ALL">
+	            SELECT
+	                #{codeDetail.DET_ID} AS DET_ID,
+	                #{codeDetail.COD_ID} AS COD_ID,
+	                #{codeDetail.DET_NM} AS DET_NM,
+	                #{codeDetail.DET_YN} AS DET_YN,
+	                #{codeDetail.DET_SORT} AS DET_SORT
+	            FROM DUAL
+	        </foreach>
+	    ) src
+	    ON (target.DET_ID = src.DET_ID AND target.COD_ID = src.COD_ID)
+	    WHEN MATCHED THEN
+	        UPDATE SET
+	            target.DET_NM = src.DET_NM,
+	            target.DET_YN = src.DET_YN,
+	            target.DET_SORT = src.DET_SORT
+	</update>
+</mapper>
