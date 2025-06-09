@@ -109,16 +109,43 @@
    		)
 	</insert>
 	
-<!--	기안서 상세조회-->
-	<select id="selectDetailDoc" resultType="map">
-		SELECT *
+<!--	반연차 기안서 상세조회-->
+	<select id="selectDetailLeave" resultType="map">
+		SELECT d.emp_id,
+	           l.lea_type,
+	           TO_CHAR(l.lea_start_date, 'YYYY-MM-DD') AS lea_start_date,
+	           TO_CHAR(l.lea_end_date, 'YYYY-MM-DD') AS lea_end_date,
+	           l.lea_tt,
+	           l.lea_con
+		  FROM document d
+		  LEFT JOIN leave_doc l
+		   ON d.doc_id = l.doc_id
+		 WHERE d.doc_id = #{doc_id}
+	</select>
+	
+<!--	출장/외근 기안서 상세조회-->	
+	<select id="selectDetailOutwork" resultType="map">
+		SELECT d.emp_id,
+		       b.bus_type,
+		       TO_CHAR(b.bus_start_time, 'YYYY-MM-DD') AS bus_start_time,
+		       TO_CHAR(b.bus_end_time, 'YYYY-MM-DD') AS bus_end_time,
+		       b.bus_type,
+		       TO_CHAR(b.bus_cost, 'FM999,999,999') AS bus_cost,
+		       b.bus_con
+		  FROM document d
+		  LEFT JOIN business_outwork_doc b
+		    ON d.doc_id = b.doc_id
+		 WHERE d.doc_id = #{doc_id}
+	</select>
+	
+<!--	사직서 기안서 상세조회-->	
+	<select id="selectDetailResignation" resultType="map">
+		SELECT d.emp_id,
+			   TO_CHAR(r.res_start_date, 'YYYY-MM-DD') AS res_start_date,
+		       r.res_con
 		  FROM document d
 		  LEFT JOIN resignation_doc r
 		    ON d.doc_id = r.doc_id
-		  LEFT JOIN leave_doc l
-		   ON d.doc_id = l.doc_id
-		  LEFT JOIN business_outwork_doc b
-		    ON d.doc_id = b.doc_id
 		 WHERE d.doc_id = #{doc_id}
 	</select>
 </mapper>

@@ -57,8 +57,8 @@ public class DocumentController {
 	// 기안서 상세조회 
 	@ResponseBody
 	@GetMapping("/select/detail/{doc_id}")
-	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id) {
-		return service.selectDetailDoc(doc_id);
+	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
+		return service.selectDetailDoc(doc_id, docTypeCode);
 	}
 	
 }

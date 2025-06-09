@@ -48,8 +48,18 @@ public class DocumentService {
 	}
 	
 	// 기안서 상세조회
-	public Map<String, Object> selectDetailDoc(String doc_id) {
-		return mapper.selectDetailDoc(doc_id);
+	public Map<String, Object> selectDetailDoc(String doc_id, String docTypeCode) {
+	    switch (docTypeCode) {
+	        case "doc_type_01":
+	        	return mapper.selectDetailLeave(doc_id);
+	        case "doc_type_02":
+	        	return mapper.selectDetailOutwork(doc_id);
+	        case "doc_type_03":
+	        	return mapper.selectDetailResignation(doc_id);
+	        default:
+	        	throw new IllegalArgumentException("알 수 없는 문서 타입입니다: " + docTypeCode);
+	    }
+		
 	}
 	
 }

@@ -37,7 +37,7 @@ $(function () {
 
   	loadDrafts(currentPage);
 
-	grid.on('scrollEnd', () => loadDrafts(currentPage));
+	grid.on('scrollEnd', () =>  loadDrafts(currentPage));
 	
 	grid.on('click', (ev) => {
 		if (ev.columnName === 'doc_id') {
@@ -299,20 +299,24 @@ $(function () {
 	// 상세조회 모달
 	async function openDetailModal(row, docTypeCode) {
 		document.querySelector("#detailModal .modal-body").innerHTML = formTemplates[docTypeCode];
-		
 		// 항상 비활성화
 		const form = document.querySelector("#detailModal .modal-body");
 		form.querySelectorAll("input, textarea, select").forEach(el => {
 			el.disabled = true;
 		});
 		try {
-			const response = await fetch(`/SOLEX/approval/select/detail/${row.doc_id}`);
+			const response = await fetch(`/SOLEX/approval/select/detail/${row.doc_id}?doc_type_code=${docTypeCode}`);
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const data = await response.json();
-			   
-		   const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-		   modal.show();
+			// 값 주입
+			for (const [key, value] of Object.entries(data)) {
+				const lowerKey = key.toLowerCase();
+				const el = form.querySelector(`[name="${lowerKey}"]`);
+				if (el) el.value = value;
+			}
+		   	const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+		   	modal.show();
 			   
 		} catch(err) {
 			console.error("상세 조회 중 에러:", err);
