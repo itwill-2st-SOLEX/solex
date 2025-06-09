@@ -13,18 +13,13 @@ public class AttendanceService {
 	private AttendanceMapper attendanceMapper;
 
 	// 자신의 근태현황 조회
-	public List<Map<String, Object>> getMyAttendanceByMonth(int year, int month) {
-		return attendanceMapper.selectMyAttendenceByMonthList(year, month);
+	public List<Map<String, Object>> getMyAttendanceByMonth(Map<String, Object> params) {
+		return attendanceMapper.selectMyAttendenceByMonthList(params);
 	}
 
 	// 부하직원의 근태현황 조회
-	public List<Map<String, Object>> getAttendanceByMonth(int year, int month) {
-		return attendanceMapper.selectAttendenceByMonthList(year, month);
+	public List<Map<String, Object>> getAttendanceByMonth(Map<String, Object> params) {
+		return attendanceMapper.selectAttendenceByMonthList(params);
 	}
-	
-	
-	
-	
-	
 	
 }

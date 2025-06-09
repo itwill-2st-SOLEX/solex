@@ -1,25 +1,71 @@
 const currentMonthYearSpan = document.getElementById('currentMonthYear');
 const prevMonthBtn = document.getElementById('prevMonthBtn');
 const nextMonthBtn = document.getElementById('nextMonthBtn');
-
-// these variables are not used. remove them or initialize them correctly if they are needed later.
-// const myAttendance = '';
-// const teamAttendance = '';
-// const whatAttendance = '';
+let requestType = '';
 
 // 페이지 로드 시 초기 표시
 updateMonthYearDisplay(); 
 
+
+
+//전역 변수 설정
+let currentPage = 0;
+const pageSize = 20;
+const gridHeight = 700;
+let editorInstance = null;
+let editorLoaded = false;
+let searchKeyword = '';
+
+// ToastUI Grid 생성
+const grid = new tui.Grid({
+    el: document.getElementById('grid'),
+    bodyHeight: gridHeight,
+    scrollY: true,
+    scrollX: false,
+    data: [],
+    columns: [
+		{ header: '사원 ID', name: 'emp_num', width: 100, sortable: true },
+        { header: '사원 직위', name: 'dep_position', sortable: true },
+        { header: '출근 시간', name: 'att_in_time', width: 200, align: 'center',  sortable: true },
+        { header: '퇴근 시간', name: 'att_out_time', width: 200, align: 'center',  sortable: true },
+        { header: '상태', name: 'att_sts', align: 'center',  sortable: true },
+        { header: '날짜', name: 'att_day', width: 200, align: 'center',  sortable: true }
+    ]
+});
+
+// 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
+window.addEventListener('DOMContentLoaded', () => {
+	searchKeyword = document.getElementById('searchInput').value.trim();
+	document.getElementById('searchBtn').addEventListener('click', searchAttendance);
+});
+
+
+//무한 스크롤 이벤트
+function bindScrollEvent() {
+	// 검색으로 화면 목록이 변경되었을 경우를 대비해서 스크롤 초기화
+    grid.off('scrollEnd');
+	
+	//무한스크롤시 검색어 유지를 위해 재전달
+    grid.on('scrollEnd', () => {
+        const keyword = document.getElementById('searchInput').value.trim();
+		attendanceLists(displayYear, displayMonth, requestType, currentPage, searchKeyword);
+		document.getElementById('searchBtn').addEventListener('click', searchAttendance);
+    });
+}
+
+
+//페이지 로딩시 무한스크롤 기능이 동작하도록 이벤트 등록
+bindScrollEvent();
+
+
 // updateMonthYearDisplay 함수가 호출될 때 currentDate를 기준으로 화면을 업데이트하고 서버로 데이터 전송
 function updateMonthYearDisplay() {
-	debugger;
-    // ⭐⭐⭐ currentDate에서 직접 연도와 월을 가져와 사용합니다. ⭐⭐⭐
     const displayYear = currentDate.getFullYear();
     const displayMonth = currentDate.getMonth() + 1;
     currentMonthYearSpan.textContent = `${displayYear}년 ${displayMonth}월`; 
 	
-    // ⭐⭐⭐ 여기에서 requestType을 결정하여 sendMonthYearToServer로 전달합니다. ⭐⭐⭐
-    let requestType = '';
+    // requestType을 결정하여 sendMonthYearToServer로 전달
+//    let requestType = '';
     let currentPath = window.location.pathname; 
     
     if (currentPath.includes('/my_attendance_list')) {
@@ -33,137 +79,133 @@ function updateMonthYearDisplay() {
         console.log("알 수 없는 근태 페이지입니다. 기본값을 사용합니다.");
     }
 
-    // ⭐⭐⭐ sendMonthYearToServer에도 updateMonthYearDisplay 내부의 최신 year, month를 전달합니다. ⭐⭐⭐
-    sendMonthYearToServer(displayYear, displayMonth, requestType); 
+    // updateMonthYearDisplay 내부의 최신 year, month를 전달
+    attendanceLists(displayYear, displayMonth, requestType); 
 }
 
-// sendMonthYearToServer 함수는 현재 그대로 두셔도 됩니다.
-function sendMonthYearToServer(year, month, requestType) { 
-    const url = `/SOLEX/attendance/data?year=${year}&month=${month}&resultType=${requestType}`; 
-    
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("서버로부터 받은 전체 데이터 (객체 형태):", data); 
-            console.log("내 근태 데이터:", data.myAttendance);
-            console.log("팀 근태 데이터:", data.teamAttendance); 
 
-            if (requestType === 'my' && data.myAttendance && Array.isArray(data.myAttendance)) {
-                displayMyAttendance(data.myAttendance);
-            } else if (requestType === 'team' && data.teamAttendance && Array.isArray(data.teamAttendance)) {
-                displayTeamAttendance(data.teamAttendance);
-            } else {
-                console.warn("요청 타입에 맞는 데이터가 없거나, 정의되지 않은 요청 타입입니다.");
-                if (data.myAttendance && Array.isArray(data.myAttendance)) {
-                    displayMyAttendance(data.myAttendance);
-                }
-                if (data.teamAttendance && Array.isArray(data.teamAttendance)) {
-                    displayTeamAttendance(data.teamAttendance);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('데이터 전송 또는 수신 중 오류 발생:', error);
-            console.error('데이터 로드 중 오류가 발생했습니다.');
-        });
+// 게시글 목록 불러오기
+async function attendanceLists(year, month, requestType, keyword = '') {
+
+	try {
+		let url = `/SOLEX/attendance/data?year=${year}&month=${month}&resultType=${requestType}`;
+
+	    if (keyword) {
+	        url += `&keyword=${encodeURIComponent(keyword)}`;
+	    }
+	    const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
+	    const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
+	
+		const attendanceArray = Array.isArray(data.teamAttendance) ? data.teamAttendance : [];
+		const totalCount = data.totalCount;
+		
+		if (requestType === 'my' && data.myAttendance && Array.isArray(data.myAttendance)) {
+			console.log('my');
+			displayMyAttendance(data.myAttendance);
+		} else if (requestType === 'team' && data.teamAttendance && Array.isArray(data.teamAttendance)) {
+			console.log('team');
+			displayTeamAttendance(data.teamAttendance);
+		} else {
+			console.warn("요청 타입에 맞는 데이터가 없거나, 정의되지 않은 요청 타입입니다.");
+			if (data.myAttendance && Array.isArray(data.myAttendance)) {
+	           	displayMyAttendance(data.myAttendance);
+			}
+			
+			if (data.teamAttendance && Array.isArray(data.teamAttendance)) {
+				displayTeamAttendance(data.teamAttendance);
+			}
+		}
+		
+	    currentPage++;
+		
+		// 무한스크롤 종료
+	    if (data.length < pageSize) {
+	        grid.off('scrollEnd');
+	    } else {
+			bindScrollEvent();
+		}
+	
+	} catch (e) {
+	    console.error('fetch 에러 : ', e);
+	}
 }
 
-// displayMyAttendance 함수도 현재 그대로 두시면 됩니다. forEach 오류는 이전에 해결됐어야 합니다.
+
 function displayMyAttendance(data) {
-    let tableBody = document.getElementById('myAttendanceTable2'); // #myAttendanceTable2 tbody를 직접 선택하는 것이 안전
-	tableBody.innerHTML = ''; 
-	
-	if (!data || data.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center;">해당 월의 데이터가 없습니다.</td>
-            </tr>
-        `;
-        return;
+	if (!data || !Array.isArray(data) || data.length === 0) {
+        console.warn("표시할 내 출퇴근 데이터가 없습니다.");
+        grid.setRows([]); // 빈 배열을 설정하여 기존 데이터를 모두 지우고 emptyMessage를 표시
+        return; 
     }
 	
-    data.forEach(item => {
-        const row = document.createElement('tr'); 
-
-        row.innerHTML = `
-            <td>${item.EMP_ID || ''}</td>
-            <td>${item.ATT_IN_TIME || ''}</td>
-            <td>${item.ATT_OUT_TIME || ''}</td>
-            <td>${item.ATT_STS || ''}</td>
-            <td>${item.ATT_DAY || ''}</td>
-        `;
-
-        tableBody.appendChild(row); 
-    });
+	gridData = data.map((at, idx) => ({
+		emp_num: at.EMP_NUM,
+	    dep_position: at.DEP_POSITION,
+	    att_in_time: at.ATT_IN_TIME,
+	    att_out_time: at.ATT_OUT_TIME,
+	    att_sts: at.ATT_STS,
+	    att_day: at.ATT_DAY
+	}));
+	console.log('내 출퇴근근황의 gridData' + JSON.stringify(gridData));
+	
+	grid.appendRows(gridData);
 }
 
 
-// displayTeamAttendance 함수도 현재 그대로 두시면 됩니다.
 function displayTeamAttendance(data) {
-	let tableBody = document.getElementById('myAttendanceTable2'); // #myAttendanceTable2 tbody를 직접 선택하는 것이 안전
-	tableBody.innerHTML = ''; 
-	
-	if (!data || data.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center;">해당 월의 데이터가 없습니다.</td>
-            </tr>
-        `;
-        return;
+	if (!data || !Array.isArray(data) || data.length === 0) {
+        console.warn("표시할 팀 출퇴근 데이터가 없습니다.");
+        grid.setRows([]); // 빈 배열을 설정하여 기존 데이터를 모두 지우고 emptyMessage를 표시
+        return; 
     }
 	
-    data.forEach(item => {
-        const row = document.createElement('tr'); 
-
-        row.innerHTML = `
-            <td>${item.EMP_ID || ''}</td>
-            <td>${item.ATT_IN_TIME || ''}</td>
-            <td>${item.ATT_OUT_TIME || ''}</td>
-            <td>${item.ATT_STS || ''}</td>
-            <td>${item.ATT_DAY || ''}</td>
-        `;
-
-        tableBody.appendChild(row); 
-    });
-//    const tableBody = document.getElementById('myAttendanceTable2'); // 팀 근태 테이블 ID 확인
-//    tableBody.innerHTML = ''; 
-//
-//    if (!data || data.length === 0) {
-//        tableBody.innerHTML = `
-//            <tr>
-//                <td colspan="3" style="text-align: center;">해당 월의 데이터가 없습니다.</td>
-//            </tr>
-//        `;
-//        return;
-//    }
-//    let html = '';
-//    data.forEach(item => {
-//        html += `<tr><td>${item.EMP_ID || ''}</td><td>${item.ATT_IN_TIME || ''}</td><td>${item.ATT_OUT_TIME || ''}</td></tr>`;
-//    });
-//    tableBody.innerHTML = html; 
+	gridData = data.map((at, idx) => ({
+		emp_num: at.EMP_NUM,
+	    dep_position: at.DEP_POSITION,
+	    att_in_time: at.ATT_IN_TIME,
+	    att_out_time: at.ATT_OUT_TIME,
+	    att_sts: at.ATT_STS,
+	    att_day: at.ATT_DAY
+	}));
+	
+	grid.appendRows(gridData);
 }
 
 // 이전 달로 이동하는 함수
 function goToPreviousMonth() {
+	
     currentDate.setMonth(currentDate.getMonth() - 1); 
-    // console.log('전월 ' + currentDate.setMonth(currentDate.getMonth() - 1)); // 이 console.log는 setMonth의 반환값을 사용하므로 혼동될 수 있습니다.
-                                                                           // currentDate는 이미 변경되었으니 그냥 currentDate를 출력하는 것이 좋습니다.
-    console.log('전월로 이동:', currentDate);
-    updateMonthYearDisplay(); 
+
+	// 기존 데이터 초기화 
+	grid.resetData([]); 
+    
+	// 년/월 업데이트
+	updateMonthYearDisplay(); 
 }
 
 // 다음 달로 이동하는 함수
 function goToNextMonth() {
-    currentDate.setMonth(currentDate.getMonth() + 1); 
-    console.log('다음 달로 이동:', currentDate); // 로그 추가
-    updateMonthYearDisplay(); 
+    currentDate.setMonth(currentDate.getMonth() + 1);
+	
+	// 기존 데이터 초기화 
+	grid.resetData([]); 
+	   
+	// 년/월 업데이트
+	updateMonthYearDisplay(); 
 }
 
 // 이벤트 리스너 연결 (이 부분은 올바릅니다.)
 prevMonthBtn.addEventListener('click', goToPreviousMonth);
 nextMonthBtn.addEventListener('click', goToNextMonth);
+
+
+// 검색기능
+function searchAttendance() {
+	grid.resetData([]); 
+	const keyword = document.getElementById('searchInput').value.trim();
+	currentPage = 0;
+		
+	bindScrollEvent();		//무한스크롤 초기화 후 실행
+	attendanceLists(currentDate.getFullYear(), currentDate.getMonth() + 1, requestType, keyword);
+//	noticeList(currentPage, keyword);
+}

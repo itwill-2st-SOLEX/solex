@@ -27,39 +27,16 @@
 			        <span class="arrow" id="nextMonthBtn">&gt;</span>
 			    </div>
 
-<!-- 				<h5 class="card-header"></h5> -->
+				<div  class="card-header demo-vertical-spacing demo-only-element">
+					<div class="search">
+						<input type="text"  class="form-control" name="searchInput" id="searchInput">
+						<button type="button" class="btn btn-outline-dark" id="searchBtn"> 검색 </button>
+					</div>
+				</div>
 				
 				<div class="card-body">
 					<div class="table-responsive text-nowrap">
-					
-						<table class="table table-bordered" id="myAttendanceTable2">
-							<thead>
-								<tr>
-									<th>사원 ID</th>
-									<th>출근 시간</th>
-									<th>퇴근 시간</th>
-									<th>상태</th>
-									<th>날짜</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
-						<table class="table table-bordered">
-							<thead>
-								<tr>
-									<th>사원 ID</th>
-									<th>출근 시간</th>
-									<th>퇴근 시간</th>
-									<th>상태</th>
-									<th>날짜</th>
-								</tr>
-							</thead>
-							<tbody id="attendanceTable">
-			                    <tr>
-			                        <td colspan="5" style="text-align: center;">데이터를 불러오는 중...</td>
-			                    </tr>
-			                </tbody>
-						</table>
+						<div id="grid"></div>
 					</div>
 				</div>
 			</div>
