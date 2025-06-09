@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="kr.co.itwillbs.solex.vacation.VacationMapper">	
+	
+	<!-- 개인별 휴가 사용 개수 조회 -->
+	<select id="getVacationSummary" resultType="map">
+		SELECT e.emp_id, e.emp_nm, e.emp_hire, v.vac_total, v.vac_used, v.vac_total - v.vac_used vac_remain
+		FROM vacation v RIGHT JOIN employee e ON v.emp_id = e.emp_id
+		WHERE v.emp_id = #{emp_id}
+	</select>
+
+ </mapper>
+  
+  
+  
+  
+  
+  

@@ -78,6 +78,8 @@ async function noticeList(page, keyword = '') {
 		const list = data.list;
 		const totalCount = data.totalCount;
 		
+		console.log(data.list.length)
+		
         const gridData = list.map((n, idx) => ({
             notId: n.NOT_ID,
             notTt: n.NOT_TT,
