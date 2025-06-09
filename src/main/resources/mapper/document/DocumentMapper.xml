@@ -3,7 +3,7 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.co.itwillbs.solex.approval.ApprovalMapper">
+<mapper namespace="kr.co.itwillbs.solex.document.DocumentMapper">
 <!--	기안서 종류 공통코드-->
 	<select id="getdocTypeList" resultType="map">
 		SELECT det_id, det_nm
@@ -14,10 +14,11 @@
 	
 <!--	올린 기안서 목록-->
 	<select id="selectDraftList" resultType="map">
-		SELECT doc_id,
+		SELECT d.doc_id,
+			   c.det_id AS doc_type_code,
 		       c.det_nm AS doc_type,
 		       s.det_nm AS doc_sts,
-		       TO_CHAR(doc_reg_time, 'YYYY-MM-DD HH24:MI:SS') AS doc_reg_time
+		       TO_CHAR(d.doc_reg_time, 'YYYY-MM-DD HH24:MI:SS') AS doc_reg_time
 		  FROM document d
 		  LEFT JOIN code_detail c
 		    ON d.doc_type = c.det_id

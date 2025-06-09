@@ -21,11 +21,11 @@ $(function () {
       		const rawData = await response.json();
       		const data = rawData.map(row => ({
 	        doc_id: row.DOC_ID,
+			doc_type_code: row.DOC_TYPE_CODE, 
 	        doc_type: row.DOC_TYPE,
 	        doc_sts: row.DOC_STS,
 	        doc_reg_time: row.DOC_REG_TIME
       	}));
-
 		page === 0 ? grid.resetData(data) : grid.appendRows(data);
       	currentPage++;
 
@@ -42,7 +42,8 @@ $(function () {
 	grid.on('click', (ev) => {
 		if (ev.columnName === 'doc_id') {
 			const rowData = grid.getRow(ev.rowKey);
-			openDetailModal(rowData);
+			const docTypeCode = rowData.doc_type_code;
+			openDetailModal(rowData, docTypeCode);
     	}
 	});
 
@@ -294,29 +295,31 @@ $(function () {
 	    	e.target.value = e.target.value.slice(0, 7); 
         }
 	});
-});
-
-// 상세조회 모달
-async function openDetailModal(row) {
-	try {
-		const response = await fetch(`/SOLEX/approval/select/detail/${row.doc_id}`);
-		   if (!response.ok) throw new Error("상세 조회 실패");
-
-		   const data = await response.json();
-		   
-		   $('#detailDocId').text(data.DOC_ID);
-		   $('#detailDocType').text(data.DOC_TYPE);
-		   $('#detailDocSts').text(data.DOC_STS);
-		   $('#detailDocRegTime').text(data.DOC_REG_TIME);
-		   $('#detailDocContent').text(data.DOC_CON);
+	
+	// 상세조회 모달
+	async function openDetailModal(row, docTypeCode) {
+		document.querySelector("#detailModal .modal-body").innerHTML = formTemplates[docTypeCode];
+		
+		// 항상 비활성화
+		const form = document.querySelector("#detailModal .modal-body");
+		form.querySelectorAll("input, textarea, select").forEach(el => {
+			el.disabled = true;
+		});
+		try {
+			const response = await fetch(`/SOLEX/approval/select/detail/${row.doc_id}`);
+			if (!response.ok) throw new Error("상세 조회 실패");
+	
+			const data = await response.json();
+			   
 		   const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 		   modal.show();
-		   
-	} catch(err) {
-		console.error("상세 조회 중 에러:", err);
-	    alert("상세 조회에 실패했습니다.");
+			   
+		} catch(err) {
+			console.error("상세 조회 중 에러:", err);
+		    alert("상세 조회에 실패했습니다.");
+		}
 	}
-}
+});
 
 // 날짜 추출하기
 function attachDateRangeChange() {

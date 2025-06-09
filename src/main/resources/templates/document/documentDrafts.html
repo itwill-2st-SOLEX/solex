@@ -5,7 +5,7 @@
 <head>
 <title>SOLEX</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" th:href="@{/css/approval/approvalDrafts.css}" />
+<link rel="stylesheet" th:href="@{/css/document/documentDrafts.css}" />
 </head>
 <body>
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
@@ -73,20 +73,28 @@
 						<div class="modal-header">
 							<h2 class="modal-title" id="detailModalLabel">기안서 상세조회</h2>
 						</div>
-						<div class="modal-body">
-							<p>
-								<strong>기안서 번호:</strong> <span id="detailDocId"></span>
-							</p>
-							<p>
-								<strong>종류:</strong> <span id="detailDocType"></span>
-							</p>
-							<p>
-								<strong>결재상태:</strong> <span id="detailDocSts"></span>
-							</p>
-							<p>
-								<strong>등록일:</strong> <span id="detailDocRegTime"></span>
-							</p>
-						</div>
+						<div class="approval-line">
+								<table class="approval-table ms-auto">
+									<thead>
+										<tr>
+											<th></th>
+											<th>팀장</th>
+											<th>부장</th>
+										</tr>
+									</thead>
+									<!-- 									여기에 결제권자가 들어와야 함 -->
+									<tbody>
+										<tr>
+											<td>결재</td>
+											<td>이수정<br>
+											<span>결재<br>25/05/27</span></td>
+											<td><span> 배지영<br>대기</span></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+<!-- 					상세조회 js에서 채움 -->
+						<div class="modal-body"></div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary"
 								data-bs-dismiss="modal">닫기</button>
@@ -101,7 +109,7 @@
 		</div>
 		<th:block layout:fragment="script">
 			<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-			<script th:src="@{/js/approval/approvalDrafts.js}"></script>
+			<script th:src="@{/js/document/documentDrafts.js}"></script>
 			<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 		</th:block>
 </body>

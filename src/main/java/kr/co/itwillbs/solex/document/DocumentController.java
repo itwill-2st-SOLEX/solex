@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.approval;
+package kr.co.itwillbs.solex.document;
 
 import java.util.List;
 import java.util.Map;
@@ -17,17 +17,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequestMapping("/approval")
-public class ApprovalController {
+public class DocumentController {
 	
 	@Autowired
-	private ApprovalService service;
+	private DocumentService service;
 	
 	@GetMapping("/drafts")
 	public String approvalDrafts(Model model) {
 		// 모달 기안서 공통코드로 불러오기
 		List<Map<String, String>> docTypeList = service.getdocTypeList();
 		model.addAttribute("docTypes", docTypeList);
-		return "approval/approvalDrafts";
+		return "document/documentDrafts";
 	}
 	
 	// 무한스크롤

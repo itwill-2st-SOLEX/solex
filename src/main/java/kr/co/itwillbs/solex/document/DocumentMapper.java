@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.approval;
+package kr.co.itwillbs.solex.document;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 @Mapper
-public interface ApprovalMapper {
+public interface DocumentMapper {
 	
 	// 모달 기안서 공통코드로 불러오기
 	List<Map<String, String>> getdocTypeList();

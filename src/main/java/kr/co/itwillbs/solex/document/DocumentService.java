@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.approval;
+package kr.co.itwillbs.solex.document;
 
 import java.util.List;
 import java.util.Map;
@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ApprovalService {
+public class DocumentService {
 
 	@Autowired
-	private ApprovalMapper mapper;
+	private DocumentMapper mapper;
 	
 	// 모달 기안서 공통코드로 불러오기
 	public List<Map<String, String>> getdocTypeList() {
@@ -32,14 +32,19 @@ public class ApprovalService {
 	@Transactional
 	public void registerDarafts(Map<String, Object> map) {
 		mapper.registerDocument(map);
-		System.out.println("생성된 doc_id = " + map.get("doc_id"));
-		if(map.get("doc_type").equals("doc_type_01")) {
-			mapper.registerLeaveDoc(map);
-		} else if(map.get("doc_type").equals("doc_type_02")) {
-			mapper.registerbusinessOutworkDoc(map);
-		} else if(map.get("doc_type").equals("doc_type_03")) {
-			mapper.resignationDoc(map);
-		}
+		String docType = (String) map.get("doc_type");
+
+	    switch (docType) {
+	        case "doc_type_01":
+	            mapper.registerLeaveDoc(map);
+	            break;
+	        case "doc_type_02":
+	            mapper.registerbusinessOutworkDoc(map);
+	            break;
+	        case "doc_type_03":
+	            mapper.resignationDoc(map);
+	            break;
+	    }
 	}
 	
 	// 기안서 상세조회
