@@ -6,30 +6,23 @@
 <title>SOLEX</title>
 
 <link rel="stylesheet" th:href="@{/css/employee/orgChart.css}">
+<link rel="stylesheet" th:href="@{/treant/Treant.css}">
 
 </head>
 <body>
 	<th:block layout:fragment="content">
 		<div class="content-area">
-			<h3>조직도</h3>
-			
-			<div id="chart_div"></div>
+			<div class="orgChart-area">
+				<h3 class="title">조직도</h3>
+				
+				<div id="orgCard"></div>
+			</div>
 		</div>
 	</th:block>
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	<th:block layout:fragment="script">
-		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script th:src="@{/treant/vendor/raphael.js}"></script>
+		<script th:src="@{/treant/Treant.js}"></script>
 		<script th:src="@{/js/employee/orgChart.js}"></script>
 	</th:block>
 </body>

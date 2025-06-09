@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.co.itwillbs.solex.employee.EmployeeMapper">
+	<select id="getOrgChartData" resultType="map">
+		SELECT
+		    EMP_NUM,
+		    EMP_NM,
+		    EMP_CAT_CD,
+		    EMP_POS_CD,
+		    EMP_DEP_CD,
+		    EMP_TEAM_CD,
+		    MEG_NUM
+		FROM employee
+		WHERE lower(EMP_STS) = 'y'
+		ORDER BY EMP_POS_CD ASC
+	</select>
+</mapper>
