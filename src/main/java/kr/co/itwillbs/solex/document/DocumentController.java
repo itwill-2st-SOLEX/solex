@@ -70,7 +70,7 @@ public class DocumentController {
 //		session.getAttribute("emp_id");
 		
 		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	long loginEmpId = 1L;
+    	long loginEmpId = 31L;
     	
     	
 		service.registerDarafts(map, loginEmpId);

@@ -177,7 +177,7 @@
 		WHERE d.doc_id = #{doc_id}  
 	</select>
 	
-	<select id="findSteps" resultType="int">
+	<select id="findSteps" resultType="java.lang.Integer">
 		SELECT upper_steps
 		FROM doc_type_rule
 		WHERE doc_type = #{docType}

@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.document;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -45,10 +46,8 @@ public class DocumentService {
 	public void registerDarafts(Map<String, Object> map, long loginEmpId) {
 		map.put("emp_id", loginEmpId);
 		documentMapper.registerDocument(map);
-		System.out.println("ASDASDSA" + map);
 		
-		long docId = (Long) map.get("doc_id");
-		System.out.println( "docId: "+ docId);
+		long docId = ((Integer) map.get("doc_id")).longValue();
 		String docType = (String) map.get("doc_type");
 
 	    switch (docType) {
@@ -65,14 +64,22 @@ public class DocumentService {
 	    
 	    // 작성자 직급 sort 
         Map<String, Object> docEmployee = employeeMapper.selectJoinCodeDetail(loginEmpId);
-        int docEmployeePosSort = (int) docEmployee.get("posSort");
         
+        int docEmployeePosSort = ((BigDecimal) docEmployee.get("POS_SORT")).intValue();
         // 필요 상위 단계 수
-        int steps = documentMapper.findSteps(docType);
+        Integer steps = documentMapper.findSteps(docType);
+        System.out.println("saASDSASSAD           " + steps);
         
-		String catCd = (String) docEmployee.get("catCd");  // null 가능
-		String depCd = (String) docEmployee.get("depCd");  // null 가능
-		String teamCd = (String) docEmployee.get("teamCd"); // null 가능
+		String catCd = (String) docEmployee.get("EMP_CAT_CD");
+		
+		String depCd = null;
+		if (docEmployee.get("EMP_DEP_CD") != null) {
+			depCd = (String) docEmployee.get("EMP_DEP_CD");
+		}
+		String teamCd = null;
+		if (docEmployee.get("EMP_DEP_CD") != null) {
+			teamCd = (String) docEmployee.get("EMP_TEAM_CD");
+		}
         
         // 상위 결재자 체인 탐색
         List<Map<String, Object>> approverList = employeeMapper.selectApprovers(
