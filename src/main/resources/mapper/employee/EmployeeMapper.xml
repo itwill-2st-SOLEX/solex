@@ -5,7 +5,7 @@
 
 <mapper namespace="kr.co.itwillbs.solex.employee.EmployeeMapper">
 
-	<select id="selectJoinCodeDetail" resultMap="map">
+	<select id="selectJoinCodeDetail" resultType="map">
 		SELECT e.*, c.det_sort as pos_sort
 		FROM employee e
 		LEFT JOIN code_detail c

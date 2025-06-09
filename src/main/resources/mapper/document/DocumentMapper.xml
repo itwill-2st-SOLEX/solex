@@ -75,10 +75,12 @@
 		<selectKey keyProperty="doc_id" resultType="int" order="BEFORE">
 		    SELECT doc_seq.NEXTVAL FROM dual
 		</selectKey>
-		INSERT INTO document (doc_type,
+		INSERT INTO document (doc_id,
+							  doc_type,
 					          emp_id,
 					          doc_reg_time
-    	) VALUES (#{doc_type},
+    	) VALUES (#{doc_id},
+  				  #{doc_type},
 		          #{emp_id},
 		          SYSDATE
     	)
@@ -134,7 +136,7 @@
 	           TO_CHAR(l.lea_start_date, 'YYYY-MM-DD') AS lea_start_date,
 	           TO_CHAR(l.lea_end_date, 'YYYY-MM-DD') AS lea_end_date,
 	           l.lea_tt,
-	           l.lea_con
+	           l.lea_con,
 	           al.*
 		FROM document d
 		LEFT JOIN leave_doc l

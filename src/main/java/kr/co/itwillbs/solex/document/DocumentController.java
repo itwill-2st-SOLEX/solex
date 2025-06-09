@@ -68,10 +68,10 @@ public class DocumentController {
 	public void registerDarafts(@RequestBody Map<String, Object> map) {
 //		[TODO] 로그인 만들어지면 넘겨주기
 //		session.getAttribute("emp_id");
-		System.out.println("ASDASDSA" + map);
 		
 		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
     	long loginEmpId = 1L;
+    	
     	
 		service.registerDarafts(map, loginEmpId);
 	}

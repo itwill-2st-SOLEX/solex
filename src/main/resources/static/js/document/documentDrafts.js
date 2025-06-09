@@ -332,6 +332,7 @@ $(function () {
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const data = await response.json();
+			debugger;
 			const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 			modal.show();
 			// 값 주입

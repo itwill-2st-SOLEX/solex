@@ -37,16 +37,18 @@ public class DocumentService {
 	
 	// 로그인한 사원정보 
 	public Map<String, Object> getEmpInfo(int emp_id) {
-		return mapper.getEmpInfo(emp_id);
+		return documentMapper.getEmpInfo(emp_id);
 	}
 	
 	// 기안서 등록
 	@Transactional
 	public void registerDarafts(Map<String, Object> map, long loginEmpId) {
-		// 파라미터의 map에 저장한 기안서의 id 가 저장된다는데 맞나 ?
+		map.put("emp_id", loginEmpId);
 		documentMapper.registerDocument(map);
+		System.out.println("ASDASDSA" + map);
 		
 		long docId = (Long) map.get("doc_id");
+		System.out.println( "docId: "+ docId);
 		String docType = (String) map.get("doc_type");
 
 	    switch (docType) {
