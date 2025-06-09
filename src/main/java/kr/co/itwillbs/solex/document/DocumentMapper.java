@@ -15,6 +15,8 @@ public interface DocumentMapper {
 	List<Map<String, Object>> selectDraftList(@Param("offset") int offset, @Param("size") int size);
 	// 직급 공통코드 불러오기
 	List<Map<String, String>> getPosition(String group);
+	// 로그인한 사원정보 들고오기
+	Map<String, Object> getEmpInfo(int emp_id);
 	// 기안서 등록
 	void registerDocument(Map<String, Object> map);
 	void registerLeaveDoc(Map<String, Object> map);

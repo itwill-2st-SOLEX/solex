@@ -64,31 +64,42 @@ $(function () {
   			<div class="doc-type01">
   				<div id="emp-nm" class="mb-3">
   					<label class="form-label">사번</label>
-  					<input type="text" class="form-control" id="docEmp_nm" name="emp_id"/>
+					<input type="text" class="form-control" id="docEmp_nm" name="emp_id"/>
+					<input type="hidden" name="emp_id" id="docEmp_nm">
   				</div>
+				<div id="emp-nms" class="mb-3">
+					<label class="form-label">성명</label>
+					<input type="text" id="docEmp_nm" class="form-control" />
+				</div>
+  			</div>
+  			<div class="doc-type01">
   				<div id="dept-nm" class="mb-3">
   					<label class="form-label">부서</label>
   					<input type="text" class="form-control" id="docdept_nm" />
   				</div>
-  			</div>
-  			<div class="btn-group" role="group" aria-label="출장 외근 선택">
-  				<input type="radio" class="btn-check" name="lea_type" id="businessTrip" value="반차" autocomplete="off" checked>
-  				<label class="btn btn-purple" for="businessTrip">반차</label>
-  				
-  				<input type="radio" class="btn-check" name="lea_type" id="fieldWork" value="연차" autocomplete="off">
-  				<label class="btn btn-purple" for="fieldWork">연차</label>
-  			</div>
-  			<div class="doc-type01">
   				<div id="dept-team" class="mb-3">
   					<label class="form-label">팀</label>
-  					<input type="text" class="form-control" id="docdept_nm" />
+  					<input type="text" class="form-control" id="docdept_team" />
   				</div>
-  				<div class="date mb-3">
-  					<label class="form-label">날짜</label>
-  					<input type="text" id="dateRange" class="form-control" placeholder="휴가기간 선택">
-  					<input type="hidden" name="lea_start_date" id="startDate">
-  					<input type="hidden" name="lea_end_date" id="endDate">
-  				</div>
+  			</div>
+			<div class="doc-type01">
+				<div id="job-posits" class="mb-3">
+					<label class="form-label">직급</label>
+					<input type="text" class="form-control" id="docdept_position" />
+				</div>
+				<div class="date mb-3">
+					<label class="form-label">날짜</label>
+					<input type="text" id="dateRange" class="form-control" placeholder="휴가기간 선택">
+					<input type="hidden" name="lea_start_date" id="startDate">
+					<input type="hidden" name="lea_end_date" id="endDate">
+				</div>
+			</div>
+  			<div class="btn-group" role="group" aria-label="반차 연차 선택">
+  				<input type="radio" class="btn-check" name="lea_type" id="businessTrip" value="반차" checked>
+  				<label class="btn btn-purple" for="businessTrip">반차</label>
+  				
+  				<input type="radio" class="btn-check" name="lea_type" id="fieldWork" value="연차">
+  				<label class="btn btn-purple" for="fieldWork">연차</label>
   			</div>
   			<div class="mb-3">
   				<label class="form-label">제목</label>
@@ -104,22 +115,27 @@ $(function () {
 			<div class="doc-type05">
 				<div id="emp-id" class="mb-3">
 					<label class="form-label">사번</label>
-					<input type="text" class="form-control" name="emp_id" />
+					<input type="text" class="form-control" id="docEmp_id" name="emp_id" />
+					<input type="hidden" name="emp_id" id="docEmp_nm">
 				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
-					<input type="text" class="form-control" />
+					<input type="text" id="docEmp_nm" class="form-control" />
 				</div>
 			</div>
 			<div class="doc-type05">
 				<div id="dept-nms" class="mb-3">
 					<label class="form-label">부서</label>
-					<input type="text" class="form-control" />
+					<input type="text" id="docdept_nm" class="form-control" />
 				</div>
 				<div id="dept-teams" class="mb-3">
 					<label class="form-label">팀</label>
-					<input type="text" class="form-control" />
+					<input type="text" id="docdept_team" class="form-control" />
 				</div>
+			</div>
+			<div id="job-posit" class="mb-3">
+				<label class="form-label">직급</label>
+				<input type="text" class="form-control" id="docdept_position" />
 			</div>
 			<div class="btn-group" role="group" aria-label="출장 외근 선택">
 			  <input type="radio" class="btn-check" name="bus_type" value="출장" id="businessTrip" checked>
@@ -149,7 +165,8 @@ $(function () {
 			<div class="doc-type03">
 				<div id="emp-id" class="mb-3">
 					<label class="form-label">사번</label>
-					<input type="text" class="form-control" id="docEmp_nm" name="emp_id"/>
+					<input type="text" class="form-control" id="docEmp_id" name="emp_id"/>
+					<input type="hidden" name="emp_id" id="docEmp_nm">
 				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
@@ -163,7 +180,7 @@ $(function () {
 				</div>
 				<div id="curr-team" class="team mb-3">
 					<label class="form-label">팀</label>
-					<input type="text" class="form-control" id="docdept_nm" />
+					<input type="text" class="form-control" id="docdept_team" />
 				</div>
 			</div>
 			<div class="doc-type03">
@@ -198,7 +215,8 @@ $(function () {
 	      <input type="hidden" name="doc_type" value="${selected}" />
 	      ${formHtml}
 	    `);
-	
+		// 2. 사원 정보 채우기
+		fillEmployeeInfo();
 	    attachDateRangeChange();
 	
 	    flatpickr("#dateRange", {
@@ -282,6 +300,10 @@ $(function () {
 			const modalEl = document.getElementById('exampleModal');
 			const modalInstance = bootstrap.Modal.getInstance(modalEl);
 			modalInstance.hide();
+			
+			// 페이지 리셋 후 목록 다시 불러오기
+			currentPage = 0;
+			await loadDrafts(currentPage);
 			} catch (err) {
       			console.error("등록 중 에러:", err);
       			alert("등록에 실패했습니다. 다시 시도해주세요.");
@@ -298,6 +320,7 @@ $(function () {
 	
 	// 상세조회 모달
 	async function openDetailModal(row, docTypeCode) {
+		debugger;
 		document.querySelector("#detailModal .modal-body").innerHTML = formTemplates[docTypeCode];
 		// 항상 비활성화
 		const form = document.querySelector("#detailModal .modal-body");
@@ -309,22 +332,78 @@ $(function () {
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const data = await response.json();
+			const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+			modal.show();
 			// 값 주입
 			for (const [key, value] of Object.entries(data)) {
-				const lowerKey = key.toLowerCase();
-				const el = form.querySelector(`[name="${lowerKey}"]`);
-				if (el) el.value = value;
+			  const lowerKey = key.toLowerCase();
+
+			  // 일반 input 주입
+			  const el = form.querySelector(`[name="${lowerKey}"]`);
+			  if (el) {
+			    el.value = value;
+			    continue;
+			  }
+			  // 날짜 필드 처리 (docType별 분기)
+			     if (docTypeCode === "doc_type_01") {
+			       const start = data.LEA_START_DATE;
+			       const end = data.LEA_END_DATE;
+			       if (start && end) {
+			         modalBody.querySelector('input[name="lea_start_date"]').value = start;
+			         modalBody.querySelector('input[name="lea_end_date"]').value = end;
+			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+			         fp?.setDate([start, end]);
+			       }
+				   debugger;
+			     } 
+			     else if (docTypeCode === "doc_type_02") {
+			       const start = data.BUS_START_TIME;
+			       const end = data.BUS_END_TIME;
+			       if (start && end) {
+			         modalBody.querySelector('input[name="bus_start_time"]').value = start;
+			         modalBody.querySelector('input[name="bus_end_time"]').value = end;
+			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+			         fp?.setDate([start, end]);
+			       }
+				   debugger;
+			     } 
+			     else if (docTypeCode === "doc_type_03") {
+			       const start = data.RES_START_DATE;
+			       if (start) {
+			         modalBody.querySelector('input[name="res_start_date"]').value = start;
+			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+			         fp?.setDate(start);
+			       }
+				   debugger;
+			     }
+
+//			     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+//			     modal.show();
 			}
-		   	const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-		   	modal.show();
-			   
 		} catch(err) {
 			console.error("상세 조회 중 에러:", err);
 		    alert("상세 조회에 실패했습니다.");
 		}
 	}
 });
-
+//로그인한 사원정보 넣어주기
+function fillEmployeeInfo() {
+    $.ajax({
+        url: '/SOLEX/approval/employee/info',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+			$('#docEmp_id').val(data.EMP_ID).prop('disabled', true);
+			$('#docEmp_nm').val(data.EMP_NM).prop('disabled', true);
+			$('#docdept_nm').val(data.EMP_DEP_NM).prop('disabled', true);
+			$('#docdept_team').val(data.EMP_TEAM_NM).prop('disabled', true);
+			$('#docdept_position').val(data.EMP_POS_NM).prop('disabled', true);
+        },
+        error: function() {
+            alert('사원 정보를 불러오지 못했습니다.');
+        }
+    });
+}
 // 날짜 추출하기
 function attachDateRangeChange() {
 	const input = document.getElementById('dateRange');

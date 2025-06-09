@@ -28,6 +28,11 @@ public class DocumentService {
 		return mapper.getPosition(group);
 	}
 	
+	// 로그인한 사원정보 
+	public Map<String, Object> getEmpInfo(int emp_id) {
+		return mapper.getEmpInfo(emp_id);
+	}
+	
 	// 기안서 등록
 	@Transactional
 	public void registerDarafts(Map<String, Object> map) {
@@ -61,5 +66,6 @@ public class DocumentService {
 	    }
 		
 	}
+
 	
 }

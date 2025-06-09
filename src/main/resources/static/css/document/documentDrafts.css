@@ -35,7 +35,8 @@
 #transfer-team,
 #curr-ranks,
 #dept-teams,
-#job-posit {
+#job-posit,
+#job-posits {
 	width: 310px;
 }
 .doc-type01,
@@ -49,13 +50,13 @@
 #curr-ranks,
 #emp-nms,
 #cost-detail,
-.date,
 #job-posi,
 #curr-team,
 #promotion-posi,
 #transfer-team,
 #dept-teams,
-#last-day {
+#last-day,
+#job-posits {
 	margin-left: 70px;
 }
 .approval-line{

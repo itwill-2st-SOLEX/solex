@@ -29,26 +29,46 @@
   	</select>
   
 <!--   직급 공통코드 불러오기  -->
-	<select id="getPosition" resultType="map" parameterType="string">
-		SELECT det_id, det_nm
-      FROM code_detail
-     WHERE cod_id = 
-       <choose>
-         <when test="group == 'dep_erp' or group == 'team'">
-           'dept'
-         </when>
-         <otherwise>
-           #{group}
-         </otherwise>
-       </choose>
-       AND det_yn = 'y'
-       <if test="group == 'dep_erp'">
-         AND det_id LIKE 'dept#___' ESCAPE '#'
-       </if>
-       <if test="group == 'team'">
-          AND det_nm like '%팀'
-       </if>
-	</select>
+<!-- 	<select id="getPosition" resultType="map" parameterType="string"> -->
+<!-- 		SELECT det_id, det_nm -->
+<!--       FROM code_detail -->
+<!--      WHERE cod_id =  -->
+<!--        <choose> -->
+<!--          <when test="group == 'dep_erp' or group == 'team'"> -->
+<!--            'dept' -->
+<!--          </when> -->
+<!--          <otherwise> -->
+<!--            #{group} -->
+<!--          </otherwise> -->
+<!--        </choose> -->
+<!--        AND det_yn = 'y' -->
+<!--        <if test="group == 'dep_erp'"> -->
+<!--          AND det_id LIKE 'dept#___' ESCAPE '#' -->
+<!--        </if> -->
+<!--        <if test="group == 'team'"> -->
+<!--           AND det_nm like '%팀' -->
+<!--        </if> -->
+<!-- 	</select> -->
+	
+<!-- 	로그인한 사원 정보 들고오기 -->
+		<select id="getEmpInfo" resultType="map">
+			SELECT e.emp_id,
+				   e.emp_nm,
+			       pos.det_nm AS emp_pos_nm,
+			       dep.det_nm AS emp_dep_nm,
+			       team.det_nm AS emp_team_nm
+			FROM employee e
+			LEFT JOIN code_detail pos 
+			  ON e.emp_pos_cd = pos.det_id 
+			 AND pos.cod_id = 'pos'
+			LEFT JOIN code_detail dep 
+			  ON e.emp_dep_cd = dep.det_id 
+			 AND dep.cod_id IN ('dep_erp', 'dep_mes')
+			LEFT JOIN code_detail team 
+			  ON e.emp_team_cd = team.det_id 
+			 AND team.cod_id = 'team'
+			WHERE e.emp_id = #{emp_id}
+		</select>
 	
 <!-- 	기안서 등록  반연차 테이블에 doc_id를 넘겨줘야 해서 keyProperty 넘김-->
 	<insert id="registerDocument" parameterType="map">

@@ -9,6 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,10 +49,22 @@ public class DocumentController {
 		return service.getPosition(group);
 	}
 	
+	// 로그인한 사원정보 들고오기
+	@ResponseBody
+	@GetMapping("/employee/info")
+	public Map<String, Object> empInfo(HttpSession session) {
+//		[TODO] 로그인 만들어지면 넘겨주기
+//		session.getAttribute("emp_id");
+		int emp_id = 31;
+		return service.getEmpInfo(emp_id);
+	}
+	
 	// 기안서 등록
 	@ResponseBody
 	@PostMapping("register/drafts")
 	public void registerDarafts(@RequestBody Map<String, Object> map) {
+//		[TODO] 로그인 만들어지면 넘겨주기
+//		session.getAttribute("emp_id");
 		System.out.println("ASDASDSA" + map);
 		service.registerDarafts(map);
 	}
