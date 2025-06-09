@@ -1,14 +1,16 @@
 @charset "UTF-8";
 
 .custom-content{
-	margin: 20px 100px;
+	margin: 40px 100px 40px 100px;
 	padding: 30px;
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
-	background-color: lightyellow;
+	/*background-color: lightyellow;*/
 	font-size: 1.3em;
 	text-align: center;
+	border: 1px solid #ccc;
+	border-radius: 5px;
 }
 
 .custom-content .cc-day {
@@ -17,6 +19,7 @@
 
 .custom-content div:nth-child(3){
 	position: relative;
+
 }
 
 .custom-content  div:nth-child(3) span{
@@ -25,8 +28,11 @@
 	padding: 0;
 	position: absolute;
 	bottom: -10px;
-	left: 30%;
+	left: 50%;
+	transform: translateX(-50%);
 	display: block;
+	white-space: nowrap;
+	overflow: hidden;
 }
 /* 	
 .custom-modal-header {

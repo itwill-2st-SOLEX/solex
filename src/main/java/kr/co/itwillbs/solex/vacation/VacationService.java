@@ -1,9 +1,8 @@
 package kr.co.itwillbs.solex.vacation;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,7 @@ public class VacationService {
 	public VacationMapper vacationMapper;
 	
 	//개인별 휴가 개수 확인
-	public Map<String, Object> getVacationSummary(int empId) {
+	public Map<String, Object> getVacationSummary(Long empId) {
 		
 		//sql 조회
 		Map<String, Object> summary = vacationMapper.getVacationSummary(empId);
@@ -53,5 +52,19 @@ public class VacationService {
 
         return summary;
 	}
+	
+	//총 휴가 사용 개수
+	public int getVacationCount(Long empId) {
+		return vacationMapper.getVacationCount(empId);
+	}
+
+	
+	
+	//개인별 휴가 내역 확인
+	public List<Map<String, Object>> getVacationDetail(Map<String, Object> params) {
+		
+		return vacationMapper.getVacationDetail(params);
+	}
+
 
 }

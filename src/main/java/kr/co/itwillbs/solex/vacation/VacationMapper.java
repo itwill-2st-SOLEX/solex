@@ -7,5 +7,9 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface VacationMapper {
-	Map<String, Object> getVacationSummary(int empId);
+	Map<String, Object> getVacationSummary(Long empId);
+	
+	int getVacationCount(Long empId);
+	
+	List<Map<String, Object>> getVacationDetail(Map<String, Object> params);
 }

@@ -13,20 +13,11 @@ public class VacationController {
 	
 	@Autowired
 	public VacationService vacationService;
-
+    
+	// 공지사항 페이지로 단순 이동
     @GetMapping("/vacation")
-    public String getVacationPage(Model model) {
-    	
-    	//---------------------------------
-    	//로그인 구현 후 emp_id 전달 예정
-    	
-        
-    	Map<String, Object> vacationList = vacationService.getVacationSummary(1);
-    	
-    	System.out.println(vacationList);
-    	model.addAttribute("vacationList", vacationList);
-    	
-    	
-    	return "vacation/vacationList";
+    public String getVacationPage() {
+        return "vacation/vacationDetail"; 
     }
+    
 }

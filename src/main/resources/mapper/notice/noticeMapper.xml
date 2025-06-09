@@ -8,7 +8,7 @@
 	<select id="getNoticeList" resultType="map">
 		SELECT n.not_id, n.emp_id, n.not_tt, n.not_con, not_reg_date, e.emp_nm, c.det_nm
 		FROM NOTICE n JOIN EMPLOYEE e ON n.emp_id = e.emp_id
-		   			  JOIN code_detail c ON e.emp_dep_cd = c.det_id
+		   		LEFT JOIN code_detail c ON e.emp_dep_cd = c.det_id
 		<where>
 			<if test="keyword != null and keyword != ''">
 				(LOWER(n.not_tt) LIKE '%' || LOWER(#{keyword}) || '%'
@@ -23,7 +23,7 @@
 	<select id="getNoticeDetail" resultType="map">
 		SELECT n.not_id, n.emp_id, n.not_tt, n.not_con, e.emp_nm, not_reg_date, c.det_nm
 		FROM NOTICE n JOIN EMPLOYEE e ON n.emp_id = e.emp_id
-		   			  JOIN code_detail c ON e.emp_dep_cd = c.det_id
+		   		LEFT JOIN  code_detail c ON e.emp_dep_cd = c.det_id
 		WHERE n.not_id = #{notId}
 	</select>
 	
@@ -65,7 +65,7 @@
 	<select id="searchNotice" resultType="map">
 		SELECT n.not_id, n.emp_id, n.not_tt, n.not_con, e.emp_nm, not_reg_date, c.det_nm
 		FROM NOTICE n JOIN EMPLOYEE e ON n.emp_id = e.emp_id
-		   			  JOIN code_detail c ON e.emp_dep_cd = c.det_id
+		   		LEFT JOIN  code_detail c ON e.emp_dep_cd = c.det_id
 		WHERE n.not_id = #{notId}
 	</select>
   </mapper>

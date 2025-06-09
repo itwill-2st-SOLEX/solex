@@ -2,10 +2,10 @@
 //전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
-const gridHeight = 550;
-let editorInstance = null;
+const gridHeight = 400;
+/*let editorInstance = null;
 let editorLoaded = false;
-let searchKeyword = '';
+let searchKeyword = '';*/
 
 // ToastUI Grid 생성
 const grid = new tui.Grid({
@@ -15,20 +15,25 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [],
     columns: [
-		{ header: '번호', name: 'rowNum', width: 100, sortable: true },
-        { header: '제목', name: 'notTt', width: 600, sortable: true },
-        { header: '부서', name: 'detNm', align: 'center',  sortable: true },
-        { header: '작성자', name: 'empNm', align: 'center',  sortable: true },
-        { header: '등록일', name: 'notRegDate', align: 'center',  sortable: true }
+		{ header: '번호', name: 'rowNum', width: 100, align: 'center', sortable: true },
+        { header: '연차유형', name: 'leaType', align: 'center', sortable: true },
+        { header: '휴가시작일', name: 'leaStartDate', align: 'center',  sortable: true },
+        { header: '휴가종료일', name: 'leaEndDate', align: 'center',  sortable: true },
+        { header: '사용일수', name: 'leaUsedDay', align: 'center',  sortable: true },
+		/*{ header: '상태', name: 'notRegDate', align: 'center',  sortable: true },*/
+        { header: '사유', name: 'leaCon', width: 500,  sortable: true }
     ],
+
 });
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
-	searchKeyword = document.getElementById('searchInput').value.trim();
-    noticeList(currentPage, searchKeyword);
+	vacationSummary();
+    vacationDetail(currentPage);
+	
+	/*searchKeyword = document.getElementById('searchInput').value.trim();
 	document.getElementById('searchBtn').addEventListener('click', searchNotice);
-	document.getElementById('writeBtn').addEventListener('click', onWriteNotice);
+	document.getElementById('writeBtn').addEventListener('click', onWriteNotice);*/
 	
 });
 
@@ -39,8 +44,8 @@ function bindScrollEvent() {
 	
 	//무한스크롤시 검색어 유지를 위해 재전달
     grid.on('scrollEnd', () => {
-        const keyword = document.getElementById('searchInput').value.trim();
-        noticeList(currentPage, keyword);
+        //const keyword = document.getElementById('searchInput').value.trim();
+        vacationDetail(currentPage);
     });
 }
 
@@ -54,33 +59,59 @@ const formatter = new Intl.DateTimeFormat('ko-KR', {
     day: '2-digit'
 });
 
+//휴가 요약 정보
+async function vacationSummary() {
+	try {
+			const empId = 1;
+			let url = `/SOLEX/api/vacation/summary?empId=${empId}`;
+			
+	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
+	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
+
+			document.getElementById('empNm').textContent = data.EMP_NM || '-';
+			document.getElementById('empHire').textContent = formatter.format(new Date(data.EMP_HIRE))  || '-';
+			document.getElementById('periodEnd').textContent = formatter.format(new Date(data.periodEnd)) || '-';
+			document.getElementById('daysLeft').textContent = data.daysLeft != null ? `(D-${data.daysLeft})` : '';
+			document.getElementById('vacTotal').textContent = data.VAC_TOTAL || 0;
+			document.getElementById('vacUsed').textContent = data.VAC_USED || 0;
+			document.getElementById('vacRemain').textContent = data.VAC_REMAIN || 0;
+
+	    } catch (e) {
+	        console.error('fetch 에러 : ', e);
+	    }
+}
+
 // 게시글 목록 불러오기
-async function noticeList(page, keyword = '') {
+async function vacationDetail(page) {
     try {
 		
+		const empId = 1;
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/api/notice?page=${page}&size=${pageSize}`;
+		let url = `/SOLEX/api/vacation/detail?page=${page}&size=${pageSize}&empId=${empId}`;
 		
-        if (keyword) {
-            url += `&keyword=${encodeURIComponent(keyword)}`;
-        }
+        //if (keyword) {
+        //    url += `&keyword=${encodeURIComponent(keyword)}`;
+        //}
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
-
-		const list = data.list;
-		const totalCount = data.totalCount;
 		
-		console.log(data.list.length)
+		console.log(data)
+		const list = data.list;
+		const vacationCount = data.vacationCount;
+		
+		//console.log(data.list.length)
 		
         const gridData = list.map((n, idx) => ({
-            notId: n.NOT_ID,
-            notTt: n.NOT_TT,
-            notCon: n.NOT_CON,
-            detNm: n.DET_NM || '-',
-            empNm: n.EMP_NM || '-',
-            notRegDate: formatter.format(new Date(n.NOT_REG_DATE)),
-			rowNum: totalCount - (page * pageSize + idx) // 역순 번호 계산
+			rowNum: vacationCount - (page * pageSize + idx), // 역순 번호 계산
+			leaType: n.LEA_TYPE,
+			vacTotal: n.VAC_TOTAL,
+			vacUsed: n.VAC_USED,
+			vacRemain: n.VAC_REMAIN,
+            leaStartDate: formatter.format(new Date(n.LEA_START_DATE))  || '-',
+            leaEndDate: formatter.format(new Date(n.LEA_END_DATE))  || '-',
+            leaUsedDay: n.LEA_USED_DAY,
+            leaCon: n.LEA_CON
         }));
 		
 		//첫 페이지면 초기화 후 새로 보여줌
@@ -93,9 +124,9 @@ async function noticeList(page, keyword = '') {
 		// 무한스크롤 종료
         if (data.length < pageSize) {
             grid.off('scrollEnd');
-        } else {
+        } /*else {
 			bindScrollEvent();
-		}
+		}*/
 
     } catch (e) {
         console.error('fetch 에러 : ', e);
@@ -103,16 +134,16 @@ async function noticeList(page, keyword = '') {
 }
 
 // 검색기능
-function searchNotice() {
+/*function searchNotice() {
 	const keyword = document.getElementById('searchInput').value.trim();
 	    currentPage = 0;
 		
 		bindScrollEvent();		//무한스크롤 초기화 후 실행
 	    noticeList(currentPage, keyword);
-}
+}*/
 
 // 제목 클릭 시 상세조회
-grid.on('click', async (ev) => {
+/*grid.on('click', async (ev) => {
     if (ev.columnName === 'notTt') {
         const noticeId = grid.getRow(ev.rowKey).notId;
 
@@ -125,15 +156,16 @@ grid.on('click', async (ev) => {
         }
     }
 });
+*/
 
 // 글쓰기 버튼 클릭
-function onWriteNotice() {
+/*function onWriteNotice() {
     showNoticeModal('new');
 }
-
+*/
 
 // 게시글 등록/수정/삭제 - 비동기
-async function changeNotice(mode, noticeId = null) {
+/*async function changeNotice(mode, noticeId = null) {
 	
 	let url = '';
 	let method = '';
@@ -235,7 +267,7 @@ function showNoticeModal(mode, data = {}) {
             <div class="custom-modal-header">
                 <h4 class="custom-modal-title" id="exampleModalLabel">${title}</h4>
                 <ul class="custom-modal-meta">
-                    <li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM || '-'}</span></li>
+                    <li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM }</span></li>
                     <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span></li>
                     <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? 
 										new Date(data.NOT_REG_DATE).toLocaleString('ko-KR', {
@@ -295,4 +327,4 @@ function loadEditorScript(callback) {
 	
     document.body.appendChild(script);
 }
-
+*/
