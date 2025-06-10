@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const punchInTimeSpan = document.getElementById('punch-in-time');
     const punchOutTimeSpan = document.getElementById('punch-out-time');
     const totalWorkTimeSpan = document.getElementById('total-work-time');
-    const attStsSpan = document.getElementById('punch_sts');
+    const pubchStatusSpan = document.getElementById('punch-sts');
     const resetButton = document.getElementById('reset-attendance-button'); // 초기화 버튼 (이전 단계에서 추가했다면)
 
     // 서버 API 엔드포인트 정의 
@@ -24,18 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 서버 응답 예시: { "punchInTime": "2025-06-09T09:00:00", "punchOutTime": null, "totalWorkMinutes": 0 }
                 // 또는 { "punchInTime": "2025-06-09T09:00:00", "punchOutTime": "2025-06-09T18:00:00", "totalWorkMinutes": 540 }
 
-				console.log('response??????????   '  + JSON.stringify(response));
+				console.log('today response??????????   '  + JSON.stringify(response));
                 const punchInDbTime = response.att_in_time;
                 const punchOutDbTime = response.att_out_time;
-                const totalWorkMinutes = response.totalWorkMinutes; // 서버에서 계산해서 주는게 좋음
-
+				const punchStatus = response.det_nm;
+                
                 // 출근 시간 표시 및 버튼 상태
                 if (punchInDbTime) {
                     const date = new Date(punchInDbTime); // 서버에서 받은 시간 (ISO 8601 문자열)을 Date 객체로 변환
                     punchInTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                     punchInButton.disabled = true;
                     punchInButton.style.opacity = '0.6';
-                    
+					punchStatus.textContent = punchStatus;
                     // 출근은 했는데 아직 퇴근을 안 했을 경우
                     if (!punchOutDbTime) { 
                         punchOutButton.disabled = false;
@@ -60,15 +60,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     punchOutTimeSpan.textContent = '--:--';
                 }
+				
+				// 출퇴근 상태 표시
+				if(punchStatus) {
+					pubchStatusSpan.textContent = punchStatus;
+				} else {
+					pubchStatusSpan.textContent = '--';
+				}
+				
+				// 근무시간 표시
+				if (punchInDbTime && punchOutDbTime) { // 두 값이 모두 존재할 때만 계산
+				    const punchInDate = new Date(punchInDbTime);
+				    const punchOutDate = new Date(punchOutDbTime);
 
-                // 총 근무 시간 표시 (서버에서 받은 분을 시간/분으로 변환)
-                if (totalWorkMinutes !== undefined && totalWorkMinutes !== null) {
-                    const hours = Math.floor(totalWorkMinutes / 60);
-                    const minutes = totalWorkMinutes % 60;
-                    totalWorkTimeSpan.textContent = `${hours}시간 ${minutes}분`;
-                } else {
-                    totalWorkTimeSpan.textContent = '--시간 --분';
-                }
+				    if (isNaN(punchInDate.getTime()) || isNaN(punchOutDate.getTime())) {
+				        console.error("유효하지 않은 날짜/시간 형식이 DB에서 넘어왔습니다.");
+				        totalWorkTimeSpan.textContent = '--시간 --분';
+				    } else {
+				        const totalMilliseconds = punchOutDate.getTime() - punchInDate.getTime();
+				        const totalWorkMinutes = Math.floor(totalMilliseconds / (1000 * 60));
+
+				        const hours = Math.floor(totalWorkMinutes / 60);
+				        const minutes = totalWorkMinutes % 60;
+
+				        totalWorkTimeSpan.textContent = `${hours}시간 ${minutes}분`;
+				    }
+				} else {
+				    // 퇴근 시간이 아직 없거나 출근 시간 정보가 없을 경우
+				    totalWorkTimeSpan.textContent = '--시간 --분';
+				}
+				
             },
             error: function(xhr, status, error) {
                 console.error("오늘 출퇴근 현황 불러오기 실패:", error);
@@ -100,8 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
             success: function(response) {
                 // 서버 응답 예시: { "status": "success", "punchInTime": "2025-06-09T09:05:30" }
                 alert('출근 등록이 완료되었습니다!');
-                // DB에 저장된 실제 출근 시간을 받아와 UI 업데이트
-                const punchInDbTime = response.punchInTime;
+            
+				// DB에 저장된 실제 출근 시간과 상태를 받아와 UI 업데이트
+                const punchInDbTime = response.att_in_time;
+				const punchStatus = response.det_nm;
+
+				
                 if (punchInDbTime) {
                     const date = new Date(punchInDbTime);
                     punchInTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -113,10 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 punchOutButton.disabled = false;
                 punchOutButton.style.opacity = '1';
 
+				// 출퇴근 상태 표시
+				if(punchStatus) {
+					pubchStatusSpan.textContent = punchStatus;
+				} else {
+					pubchStatusSpan.textContent = '--';
+				}
+
+				
                 // 퇴근 시간 및 총 근무 시간 초기화 (새로운 출근이므로)
                 punchOutTimeSpan.textContent = '--:--';
                 totalWorkTimeSpan.textContent = '--시간 --분';
-				attStsSpan = '출근';
             },
             error: function(xhr, status, error) {
                 console.error("출근 등록 실패:", xhr.responseText);
@@ -133,13 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('출근 기록이 없습니다. 먼저 출근 등록을 해주세요.');
             return;
         }
+		console.log('AJAX 요청 시작 직전! punchInTimeSpan.textContent:', punchInTimeSpan.textContent); // 추가
 
         $.ajax({
             url: PUNCH_OUT_URL,
             method: 'POST', // POST 요청
             dataType: 'json',
-//			contentType: 'application/json', // <-- Content-Type 명시
-//		    data: JSON.stringify({}),      // <-- 빈 JSON 객체를 문자열로 변환하여 보냄
 			   
             success: function(response) {
                 // 서버 응답 예시: { "status": "success", "punchOutTime": "2025-06-09T18:00:00", "totalWorkMinutes": 535 }
@@ -148,21 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 // DB에 저장된 실제 퇴근 시간 및 총 근무 시간을 받아와 UI 업데이트
                 const punchOutDbTime = response.att_out_time;
                 const totalWorkMinutes = response.totalWorkMinutes;
-				const attSts = response.att_sts;
+				const punchStatus = response.det_nm;
+
 				
 				console.log('punchOutDbTime ?? ' + JSON.stringify(response));
-
+				
                 if (punchOutDbTime) {
                     const date = new Date(punchOutDbTime);
                     punchOutTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
                 }
+				// 출퇴근 상태 표시
+				if(punchStatus) {
+					pubchStatusSpan.textContent = punchStatus;
+				} else {
+					pubchStatusSpan.textContent = '--';
+				}
+
                 if (totalWorkMinutes !== undefined && totalWorkMinutes !== null) {
                     const hours = Math.floor(totalWorkMinutes / 60);
                     const minutes = totalWorkMinutes % 60;
                     totalWorkTimeSpan.textContent = `${hours}시간 ${minutes}분`;
-                }
-                if (attSts) {
-                    attStsSpan.textContent = attSts;
                 }
 
                 // 버튼 상태 변경
@@ -173,8 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             },
             error: function(xhr, status, error) {
+	            console.error("HTTP 상태:", status);
+	            console.error("오류 객체:", error);
                 console.error("퇴근 등록 실패:", xhr.responseText);
                 alert('퇴근 등록에 실패했습니다. 다시 시도해주세요. (오류: ' + xhr.responseText + ')');
+				       
             }
         });
     });
