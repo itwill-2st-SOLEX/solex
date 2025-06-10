@@ -39,5 +39,9 @@ public interface OrderMapper {
 	List<Map<String, Object>> getSearchProductList(@Param("offset") int offset, @Param("limit")  int limit, @Param("searchKeyword") String searchKeyword);
 
 	int getStockCount(@Param("productCode") String productCode);
+
+	int createSujuOrder(Map<String, Object> safe);
+
+	int createSujuOrderDetail(Map<String, Object> safe);
 	
 }

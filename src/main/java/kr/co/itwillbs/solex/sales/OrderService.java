@@ -93,6 +93,21 @@ public class OrderService {
 	public int getStockCount(String productCode) {
 		return orderMapper.getStockCount(productCode);
 	}
+
+	@Transactional
+	public int createOrder(Map<String, Object> safe) {
+		int result = orderMapper.createSujuOrder(safe);
+		
+		if (result != 1) {
+	        // INSERT 실패 시 롤백을 위해 예외를 던지거나 에러 코드를 반환할 수 있습니다.
+	        // @Transactional에 의해 예외 발생 시 롤백됩니다.
+	        throw new RuntimeException("주문 생성에 실패했습니다.");
+	    }
+		
+		log.info("어떤값? : " + safe);
+		
+		return orderMapper.createSujuOrderDetail(safe); 
+	}
     
     
 

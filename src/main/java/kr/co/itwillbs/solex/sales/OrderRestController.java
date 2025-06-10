@@ -45,19 +45,22 @@ public class OrderRestController {
 	
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Map<String, Object> param, HttpSession session) {
+		log.info("param = {}", param);
+		
 		session.setAttribute("emp_id", "201");
 		String emp_id = (String) session.getAttribute("emp_id");		
-		param.put("emp_id", emp_id);
+		
 		 // 화이트리스트 방식으로 안전한 Map 생성
 	    Map<String, Object> safe = new HashMap<>();
-	    safe.put("cli_id",       param.get("clientId"));     // JS에서 보낸 키 이름에 맞춰 가져오기
-	    safe.put("prd_cd",       param.get("productCode"));
+	    safe.put("cli_id",       param.get("selectClientCd"));     // JS에서 보낸 키 이름에 맞춰 가져오기
+	    safe.put("prd_cd",       param.get("selectProductCd"));
 	    safe.put("odd_cnt",      param.get("orderCnt"));
 	    safe.put("odd_pay",      param.get("payAmt"));
 	    safe.put("odd_end_date", param.get("deliverDate"));
 	    safe.put("odd_pay_date", param.get("payDate"));
-	    safe.put("cli_pc",       param.get("postCode"));
-	    safe.put("cli_da",       param.get("postDetail"));
+	    safe.put("odd_pc",       param.get("postCode"));
+	    safe.put("odd_add",       param.get("postAdd"));
+	    safe.put("odd_da",       param.get("postDetail"));
 	    safe.put("emp_id",       emp_id);
 
 	    log.info("safe param = {}", safe);

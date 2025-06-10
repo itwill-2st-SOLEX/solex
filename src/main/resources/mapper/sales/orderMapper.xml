@@ -122,7 +122,24 @@
 		on stk.item_id = prd.prd_cd
 		where prd.prd_cd = #{productCode}
 	</select>
-  
+  	
+  	<insert id="createSujuOrder" parameterType="map" >
+	  	<selectKey keyProperty="ord_id" resultType="long" order="AFTER">
+	        SELECT SUJU_ORDER_SEQ.CURRVAL FROM DUAL
+	    </selectKey>
+  		INSERT INTO suju_order(cli_id, emp_id, ord_reg_date)
+  			VALUES(#{cli_id},#{emp_id},SYSDATE)
+  	</insert>
+  	
+  	<insert id="createSujuOrderDetail">
+  		INSERT INTO suju_order_detail(
+  		  ord_id, prd_cd, odd_cnt, odd_end_date, odd_sts, odd_pc, odd_add, odd_da, odd_pay, odd_pay_date, odd_mod_date 
+  		)
+  			VALUES(
+  			#{ord_id}, #{prd_cd}, #{odd_cnt}, #{odd_end_date}, 'ord_type_01', #{odd_pc}, #{odd_add},#{odd_da}, #{odd_pay}, #{odd_pay_date}, SYSDATE)
+  	</insert>
+  	
+  	
 	
   
   
