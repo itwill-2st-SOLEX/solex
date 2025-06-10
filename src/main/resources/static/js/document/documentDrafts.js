@@ -332,6 +332,7 @@ $(function () {
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const data = await response.json();
+			debugger;
 			const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 			modal.show();
 			// 값 주입
@@ -348,7 +349,7 @@ $(function () {
 			     if (docTypeCode === "doc_type_01") {
 			       const start = data.LEA_START_DATE;
 			       const end = data.LEA_END_DATE;
-			       if (start && end) {
+			       if (start || end) {
 			         modalBody.querySelector('input[name="lea_start_date"]').value = start;
 			         modalBody.querySelector('input[name="lea_end_date"]').value = end;
 			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
