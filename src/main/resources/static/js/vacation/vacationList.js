@@ -2,7 +2,7 @@
 //전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
-const gridHeight = 400;
+const gridHeight = 600;
 /*let editorInstance = null;
 let editorLoaded = false;
 let searchKeyword = '';*/
@@ -15,13 +15,18 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [],
     columns: [
-		{ header: '번호', name: 'rowNum', width: 100, align: 'center', sortable: true },
-        { header: '연차유형', name: 'leaType', align: 'center', sortable: true },
-        { header: '휴가시작일', name: 'leaStartDate', align: 'center',  sortable: true },
-        { header: '휴가종료일', name: 'leaEndDate', align: 'center',  sortable: true },
-        { header: '사용일수', name: 'leaUsedDay', align: 'center',  sortable: true },
-		/*{ header: '상태', name: 'notRegDate', align: 'center',  sortable: true },*/
-        { header: '사유', name: 'leaCon', width: 500,  sortable: true }
+		/*{ header: '번호', name: 'rowNum', width: 100, align: 'center', sortable: true },*/
+        { header: '사번', name: 'leaType', align: 'center', filter: 'select',sortable: true },
+        { header: '이름', name: 'leaStartDate', align: 'center', filter: 'select', sortable: true },
+        { header: '부서', name: 'leaEndDate', align: 'center',  sortable: true },
+        { header: '팀', name: 'leaUsedDay', align: 'center',  sortable: true },
+		{ header: '직급', name: 'leaUsedDay', align: 'center',  sortable: true },
+		{ header: '입사일', name: 'leaUsedDay', align: 'center',  sortable: true },
+		{ header: '총 휴가일수', name: 'leaUsedDay', align: 'center',  sortable: true },
+		{ header: '사용 휴가일수', name: 'leaUsedDay', align: 'center',  sortable: true },
+		{ header: '잔여 휴가일수', name: 'leaUsedDay', align: 'center',  sortable: true },
+		{ header: '휴가소멸일', name: 'leaUsedDay', align: 'center',  sortable: true },
+
     ],
 
 });

@@ -17,9 +17,9 @@ public class RestNoticeController {
 	@Autowired
 	private NoticeService noticeService;
 	
-	// 공지사항 목록
+		// 공지사항 목록
 		// 비동기: JSON 데이터 반환 (fetch API 호출용)
-	    @GetMapping("/api/notice")
+	    @GetMapping("/notice/api")
 	    public Map<String, Object> apiNoticeList(@RequestParam("page") int page, 
 											     @RequestParam("size") int size,
 											     @RequestParam(name="keyword", required = false) String keyword) {
@@ -41,8 +41,8 @@ public class RestNoticeController {
 	    }
 	    
 	    // 공지사항 내용 모달창 띄우기
-	    @GetMapping("/api/notice/{notId}")
-	    public Map<String, Object> apiNoticeContent(@PathVariable("notId") int notId) {
+	    @GetMapping("/notice/api/{id}")
+	    public Map<String, Object> apiNoticeContent(@PathVariable("id") int notId) {
 	    	 
 	    	Map<String, Object> detail = noticeService.getNoticeDetail(notId);
 	    	 

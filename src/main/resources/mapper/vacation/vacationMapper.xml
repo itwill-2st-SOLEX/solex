@@ -23,17 +23,40 @@
 	
 	<!-- 개인별 휴가 상세 내역 조회 -->
 	<select id="getVacationDetail" resultType="map">
-		SELECT d.doc_id, d.emp_id, d.doc_type, d.doc_sts, l.lea_type, l.lea_start_date, l.lea_end_date, l.lea_end_date-l.lea_start_date lea_used_day, l.lea_con
+		SELECT d.doc_id, d.emp_id, d.doc_type, d.doc_sts, l.lea_type, l.lea_start_date, l.lea_end_date, 
+			   (TO_DATE(l.lea_end_date, 'YYYY-MM-DD') - TO_DATE(l.lea_start_date, 'YYYY-MM-DD')+1) lea_used_day, l.lea_con
 		FROM ( SELECT doc_id, emp_id, doc_type, doc_sts
 			   FROM document
 			   WHERE doc_type = 'doc_type_01' AND doc_sts = 'doc_sts_02' AND emp_id = #{empId}
 			  ) d JOIN leave_doc l ON d.doc_id = l.doc_id
 		ORDER BY l.lea_start_date DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
-
 	</select>
 	
-	
+	<!-- 직급별 각 담당 직원의 연차 확인하기 -->
+	<select id="getVacationList" resultType="map">
+		SELECT e.emp_id, e.emp_nm, e.emp_hire, v.vac_total, v.vac_used, v.vac_total - v.vac_used vac_remain
+		FROM vacation v RIGHT JOIN employee e ON v.emp_id = e.emp_id
+		WHERE TO_NUMBER(SUBSTR(emp_pos_cd, -2)) > TO_NUMBER(SUBSTR(#{e.emp_pos_cd}, -2))
+			<choose>
+				<!-- 팀장 조건 -->
+				<when test="team != 'team_00'">
+					AND e.emp_team_cd = #{team} AND e.emp_dep_cd = #{dep}
+				</when>
+				<!-- 부장 조건 -->
+				<when test="dep != 'dep_00'">
+					AND e.emp_dep_cd = #{dep}
+				</when>
+				<!-- 이사 조건 -->
+				<when test="cat != 'cat_00'">
+					AND e.emp_cat_cd = #{cat}
+				</when>
+				<!-- 사장 조건 -->
+				<when test="pos == 'pos_01'">
+					AND e.emp_pos_cd = #{pos}
+				</when>
+			</choose>
+	</select>
  </mapper>
   
   

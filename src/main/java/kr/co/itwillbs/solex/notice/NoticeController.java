@@ -34,7 +34,7 @@ public class NoticeController {
     }
     
     // 글 등록
-    @PostMapping("/api/notice")
+    @PostMapping("/notice/api")
     public ResponseEntity<?> insertNotice(@RequestBody Map<String, Object> map, HttpSession session) {
         System.out.println(map);
         
@@ -50,7 +50,7 @@ public class NoticeController {
     
     
     // 글 변경
-    @PutMapping("/api/notice/{id}")
+    @PutMapping("/notice/api/{id}")
     public ResponseEntity<?> updateNotice(@PathVariable("id") int notId, @RequestBody Map<String, Object> map) {
         map.put("notId", notId);
         map.put("notTt", "[수정] " + map.get("notTt"));
@@ -59,7 +59,7 @@ public class NoticeController {
     }
     
     // 글 삭제
-    @DeleteMapping("/api/notice/{id}")
+    @DeleteMapping("/notice/api/{id}")
     public ResponseEntity<?> deleteNotice(@PathVariable("id") int notId) {
 
         noticeService.deleteNotice(notId);

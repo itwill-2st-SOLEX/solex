@@ -16,42 +16,21 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		<!-- 여기서 부터 작성하시면 됩니다  -->
-			<h2>연차사용내역</h2>
-			<!-- 본문 영역-->
-			<div class="custom-summary">
-				<div>
-					<p class="cc-title" id="empNm"></p>
-				</div>
-				<div>
-					<p class="cc-title">입사일</p>
-					<p class="cc-day" id="empHire"></p>
-				</div>
-				<div>
-					<p class="cc-title">휴가 소멸일</p>
-					<p class="cc-day" id="periodEnd"></p>
-					<span id="daysLeft"></span>
-				</div>
-				<div>
-					<p class="cc-title">총 휴가일수 </p>
-					<p class="cc-day" id="vacTotal"></p>
-				</div>
-
-				<div>
-					<p class="cc-title">사용휴가일수 </p>
-					<p class="cc-day" id="vacUsed"></p>
-				</div>
-				<div>
-					<p class="cc-title">잔여 휴가일수 </p>
-					<p class="cc-day" id="vacRemain"></p>
-				</div>
-
-			</div>
 		
+			<h2>연차현황조회</h2>
+			<div class="custom-content">
+				<div class="search">
+					<input type="text"  class="form-control" name="searchInput" id="searchInput">
+					<button type="button" class="btn btn-outline-dark" id="searchBtn"> 검색 </button>
+				</div>
+			</div>
+			
+			
 			<div id="grid"></div>
         </div>
-
 		
-		<script th:src="@{/js/vacation/vacationDetail.js}"></script>
+		
+		<script th:src="@{/js/vacation/vacationList.js}"></script>
 		
 	</th:block>
 	

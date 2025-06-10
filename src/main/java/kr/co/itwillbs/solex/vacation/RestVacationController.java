@@ -15,13 +15,14 @@ public class RestVacationController {
 	@Autowired
 	public VacationService vacationService;
 	
-	@GetMapping("/api/vacation/summary")
+	@GetMapping("/vacation/api/summary")
 	public Map<String, Object> getVacationSummary(@RequestParam("empId") String empId) {
+		
 	    Long userId = Long.parseLong(empId);
 	    return vacationService.getVacationSummary(userId);
 	}
 	
-	@GetMapping("/api/vacation/detail")
+	@GetMapping("/vacation/api/detail")
 	public Map<String, Object> getVacationDetail(@RequestParam(name = "page", required = false) Integer page,
 										         @RequestParam(name = "size", required = false) Integer size,
 										         @RequestParam("empId") String empId) {

@@ -1,6 +1,7 @@
 @charset "UTF-8";
 
-.custom-content{
+
+.custom-summary{
 	margin: 40px 100px 40px 100px;
 	padding: 30px;
 	display: flex;
@@ -13,16 +14,16 @@
 	border-radius: 5px;
 }
 
-.custom-content .cc-day {
+.custom-summary .cc-day {
 	font-size: 1.1em;
 }
 
-.custom-content div:nth-child(3){
+.custom-summary div:nth-child(3){
 	position: relative;
 
 }
 
-.custom-content  div:nth-child(3) span{
+.custom-summary  div:nth-child(3) span{
 	font-size: 0.9em;
 	margin: 0;
 	padding: 0;
@@ -34,6 +35,31 @@
 	white-space: nowrap;
 	overflow: hidden;
 }
+
+
+.custom-content{
+	margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.custom-content .search{
+	position: static;
+	display: flex;
+}
+
+.custom-content .search button {
+	width: 100px;
+	margin-left: 30px;
+}
+
+.tui-grid-cell-has-input .tui-grid-cell-content{
+	padding-left: 15px;
+}
+
+
+
 /* 	
 .custom-modal-header {
   border-bottom: 1px solid #ccc;

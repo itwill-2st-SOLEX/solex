@@ -2,7 +2,7 @@
 //전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
-const gridHeight = 550;
+const gridHeight = 600;
 let editorInstance = null;
 let editorLoaded = false;
 let searchKeyword = '';
@@ -59,7 +59,7 @@ async function noticeList(page, keyword = '') {
     try {
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/api/notice?page=${page}&size=${pageSize}`;
+		let url = `/SOLEX/notice/api?page=${page}&size=${pageSize}`;
 		
         if (keyword) {
             url += `&keyword=${encodeURIComponent(keyword)}`;
@@ -74,7 +74,7 @@ async function noticeList(page, keyword = '') {
 		console.log(data.list.length)
 		
         const gridData = list.map((n, idx) => ({
-            notId: n.NOT_ID,
+            id: n.NOT_ID,
             notTt: n.NOT_TT,
             notCon: n.NOT_CON,
             detNm: n.DET_NM || '-',
@@ -114,10 +114,10 @@ function searchNotice() {
 // 제목 클릭 시 상세조회
 grid.on('click', async (ev) => {
     if (ev.columnName === 'notTt') {
-        const noticeId = grid.getRow(ev.rowKey).notId;
+        const noticeId = grid.getRow(ev.rowKey).id;
 
         try {
-            const res = await fetch(`/SOLEX/api/notice/${noticeId}`);
+            const res = await fetch(`/SOLEX/notice/api/${noticeId}`);
             const detail = await res.json();
             showNoticeModal('view', detail);
         } catch (e) {
@@ -140,15 +140,15 @@ async function changeNotice(mode, noticeId = null) {
 	let payload = null;
 	
 	if (mode == 'new') {
-		url = '/SOLEX/api/notice';
+		url = '/SOLEX/notice/api';
 		method = 'POST';
 	  
 	} else if (mode == 'edit') {
-		url = `/SOLEX/api/notice/${noticeId}`;
+		url = `/SOLEX/notice/api/${noticeId}`;
 		method = 'PUT';
 	  
 	} else if (mode == 'delete') {
-		url = `/SOLEX/api/notice/${noticeId}`;
+		url = `/SOLEX/notice/api/${noticeId}`;
 		method = 'DELETE';
 	  
 	}
@@ -201,7 +201,7 @@ async function changeNotice(mode, noticeId = null) {
 
 // 수정 버튼 클릭
 function noticeEditMode(noticeId) {
-    fetch(`/SOLEX/api/notice/${noticeId}`)
+    fetch(`/SOLEX/notice/api/${noticeId}`)
         .then(res => res.json())
         .then(data => showNoticeModal('edit', data))
         .catch(err => console.error('수정 모드 조회 실패', err));
@@ -209,7 +209,7 @@ function noticeEditMode(noticeId) {
 
 // 삭제 버튼 클릭
 function noticeDelMode(noticeId) {
-    fetch(`/SOLEX/api/notice/${noticeId}`)
+    fetch(`/SOLEX/notice/api/${noticeId}`)
         .then(res => res.json())
         .then(data => showNoticeModal('delete', data))
         .catch(err => console.error('삭제 모드 조회 실패', err));
