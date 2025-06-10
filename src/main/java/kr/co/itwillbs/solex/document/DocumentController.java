@@ -71,8 +71,6 @@ public class DocumentController {
 		
 		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
     	long loginEmpId = 31L;
-    	
-    	
 		service.registerDarafts(map, loginEmpId);
 	}
 	
@@ -80,6 +78,8 @@ public class DocumentController {
 	@ResponseBody
 	@GetMapping("/select/detail/{doc_id}")
 	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
+		System.out.println(doc_id);
+		System.out.println("SADSAD"+service.selectDetailDoc(doc_id, docTypeCode));
 		return service.selectDetailDoc(doc_id, docTypeCode);
 	}
 	

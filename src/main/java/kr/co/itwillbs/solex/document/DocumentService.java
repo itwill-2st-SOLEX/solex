@@ -68,8 +68,6 @@ public class DocumentService {
         int docEmployeePosSort = ((BigDecimal) docEmployee.get("POS_SORT")).intValue();
         // 필요 상위 단계 수
         Integer steps = documentMapper.findSteps(docType);
-        System.out.println("saASDSASSAD           " + steps);
-        
 		String catCd = (String) docEmployee.get("EMP_CAT_CD");
 		
 		String depCd = null;
@@ -123,8 +121,5 @@ public class DocumentService {
 	        default:
 	        	throw new IllegalArgumentException("알 수 없는 문서 타입입니다: " + docTypeCode);
 	    }
-		
 	}
-
-	
 }

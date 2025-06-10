@@ -46,7 +46,6 @@
 .doc-type03 {
 	display: flex;
 }
-#dept-nm,
 #curr-ranks,
 #emp-nms,
 #cost-detail,
@@ -56,7 +55,7 @@
 #transfer-team,
 #dept-teams,
 #last-day,
-#job-posits {
+#dates {
 	margin-left: 70px;
 }
 .approval-line{
