@@ -24,9 +24,9 @@ public interface DocumentMapper {
 	void resignationDoc(Map<String, Object> map);
 	
 	// 기안서 상세조회
-	List<Map<String, Object>> selectDetailLeave(String doc_id);
-	List<Map<String, Object>> selectDetailOutwork(String doc_id);
-	List<Map<String, Object>> selectDetailResignation(String doc_id);
+	Map<String, Object> selectDetailLeave(String doc_id);
+	Map<String, Object> selectDetailOutwork(String doc_id);
+	Map<String, Object> selectDetailResignation(String doc_id);
 	
 	Integer findSteps(String docType);
 }
