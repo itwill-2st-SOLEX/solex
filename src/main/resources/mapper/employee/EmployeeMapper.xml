@@ -3,17 +3,25 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="kr.co.itwillbs.solex.employee.EmployeeMapper">
-	<select id="getOrgChartData" resultType="map">
-		SELECT
-		    EMP_NUM,
-		    EMP_NM,
-		    EMP_CAT_CD,
-		    EMP_POS_CD,
-		    EMP_DEP_CD,
-		    EMP_TEAM_CD,
-		    MEG_NUM
-		FROM employee
-		WHERE lower(EMP_STS) = 'y'
-		ORDER BY EMP_POS_CD ASC
+
+	<select id="selectOrgChartData" resultType="map">
+	    SELECT
+	        E.EMP_ID,
+	        E.EMP_NUM,
+	        E.EMP_NM,
+	        E.EMP_POS_CD,
+	        CAT.DET_NM AS EMP_CAT,						-- 소속
+	        POS.DET_NM AS EMP_POS,						-- 직급
+	        COALESCE(DEP.DET_NM, NULL) AS EMP_DEP,		-- 부서
+	        COALESCE(TEAM.DET_NM, NULL) AS EMP_TEAM,	-- 팀
+	        COALESCE(E.MEG_NUM, NULL) AS MEG_NUM		-- 매니저
+	    FROM EMPLOYEE E
+	    LEFT JOIN CODE_DETAIL CAT ON CAT.DET_ID = E.EMP_CAT_CD
+	    LEFT JOIN CODE_DETAIL POS ON POS.DET_ID = E.EMP_POS_CD
+	    LEFT JOIN CODE_DETAIL DEP ON DEP.DET_ID = E.EMP_DEP_CD
+	    LEFT JOIN CODE_DETAIL TEAM ON TEAM.DET_ID = E.EMP_TEAM_CD
+	    WHERE	E.EMP_POS_CD != 'pos_05'
+	    ORDER BY E.EMP_NUM
 	</select>
+    
 </mapper>

@@ -3,13 +3,14 @@
 .content-area {
 	display: flex;
     flex-direction: row;
+    justify-content: space-around;
     padding: 20px;
 }
 
 .code {
 	padding: 10px;
 	width: 50%;
-	height: 700px;
+	height: auto;
 }
 
 .c-title {

@@ -8,6 +8,6 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface EmployeeMapper {
 
-	List<Map<String, Object>> getOrgChartData();
+	List<Map<String, Object>> selectOrgChartData();
 
 }
