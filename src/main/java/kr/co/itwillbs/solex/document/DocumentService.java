@@ -81,26 +81,32 @@ public class DocumentService {
 			teamCd = (String) docEmployee.get("EMP_TEAM_CD");
 		}
         
-		System.out.println("시발ㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹ    " + docEmployeePosSort);
-		System.out.println("시발ㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹ    " + catCd);
-		System.out.println("시발ㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹ    " + depCd);
-		System.out.println("시발ㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹ    " + teamCd);
+		System.out.println("docEmployeePosSort    " + docEmployeePosSort);
+		System.out.println("catCd   ----------  " + catCd);
+		System.out.println("depCd    ---------- " + depCd);
+		System.out.println("teamCd   ----------   " + teamCd);
 		
         // 상위 결재자 체인 탐색
         List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
         
-        
+        System.out.println("upperRanks                  :           " + upperRanks);
         System.out.println("upperRanks.size()           :           " + upperRanks.size());
         
         for (int i = 0; i < Math.min(steps, upperRanks.size()); i++) {
             Map<String, Object> rank = upperRanks.get(i);
+            String posCd = (String) rank.get("POS_CD");
+            
+            System.out.println("rank                  :           " + rank);
+            System.out.println("posCd                  :           " + posCd);
+            System.out.println("i                  :           " + i);
+            
             approvalMapper.insertApprovalLine(
                 docId,
                 i + 1,
                 catCd,
                 depCd,
                 teamCd,
-                (String) rank.get("pos_cd")  // 상위 직급
+                posCd
             );
         }
 	}

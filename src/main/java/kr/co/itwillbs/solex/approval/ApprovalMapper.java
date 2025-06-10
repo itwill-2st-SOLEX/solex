@@ -8,11 +8,11 @@ public interface ApprovalMapper {
 
 	void insertApprovalLine(
 			@Param("docId") long docId, 
-			@Param("docId") int i, 
-			@Param("docId") String catCd, 
-			@Param("docId") String depCd, 
-			@Param("docId") String teamCd, 
-			@Param("docId") String string
+			@Param("stepNo") int i, 
+			@Param("catCd") String catCd, 
+			@Param("depCd") String depCd, 
+			@Param("teamCd") String teamCd, 
+			@Param("posCd") String posCd
 			);
 
 }
