@@ -68,43 +68,39 @@
 			    </div>
                 <div class="col">
 			        <label for="prd_nm_virtual_select" class="form-label">상품명 <span style="color:red">*</span></label>
-			        <div class="input-group">
+			        <div class="input-group mb-4">
 			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="상품명을 선택하거나 검색하세요." ></select>
-			            <div class="form-text ms-4" style="color: #f35a5a;" id="no_biz_text" id="stockCount">
-	                    	(재고 : 35개)
-	                	</div>
 			        </div>
+		            <div class="form-text ms-4" style="color: #f35a5a; display: none;" id="stockCount"></div>
 			    </div>
             </div>
             
-            <!-- name , id 등등 손봐야됨 지금은 html만 만짐  -->
 			<div class="row mb-4">
-				<div class="col">
-		            <label for="odd_cnt" class="form-label">선출고 수량</label>
-		            <div class="d-flex align-items-center">
-		                <input type="number" id="odd_cnt" name="odd_cnt" class="form-control" placeholder="선출고 수량 입력하세요." disabled="disabled">
-		            </div>
-				</div>
 				<div class="col">
 		            <label for="odd_cnt" class="form-label">주문 수량 <span style="color:red;">*</span></label>
 		            <div class="d-flex align-items-center">
-		                <input type="number" id="odd_cnt" name="odd_cnt" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
-		            </div>
-				</div>
-	        </div>
-	        <!-- 여기도 value 값 너헝야 됨 -->
-            <div class="row mb-4">
-                <div class="col">
-		            <label for="odd_cnt" class="form-label">주문 마감일 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" value="2021-06-18" id="html5-date-input">
+		                <input type="text" id="odd_cnt" name="odd_cnt" min="0" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
 		            </div>
 				</div>
 				<div class="col">
-				<!-- 이거는 자동 계산 -->
-		            <label for="odd_cnt" class="form-label">결제 금액 <span style="color:red;">*</span></label>
+		            <label for="odd_end_date" class="form-label">납품 요청일 <span style="color:red;">*</span></label>
 		            <div class="d-flex align-items-center">
-		                <input type="number" id="odd_cnt" name="odd_cnt" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
+		                <input class="form-control" type="date" value="" name ="odd_pay_date" id="odd_end_date" disabled="disabled">
+		            </div>
+				</div>
+	        </div>
+            <div class="row mb-4">
+				<div class="col">
+				<!-- 이거는 자동 계산 -->
+		            <label for="odd_pay" class="form-label">결제 금액 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input type="text" id="odd_pay" name="odd_pay" min="0" class="form-control" placeholder="결제 금액 입력하세요." disabled="disabled">
+		            </div>
+				</div>
+                <div class="col">
+		            <label for="odd_pay_date" class="form-label">결제 예정일 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date" value="" disabled="disabled">
 		            </div>
 				</div>
             </div>
@@ -148,7 +144,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-<!--             <button type="button" class="btn btn-primary" id="submitBtn" onclick="${submitFunctionCall}">${submitButtonText}</button> -->
+            <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitForm()">등록</button>
         </div>
 	        </div>
 	    </div>
@@ -158,10 +154,9 @@
 	
 	<th:block layout:fragment="script">
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
-
-    <script th:src="@{/js/sales/order.js}"></script>
+		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
+	    <script th:src="@{/js/sales/order.js}"></script>
 	</th:block>
 	
 </body>

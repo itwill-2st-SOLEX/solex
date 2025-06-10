@@ -13,6 +13,11 @@ let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 �
 let VirtualSelectClientInput = "";
 let VirtualSelectProductInput = "";
 
+let isSelectClient = false;
+let isSelectProduct = false;
+
+let selectProductCd = "";
+let selectClientCd = "";
 
 
 // 2. ToastUI Grid 생성 (변경 없음)
@@ -23,7 +28,7 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [], // 초기 데이터는 비어있음
     columns: [
-        { header: '상품 코드', name: 'PRD_CD', width: 100, sortable: true },
+        { header: '상품 코드', name: 'PRD_CD', width: 100,align: 'center', sortable: true },
         { header: '상품명', name: 'PRD_NM', width: 200, sortable: true },
         { header: '거래처 명', name: 'CLI_NM', align: 'center', sortable: true },
         { header: '주문 수량', name: 'ODD_CNT', align: 'center', sortable: true },
@@ -35,6 +40,10 @@ const grid = new tui.Grid({
 
 // 3. DOM 로드 후 실행될 코드
 document.addEventListener('DOMContentLoaded', async function() { // async 키워드 추가
+	const endDateEl = document.getElementById('odd_end_date');
+    const payDateEl = document.getElementById('odd_pay_date');
+    if (endDateEl) endDateEl.addEventListener('change', onEndDateChange);
+    if (payDateEl) payDateEl.addEventListener('change', onPayDateChange);
 	
 	// DOM 로드 후 검색 입력 필드와 버튼 요소를 가져옴
 	const searchInput = document.getElementById('searchInput'); // 검색 입력 필드 (이미지에 보이는 큰 검색창)
@@ -60,6 +69,8 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
 	        }
 	    }
 	});
+	attachNumericFormatter('odd_cnt');
+	attachNumericFormatter('odd_pay');
 	
 	// --- 주문 등록 모달 관련 요소 및 이벤트 리스너 ---
     const openOrderModalBtn = document.getElementById('openOrderModalBtn'); // '주문 등록' 버튼
@@ -69,7 +80,52 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
     let orderRegisterModalInstance = null; // 전역 변수로 선언하여 다른 함수에서도 사용 가능하게 함
     if (myModalElement) {
         orderRegisterModalInstance = new bootstrap.Modal(myModalElement);
+		
+		
+		// ← 여기 추가: shown.bs.modal 이벤트 바인딩
+	    myModalElement.addEventListener('shown.bs.modal', () => {
+	      initOddEndDate();     // 오늘 날짜 세팅 + min 속성 세팅 + change 콘솔 로그
+	      // 선택 플래그 초기화
+	      isSelectClient  = false;
+	      isSelectProduct = false;
+	      updateInputState();   // odd_* 필드 비활성화
+	    });
+		  
     }
+	// 모달이 닫힐 때: 폼 전체 초기화 (선택값, 입력값, 플래그, 재고표시 등)
+    myModalElement.addEventListener('hidden.bs.modal', () => {
+      // 플래그 & 입력 상태 리셋
+      isSelectClient  = false;
+      isSelectProduct = false;
+      updateInputState();
+
+	  document
+	      .querySelectorAll('#cli_nm_virtual_select .vscomp-clear-button.toggle-button-child')
+	      .forEach(btn => btn.click());
+	    // 상품 clear 버튼
+	    document
+	      .querySelectorAll('#prd_nm_virtual_select .vscomp-clear-button.toggle-button-child')
+	      .forEach(btn => btn.click());
+
+      // 일반 input 비우기
+      [
+        'cli_phone','cli_mgr_name','cli_mgr_phone',
+        'odd_cnt','odd_end_date','odd_pay','odd_pay_date'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      // 재고 표시 숨기기
+      const stockEl = document.getElementById('stockCount');
+      if (stockEl) {
+        stockEl.textContent = '';
+        stockEl.style.display = 'none';
+      }
+
+      // 날짜 피커 다시 오늘 날짜로 초기화
+      initOddEndDate();
+    });
 
     if (openOrderModalBtn) {
         openOrderModalBtn.addEventListener('click', async function() {
@@ -92,7 +148,7 @@ async function fetchGridData(page = currentPage, currentSearchKw = searchKeyword
 
     try {
         const params = new URLSearchParams();
-        params.append('page', page);
+        params.append('page', currentPage);
         params.append('pageSize', pageSize);
 
         if (currentSearchKw) { // 검색어가 비어있지 않다면 (null, '', undefined, ' ') 포함
@@ -171,9 +227,23 @@ async function loadClientDataForModal() {
     }, 300)
   });
 
-  vsInst.$ele.addEventListener('change', (e) => {
-    // vsInst.getValue() 로 최신 선택값을 가져올 수 있습니다.
-    console.log('선택된 값(on wrapper change):', vsInst.getValue());
+  vsInst.$ele.addEventListener('change',async  (e) => {
+	
+	  const cliNm = vsInst.getValue();
+	  
+	  selectClientCd = cliNm;
+	
+	  if (cliNm && cliNm.trim()) {
+	    // 실제 코드가 있을 때만 재고 조회
+	    isSelectClient = true;
+	  } else {
+	    // clear(빈값)이면 false 세팅
+	    isSelectClient = false;
+	  }
+	  await getClientInfo(cliNm);  
+	
+	
+      updateInputState();
   });
   
   
@@ -185,7 +255,6 @@ async function loadClientDataForModal() {
   const inputEl = document.getElementById(vsInst.$searchInput.id);
   inputEl.addEventListener('input', e => {
     VirtualSelectClientInput = e.target.value;
-    console.log('현재 입력값:', VirtualSelectClientInput);
   });
 
   // 5) ▶️ 초기 데이터 한 번 로드
@@ -197,11 +266,8 @@ async function loadClientDataForModal() {
 
 // 서버 호출 + 옵션 세팅을 분리한 헬퍼 함수
 async function fetchAndSetClientOptions(searchValue, virtualSelectInstance) {
-  const page     = 0;
-  const pageSize = 20;
-
   const params = new URLSearchParams();
-  params.append('page', page);
+  params.append('page', currentPage);
   params.append('pageSize', pageSize);
   if (searchValue && searchValue.trim()) {
     params.append('searchKeyword', searchValue.trim());
@@ -256,10 +322,23 @@ async function loadProductDataForModal() {
   });
 
 
-  vsInst.$ele.addEventListener('change', (e) => {
-      // vsInst.getValue() 로 최신 선택값을 가져올 수 있습니다.
-      console.log('선택된 값(on wrapper change):', vsInst.getValue());
-	  getStockCount(vsInst.getValue());
+  vsInst.$ele.addEventListener('change', async (e) => {
+	
+	
+	 const prdCd = vsInst.getValue();
+	 
+	 selectProductCd = prdCd;
+
+	 if (prdCd && prdCd.trim()) {
+	   // 실제 코드가 있을 때만 재고 조회
+	   isSelectProduct = true;
+	 } else {
+	   // clear(빈값)이면 false 세팅
+	   isSelectProduct = false;
+	 }
+	 await getStockCount(prdCd);  
+	 updateInputState();
+	  
     });
 	
 	
@@ -282,11 +361,8 @@ async function loadProductDataForModal() {
 
 // 서버 호출 + 옵션 세팅을 분리한 헬퍼 함수
 async function fetchAndSetProductOptions(searchValue, virtualSelectInstance) {
-  const page     = 0;
-  const pageSize = 20;
-
   const params = new URLSearchParams();
-  params.append('page', page);
+  params.append('page', currentPage);
   params.append('pageSize', pageSize);
   if (searchValue && searchValue.trim()) {
     params.append('searchKeyword', searchValue.trim());
@@ -316,9 +392,21 @@ async function fetchAndSetProductOptions(searchValue, virtualSelectInstance) {
 
 // 서버 호출
 async function getStockCount(productCode) {
-	if (!productCode || !productCode.trim()) {
-	    return;  
-	  }
+	const stockEl = document.getElementById("stockCount");
+	const isEmpty = !productCode || !productCode.trim();
+
+	// 1) 상품 선택 여부 플래그
+	isSelectProduct = !isEmpty;
+	updateInputState();
+
+	// 2) 빈값이면 재고 표시 초기화하고 끝
+	if (isEmpty) {
+	  if (stockEl) stockEl.textContent = "";
+	  return;
+	}
+	 
+	 
+	 
     // 2) URLSearchParams 로 안전하게 쿼리 생성
     const params = new URLSearchParams({ productCode: productCode.trim() });
     const url = `/solex/orders/stock?${params.toString()}`;
@@ -327,7 +415,51 @@ async function getStockCount(productCode) {
 	   const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
 	   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 	   const json = await resp.json();
-	   console.log('재고 수량 응답:', json.stockCount);
+       if (stockEl) {
+         stockEl.textContent = `(재고 ${json.stockCount}개)`;
+		 stockEl.style.display =  "flex";
+       }
+	   
+	 } catch (err) {
+	   console.error('getStockCount 오류:', err);
+	   throw err;    // 상위 로직에서 처리하려면 다시 throw
+	 }
+}
+
+
+// 서버 호출
+async function getClientInfo(clientCode) {
+	if (!clientCode || !clientCode.trim()) {
+	    const elPhone     = document.getElementById('cli_phone');
+	    const elMgrName   = document.getElementById('cli_mgr_name');
+	    const elMgrPhone  = document.getElementById('cli_mgr_phone');
+
+	    if (elPhone)    elPhone.value     = '';
+	    if (elMgrName)  elMgrName.value   = '';
+	    if (elMgrPhone) elMgrPhone.value  = '';
+		
+		isSelectClient = false;
+	    
+	    return;
+	}
+	  
+    
+    const url = `/solex/clients/${clientCode}`;
+
+	try {
+	   const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+	   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+	   const json = await resp.json();
+	   
+	   // 입력값 세팅
+       const elPhone     = document.getElementById('cli_phone');
+       const elMgrName   = document.getElementById('cli_mgr_name');
+       const elMgrPhone  = document.getElementById('cli_mgr_phone');
+
+       if (elPhone)    elPhone.value     = json.data.CLI_PHONE     || '';
+       if (elMgrName)  elMgrName.value   = json.data.CLI_MGR_NAME  || '';
+       if (elMgrPhone) elMgrPhone.value  = json.data.CLI_MGR_PHONE || '';
+	   
 	 } catch (err) {
 	   console.error('getStockCount 오류:', err);
 	   throw err;    // 상위 로직에서 처리하려면 다시 throw
@@ -337,11 +469,233 @@ async function getStockCount(productCode) {
 // 우편번호 찾기 (Daum Postcode API)
 function findPostCode() {
 	new daum.Postcode({
-	            oncomplete: function(data) {
-	            	// 우편번호
-	                $("#cli_pc").val(data.zonecode);
-	                // 도로명 및 지번주소
-	                $("#cli_add").val(data.roadAddress);
-	            }
-	        }).open();
+        oncomplete: function(data) {
+        	// 우편번호
+            $("#cli_pc").val(data.zonecode);
+            // 도로명 및 지번주소
+            $("#cli_add").val(data.roadAddress);
+        }
+    }).open();
 }
+
+function updateInputState() {
+  const shouldEnable = isSelectProduct && isSelectClient;
+  ['odd_cnt','odd_end_date','odd_pay','odd_pay_date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !shouldEnable;
+  });
+}
+// 3) initOddEndDate: 오직 min/value 세팅만
+function initOddEndDate() {
+  const endDateEl = document.getElementById('odd_end_date');
+  const payDateEl = document.getElementById('odd_pay_date');
+  if (!endDateEl || !payDateEl) return;
+
+  const today    = new Date();
+  const yyyy     = today.getFullYear();
+  const mm       = String(today.getMonth()+1).padStart(2,'0');
+  const dd       = String(today.getDate()).padStart(2,'0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  [endDateEl, payDateEl].forEach(el => {
+    el.min   = todayStr;
+    el.value = todayStr;
+  });
+}
+
+
+
+function formatWithComma(str) {
+  return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// 2) 숫자 전용 입력 + 0 이하 차단 + 콤마 포맷터
+function attachNumericFormatter(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.addEventListener('focus', e => {
+    e.target.value = e.target.value.replace(/,/g, '');
+  });
+
+  el.addEventListener('input', e => {
+    let v = e.target.value.replace(/[^0-9]/g, '');
+    e.target.value = v;
+  });
+
+  el.addEventListener('blur', e => {
+    let v = e.target.value.replace(/,/g, '');
+    let n = parseInt(v, 10);
+    if (isNaN(n) || n < 0) n = 0;
+    e.target.value = formatWithComma(String(n));    // ← formatWithComma 호출
+  });
+}
+
+function onEndDateChange(e) {
+  console.log('선택한 납품 요청일:', e.target.value);
+}
+function onPayDateChange(e) {
+  console.log('선택한 결제 요청일:', e.target.value);
+}
+
+
+
+function validateOrderForm() {
+  // 1) 거래처·상품
+  if (!isSelectClient) {
+    alert('거래처를 선택해주세요.');
+    return false;
+  }
+  if (!isSelectProduct) {
+    alert('상품을 선택해주세요.');
+    return false;
+  }
+
+  // 2) 주문 수량
+  const cntEl  = document.getElementById('odd_cnt');
+  const cntVal = cntEl?.value.replace(/,/g,'') || '';
+  const cntNum = parseInt(cntVal, 10);
+  if (!cntVal) {
+    alert('주문 수량을 입력해주세요.');
+    return false;
+  }
+  if (isNaN(cntNum) || cntNum <= 0) {
+    alert('주문 수량은 1 이상이어야 합니다.');
+    return false;
+  }
+
+  // 3) 결제 금액
+  const payEl   = document.getElementById('odd_pay');
+  const payVal  = payEl?.value.replace(/,/g,'') || '';
+  const payNum  = parseInt(payVal, 10);
+  if (!payVal) {
+    alert('결제 금액을 입력해주세요.');
+    return false;
+  }
+  if (isNaN(payNum) || payNum <= 0) {
+    alert('결제 금액은 1 이상이어야 합니다.');
+    return false;
+  }
+  // 4) 날짜 값 가져오기
+   const endDateStr = document.getElementById('odd_end_date')?.value || '';
+   const payDateStr = document.getElementById('odd_pay_date')?.value || '';
+  // 4) 납품 요청일
+  if (!endDateStr) {
+    alert('납품 요청일을 선택해주세요.');
+    return false;
+  }
+
+  // 5) 결제 요청일
+  if (!payDateStr) {
+    alert('결제 요청일을 선택해주세요.');
+    return false;
+  }
+
+  // 6) 날짜 순서 검증 (선택사항)
+  if (endDateStr < payDateStr) {
+    alert('납품 요청일은 결제 요청일 이후여야 합니다.');
+    return false;
+  }
+  
+  // 5) 오늘 날짜 체크용
+    const validateToday = new Date();
+    validateToday.setHours(0,0,0,0);
+
+    const endDate = new Date(endDateStr);
+    const payDate = new Date(payDateStr);
+
+    // 6) 과거일 입력 방지
+    if (endDate < validateToday) {
+      alert('납품 요청일은 오늘 날짜 이후로 선택해야 합니다.');
+      return false;
+    }
+    if (payDate < validateToday) {
+      alert('결제 요청일은 오늘 날짜 이후로 선택해야 합니다.');
+      return false;
+    }
+  
+  // 2) 우편번호
+  const postCodeEl = document.getElementById('cli_pc');
+  const postCode   = postCodeEl?.value.trim() || '';
+  if (!postCode) {
+    alert('배송지를 입력해주세요.');
+    return false;
+  }
+  
+ const postDetailEl = document.getElementById("cli_da");
+ const postDetail   = postDetailEl?.value.trim() || '';
+ if (!postDetail) {
+     alert('배송지의 상세 주소를 입력해주세요.');
+     return false;
+   }
+  
+
+  // 모든 검증 통과
+  return true;
+}
+
+
+
+async function submitForm() {
+  if (!validateOrderForm()) {
+    return;
+  }
+
+  console.log('✅ 검증 통과! 서버로 전송합니다.');
+
+  // 3) 주문 수량
+  const cntRaw   = document.getElementById('odd_cnt')?.value.replace(/,/g, '') || '0';
+  const orderCnt = parseInt(cntRaw, 10);
+
+  // 4) 결제 금액
+  const payRaw  = document.getElementById('odd_pay')?.value.replace(/,/g, '') || '0';
+  const payAmt  = parseInt(payRaw, 10);
+
+  // 5) 납품 요청일
+  const deliverDate = document.getElementById('odd_end_date')?.value || '';
+
+  // 6) 결제 요청일
+  const payDate     = document.getElementById('odd_pay_date')?.value || '';
+
+  // 7) 우편번호
+  const postCode    = document.getElementById('cli_pc')?.value.trim() || '';
+  
+  // 7-1) 우편번호
+  const postAdd    = document.getElementById('cli_add')?.value.trim() || '';
+
+  // 8) 상세주소
+  const postDetail  = document.getElementById('cli_da')?.value.trim() || '';
+
+  const formData = {
+	selectClientCd,
+    selectProductCd,
+    orderCnt,
+    payAmt,
+    deliverDate,
+    payDate,
+    postCode,
+	postAdd,
+    postDetail
+  };
+
+  console.log('▶️ 전송할 데이터:', formData);
+  
+  const response = await fetch('/solex/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+	
+	
+
+	if (!response.ok) {
+	  throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+	}
+
+	const data = await response.json();
+	console.log('✅ 등록 완료 응답:', data);
+
+}
+

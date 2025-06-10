@@ -36,6 +36,7 @@
     	cli_nm, cli_id
     FROM client
     <where>
+	  cli_type = 'SELLER'
       <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
       <if test="searchKeyword != null and searchKeyword != ''">
         AND LOWER(cli_nm) LIKE '%' || #{searchKeyword} || '%'
@@ -51,13 +52,14 @@
   <select id="countClientsByEmployeeId" resultType="int">
   	SELECT count(*)
   	FROM client
-  	WHERE emp_id = #{emp_id}
+  	WHERE emp_id = #{emp_id} and cli_type = 'SELLER' 
   </select>
   
   <select id="getSelectClientsByEmployeeId" resultType="Map">
   	SELECT cli_nm
   	FROM client
   	WHERE emp_id = #{emp_id}
+  	and cli_type = 'SELLER'
   	ORDER BY cli_nm 
   </select>
   
@@ -71,6 +73,7 @@
         FROM client cli 
         JOIN suju_order suju    
         ON cli.cli_id = suju.cli_id
+        WHERE cli.cli_type = 'SELLER'    
         GROUP BY
             cli.cli_nm,cli.cli_id
         ORDER BY order_count DESC
@@ -116,8 +119,8 @@
 		select 
 			stk_cnt
 		from stock stk join product prd
-		on stk.prd_cd = prd.prd_cd
-		where stk.prd_cd = #{productCode}
+		on stk.item_id = prd.prd_cd
+		where prd.prd_cd = #{productCode}
 	</select>
   
 	

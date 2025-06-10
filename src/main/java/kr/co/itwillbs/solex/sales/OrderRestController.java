@@ -43,6 +43,43 @@ public class OrderRestController {
 	@Autowired
 	OrderService orderService;
 	
+	@PostMapping
+	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Map<String, Object> param, HttpSession session) {
+		session.setAttribute("emp_id", "201");
+		String emp_id = (String) session.getAttribute("emp_id");		
+		param.put("emp_id", emp_id);
+		 // 화이트리스트 방식으로 안전한 Map 생성
+	    Map<String, Object> safe = new HashMap<>();
+	    safe.put("cli_id",       param.get("clientId"));     // JS에서 보낸 키 이름에 맞춰 가져오기
+	    safe.put("prd_cd",       param.get("productCode"));
+	    safe.put("odd_cnt",      param.get("orderCnt"));
+	    safe.put("odd_pay",      param.get("payAmt"));
+	    safe.put("odd_end_date", param.get("deliverDate"));
+	    safe.put("odd_pay_date", param.get("payDate"));
+	    safe.put("cli_pc",       param.get("postCode"));
+	    safe.put("cli_da",       param.get("postDetail"));
+	    safe.put("emp_id",       emp_id);
+
+	    log.info("safe param = {}", safe);
+	    
+	    
+	    
+	    int rows = orderService.createOrder(safe); 
+		Map<String, Object> response = new HashMap<>();
+
+		if (rows == 1) { 
+		    response.put("status", "OK"); 
+		    response.put("message", "거래처 등록 완료");
+		    return ResponseEntity.ok(response); 
+		} else { 
+		    response.put("status", "ERROR"); 
+		    response.put("message", "거래처 생성 실패");
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		}
+	}
+	
+	
+	
 	@GetMapping("/gridData") // JavaScript에서 이 URL로 요청을 보낼 것임
 	@ResponseBody
 	public List<Map<String, Object>> getPagedGridData(
