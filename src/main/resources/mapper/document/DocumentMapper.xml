@@ -29,26 +29,26 @@
   	</select>
   
 <!--   직급 공통코드 불러오기  -->
-<!-- 	<select id="getPosition" resultType="map" parameterType="string"> -->
-<!-- 		SELECT det_id, det_nm -->
-<!--       FROM code_detail -->
-<!--      WHERE cod_id =  -->
-<!--        <choose> -->
-<!--          <when test="group == 'dep_erp' or group == 'team'"> -->
-<!--            'dept' -->
-<!--          </when> -->
-<!--          <otherwise> -->
-<!--            #{group} -->
-<!--          </otherwise> -->
-<!--        </choose> -->
-<!--        AND det_yn = 'y' -->
-<!--        <if test="group == 'dep_erp'"> -->
-<!--          AND det_id LIKE 'dept#___' ESCAPE '#' -->
-<!--        </if> -->
-<!--        <if test="group == 'team'"> -->
-<!--           AND det_nm like '%팀' -->
-<!--        </if> -->
-<!-- 	</select> -->
+	<select id="getPosition" resultType="map" parameterType="string">
+		SELECT det_id, det_nm
+      FROM code_detail
+     WHERE cod_id = 
+       <choose>
+         <when test="group == 'dep_erp' or group == 'team'">
+           'dept'
+         </when>
+         <otherwise>
+           #{group}
+         </otherwise>
+       </choose>
+       AND det_yn = 'y'
+       <if test="group == 'dep_erp'">
+         AND det_id LIKE 'dept#___' ESCAPE '#'
+       </if>
+       <if test="group == 'team'">
+          AND det_nm like '%팀'
+       </if>
+	</select>
 	
 <!-- 	로그인한 사원 정보 들고오기 -->
 		<select id="getEmpInfo" resultType="map">
@@ -102,6 +102,7 @@
 		          #{lea_con}
    		)
 	</insert>
+	
 <!--	출장/외근 등록-->
 	<insert id="registerbusinessOutworkDoc" parameterType="map">
 		INSERT INTO business_outwork_doc (doc_id,
@@ -118,6 +119,7 @@
 		          #{bus_con}
    		)
 	</insert>
+	
 <!--	사직서 등록-->
 	<insert id="resignationDoc" parameterType="map">
 		INSERT INTO resignation_doc (doc_id,
@@ -133,56 +135,109 @@
 	<select id="selectDetailLeave" resultType="map">
 		SELECT d.emp_id,
 			   e.emp_nm,
-		       e.emp_pos_cd AS emp_pos_nm,
-		       e.emp_dep_cd AS emp_dep_nm,
-		       e.emp_team_cd AS emp_team_nm,
-	           l.lea_type,
-	           TO_CHAR(l.lea_start_date, 'YYYY-MM-DD') AS lea_start_date,
-	           TO_CHAR(l.lea_end_date, 'YYYY-MM-DD') AS lea_end_date,
-	           l.lea_tt,
-	           l.lea_con,
-	           al.*
-		 FROM document d
-		 LEFT JOIN leave_doc l
-		   ON d.doc_id = l.doc_id
-		 LEFT JOIN approval_line al
-		   ON d.doc_id = al.doc_id
-		 LEFT JOIN employee e
-		   ON d.emp_id = e.emp_id
-		WHERE d.doc_id = #{doc_id}
+			   pos.det_nm AS emp_pos_nm,
+			   dep.det_nm AS emp_dep_nm,
+			   team.det_nm AS emp_team_nm,
+			   TO_CHAR(r.res_start_date, 'YYYY-MM-DD') AS res_start_date,
+			   r.res_con,
+			   al.apl_step_no,
+		       al.apl_emp_pos,
+		       al.apl_sts,
+			   al.apl_action_time,
+			   al.apl_rremark
+		  FROM document d
+		  LEFT JOIN resignation_doc r
+		    ON d.doc_id = r.doc_id
+		  LEFT JOIN approval_line al
+		    ON d.doc_id = al.doc_id
+		  LEFT JOIN employee e
+		    ON d.emp_id = e.emp_id
+		  LEFT JOIN code_detail pos 
+			ON e.emp_pos_cd = pos.det_id 
+		   AND pos.cod_id = 'pos'
+		  LEFT JOIN code_detail dep 
+			ON e.emp_dep_cd = dep.det_id 
+		   AND dep.cod_id IN ('dep_erp', 'dep_mes')
+		  LEFT JOIN code_detail team 
+			ON e.emp_team_cd = team.det_id 
+		   AND team.cod_id = 'team'
+		 WHERE d.doc_id = #{doc_id}
+		 ORDER BY al.apl_step_no
 	</select>
 	
 <!--	출장/외근 기안서 상세조회-->	
 	<select id="selectDetailOutwork" resultType="map">
 		SELECT d.emp_id,
+			   e.emp_nm,
+		       pos.det_nm AS emp_pos_nm,
+			   dep.det_nm AS emp_dep_nm,
+			   team.det_nm AS emp_team_nm,
 		       b.bus_type,
 		       TO_CHAR(b.bus_start_time, 'YYYY-MM-DD') AS bus_start_time,
 		       TO_CHAR(b.bus_end_time, 'YYYY-MM-DD') AS bus_end_time,
 		       b.bus_type,
 		       TO_CHAR(b.bus_cost, 'FM999,999,999') AS bus_cost,
-		       b.bus_con
+		       b.bus_con,
+		       al.apl_step_no,
+		       al.apl_emp_pos,
+		       al.apl_sts,
+			   al.apl_action_time,
+			   al.apl_rremark
 		 FROM document d
 		 LEFT JOIN business_outwork_doc b
 		   ON d.doc_id = b.doc_id
 		 LEFT JOIN approval_line al
 		   ON d.doc_id = al.doc_id
-		WHERE d.doc_id = #{doc_id}  
+		 LEFT JOIN employee e
+		   ON d.emp_id = e.emp_id
+		 LEFT JOIN code_detail pos
+		   ON e.emp_pos_cd = pos.det_id 
+		  AND pos.cod_id = 'pos'
+		 LEFT JOIN code_detail dep
+		   ON e.emp_dep_cd = dep.det_id
+		  AND dep.cod_id IN ('dep_erp', 'dep_mes')
+		 LEFT JOIN code_detail team
+		   ON e.emp_team_cd = team.det_id
+		  AND team.cod_id = 'team' 
+		WHERE d.doc_id = #{doc_id}
+		ORDER BY al.apl_step_no
 	</select>
 	
 <!--	사직서 기안서 상세조회-->	
 	<select id="selectDetailResignation" resultType="map">
 		SELECT d.emp_id,
+	 		   e.emp_nm,
+		       pos.det_nm AS emp_pos_nm,
+			   dep.det_nm AS emp_dep_nm,
+			   team.det_nm AS emp_team_nm,
 			   TO_CHAR(r.res_start_date, 'YYYY-MM-DD') AS res_start_date,
 		       r.res_con,
-		       al.apl_emp_pos
+		       al.apl_step_no,
+		       al.apl_emp_pos,
+		       al.apl_sts,
+			   al.apl_action_time,
+			   al.apl_rremark
 		  FROM document d
 		  LEFT JOIN resignation_doc r
 			ON d.doc_id = r.doc_id
 		  LEFT JOIN approval_line al
 			ON d.doc_id = al.doc_id
-		 WHERE d.doc_id = #{doc_id}  
+		  LEFT JOIN employee e
+		    ON d.emp_id = e.emp_id
+		  LEFT JOIN code_detail pos
+		    ON e.emp_pos_cd = pos.det_id 
+		   AND pos.cod_id = 'pos'
+		  LEFT JOIN code_detail dep
+		    ON e.emp_dep_cd = dep.det_id
+		   AND dep.cod_id IN ('dep_erp', 'dep_mes')
+		  LEFT JOIN code_detail team
+		    ON e.emp_team_cd = team.det_id
+		   AND team.cod_id = 'team' 
+		  WHERE d.doc_id = #{doc_id}  
+		  ORDER BY al.apl_step_no
 	</select>
 	
+<!-- 	결재 유형별 결재선 찾아오기 -->
 	<select id="findSteps" resultType="java.lang.Integer">
 		SELECT upper_steps
 		  FROM doc_type_rule

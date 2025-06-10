@@ -64,28 +64,28 @@ $(function () {
   			<div class="doc-type01">
   				<div id="emp-nm" class="mb-3">
   					<label class="form-label">사번</label>
-					<input type="text" class="form-control" id="docEmp_id" name="emp_id"/>
+					<input type="text" class="form-control" id="docEmp_id" name="emp_id" />
 					<input type="hidden" name="emp_id">
   				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
-					<input type="text" id="docEmp_nm" class="form-control" />
+					<input type="text" id="docEmp_nm" class="form-control" name="emp_nm" />
 				</div>
   			</div>
   			<div class="doc-type01">
   				<div id="dept-nm" class="mb-3">
   					<label class="form-label">부서</label>
-  					<input type="text" class="form-control" id="docdept_nm" />
+  					<input type="text" class="form-control" id="docdept_nm" name="emp_dep_nm" />
   				</div>
   				<div id="dept-teams" class="mb-3">
   					<label class="form-label">팀</label>
-  					<input type="text" class="form-control" id="docdept_team" />
+  					<input type="text" class="form-control" id="docdept_team" name="emp_team_nm" />
   				</div>
   			</div>
 			<div class="doc-type01">
 				<div id="job-posits" class="mb-3">
 					<label class="form-label">직급</label>
-					<input type="text" class="form-control" id="docdept_position" />
+					<input type="text" class="form-control" id="docdept_position" name="emp_pos_nm"/>
 				</div>
 				<div id="dates" class="date mb-3">
 					<label class="form-label">날짜</label>
@@ -120,22 +120,22 @@ $(function () {
 				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
-					<input type="text" id="docEmp_nm" class="form-control" />
+					<input type="text" id="docEmp_nm" class="form-control" name="emp_nm"/>
 				</div>
 			</div>
 			<div class="doc-type05">
 				<div id="dept-nms" class="mb-3">
 					<label class="form-label">부서</label>
-					<input type="text" id="docdept_nm" class="form-control" />
+					<input type="text" id="docdept_nm" class="form-control" name="emp_dep_nm" />
 				</div>
 				<div id="dept-teams" class="mb-3">
 					<label class="form-label">팀</label>
-					<input type="text" id="docdept_team" class="form-control" />
+					<input type="text" id="docdept_team" class="form-control" name="emp_team_nm"/>
 				</div>
 			</div>
 			<div id="job-posit" class="mb-3">
 				<label class="form-label">직급</label>
-				<input type="text" class="form-control" id="docdept_position" />
+				<input type="text" class="form-control" id="docdept_position" name="emp_pos_nm" />
 			</div>
 			<div class="btn-group" role="group" aria-label="출장 외근 선택">
 			  <input type="radio" class="btn-check" name="bus_type" value="출장" id="businessTrip" checked>
@@ -170,23 +170,23 @@ $(function () {
 				</div>
 				<div id="emp-nms" class="mb-3">
 					<label class="form-label">성명</label>
-					<input type="text" class="form-control" id="docEmp_nm" />
+					<input type="text" class="form-control" id="docEmp_nm" name="emp_nm" />
 				</div>
 			</div>
 			<div class="doc-type03">
 				<div id="dept-nms" class="mb-3">
 					<label class="form-label">부서</label>
-					<input type="text" class="form-control" id="docdept_nm" />
+					<input type="text" class="form-control" id="docdept_nm" name="emp_dep_nm" />
 				</div>
 				<div id="curr-team" class="team mb-3">
 					<label class="form-label">팀</label>
-					<input type="text" class="form-control" id="docdept_team" />
+					<input type="text" class="form-control" id="docdept_team" name="emp_team_nm"/>
 				</div>
 			</div>
 			<div class="doc-type03">
 				<div id="job-posit" class="mb-3">
 					<label class="form-label">직급</label>
-					<input type="text" class="form-control" id="docdept_position" />
+					<input type="text" class="form-control" id="docdept_position" name="emp_pos_nm" />
 				</div>
 				<div id="last-day" class="mb-3">
 					<label class="form-label">사직 희망일</label>
@@ -320,63 +320,83 @@ $(function () {
 	
 	// 상세조회 모달
 	async function openDetailModal(row, docTypeCode) {
-		debugger;
 		document.querySelector("#detailModal .modal-body").innerHTML = formTemplates[docTypeCode];
 		// 항상 비활성화
 		const form = document.querySelector("#detailModal .modal-body");
 		form.querySelectorAll("input, textarea, select").forEach(el => {
 			el.disabled = true;
 		});
+		
 		try {
 			const response = await fetch(`/SOLEX/approval/select/detail/${row.doc_id}?doc_type_code=${docTypeCode}`);
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
-			const data = await response.json();
-			debugger;
-			const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-			modal.show();
-			// 값 주입
+			const dataList = await response.json();
+			const data = dataList[0]; 
+			
+			// 일반 input, textarea, select 값 주입
 			for (const [key, value] of Object.entries(data)) {
-			  const lowerKey = key.toLowerCase();
-
-			  // 일반 input 주입
-			  const el = form.querySelector(`[name="${lowerKey}"]`);
+			  const el = form.querySelector(`[name="${key.toLowerCase()}"]`);
 			  if (el) {
 			    el.value = value;
-			    continue;
 			  }
-			  // 날짜 필드 처리 (docType별 분기)
-			     if (docTypeCode === "doc_type_01") {
-			       const start = data.LEA_START_DATE;
-			       const end = data.LEA_END_DATE;
-			       if (start || end) {
-			         modalBody.querySelector('input[name="lea_start_date"]').value = start;
-			         modalBody.querySelector('input[name="lea_end_date"]').value = end;
-			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-			         fp?.setDate([start, end]);
-			       }
-				   debugger;
-			     } 
-			     else if (docTypeCode === "doc_type_02") {
-			       const start = data.BUS_START_TIME;
-			       const end = data.BUS_END_TIME;
-			       if (start && end) {
-			         modalBody.querySelector('input[name="bus_start_time"]').value = start;
-			         modalBody.querySelector('input[name="bus_end_time"]').value = end;
-			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-			         fp?.setDate([start, end]);
-			       }
-				   debugger;
-			     } 
-			     else if (docTypeCode === "doc_type_03") {
-			       const start = data.RES_START_DATE;
-			       if (start) {
-			         modalBody.querySelector('input[name="res_start_date"]').value = start;
-			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-			         fp?.setDate(start);
-			       }
-				   debugger;
-			     }
+			// 결재 라인 테이블 값 주입
+			const tbody = document.querySelector(".approval-line tbody");
+		    tbody.innerHTML = "";  // 초기화
+			
+			const rowEl = document.createElement("tr");
+		    const headerCell = document.createElement("td");
+		    headerCell.innerText = "결재";
+		    rowEl.appendChild(headerCell);
+
+		    dataList.forEach((line) => {
+		      const td = document.createElement("td");
+		      td.innerHTML = `
+		        ${line.EMP_NM || "-"}<br>
+		        <span>${line.APL_STS || "대기"}<br>${line.APL_ACTION_TIME || "-"}</span>
+		      `;
+		      rowEl.appendChild(td);
+		    });
+
+		    tbody.appendChild(rowEl);
+			
+			// 기존 모달 제거
+			const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+			existingBackdrops.forEach(bd => bd.remove()); 
+		    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+		    modal.show();
+//			  // 날짜 필드 처리 (docType별 분기)
+//			     if (docTypeCode === "doc_type_01") {
+//			       const start = data.LEA_START_DATE;
+//			       const end = data.LEA_END_DATE;
+//			       if (start || end) {
+//			         modalBody.querySelector('input[name="lea_start_date"]').value = start;
+//			         modalBody.querySelector('input[name="lea_end_date"]').value = end;
+//			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+//			         fp?.setDate([start, end]);
+//			       }
+//				   debugger;
+//			     } 
+//			     else if (docTypeCode === "doc_type_02") {
+//			       const start = data.BUS_START_TIME;
+//			       const end = data.BUS_END_TIME;
+//			       if (start && end) {
+//			         modalBody.querySelector('input[name="bus_start_time"]').value = start;
+//			         modalBody.querySelector('input[name="bus_end_time"]').value = end;
+//			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+//			         fp?.setDate([start, end]);
+//			       }
+//				   debugger;
+//			     } 
+//			     else if (docTypeCode === "doc_type_03") {
+//			       const start = data.RES_START_DATE;
+//			       if (start) {
+//			         modalBody.querySelector('input[name="res_start_date"]').value = start;
+//			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+//			         fp?.setDate(start);
+//			       }
+//				   debugger;
+//			     }
 
 //			     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 //			     modal.show();

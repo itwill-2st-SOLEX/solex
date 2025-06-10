@@ -4,7 +4,8 @@
 	layout:decorate="~{layouts/layout}">
 <head>
 <title>SOLEX</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link rel="stylesheet" th:href="@{/css/document/documentDrafts.css}" />
 </head>
 <body>
@@ -25,32 +26,16 @@
 							<select id="docTypeSelect"
 								class="form-select form-select-sm mb-3" aria-label="기안서 종류 선택">
 								<th:block th:each="type : ${docTypes}">
-									<option th:value="${type['DET_ID']}" th:text="${type['DET_NM']}"
+									<option th:value="${type['DET_ID']}"
+										th:text="${type['DET_NM']}"
 										th:selected="${type['DET_NM'] == '반/연차신청서'}"></option>
 								</th:block>
 							</select>
 						</div>
 						<div class="modal-body">
 							<div class="approval-line">
-								<h2></h2> 
-<!-- 								<table class="approval-table ms-auto"> -->
-<!-- 									<thead> -->
-<!-- 										<tr> -->
-<!-- 											<th></th> -->
-<!-- 											<th>팀장</th> -->
-<!-- 											<th>부장</th> -->
-<!-- 										</tr> -->
-<!-- 									</thead> -->
-<!-- 																		여기에 결제권자가 들어와야 함 -->
-<!-- 									<tbody> -->
-<!-- 										<tr> -->
-<!-- 											<td>결재</td> -->
-<!-- 											<td>이수정<br> -->
-<!-- 											<span>결재<br>25/05/27</span></td> -->
-<!-- 											<td><span> 배지영<br>대기</span></td> -->
-<!-- 										</tr> -->
-<!-- 									</tbody> -->
-<!-- 								</table> -->
+								<!-- 							JS에서 h2태그 채움 -->
+								<h2></h2>
 							</div>
 							<!-- 여기에 기안서 등록 form(JS) -->
 							<form id="draftForm" method="post">
@@ -60,7 +45,8 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary"
 								data-bs-dismiss="modal">닫기</button>
-							<button type="submit" id="submitApproval" class="btn custom-btn-blue">등록</button>
+							<button type="submit" id="submitApproval"
+								class="btn custom-btn-blue">등록</button>
 						</div>
 					</div>
 				</div>
@@ -74,26 +60,18 @@
 							<h2 class="modal-title" id="detailModalLabel">기안서 상세조회</h2>
 						</div>
 						<div class="approval-line">
-								<table class="approval-table ms-auto">
-									<thead>
-										<tr>
-											<th></th>
-											<th>팀장</th>
-											<th>부장</th>
-										</tr>
-									</thead>
-									<!-- 									여기에 결제권자가 들어와야 함 -->
-									<tbody>
-										<tr>
-											<td>결재</td>
-											<td>이수정<br>
-											<span>결재<br>25/05/27</span></td>
-											<td><span> 배지영<br>대기</span></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-<!-- 					상세조회 js에서 채움 -->
+							<table class="approval-table ms-auto">
+								<thead>
+									<tr></tr>
+									<!-- JS가 여기에 <th>를 동적으로 추가함 -->
+								</thead>
+								<tbody>
+									<tr></tr>
+									<!-- JS가 여기에 <td>를 동적으로 추가함 -->
+								</tbody>
+							</table>
+						</div>
+						<!-- 					상세조회 js에서 채움 -->
 						<div class="modal-body"></div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary"

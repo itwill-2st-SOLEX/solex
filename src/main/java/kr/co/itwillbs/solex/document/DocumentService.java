@@ -79,24 +79,12 @@ public class DocumentService {
 			teamCd = (String) docEmployee.get("EMP_TEAM_CD");
 		}
         
-		System.out.println("docEmployeePosSort    " + docEmployeePosSort);
-		System.out.println("catCd   ----------  " + catCd);
-		System.out.println("depCd    ---------- " + depCd);
-		System.out.println("teamCd   ----------   " + teamCd);
-		
         // 상위 결재자 체인 탐색
         List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
-        
-        System.out.println("upperRanks                  :           " + upperRanks);
-        System.out.println("upperRanks.size()           :           " + upperRanks.size());
         
         for (int i = 0; i < Math.min(steps, upperRanks.size()); i++) {
             Map<String, Object> rank = upperRanks.get(i);
             String posCd = (String) rank.get("POS_CD");
-            
-            System.out.println("rank                  :           " + rank);
-            System.out.println("posCd                  :           " + posCd);
-            System.out.println("i                  :           " + i);
             
             approvalMapper.insertApprovalLine(
                 docId,
@@ -110,7 +98,7 @@ public class DocumentService {
 	}
 	
 	// 기안서 상세조회
-	public Map<String, Object> selectDetailDoc(String doc_id, String docTypeCode) {
+	public List<Map<String, Object>> selectDetailDoc(String doc_id, String docTypeCode) {
 	    switch (docTypeCode) {
 	        case "doc_type_01":
 	        	return documentMapper.selectDetailLeave(doc_id);
