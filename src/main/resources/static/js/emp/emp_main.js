@@ -1,3 +1,69 @@
+$(function() {
+	let currentPage = 0;
+	const pageSize = 30;
+
+	const grid = new tui.Grid({
+	    el: document.getElementById('grid'),
+	    data: [], // 초기에는 빈 배열로 시작, scrollMoreClient 함수가 데이터를 채움
+	    height: 700,
+	    bodyHeight: 500,
+	    autoWidth: true,
+	    columns: [
+	        { header: '사번', name: 'empNum' }, // 백엔드 DTO 필드명 (camelCase)
+	        { header: '카테고리', name: 'empCatCd' },
+	        { header: '부서', name: 'empDepCd' },
+	        { header: '팀', name: 'empTeamCd'},
+	        { header: '직급', name: 'empPosCd' },
+	        { header: '사원명', name: 'empNm' },
+	        { header: '연락처', name: 'empPhone' },
+	        { header: '입사일', name: 'empHire'},
+	        { header: '재직상태', name: 'empStsCd'}
+	        
+	    ]
+	});
+	
+	async function loadDrafts(page) {
+			try {
+				const response = await fetch(`/SOLEX/emp/empList?page=${page}&size=${pageSize}`);
+	      		const rawData = await response.json();
+	      		const data = rawData.map(row => ({
+		        empNum: row.empNum,
+				empCatCd: row.empCatCd, 
+		        empDepCd: row.empDepCd,
+		        empTeamCd: row.empTeamCd,
+		        empPosCd: row.empPosCd,
+				empNm: row.empNm,
+				empPhone: row.empPhone,
+				empHire: row.empHire,
+				empStsCd: row.empStsCd
+				
+	      	}));
+			page === 0 ? grid.resetData(data) : grid.appendRows(data);
+	      	currentPage++;
+
+	      	if (data.length < pageSize) grid.off("scrollEnd");
+	    	} catch (error) {
+	      		console.error('기안서 목록 조회 실패:', error);
+	    	}
+	  	}
+
+	  	loadDrafts(currentPage);
+
+		grid.on('scrollEnd', () =>  loadDrafts(currentPage));
+		
+		grid.on('click', (ev) => {
+			if (ev.columnName === 'empNum') {
+				const rowData = grid.getRow(ev.rowKey);
+				console.log(rowData.empNum);
+//				openModal(rowData.empNum);
+			const modalElement = document.getElementById('exampleModal2');
+			
+			const modal = new bootstrap.Modal(modalElement);
+			modal.show();
+	    	}
+		});
+	
+});
 let categoryOptions = {};
 let positionOptions = {};
 let departmentOptions = {};
@@ -9,6 +75,18 @@ const currentURL = location.href;
 const url = new URL(currentURL);
 const params = new URLSearchParams(url.search);
 
+
+
+
+
+
+
+
+
+
+
+
+
 function loadEmpList() {
 	$.ajax({
 	   url: "/SOLEX/emp/listJson",
@@ -17,12 +95,14 @@ function loadEmpList() {
 	   success: function(data){
 	     console.log("listJson data = ", data);
 	     const empList = data.empList;
+		 console.log("@@@@@@@@@@empLIst = " , empList);
 	     const tableBody = $("#empTable tbody");
 	     tableBody.empty();  // 초기화
-
+	
 	     empList.forEach(function(emp){
 	       const row = $("<tr>");
-
+		   
+		   
 	       // 사번
 	      row.append($("<td class='empNum'>").text(emp.empNum));
 
@@ -58,22 +138,6 @@ function loadEmpList() {
 	      // 테이블에 추가
 	      tableBody.append(row);
 		   
-//		   // ### 여기서 강제 선택 시도 (디버깅용) ###
-//          // 각 select 요소에 특정 클래스나 ID를 부여하여 직접 선택하는 것이 더 안정적일 수 있습니다.
-//          // 일단은 `catSelect` 객체 자체에 .val()을 다시 시도
-//          const currentCatValue = emp.empCatCd ? emp.empCatCd.trim() : null;
-//          if (currentCatValue) {
-//              catSelect.val(currentCatValue);
-//              // 혹시 모르니 다시 한번 selected 확인
-//              console.log(`강제 선택 후: ${emp.empNum.trim()}의 카테고리 selected val = `, catSelect.val());
-//          }
-//          // 다른 select들도 동일하게 적용
-//          const currentDepValue = emp.empDepCd ? emp.empDepCd.trim() : null;
-//          if (currentDepValue) { depSelect.val(currentDepValue); }
-//          const currentTeamValue = emp.empTeamCd ? emp.empTeamCd.trim() : null;
-//          if (currentTeamValue) { teamSelect.val(currentTeamValue); }
-//          const currentPosValue = emp.empPosCd ? emp.empPosCd.trim() : null;
-//          if (currentPosValue) { posSelect.val(currentPosValue); }
 	     });
 
 	     // 변경 이벤트 바인딩
@@ -98,7 +162,6 @@ function loadEmpList() {
 	   
  	  $.each(optionMap, function(code, label){
 		
-// 		console.log("  옵션 비교: code =", code, "(Type:", typeof code, ") vs selectedValue =", selectedValue, "(Type:", typeof selectedValue, ") -> ", code === selectedValue);
  	    const option = $("<option>")
  	      .val(code)
  	      .text(label)
@@ -109,11 +172,11 @@ function loadEmpList() {
  	  return select;
 }
 
+
+
 // 코드 값을 실제 이름으로 변환하는 로직
 function convertCodeToName(codeValue) {
-    // 예시: "cat_00" -> "정규직", "pos_01" -> "사원" 등으로 매핑하는 로직
     // 실제 이름은 서버에서 가져온 별도의 맵이 필요할 수 있습니다.
-    // 여기서는 단순히 값을 보기 좋게 변환하는 예시입니다.
     switch (codeValue) {
         case "cat_00": return "공통";
         case "cat_01": return "ERP";
@@ -146,6 +209,17 @@ function convertCodeToName(codeValue) {
     }
 }
 
+function openModal(empNum) {
+	debugger;
+	$.ajax({
+		url: "/SOLEX/emp/",
+	    type: "get",
+	    dataType: "json",
+	    success: function(data){
+	    
+		}
+	});
+}
 //date 파싱
 function formatDate(dateString){
 	const date = new Date(dateString);
@@ -156,7 +230,7 @@ function formatDate(dateString){
 }
 
 function requestUpdate(){
-	console.log("변경됨되밍~~~~~~~~~~");
+	console.log("변경됨~~~~~~~~~~");
 	const changedEmpName = $(this).attr("name");
 	const changedEmpValue = $(this).val();
 	
@@ -211,7 +285,7 @@ $.ajax({
         console.log("Position Options: ", positionOptions);
         console.log("Department Options: ", departmentOptions);
         console.log("Team Options: ", teamOptions);// 제대로 됨
-        console.log("stsOptions: ", stsOptions);
+        console.log("StsOptions: ", stsOptions);
 		loadEmpList();
     },
     error: function(xhr, status, error){

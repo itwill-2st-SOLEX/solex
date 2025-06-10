@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.Emp;
+package kr.co.itwillbs.solex.emp;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -29,20 +29,11 @@ public class EmpController {
 	public String main(Model model, @RequestParam(value="includeEmpSts", required = false) String includeEmpSts,
 			@RequestParam(name = "searchType", defaultValue = "") String searchType,
 			@RequestParam(name = "searchKeyword", defaultValue = "") String searchKeyword){
-		List<Map<String, Object>> empList;
-		List<Map<String, Object>> codeList;
-		List<Map<String, Object>> mm;
+
 		
+		List<Map<String, Object>> empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
+//		empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
 		
-		//퇴사자 포함 
-		if("N".equals(includeEmpSts)) {
-			empList = empService.getEmpAllList(searchType, searchKeyword);
-			
-		}else {
-			empList = empService.getEmpList(searchType, searchKeyword);
-		}
-		codeList = empService.getDepCode();
-		model.addAttribute("codeList", codeList);
 		model.addAttribute("empList", empList);
 		model.addAttribute("includeEmpSts", includeEmpSts); // 체크박스 유지용
 		model.addAttribute("searchType", searchType);
