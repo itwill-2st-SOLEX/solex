@@ -58,7 +58,7 @@ public class DocumentController {
 	public Map<String, Object> empInfo(HttpSession session) {
 //		[TODO] 로그인 만들어지면 넘겨주기
 //		session.getAttribute("emp_id");
-		int emp_id = 31;
+		int emp_id = 35;
 		return service.getEmpInfo(emp_id);
 	}
 	
@@ -69,15 +69,15 @@ public class DocumentController {
 //		[TODO] 로그인 만들어지면 넘겨주기
 //		session.getAttribute("emp_id");
 		
-		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	long loginEmpId = 31L;
+// 		로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
+    	long loginEmpId = 35L;
 		service.registerDarafts(map, loginEmpId);
 	}
 	
 	// 기안서 상세조회 
 	@ResponseBody
 	@GetMapping("/select/detail/{doc_id}")
-	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
+	public List<Map<String, Object>> selectDetailDoc(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
 		System.out.println(doc_id);
 		System.out.println("SADSAD"+service.selectDetailDoc(doc_id, docTypeCode));
 		return service.selectDetailDoc(doc_id, docTypeCode);
