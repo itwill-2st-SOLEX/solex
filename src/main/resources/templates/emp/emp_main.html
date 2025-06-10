@@ -42,24 +42,48 @@
 <!-- 사원등록 및 수정 -->
         <button type="button" class="btn custom-btn-blue" data-bs-toggle="modal" data-bs-target="#exampleModal">사원등록</button>
     </div>
-
-    <table border="1" id="empTable">
-    	<thead>
-	        <tr>
-	            <td>사번</td>
-	            <td>카테고리</td>
-	            <td>부서</td>
-	            <td>팀</td>
-	            <td>직급</td>
-	            <td>사원명</td>
-	            <td>연락처</td>
-	            <td>입사일</td>
-	            <td>재직상태</td>
-	        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+<!-- Bordered Table -->
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive text-nowrap">
+                    <table class="table table-bordered" id="empTable">
+                      <thead>
+                        <tr>
+                            <td>사번</td>
+				            <td>카테고리</td>
+				            <td>부서</td>
+				            <td>팀</td>
+				            <td>직급</td>
+				            <td>사원명</td>
+				            <td>연락처</td>
+				            <td>입사일</td>
+				            <td>재직상태</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <!--/ Bordered Table -->
+<!--     <table border="1" id="empTable"> -->
+<!--     	<thead> -->
+<!-- 	        <tr> -->
+<!-- 	            <td>사번</td> -->
+<!-- 	            <td>카테고리</td> -->
+<!-- 	            <td>부서</td> -->
+<!-- 	            <td>팀</td> -->
+<!-- 	            <td>직급</td> -->
+<!-- 	            <td>사원명</td> -->
+<!-- 	            <td>연락처</td> -->
+<!-- 	            <td>입사일</td> -->
+<!-- 	            <td>재직상태</td> -->
+<!-- 	        </tr> -->
+<!--         </thead> -->
+<!--         <tbody> -->
+<!--         </tbody> -->
+<!--     </table> -->
 
     <!-- 등록모달창 -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -75,21 +99,25 @@
                     <form th:action="@{/emp/registration}" id="joinForm" method="post">
                         <div class="mb-3">
                             <label>사번</label>
-                            <input type="text" class="form-control d-inline-block w-25" name="emp_num" required>
+                            <input type="text" class="form-control d-inline-block w-25" name="emp_num" required><br>
+                        </div>
+                        <div class="mb-3">
                             <label>이름</label>
                             <input type="text" class="form-control d-inline-block w-25" name="emp_nm" required><br>
                         </div>
 						<div class="mb-3">
                             <label>입사일</label>
-                            <input type="date" class="form-control d-inline-block w-25" name="emp_hire" required>
+                            <input type="date" class="form-control d-inline-block w-25" name="emp_hire" required><br>
 						</div>
                         <div class="mb-3">
                             <label>성별</label>
                             <label><input type="radio" name="emp_gd" value="M" checked="checked">남</label>
-                            <label><input type="radio" name="emp_gd" value="W"> 여</label>
+                            <label><input type="radio" name="emp_gd" value="W"> 여</label><br>
+                        </div>
+                        <div class="mb-3">
                             <label>생년월일</label>
                             <input type="text" class="form-control d-inline-block w-25" name="emp_birth" id="emp_birth" pattern="\d{6}" placeholder="ex)990101" required>
-                            <input type="hidden" name="emp_pw" id="emp_pw">
+                            <input type="hidden" name="emp_pw" id="emp_pw"><br>
                         </div>
                         <div class="inline-container">
                             <span>사원</span>
@@ -125,16 +153,16 @@
                             <label>연락처</label>
                             <input type="text" id="emp_phone1"  class="form-control d-inline-block w-25" required> -
                             <input type="text" id="emp_phone2"  class="form-control d-inline-block w-25" required> -
-                            <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required>
+                            <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required><br>
                         </div>
                         <div class="mb-3">
                             <label>이메일</label>
-                            <input type="text" id="email1" class="form-control d-inline-block w-25" required>@<input type="text" id="email2" class="form-control d-inline-block w-25" required>
+                            <input type="text" id="email1" class="form-control d-inline-block w-25" required>@<input type="text" id="email2" class="form-control d-inline-block w-25" required><br>
                         </div>
                         <div class="mb-3">
-                            <label>주소</label>
-                            <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+                            <label>주소</label><br>
                             <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
+                            <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
                             <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
                             <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1"  placeholder="상세주소"required>
                             <input type="text" id="sample6_extraAddress" placeholder="참고항목">

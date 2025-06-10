@@ -54,7 +54,7 @@ public class EmpController {
 	
 	@PostMapping("/registration")
 	public String register_post(@RequestParam Map<String, Object> empMap) {
-		log.info("@@@@@@@@@@@@@ Received empData: {}", empMap);
+//		log.info("@@@@@@@@@@@@@ Received empData: {}", empMap);
 		int insertCount;
 		
 		try {
