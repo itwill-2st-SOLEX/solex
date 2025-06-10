@@ -4,7 +4,12 @@
 
 <mapper namespace="kr.co.itwillbs.solex.approval.ApprovalMapper">
 
-	<insert id="insertApprovalLine" parameterType="aplId">
+	<insert id="insertApprovalLine" parameterType="map">
+		INSERT INTO approval_line (doc_id, apl_step_no, apl_emp_cat, apl_emp_dep, apl_emp_team, apl_emp_pos)
+		VALUES (#{docId}, #{stepNo}, #{catCd}, #{depCd}, #{teamCd}, #{posCd})
+     </insert>
+     
+     <insert id="decisionDocument" parameterType="map">
 		INSERT INTO approval_line (doc_id, apl_step_no, apl_emp_cat, apl_emp_dep, apl_emp_team, apl_emp_pos)
 		VALUES (#{docId}, #{stepNo}, #{catCd}, #{depCd}, #{teamCd}, #{posCd})
      </insert>
@@ -22,9 +27,9 @@
   		WHERE  al.apl_sts    = 'apl_sts_01'
     	AND  al.emp_id IS NULL
     	AND  al.apl_emp_pos  = m.pos_cd    	
-    	AND  NVL(al.apl_emp_cat, '-') = NVL(m.emp_cat_cd, '-')
-    	AND  NVL(al.apl_emp_dep, '-') = NVL(m.emp_dep_cd, '-')
-    	AND  NVL(al.apl_emp_team, '-') = NVL(m.emp_team_cd, '-')
+    	AND  al.apl_emp_cat = m.emp_cat_cd
+    	AND  al.apl_emp_dep = m.emp_dep_cd
+    	AND  al.apl_emp_team = m.emp_team_cd
     	AND  NOT EXISTS (
           	SELECT 1
           	FROM   approval_line apl
@@ -34,29 +39,4 @@
         )
   		ORDER  BY d.reg_time DESC
    </select>
-   
-  	<!-- 문서별 전체 결재선 조회 -->
-	<select id="selectDocumentDetail" resultMap="aplMap">
-		SELECT 
-    		al.*, 
-    		d.doc_type,
-    		d.emp_id ,
-   			d.doc_reg_time,
-    		d.doc_sts
-  		FROM approval_line al
-  JOIN document      d ON d.doc_id = al.doc_id
-  WHERE al.doc_id = #{docId}
-  ORDER BY al.step_no
-  
-  
-   		SELECT 
-   		al.*
-   		d.doc_type       AS doc_type,
-    	d.emp_id         AS doc_emp_id,
-    	d.doc_reg_time   AS doc_reg_time,
-    	d.doc_sts        AS doc_sts
-      	FROM approval_line al
-     	WHERE doc_id = #{docId}
-     	ORDER BY step_no
-	</select>
 </mapper>

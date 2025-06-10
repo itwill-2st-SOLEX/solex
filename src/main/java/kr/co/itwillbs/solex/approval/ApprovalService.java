@@ -21,40 +21,43 @@ public class ApprovalService {
     }
 	
 	// 결재 해야하는 기안서 상세보기
-	public Map<String, Object> getTodoDocumentDetail(long docId, String docTypeCode, long loginEmpId) {
+	public List<Map<String, Object>> getTodoDocumentDetail(String docId, String docTypeCode, long loginEmpId) {
 		switch (docTypeCode) {
         case "doc_type_01":
-        	return approvalMapper.selectDetailLeave(doc_id);
+        	return documentMapper.selectDetailLeave(docId);
         case "doc_type_02":
-        	return approvalMapper.selectDetailOutwork(doc_id);
+        	return documentMapper.selectDetailOutwork(docId);
         case "doc_type_03":
-        	return approvalMapper.selectDetailResignation(doc_id);
+        	return documentMapper.selectDetailResignation(docId);
         default:
         	throw new IllegalArgumentException("알 수 없는 문서 타입입니다: " + docTypeCode);
 		}
-		
-        return null;
-    }
+	}
 	
 	// 기안서 결재 (승인/반려)
 	public void approvalDocument(Map<String, Object> approvalRequest, long loginEmpId) {
-		long docId = (Long) approvalRequest.get("docId");
+		approvalRequest.put("emp_id", loginEmpId);
 		
-		Map<String, Object> approvalLine = approvalMapper.selectByEmpIdAndDocId(loginEmpId, docId);
+		approvalMapper.updateApprovalLine(approvalRequest);
 		
-		// 3) 승인/반려 처리
-		approvalLine.put("approveSts", approvalRequest.get("sts"));
-		approvalLine.put("actionTime", LocalDateTime.now());
-		approvalMapper.updateByMap(approvalLine);
-		
-		String decision = null;
-		if(approvalRequest.get("sts").equals("REJECTED")) {
-			decision = "REJECTED";
-		} else if(approvalRequest.get("sts").equals("APPROVED")) {
-			decision = "APPROVED";
-		}
-		
-		documentMapper.updateFinalSts(docId, decision);
+		String status = (String) approvalRequest.get("status");
+        Long   docId  = ((Number)approvalRequest.get("docId")).longValue();
+        Long   aplId  = ((Number)approvalRequest.get("aplId")).longValue();
+        Integer step  = (Integer)approvalRequest.get("stepNo");
+        
+        if (status.equals("apl_sts_02")) {
+        	approvalRequest.replace("status", "doc_sts_02");
+        	documentMapper.updateDocumentStatus(approvalRequest);
+        }
+        else if (status.equals("apl_sts_03")) {
+        	approvalRequest.replace("status", "doc_sts_03");
+        	if (step == 1) {
+        		documentMapper.updateDocumentStatus(approvalRequest);
+        	} 	
+        } 
+        else {
+        	System.out.println("말도 안되는 상태값임");
+        }
+       
     }
-	
 }

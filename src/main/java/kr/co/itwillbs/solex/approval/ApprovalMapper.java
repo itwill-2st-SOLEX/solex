@@ -19,9 +19,7 @@ public interface ApprovalMapper {
 			);
 	
 	List<Map<String, Object>> selectTodoDocumentList(long loginEmpId);
+
+	void updateApprovalLine(Map<String, Object> approvalRequest);
 	
-	List<Map<String, String>> insertAL(Map<String, Object> aplmap);
-	Map<String, Object> selectById(long aplId);
-	Map<String, Object> selectByEmpIdAndDocId(long loginEmpId, long docId);
-	void updateByMap(Map<String, Object> apl);
 }
