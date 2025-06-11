@@ -331,42 +331,52 @@ $(function () {
 			const response = await fetch(`/SOLEX/approval/select/detail/${row.doc_id}?doc_type_code=${docTypeCode}`);
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
-			const dataList = await response.json();
+			const data = await response.json();
 			debugger;
-			const data = dataList[0]; 
 			
 			// 일반 input, textarea, select 값 주입
 			for (const [key, value] of Object.entries(data)) {
 			  const el = form.querySelector(`[name="${key.toLowerCase()}"]`);
-			  if (el) {
-			    el.value = value;
-			  }
-			// 결재 라인 테이블 값 주입
+			  if (el) el.value = value;
+			}
+			const posList = (data.APL_EMP_POS || "").split(",");
+			// thead 구성
+			const theadRow = document.querySelector(".approval-line thead tr");
+			theadRow.innerHTML = "";
+			
+			const headLabel = document.createElement("th");
+			headLabel.innerText = "결재";
+			theadRow.appendChild(headLabel);
+
+			posList.forEach(pos => {
+			  const th = document.createElement("th");
+			  th.innerText = pos;
+			  theadRow.appendChild(th);
+			});
+			
+			// tbody 구성
 			const tbody = document.querySelector(".approval-line tbody");
-		    tbody.innerHTML = "";  // 초기화
-			
+			tbody.innerHTML = "";
 			const rowEl = document.createElement("tr");
-		    const headerCell = document.createElement("td");
-		    headerCell.innerText = "결재";
-		    rowEl.appendChild(headerCell);
-
-		    dataList.forEach((line) => {
-		      const td = document.createElement("td");
-		      td.innerHTML = `
-		        ${line.EMP_NM || "-"}<br>
-		        <span>${line.APL_STS || "대기"}<br>${line.APL_ACTION_TIME || "-"}</span>
-		      `;
-		      rowEl.appendChild(td);
-		    });
-
-		    tbody.appendChild(rowEl);
+			const bodyLabel = document.createElement("td");
+			bodyLabel.innerText = "결재";
+			rowEl.appendChild(bodyLabel);
 			
-			// 기존 모달 제거
-			const existingBackdrops = document.querySelectorAll('.modal-backdrop');
-			existingBackdrops.forEach(bd => bd.remove()); 
-		    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-		    modal.show();
+			for (let i = 0; i < posList.length; i++) {
+			  const td = document.createElement("td");
+			  td.innerHTML = `
+			    ${nameList[i] || "-"}<br>
+			    <span>${statusList[i] || "대기"}<br>${timeList[i] || "-"}</span>
+			  `;
+			  rowEl.appendChild(td);
+			}
 			
+			tbody.appendChild(rowEl);
+
+			// 모달 오픈
+			document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
+			const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+			modal.show();
 //			const modalBody = document.querySelector('.modal-body');
 //	 		 // 날짜 필드 처리 (docType별 분기)
 //			 
@@ -400,7 +410,7 @@ $(function () {
 
 //			     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 //			     modal.show();
-			}
+//			}
 		} catch(err) {
 			console.error("상세 조회 중 에러:", err);
 		    alert("상세 조회에 실패했습니다.");
