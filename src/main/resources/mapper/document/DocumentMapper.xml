@@ -170,21 +170,20 @@
 	
 <!--	출장/외근 기안서 상세조회-->	
 	<select id="selectDetailOutwork" resultType="map">
-		SELECT d.emp_id,
-			   e.emp_nm,
-		       pos.det_nm AS emp_pos_nm,
-			   dep.det_nm AS emp_dep_nm,
-			   team.det_nm AS emp_team_nm,
-		       b.bus_type,
-		       TO_CHAR(b.bus_start_time, 'YYYY-MM-DD') || TO_CHAR(b.bus_end_time, 'YYYY-MM-DD') AS dbdateRange, 
-		       b.bus_type,
-		       TO_CHAR(b.bus_cost, 'FM999,999,999') AS bus_cost,
-		       b.bus_con,
-		       al.apl_step_no,
-		       al.apl_emp_pos,
-		       al.apl_sts,
-			   al.apl_action_time,
-			   al.apl_rremark,
+		SELECT MAX(d.emp_id) AS emp_id,
+			   MAX(e.emp_nm) AS emp_nm,
+		       MAX(pos.det_nm) AS emp_pos_nm,
+			   MAX(dep.det_nm) AS emp_dep_nm,
+			   MAX(team.det_nm) AS emp_team_nm,
+		       MAX(b.bus_type) AS bus_type,
+		       MAX(TO_CHAR(b.bus_start_time, 'YYYY-MM-DD') || TO_CHAR(b.bus_end_time, 'YYYY-MM-DD')) AS dbdateRange, 
+		       MAX(TO_CHAR(b.bus_cost, 'FM999,999,999')) AS bus_cost,
+		       MAX(b.bus_con) AS bus_con,
+		       MAX(al.apl_step_no) AS apl_step_no,
+		       MAX(al.apl_emp_pos) AS apl_emp_pos,
+		       MAX(al.apl_sts) AS apl_sts,
+			   MAX(al.apl_action_time) AS apl_action_time,
+			   MAX(al.apl_rremark) AS apl_rremark,
 			   LISTAGG(al.apl_emp_pos, ',') AS apl_emp_pos,
 			   LISTAGG(code.det_nm, ',') AS app_auth_emp_nm  
 		 FROM document d
@@ -200,11 +199,11 @@
 		 LEFT JOIN code_detail dep
 		   ON e.emp_dep_cd = dep.det_id
 		  AND dep.cod_id IN ('dep_erp', 'dep_mes')
-		 LEFT JOIN code_detail team`
+		 LEFT JOIN code_detail team
 		   ON e.emp_team_cd = team.det_id
 		  AND team.cod_id = 'team'
 		 LEFT JOIN code_detail code
-           ON al.apl_emp_pos = code.det_id 
+           ON al.apl_emp_pos = code.det_id
 		WHERE d.doc_id = #{doc_id}
 		ORDER BY al.apl_step_no
 	</select>
@@ -213,9 +212,9 @@
 	<select id="selectDetailResignation" resultType="map">
 		SELECT MAX(d.emp_id) AS emp_id,
 	 		   MAX(e.emp_nm) AS emp_nm,
-		       MAX(pos.det_nm) AS apl_rremark,
-			   MAX(dep.det_nm) AS apl_rremark,
-			   MAX(team.det_nm) AS apl_rremark,
+		       MAX(pos.det_nm) AS emp_pos_nm,
+			   MAX(dep.det_nm) AS emp_dep_nm,
+			   MAX(team.det_nm) AS emp_team_nm,
 			   LISTAGG(al.apl_emp_pos, ',') AS apl_emp_pos,
 			   MAX(TO_CHAR(r.res_start_date, 'YYYY-MM-DD')) AS dbdateRange,
 		       MAX(r.res_con) AS res_con,
@@ -243,8 +242,8 @@
 		   AND team.cod_id = 'team'
 		  LEFT JOIN code_detail code
             ON al.apl_emp_pos = code.det_id 
-		  WHERE d.doc_id = #{doc_id}  
-		  ORDER BY al.apl_step_no
+		 WHERE d.doc_id = #{doc_id}  
+		 ORDER BY al.apl_step_no
 	</select>
 	
 	<update id="updateDocumentStatus" parameterType="map">

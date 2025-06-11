@@ -332,14 +332,16 @@ $(function () {
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const data = await response.json();
-			debugger;
 			
 			// 일반 input, textarea, select 값 주입
 			for (const [key, value] of Object.entries(data)) {
 			  const el = form.querySelector(`[name="${key.toLowerCase()}"]`);
 			  if (el) el.value = value;
 			}
-			const posList = (data.APL_EMP_POS || "").split(",");
+			const nameList = (data.APP_AUTH_EMP_NM || "").split(",");
+			const statusList = (data.APL_STS || "").split(",");
+			const timeList = (data.APL_ACTION_TIME || "").split(",");
+			debugger;
 			// thead 구성
 			const theadRow = document.querySelector(".approval-line thead tr");
 			theadRow.innerHTML = "";
@@ -348,7 +350,7 @@ $(function () {
 			headLabel.innerText = "결재";
 			theadRow.appendChild(headLabel);
 
-			posList.forEach(pos => {
+			nameList.forEach(pos => {
 			  const th = document.createElement("th");
 			  th.innerText = pos;
 			  theadRow.appendChild(th);
@@ -362,10 +364,9 @@ $(function () {
 			bodyLabel.innerText = "결재";
 			rowEl.appendChild(bodyLabel);
 			
-			for (let i = 0; i < posList.length; i++) {
+			for (let i = 0; i < nameList.length; i++) {
 			  const td = document.createElement("td");
 			  td.innerHTML = `
-			    ${nameList[i] || "-"}<br>
 			    <span>${statusList[i] || "대기"}<br>${timeList[i] || "-"}</span>
 			  `;
 			  rowEl.appendChild(td);
@@ -377,40 +378,6 @@ $(function () {
 			document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
 			const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 			modal.show();
-//			const modalBody = document.querySelector('.modal-body');
-//	 		 // 날짜 필드 처리 (docType별 분기)
-//			 
-//		     if (docTypeCode === "doc_type_01") {
-//		       const val = data.DBDATERANGE;
-//			   debugger;
-//		       modalBody.querySelector('input[name="dbdateRange"]').value = val;
-//			   
-//			   console.log(modalBody.querySelector('input[name="dbdateRange"]'));
-//		     } 
-//		     else if (docTypeCode === "doc_type_02") {
-//		       const val = data.DBDATERANGE;
-//		       if (start && end) {
-//		         modalBody.querySelector('input[name="bus_start_time"]').value = start;
-//		         modalBody.querySelector('input[name="bus_end_time"]').value = end;
-//		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-//		         fp?.setDate([start, end]);
-//		       }
-//			   debugger;
-//		     } 
-//		     else if (docTypeCode === "doc_type_03") {
-//		       const start = data.RES_START_DATE;
-//		       if (start) {
-//				debugger;
-//		         modalBody.querySelector('input[name="res_start_date"]').value = start;
-//		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-//		         fp?.setDate(start);
-//		       }
-//				   
-//		     }
-
-//			     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-//			     modal.show();
-//			}
 		} catch(err) {
 			console.error("상세 조회 중 에러:", err);
 		    alert("상세 조회에 실패했습니다.");

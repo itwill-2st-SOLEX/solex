@@ -21,7 +21,7 @@ public class ApprovalService {
     }
 	
 	// 결재 해야하는 기안서 상세보기
-	public List<Map<String, Object>> getTodoDocumentDetail(String docId, String docTypeCode, long loginEmpId) {
+	public Map<String, Object> getTodoDocumentDetail(String docId, String docTypeCode, long loginEmpId) {
 		switch (docTypeCode) {
         case "doc_type_01":
         	return documentMapper.selectDetailLeave(docId);
