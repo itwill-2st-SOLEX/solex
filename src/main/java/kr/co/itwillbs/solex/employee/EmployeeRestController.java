@@ -3,7 +3,6 @@ package kr.co.itwillbs.solex.employee;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,9 +14,9 @@ public class EmployeeRestController {
 	@Autowired
 	private OrgChartService orgChartService;
 	
-	@GetMapping("/orgchart/tree")
-    public ResponseEntity<?> getOrgChartTree() {
-        Map<String, Object> tree = orgChartService.buildOrgChart();
-        return ResponseEntity.ok(tree);
-    }
+	@GetMapping("/org/chart")
+	public Map<String, Object> getOrgChart() {
+		Map<String, Object> chart = orgChartService.getOrgChartTree();
+	    return chart;
+	}
 }
