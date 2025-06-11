@@ -28,22 +28,41 @@ public class AttendanceRestController {
 	@Autowired
 	private AttendanceService attendanceService;
 	
+	long loginEmpId = 6L; // 임시 ID
+
+	
+	// 근태현황조회
 	@GetMapping("/data")
 	public Map<String, Object> getAttendanceDataByMonth( // 반환 타입을 DTO로 변경
 	        @RequestParam("year") int year,
 	        @RequestParam("month") int month,
 	        @RequestParam(value = "resultType", required = false) String resultType,
-			@RequestParam(name="keyword", required = false) String keyword
+			@RequestParam(name="keyword", required = false) String keyword,
+			@RequestParam(name = "page", required = false) Integer page,
+			@RequestParam(name = "size", required = false) Integer size
 			) {
 
-		long loginEmpId = 6L; // 임시 ID
+		
+		// 로그인한 사용자의 직급등 사원정보 가져오기
+		Map<String,Object> info = attendanceService.getEmployeeInfo(loginEmpId);
+		
 	    Map<String, Object> params = new HashMap<>();
-	    
+	    params.put("offset", page * size);// 페이징 계산
 	    params.put("year", year);
 	    params.put("month", month);
 	    params.put("keyword", keyword);
+	    params.put("page", page);
+	    params.put("size", size);
 	    params.put("empId", loginEmpId);
-	    System.out.println("controller params ??? " +  params);
+	    
+	    // 로그인한 사용자 정보 기반 필터 조건 추가
+	    params.put("empCatCd", info.get("EMP_CAT_CD"));
+	    params.put("empDepCd", info.get("EMP_DEP_CD"));
+	    params.put("empTeamCd", info.get("EMP_TEAM_CD"));
+	    params.put("empPosCd", info.get("EMP_POS_CD"));
+	    
+//	    System.out.println(params);
+	    
 	    Map<String, Object> combinedMap = new HashMap<>();
 	    
 	    if (resultType.equals("my")) { // 1. 내 근태 데이터 조회
@@ -63,7 +82,6 @@ public class AttendanceRestController {
     public ResponseEntity<Map<String, Object>> getTodayAttendanceStatus() {
     	System.out.println("/api/today - get");
 
-    	long loginEmpId = 6L; // 개발용 임시 ID - 인사부장
     	
         Optional<Map<String, Object>> attendanceRecord = attendanceService.getTodayAttendanceStatus(loginEmpId);
         System.out.println("today attendanceRecord : " + attendanceRecord);
@@ -105,7 +123,6 @@ public class AttendanceRestController {
     @PostMapping("/punch-in")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> punchIn() {
-        long loginEmpId = 6L; // 임시 ID
 
         try {
             Map<String, Object> result = attendanceService.recordPunchIn(loginEmpId);
@@ -122,7 +139,6 @@ public class AttendanceRestController {
     // 퇴근 등록 API
     @PostMapping("/punch-out")
     public ResponseEntity<Map<String, Object>> punchOut() {
-        long loginEmpId = 6L; // 임시 ID
 
         try {
             Map<String, Object> result = attendanceService.recordPunchOut(loginEmpId);

@@ -182,4 +182,8 @@ public class AttendanceService {
 		LocalDate todayDate = LocalDate.now();
 		return attendanceMapper.findByEmpIdAndAttendanceDate(loginEmpId, todayDate);
 	}
+
+	public Map<String, Object> getEmployeeInfo(long loginEmpId) {
+		return attendanceMapper.selectEmployeeInfo(loginEmpId);
+	}
 }

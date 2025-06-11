@@ -23,6 +23,51 @@
     </select>
     
     <select id="selectAttendenceByMonthList" resultType="java.util.Map">
+       SELECT e.emp_id, 
+              e.emp_num, 
+              e.emp_nm,
+              TO_CHAR(att_in_time, 'YYYY-MM-DD HH:MI AM') AS att_in_time,
+		      TO_CHAR(att_out_time, 'YYYY-MM-DD HH:MI AM') AS att_out_time,
+		      TO_CHAR(att_day, 'YYYY-MM-DD HH:MI AM') AS att_day, 
+			  ve.emp_dep_nm, 
+			  ve.emp_team_nm, 
+			  ve.emp_pos_nm
+		 FROM vacation v 
+		RIGHT JOIN employee e 
+		   ON v.emp_id = e.emp_id
+         JOIN view_employee ve 
+           ON e.emp_id = ve.emp_id
+         JOIN attendance att
+           ON e.emp_id = att.emp_id				-- 출퇴근 data
+           
+		WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) >= TO_NUMBER(SUBSTR(#{empPosCd}, -2))
+		  AND TO_CHAR(att.att_in_time, 'YYYY') = #{year}  
+ 		  AND TO_CHAR(att.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
+	<choose>
+		<!-- 팀장 조건 -->
+		<when test="empTeamCd != 'team_00'">
+		  AND e.emp_team_cd = #{empTeamCd} AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 부장 조건 -->
+		<when test="empDepCd != 'dep_00'">
+		  AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 이사 조건 -->
+		<when test="empCatCd != 'cat_00'">
+		  AND e.emp_cat_cd = #{empCatCd}
+		</when>
+		<!-- 사장 조건 -->
+		<when test="empPosCd == 'pos_01'">
+		  AND e.emp_pos_cd = #{empPosCd}
+		</when>
+	</choose>
+		ORDER BY e.emp_dep_cd, e.emp_team_cd
+	   OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+    
+    
+    
+    <select id="selectAttendenceByMonthList__" resultType="java.util.Map">
     	SELECT
 		       e.emp_num,         				-- 휘하 직원의 사번    
 		    -- TO_CHAR(MIN(a.att_in_time), 'YYYY-MM-DD HH24:MI:SS') AS first_att_in_time -- 해당 일자의 첫 출근시간
@@ -102,5 +147,12 @@
          WHERE det_id = #{attSts} -- 예시: 'ATT_STATUS'라는 그룹 ID의 코드들만 가져온다고 가정. 실제 그룹 ID에 맞게 수정
          ORDER BY det_id
     </select>
+    
+    <!-- 로그인한 사용자의 직급, 부서, 팀 등의 정보 가져오기 -->
+	<select id="selectEmployeeInfo">
+		SELECT emp_id, emp_cat_cd, emp_dep_cd, emp_team_cd, emp_pos_cd
+		FROM employee
+		WHERE EMP_ID = #{empId}
+	</select>
     
 </mapper>	

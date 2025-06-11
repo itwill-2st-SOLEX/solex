@@ -28,5 +28,7 @@ public interface AttendanceMapper {
 
 	String selectDetNm(String attSts);
 
+	Map<String, Object> selectEmployeeInfo(long loginEmpId);
+
 
 }

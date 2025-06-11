@@ -1,12 +1,3 @@
-//전역 변수 설정
-let currentPage = 0;
-const pageSize = 20;
-const gridHeight = 700;
-let editorInstance = null;
-let editorLoaded = false;
-let searchKeyword = '';
-let empId = null;
-
 const currentMonthYearSpan = document.getElementById('currentMonthYear');
 const prevMonthBtn = document.getElementById('prevMonthBtn');
 const nextMonthBtn = document.getElementById('nextMonthBtn');
@@ -14,6 +5,16 @@ let requestType = '';
 
 // 페이지 로드 시 초기 표시
 updateMonthYearDisplay(); 
+
+
+
+//전역 변수 설정
+let currentPage = 0;
+const pageSize = 20;
+const gridHeight = 700;
+let editorInstance = null;
+let editorLoaded = false;
+let searchKeyword = '';
 
 // ToastUI Grid 생성
 const grid = new tui.Grid({
@@ -47,6 +48,8 @@ function bindScrollEvent() {
 	//무한스크롤시 검색어 유지를 위해 재전달
     grid.on('scrollEnd', () => {
         const keyword = document.getElementById('searchInput').value.trim();
+		attendanceLists(displayYear, displayMonth, requestType, currentPage, searchKeyword);
+		document.getElementById('searchBtn').addEventListener('click', searchAttendance);
     });
 }
 
@@ -77,14 +80,15 @@ function updateMonthYearDisplay() {
     }
 
     // updateMonthYearDisplay 내부의 최신 year, month를 전달
-    attendanceLists(displayYear, displayMonth, requestType, '', currentPage); 
+    attendanceLists(displayYear, displayMonth, requestType); 
 }
 
 
-// 부하직원 현황 불러오기
-async function attendanceLists(year, month, requestType, keyword = '', page) {
+// 게시글 목록 불러오기
+async function attendanceLists(year, month, requestType, keyword = '') {
+
 	try {
-		let url = `/SOLEX/attendance/api/data?year=${year}&month=${month}&resultType=${requestType}&page=${page}&size=${pageSize}`;
+		let url = `/SOLEX/attendance/api/data?year=${year}&month=${month}&resultType=${requestType}`;
 
 	    if (keyword) {
 	        url += `&keyword=${encodeURIComponent(keyword)}`;
