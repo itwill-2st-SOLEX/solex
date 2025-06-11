@@ -680,22 +680,41 @@ async function submitForm() {
 
   console.log('▶️ 전송할 데이터:', formData);
   
-  const response = await fetch('/solex/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    });
-	
-	
+  // --- 에러 핸들링 및 fetch 로직 ---
+  try {
+      const response = await fetch('/solex/orders', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+      });
 
-	if (!response.ok) {
-	  throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-	}
+      // HTTP 상태 코드가 200-299 범위가 아닐 경우 에러로 처리
+      if (!response.ok) {
+          // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
+          const errorData = await response.json().catch(() => null);
+          const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
+          throw new Error(errorMessage);
+      }
 
-	const data = await response.json();
-	console.log('✅ 등록 완료 응답:', data);
+      // 응답 본문을 JSON으로 파싱
+      const data = await response.json();
+      console.log('✅ 등록 완료 응답:', data);
+
+      // 서버에서 받은 메시지를 alert 창으로 보여줌
+      alert(data.message);
+
+      // 서버 응답의 status가 'OK'일 경우에만 페이지를 새로고침
+      if (data.status === 'OK') {
+          location.reload();
+      }
+
+  } catch (error) {
+      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
+      console.error('⛔️ 등록 중 에러 발생:', error);
+      alert(`오류가 발생했습니다: ${error.message}`);
+  }
 
 }
 

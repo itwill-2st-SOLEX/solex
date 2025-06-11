@@ -94,20 +94,41 @@ public class OrderService {
 		return orderMapper.getStockCount(productCode);
 	}
 
+	
+	
+	
 	@Transactional
-	public int createOrder(Map<String, Object> safe) {
-		int result = orderMapper.createSujuOrder(safe);
-		
-		if (result != 1) {
-	        // INSERT 실패 시 롤백을 위해 예외를 던지거나 에러 코드를 반환할 수 있습니다.
-	        // @Transactional에 의해 예외 발생 시 롤백됩니다.
-	        throw new RuntimeException("주문 생성에 실패했습니다.");
+	public int createOrderProcess(Map<String, Object> orderData) {
+	    // 1. 주문 마스터 테이블에 INSERT
+	    orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
+
+	    // 2. 필요한 자재 재고 확인
+	    boolean isStockSufficient = orderMapper.checkMaterialStock(orderData);
+
+	    if (isStockSufficient) {
+	        // 2-1. 재고가 충분할 경우
+	        orderData.put("ord_sts", "ord_sts_02"); // 상태값을 '02'로 설정
+	        orderMapper.createSujuOrderDetail(orderData); // 주문 상세 등록
+
+	        // 필요하다면, 예약된 재고를 차감하는 로직을 호출
+	        orderMapper.deductStock(orderData);
+
+	    } else {
+	        // 2-2. 재고가 부족할 경우
+	        orderData.put("ord_sts", "ord_sts_01"); // 상태값을 '01'로 설정
+	        orderMapper.createSujuOrderDetail(orderData); // 주문 상세 등록
+
+	        // ★★★ 핵심: 부족한 자재에 대한 발주 요청을 추가로 INSERT ★★★
+	        List<Map<String, Object>> lackingMaterials = orderMapper.getLackingMaterials(orderData);
+	        for (Map<String, Object> material : lackingMaterials) {
+	            orderMapper.createPurchaseRequest(material);
+	        }
 	    }
-		
-		log.info("어떤값? : " + safe);
-		
-		return orderMapper.createSujuOrderDetail(safe); 
+	    
+	    return 1;
 	}
+
+	
     
     
 

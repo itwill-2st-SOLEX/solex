@@ -23,7 +23,7 @@
 						<div class="d-flex align-items-start row">
 							<div class="col-sm-12">
 								<div class="card-body">
-									<h5 class="card-title mb-3">주문 관리</h5>
+									<h5 class="card-title mb-3">수주 관리</h5>
 									<div class="d-flex justify-content-between align-items-center">
 										<div style="width : 100%;" class="d-flex align-items-center">
 											<span class="w-px-22 h-px-22">
@@ -31,7 +31,7 @@
 											</span>
 											<input id="searchInput" name="searchInput" style="width: 25%;" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none" type="text" aria-label="검색" placeholder="검색">
 										</div>
-										<button type="button" class="btn btn-primary mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openOrderModalBtn">주문 등록</button>
+										<button type="button" class="btn btn-primary mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openOrderModalBtn">수주 등록</button>
 									</div>
 									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
 								</div>
@@ -54,7 +54,7 @@
 	    <div class="modal-dialog modal-dialog-scrollable modal-lg">
 	        <div class="modal-content" id="modalContentContainer">
 	        	<div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">주문 등록</h5>
+            <h5 class="modal-title" id="exampleModalLabel">수주 등록</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body big-box">
@@ -67,9 +67,9 @@
 			        </div>
 			    </div>
                 <div class="col">
-			        <label for="prd_nm_virtual_select" class="form-label">상품명 <span style="color:red">*</span></label>
+			        <label for="prd_nm_virtual_select" class="form-label">제품명 <span style="color:red">*</span></label>
 			        <div class="input-group mb-4">
-			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="상품명을 선택하거나 검색하세요." ></select>
+			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="제품명을 선택하거나 검색하세요." ></select>
 			        </div>
 		            <div class="form-text ms-4" style="color: #f35a5a; display: none;" id="stockCount"></div>
 			    </div>

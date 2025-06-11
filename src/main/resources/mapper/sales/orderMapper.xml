@@ -121,23 +121,91 @@
 		from stock stk join product prd
 		on stk.item_id = prd.prd_cd
 		where prd.prd_cd = #{productCode}
+		and stk_cat = 'stk_cat_01'
 	</select>
   	
-  	<insert id="createSujuOrder" parameterType="map" >
-	  	<selectKey keyProperty="ord_id" resultType="long" order="AFTER">
-	        SELECT SUJU_ORDER_SEQ.CURRVAL FROM DUAL
-	    </selectKey>
+  	<!-- 1 -->
+  	<insert id="createSujuOrder" parameterType="map" useGeneratedKeys="true" keyColumn="ord_id"  keyProperty="ord_id">
   		INSERT INTO suju_order(cli_id, emp_id, ord_reg_date)
   			VALUES(#{cli_id},#{emp_id},SYSDATE)
   	</insert>
   	
+  	<!-- 2 -->
+  	<select id="checkMaterialStock" parameterType="map" resultType="int">
+	    SELECT
+	        COUNT(*)
+	    FROM
+	        BOM b
+	    JOIN
+	        STOCK s 
+	    ON b.mat_id = s.item_id
+	    WHERE
+	        b.prd_cd = #{prd_cd}
+	        AND s.stk_cnt &lt; (b.bom_cnt * #{odd_cnt})
+	        AND s.stk_cat = 'stk_cat_02'
+	</select>
+  	
+  	
+  	<!-- 3 -->
   	<insert id="createSujuOrderDetail">
   		INSERT INTO suju_order_detail(
   		  ord_id, prd_cd, odd_cnt, odd_end_date, odd_sts, odd_pc, odd_add, odd_da, odd_pay, odd_pay_date, odd_mod_date 
   		)
   			VALUES(
-  			#{ord_id}, #{prd_cd}, #{odd_cnt}, #{odd_end_date}, 'ord_type_01', #{odd_pc}, #{odd_add},#{odd_da}, #{odd_pay}, #{odd_pay_date}, SYSDATE)
+  			#{ord_id}, #{prd_cd}, #{odd_cnt}, #{odd_end_date}, #{odd_sts}, #{odd_pc}, #{odd_add},#{odd_da}, #{odd_pay}, #{odd_pay_date}, SYSDATE)
   	</insert>
+  	
+  	<!-- 3-1 연결된 자재를 찾아 재고 수량을 차감하고, 수정일을 업데이트함. -->
+  	<update id="deductStock" parameterType="map">
+	    MERGE INTO stock s
+	    USING (
+	        SELECT
+	            mat_id,
+	            (bom_cnt * #{ord_cnt}) AS DEDUCT_QTY
+	        FROM BOM
+	        WHERE prd_cd = #{prd_cd}
+	    ) b ON (s.item_id = b.mat_id AND s.stk_cat = 'stk_cat_02')
+	    WHEN MATCHED THEN
+	        UPDATE SET
+	            s.stk_cnt = s.stk_cnt - b.DEDUCT_QTY,
+	            s.stk_mod_date = SYSDATE;
+	</update>
+  	
+  	
+  	
+  	<select id="getLackingMaterials" parameterType="map" resultType="map">
+	    SELECT
+	        b.mat_id,
+	        ( (b.bom_cnt * #{ord_cnt}) - s.stk_cnt ) AS lacking_qty
+	    FROM
+	        BOM b
+	    JOIN
+	        STOCK s ON b.mat_id = s.item_id
+	    WHERE
+	        b.prd_cd = #{prd_cd}
+	        AND s.stk_cnt &lt; (b.bom_cnt * #{ord_cnt})
+	        AND s.stk_cat = 'stk_cat_02'
+	</select>
+	
+	
+	<insert id="createPurchaseRequest" parameterType="map">
+    INSERT INTO  (
+        mat_id,
+        emp_id,
+        mat_reg_date
+    ) VALUES (
+        #{ord_id},      -- 서비스단에서 추가해준 주문 ID
+        #{MAT_ID},      -- getLackingMaterials에서 조회한 자재 ID
+        #{lacking_qty}  -- getLackingMaterials에서 계산한 부족 수량
+    )
+	</insert>
+  	
+  	
+  	
+	
+
+
+	
   	
   	
 	

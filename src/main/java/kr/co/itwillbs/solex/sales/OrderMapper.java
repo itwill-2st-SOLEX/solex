@@ -43,5 +43,15 @@ public interface OrderMapper {
 	int createSujuOrder(Map<String, Object> safe);
 
 	int createSujuOrderDetail(Map<String, Object> safe);
+
+	boolean checkMaterialStock(Map<String, Object> orderData);
+
+	List<Map<String, Object>> sgetLackingMaterials(Map<String, Object> orderData);
+
+	void createPurchaseRequest(Map<String, Object> material);
+
+	void deductStock(Map<String, Object> orderData);
+
+	List<Map<String, Object>> getLackingMaterials(Map<String, Object> orderData);
 	
 }
