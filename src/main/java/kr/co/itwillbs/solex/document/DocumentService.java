@@ -98,7 +98,7 @@ public class DocumentService {
 	}
 	
 	// 기안서 상세조회
-	public List<Map<String, Object>> selectDetailDoc(String doc_id, String docTypeCode) {
+	public Map<String, Object> selectDetailDoc(String doc_id, String docTypeCode) {
 	    switch (docTypeCode) {
 	        case "doc_type_01":
 	        	return documentMapper.selectDetailLeave(doc_id);

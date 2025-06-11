@@ -89,7 +89,7 @@ $(function () {
 				</div>
 				<div id="dates" class="date mb-3">
 					<label class="form-label">날짜</label>
-					<input type="text" id="dateRange" class="form-control" placeholder="휴가기간 선택">
+					<input type="text" id="dateRange" class="form-control" name="dbdateRange" placeholder="휴가기간 선택">
 					<input type="hidden" name="lea_start_date" id="startDate">
 					<input type="hidden" name="lea_end_date" id="endDate">
 				</div>
@@ -147,7 +147,7 @@ $(function () {
 			<div class="doc-type05">
 				<div id="date" class="mb-3">
 					<label class="form-label">기간</label>
-					<input type="text" id="dateRange" class="form-control" placeholder="출장/외근 날짜 선택">
+					<input type="text" id="dateRange" class="form-control" name="dbdateRange" placeholder="출장/외근 날짜 선택">
 					<input type="hidden" name="bus_start_time" id="startDate">
 					<input type="hidden" name="bus_end_time" id="endDate">
 				</div>
@@ -190,7 +190,7 @@ $(function () {
 				</div>
 				<div id="last-day" class="mb-3">
 					<label class="form-label">사직 희망일</label>
-					<input type="text" id="dateRange" class="form-control" placeholder="퇴사 예정일 선택">
+					<input type="text" id="dateRange" class="form-control" name="dbdateRange" placeholder="퇴사 예정일 선택">
 					<input type="hidden" name="res_start_date" id="startDate">
 				</div>
 			</div>
@@ -332,6 +332,7 @@ $(function () {
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const dataList = await response.json();
+			debugger;
 			const data = dataList[0]; 
 			
 			// 일반 input, textarea, select 값 주입
@@ -365,38 +366,37 @@ $(function () {
 			existingBackdrops.forEach(bd => bd.remove()); 
 		    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 		    modal.show();
-//			  // 날짜 필드 처리 (docType별 분기)
-//			     if (docTypeCode === "doc_type_01") {
-//			       const start = data.LEA_START_DATE;
-//			       const end = data.LEA_END_DATE;
-//			       if (start || end) {
-//			         modalBody.querySelector('input[name="lea_start_date"]').value = start;
-//			         modalBody.querySelector('input[name="lea_end_date"]').value = end;
-//			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-//			         fp?.setDate([start, end]);
-//			       }
-//				   debugger;
-//			     } 
-//			     else if (docTypeCode === "doc_type_02") {
-//			       const start = data.BUS_START_TIME;
-//			       const end = data.BUS_END_TIME;
-//			       if (start && end) {
-//			         modalBody.querySelector('input[name="bus_start_time"]').value = start;
-//			         modalBody.querySelector('input[name="bus_end_time"]').value = end;
-//			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-//			         fp?.setDate([start, end]);
-//			       }
-//				   debugger;
-//			     } 
-//			     else if (docTypeCode === "doc_type_03") {
-//			       const start = data.RES_START_DATE;
-//			       if (start) {
-//			         modalBody.querySelector('input[name="res_start_date"]').value = start;
-//			         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-//			         fp?.setDate(start);
-//			       }
-//				   debugger;
-//			     }
+			
+//			const modalBody = document.querySelector('.modal-body');
+//	 		 // 날짜 필드 처리 (docType별 분기)
+//			 
+//		     if (docTypeCode === "doc_type_01") {
+//		       const val = data.DBDATERANGE;
+//			   debugger;
+//		       modalBody.querySelector('input[name="dbdateRange"]').value = val;
+//			   
+//			   console.log(modalBody.querySelector('input[name="dbdateRange"]'));
+//		     } 
+//		     else if (docTypeCode === "doc_type_02") {
+//		       const val = data.DBDATERANGE;
+//		       if (start && end) {
+//		         modalBody.querySelector('input[name="bus_start_time"]').value = start;
+//		         modalBody.querySelector('input[name="bus_end_time"]').value = end;
+//		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+//		         fp?.setDate([start, end]);
+//		       }
+//			   debugger;
+//		     } 
+//		     else if (docTypeCode === "doc_type_03") {
+//		       const start = data.RES_START_DATE;
+//		       if (start) {
+//				debugger;
+//		         modalBody.querySelector('input[name="res_start_date"]').value = start;
+//		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+//		         fp?.setDate(start);
+//		       }
+//				   
+//		     }
 
 //			     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 //			     modal.show();
