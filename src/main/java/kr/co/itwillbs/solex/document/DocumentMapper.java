@@ -18,7 +18,7 @@ public interface DocumentMapper {
 	// 로그인한 사원정보 들고오기
 	Map<String, Object> getEmpInfo(int emp_id);
 	// 기안서 등록
-	long registerDocument(Map<String, Object> map);
+	void registerDocument(Map<String, Object> map);
 	void registerLeaveDoc(Map<String, Object> map);
 	void registerbusinessOutworkDoc(Map<String, Object> map);
 	void resignationDoc(Map<String, Object> map);
@@ -29,4 +29,6 @@ public interface DocumentMapper {
 	Map<String, Object> selectDetailResignation(String doc_id);
 	
 	Integer findSteps(String docType);
+	
+	void updateDocumentStatus(Map<String, Object> approvalRequest);
 }

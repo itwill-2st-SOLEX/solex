@@ -82,13 +82,16 @@ public class DocumentService {
         // 상위 결재자 체인 탐색
         List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
         
-        for (int i = 0; i < Math.min(steps, upperRanks.size()); i++) {
+        int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
+        for (int i = 0; i < total; i++) {
             Map<String, Object> rank = upperRanks.get(i);
             String posCd = (String) rank.get("POS_CD");
             
+            int stepNo = total - i;
+            
             approvalMapper.insertApprovalLine(
                 docId,
-                i + 1,
+                stepNo,
                 catCd,
                 depCd,
                 teamCd,

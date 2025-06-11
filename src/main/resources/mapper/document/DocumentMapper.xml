@@ -247,10 +247,19 @@
 		  ORDER BY al.apl_step_no
 	</select>
 	
+	<update id="updateDocumentStatus" parameterType="map">
+	    UPDATE approval_line
+	    SET 
+	      apl_sts = #{status},
+	      doc_app_day = SYSDATE
+	    WHERE 
+	      doc_id = #{docId}
+  </update>
+	
 <!-- 	결재 유형별 결재선 찾아오기 -->
 	<select id="findSteps" resultType="java.lang.Integer">
 		SELECT upper_steps
-		  FROM doc_type_rule
+		 FROM doc_type_rule
 		 WHERE doc_type = #{docType}
 	</select>
 	
