@@ -17,12 +17,16 @@ public interface AttendanceMapper {
 	List<Map<String, Object>> selectAttendenceByMonthList(Map<String, Object> params);
 	
 	// 특정 사원의 특정 날짜 출퇴근 기록 조회
-    Optional<Map<String, Object>> findByEmpIdAndAttendanceDate(@Param("emp_id") Long empId, @Param("att_day") LocalDate attendanceDate);
+    Optional<Map<String, Object>> findByEmpIdAndAttendanceDate(
+    		@Param("emp_id") Long empId, 
+    		@Param("att_day") LocalDate attendanceDate);
 
     // 출근 기록 삽입 (새로운 출근 기록 생성)
     void insertPunchIn(Map<String, Object> params);
 
 	void updatePunchOut(Map<String, Object> attendanceData);
+
+	String selectDetNm(String attSts);
 
 
 }

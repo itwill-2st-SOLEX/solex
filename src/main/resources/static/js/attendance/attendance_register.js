@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. 페이지 로드 시 오늘 현황을 DB에서 가져와 표시 ---
     function loadTodayAttendanceStatus() {
-//		debugger;
         $.ajax({
             url: TODAY_STATUS_URL,
             method: 'GET',
@@ -125,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				// DB에 저장된 실제 출근 시간과 상태를 받아와 UI 업데이트
                 const punchInDbTime = response.att_in_time;
 				const punchStatus = response.det_nm;
+				
+//				console.log(JSON.stringify(response));
 
 				
                 if (punchInDbTime) {
@@ -158,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+	
     // --- 3. 퇴근 버튼 클릭 시 DB에 기록 ---
     punchOutButton.addEventListener('click', () => {
         // 출근 기록이 없으면 퇴근 불가 (이는 서버에서도 한 번 더 검증해야 합니다)
@@ -165,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('출근 기록이 없습니다. 먼저 출근 등록을 해주세요.');
             return;
         }
-		console.log('AJAX 요청 시작 직전! punchInTimeSpan.textContent:', punchInTimeSpan.textContent); // 추가
+//		console.log('AJAX 요청 시작 직전! punchInTimeSpan.textContent:', punchInTimeSpan.textContent); // 추가
 
         $.ajax({
             url: PUNCH_OUT_URL,
@@ -175,31 +177,42 @@ document.addEventListener('DOMContentLoaded', () => {
             success: function(response) {
                 // 서버 응답 예시: { "status": "success", "punchOutTime": "2025-06-09T18:00:00", "totalWorkMinutes": 535 }
                 alert('퇴근 등록이 완료되었습니다!');
+				
+//				console.log('퇴근시간 response?? ' + response);
                 
                 // DB에 저장된 실제 퇴근 시간 및 총 근무 시간을 받아와 UI 업데이트
                 const punchOutDbTime = response.att_out_time;
+                const punchInDbTime = response.att_in_time;
                 const totalWorkMinutes = response.totalWorkMinutes;
 				const punchStatus = response.det_nm;
-
 				
 				console.log('punchOutDbTime ?? ' + JSON.stringify(response));
 				
                 if (punchOutDbTime) {
-                    const date = new Date(punchOutDbTime);
-                    punchOutTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-                }
+                    const punchOutDate = new Date(punchOutDbTime);
+                    const punchInDate = new Date(punchInDbTime);
+                    punchOutTimeSpan.textContent = punchOutDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+					
+					const totalMilliseconds = punchOutDate.getTime() - punchInDate.getTime();
+			        const totalWorkMinutes = Math.floor(totalMilliseconds / (1000 * 60));
+
+			        const hours = Math.floor(totalWorkMinutes / 60);
+			        const minutes = totalWorkMinutes % 60;
+
+			        totalWorkTimeSpan.textContent = `${hours}시간 ${minutes}분`;
+                } else {
+				    // 퇴근 시간이 아직 없거나 출근 시간 정보가 없을 경우
+				    totalWorkTimeSpan.textContent = '--시간 --분';
+				}
 				// 출퇴근 상태 표시
 				if(punchStatus) {
-					pubchStatusSpan.textContent = punchStatus;
+					pubchStatusSpan.textContent = response.det_nm;
 				} else {
 					pubchStatusSpan.textContent = '--';
 				}
 
-                if (totalWorkMinutes !== undefined && totalWorkMinutes !== null) {
-                    const hours = Math.floor(totalWorkMinutes / 60);
-                    const minutes = totalWorkMinutes % 60;
-                    totalWorkTimeSpan.textContent = `${hours}시간 ${minutes}분`;
-                }
+
+				        
 
                 // 버튼 상태 변경
                 punchOutButton.disabled = true;

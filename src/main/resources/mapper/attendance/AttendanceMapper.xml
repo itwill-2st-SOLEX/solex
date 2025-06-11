@@ -69,9 +69,10 @@
          JOIN code_detail cd 
            ON cd.det_id = att.att_sts
         WHERE
-              att.emp_id = #{emp_id} AND att.att_day = #{att_day}
+              att.emp_id = #{emp_id} 
+          AND TRUNC(att_day) = #{att_day}
     </select>
-
+    
     <insert id="insertPunchIn">
         INSERT INTO attendance (
             emp_id,
@@ -90,10 +91,16 @@
         UPDATE attendance
         SET
             att_out_time = #{punchOutTime, jdbcType=DATE},
-            att_sts = #{att_sts, jdbcType=VARCHAR}
+            att_sts = #{att_sts, jdbcType=DATE}
 <!--             total_work_minutes = #{totalWorkMinutes} -->
         WHERE
             emp_id = #{EMP_ID, jdbcType=NUMERIC}
     </update>
+    <select id="selectDetNm" resultType="string">
+        SELECT det_nm
+          FROM code_detail
+         WHERE det_id = #{attSts} -- 예시: 'ATT_STATUS'라는 그룹 ID의 코드들만 가져온다고 가정. 실제 그룹 ID에 맞게 수정
+         ORDER BY det_id
+    </select>
     
 </mapper>	
