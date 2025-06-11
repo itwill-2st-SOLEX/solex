@@ -3,7 +3,7 @@
 let currentPage = 0;
 const pageSize = 20;
 const gridHeight = 400;
-const empId = 31;
+let empId = null;
 
 // ToastUI Grid 생성
 const grid = new tui.Grid({
@@ -26,7 +26,6 @@ const grid = new tui.Grid({
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
 	vacationSummary();
-    vacationDetail(currentPage);
 
 });
 
@@ -56,11 +55,14 @@ const formatter = new Intl.DateTimeFormat('ko-KR', {
 async function vacationSummary() {
 	try {
 			//const empId = 31;
-			let url = `/SOLEX/vacation/api/summary?empId=${empId}`;
+			let url = `/SOLEX/vacation/api/summary`;
 			
 	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
 	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
-
+			console.log(data)
+			
+			empId = data.EMP_ID;
+			
 			document.getElementById('empNm').textContent = data.EMP_NM || '-';
 			document.getElementById('empHire').textContent = formatter.format(new Date(data.EMP_HIRE))  || '-';
 			document.getElementById('periodEnd').textContent = formatter.format(new Date(data.periodEnd)) || '-';
@@ -68,6 +70,8 @@ async function vacationSummary() {
 			document.getElementById('vacTotal').textContent = data.VAC_TOTAL || 0;
 			document.getElementById('vacUsed').textContent = data.VAC_USED || 0;
 			document.getElementById('vacRemain').textContent = data.VAC_REMAIN || 0;
+			
+			vacationDetail(currentPage);
 
 	    } catch (e) {
 	        console.error('fetch 에러 : ', e);
@@ -84,7 +88,7 @@ async function vacationDetail(page) {
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
-		
+
 		console.log(data)
 		const list = data.list;
 		const vacationCount = data.vacationCount;

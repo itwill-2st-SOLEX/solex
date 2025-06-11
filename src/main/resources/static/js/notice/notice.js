@@ -25,6 +25,7 @@ const grid = new tui.Grid({
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
+		
 	searchKeyword = document.getElementById('searchInput').value.trim();
     noticeList(currentPage, searchKeyword);
 	document.getElementById('searchBtn').addEventListener('click', searchNotice);
@@ -67,17 +68,19 @@ async function noticeList(page, keyword = '') {
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
-
+		
 		const list = data.list;
 		const totalCount = data.totalCount;
 		
-		console.log(data.list.length)
+		empId = data.empId;
+		
+		console.log(data)
 		
         const gridData = list.map((n, idx) => ({
             id: n.NOT_ID,
             notTt: n.NOT_TT,
             notCon: n.NOT_CON,
-            detNm: n.DET_NM || '-',
+            detNm: n.DET_NM  == '공통' ? '-' : n.DET_NM,
             empNm: n.EMP_NM || '-',
             notRegDate: formatter.format(new Date(n.NOT_REG_DATE)),
 			rowNum: totalCount - (page * pageSize + idx) // 역순 번호 계산
@@ -128,6 +131,8 @@ grid.on('click', async (ev) => {
 
 // 글쓰기 버튼 클릭
 function onWriteNotice() {
+	
+	
     showNoticeModal('new');
 }
 
@@ -235,7 +240,7 @@ function showNoticeModal(mode, data = {}) {
             <div class="custom-modal-header">
                 <h4 class="custom-modal-title" id="exampleModalLabel">${title}</h4>
                 <ul class="custom-modal-meta">
-                    <li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM || '-'}</span></li>
+					<li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM == '공통' ? '-' : data.DET_NM}</span></li>
                     <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span></li>
                     <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? 
 										new Date(data.NOT_REG_DATE).toLocaleString('ko-KR', {

@@ -14,7 +14,7 @@ public class VacationService {
 	@Autowired
 	public VacationMapper vacationMapper;
 	
-	//개인별 휴가 개수 확인
+	//내 남은 휴가 개수 확인
 	public Map<String, Object> getVacationSummary(Long empId) {
 		
 		//sql 조회
@@ -60,11 +60,23 @@ public class VacationService {
 
 	
 	
-	//개인별 휴가 내역 확인
-	public List<Map<String, Object>> getVacationDetail(Map<String, Object> params) {
+	//내가 사용한 휴가 내역 확인
+	public List<Map<String, Object>> getVacationDetail(Map params) {
 		
 		return vacationMapper.getVacationDetail(params);
 	}
 
-
+	//관리자-휴가 내역 조회
+	public List<Map<String, Object>> getVacationList(Map params) {
+		return vacationMapper.getVacationList(params);
+	}
+	
+	//관리자 페이지에서 전체 개수
+	public int getVacationAllCount(Map params) {
+		return vacationMapper.getVacationAllCount(params);
+	}
+	
+	public Map<String, Object> getEmployeeInfo(Long empId) {
+		return vacationMapper.getEmployeeInfo(empId);
+	}
 }

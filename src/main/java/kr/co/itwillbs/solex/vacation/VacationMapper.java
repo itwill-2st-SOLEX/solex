@@ -8,15 +8,17 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface VacationMapper {
 	
-	// 휴가 현황 요약
+	// 내 휴가 현황 요약
 	Map<String, Object> getVacationSummary(Long empId);
 	
-	// 
+	// 내 휴가 사용 개수 계산하기
 	int getVacationCount(Long empId);
 	
-	List<Map<String, Object>> getVacationDetail(Map<String, Object> params);
+	List<Map<String, Object>> getVacationDetail(Map params);
 	
-	List<Map<String, Object>> getVacationList(Map<String, Object> params);
+	List<Map<String, Object>> getVacationList(Map params);
 	
+	int getVacationAllCount(Map params);
 	
+	Map<String, Object> getEmployeeInfo(Long empId);
 }

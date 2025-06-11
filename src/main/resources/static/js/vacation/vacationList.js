@@ -3,9 +3,11 @@
 let currentPage = 0;
 const pageSize = 20;
 const gridHeight = 600;
-/*let editorInstance = null;
+let editorInstance = null;
 let editorLoaded = false;
-let searchKeyword = '';*/
+let searchKeyword = '';
+let empId = null;
+
 
 // ToastUI Grid 생성
 const grid = new tui.Grid({
@@ -15,11 +17,10 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [],
     columns: [
-		/*{ header: '번호', name: 'rowNum', width: 100, align: 'center', sortable: true },*/
+		{ header: '부서', name: 'leaEndDate', align: 'center',  sortable: true },
+		{ header: '팀', name: 'leaUsedDay', align: 'center',  sortable: true },
         { header: '사번', name: 'leaType', align: 'center', filter: 'select',sortable: true },
         { header: '이름', name: 'leaStartDate', align: 'center', filter: 'select', sortable: true },
-        { header: '부서', name: 'leaEndDate', align: 'center',  sortable: true },
-        { header: '팀', name: 'leaUsedDay', align: 'center',  sortable: true },
 		{ header: '직급', name: 'leaUsedDay', align: 'center',  sortable: true },
 		{ header: '입사일', name: 'leaUsedDay', align: 'center',  sortable: true },
 		{ header: '총 휴가일수', name: 'leaUsedDay', align: 'center',  sortable: true },
@@ -33,12 +34,11 @@ const grid = new tui.Grid({
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
-	vacationSummary();
-    vacationDetail(currentPage);
+	vacationList(currentPage);
 	
-	/*searchKeyword = document.getElementById('searchInput').value.trim();
-	document.getElementById('searchBtn').addEventListener('click', searchNotice);
-	document.getElementById('writeBtn').addEventListener('click', onWriteNotice);*/
+	searchKeyword = document.getElementById('searchInput').value.trim();
+	document.getElementById('searchBtn').addEventListener('click', searchVacation);
+	//document.getElementById('writeBtn').addEventListener('click', onWriteVacation);
 	
 });
 
@@ -49,7 +49,7 @@ function bindScrollEvent() {
 	
 	//무한스크롤시 검색어 유지를 위해 재전달
     grid.on('scrollEnd', () => {
-        //const keyword = document.getElementById('searchInput').value.trim();
+        const keyword = document.getElementById('searchInput').value.trim();
         vacationDetail(currentPage);
     });
 }
@@ -64,59 +64,40 @@ const formatter = new Intl.DateTimeFormat('ko-KR', {
     day: '2-digit'
 });
 
-//휴가 요약 정보
-async function vacationSummary() {
-	try {
-			const empId = 1;
-			let url = `/SOLEX/api/vacation/summary?empId=${empId}`;
-			
-	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
-	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
-
-			document.getElementById('empNm').textContent = data.EMP_NM || '-';
-			document.getElementById('empHire').textContent = formatter.format(new Date(data.EMP_HIRE))  || '-';
-			document.getElementById('periodEnd').textContent = formatter.format(new Date(data.periodEnd)) || '-';
-			document.getElementById('daysLeft').textContent = data.daysLeft != null ? `(D-${data.daysLeft})` : '';
-			document.getElementById('vacTotal').textContent = data.VAC_TOTAL || 0;
-			document.getElementById('vacUsed').textContent = data.VAC_USED || 0;
-			document.getElementById('vacRemain').textContent = data.VAC_REMAIN || 0;
-
-	    } catch (e) {
-	        console.error('fetch 에러 : ', e);
-	    }
-}
-
 // 게시글 목록 불러오기
-async function vacationDetail(page) {
+async function vacationList(page, keyword = '') {
     try {
 		
-		const empId = 1;
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/api/vacation/detail?page=${page}&size=${pageSize}&empId=${empId}`;
+		let url = `/SOLEX/vacation/api/list?page=${page}&size=${pageSize}`;
 		
-        //if (keyword) {
-        //    url += `&keyword=${encodeURIComponent(keyword)}`;
-        //}
+        if (keyword) {
+            url += `&keyword=${encodeURIComponent(keyword)}`;
+        }
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 		
-		console.log(data)
 		const list = data.list;
 		const vacationCount = data.vacationCount;
 		
-		//console.log(data.list.length)
+		console.log(data)
 		
-        const gridData = list.map((n, idx) => ({
-			rowNum: vacationCount - (page * pageSize + idx), // 역순 번호 계산
-			leaType: n.LEA_TYPE,
+        const gridData = list.map((n) => ({
+			empNum: n.EMP_NUM,
+			empNm: n.EMP_NM,
+			empHire: formatter.format(new Date(n.EMP_HIRE))  || '-',
+/*			empCatCd: n.EMP_CAT_CD,
+			empDepCd: n.EMP_DEP_CD,
+			empTeamCd: n.EMP_TEAM_CD,
+			empPosCd: n.EMP_POS_CD,*/
 			vacTotal: n.VAC_TOTAL,
-			vacUsed: n.VAC_USED,
-			vacRemain: n.VAC_REMAIN,
-            leaStartDate: formatter.format(new Date(n.LEA_START_DATE))  || '-',
-            leaEndDate: formatter.format(new Date(n.LEA_END_DATE))  || '-',
-            leaUsedDay: n.LEA_USED_DAY,
-            leaCon: n.LEA_CON
+            vacUsed: n.VAC_USER,
+            vacRemain: n.VAC_REMAIN,
+			empCatNm: n.EMP_CAT_NM,
+			empDepNm: n.EMP_DEP_NM,
+			empTeamNm: n.EMP_TEAM_NM,
+			empPosNm: n.EMP_POS_NM
         }));
 		
 		//첫 페이지면 초기화 후 새로 보여줌
@@ -139,197 +120,12 @@ async function vacationDetail(page) {
 }
 
 // 검색기능
-/*function searchNotice() {
+function searchVacation() {
 	const keyword = document.getElementById('searchInput').value.trim();
 	    currentPage = 0;
 		
 		bindScrollEvent();		//무한스크롤 초기화 후 실행
-	    noticeList(currentPage, keyword);
-}*/
-
-// 제목 클릭 시 상세조회
-/*grid.on('click', async (ev) => {
-    if (ev.columnName === 'notTt') {
-        const noticeId = grid.getRow(ev.rowKey).notId;
-
-        try {
-            const res = await fetch(`/SOLEX/api/notice/${noticeId}`);
-            const detail = await res.json();
-            showNoticeModal('view', detail);
-        } catch (e) {
-            console.error('공지사항 상세 조회 실패: ', e);
-        }
-    }
-});
-*/
-
-// 글쓰기 버튼 클릭
-/*function onWriteNotice() {
-    showNoticeModal('new');
-}
-*/
-
-// 게시글 등록/수정/삭제 - 비동기
-/*async function changeNotice(mode, noticeId = null) {
-	
-	let url = '';
-	let method = '';
-	let payload = null;
-	
-	if (mode == 'new') {
-		url = '/SOLEX/api/notice';
-		method = 'POST';
-	  
-	} else if (mode == 'edit') {
-		url = `/SOLEX/api/notice/${noticeId}`;
-		method = 'PUT';
-	  
-	} else if (mode == 'delete') {
-		url = `/SOLEX/api/notice/${noticeId}`;
-		method = 'DELETE';
-	  
-	}
-	
-	//삭제와 등록/수정 구분하기
-	if (mode == 'delete') {
-		if (!confirm('정말 삭제하시겠습니까?')) return;
-		
-	} else {
-		const title = document.getElementById('noticeTitle').value.trim();
-	    const content = window.editorInstance ? window.editorInstance.getMarkdown() : '';
-		
-	    if (!title || !content) {
-	        alert('제목과 내용을 모두 입력해 주세요.');
-	        return;
-	    }
-	
-	    payload = {
-	        notTt: title,
-	        notCon: content
-	    };
-	}	
-
-    try {
-        const res = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-			//payload가 존재하면 payload추가, 없으면 아무것도 추가안함
-			// DELETE에는 body 없이 전달
-			// ...(대상 && 존재할때 추가할 값)
-            ...(payload && { body: JSON.stringify(payload) }) 
-        });
-
-        if (!res.ok) {
-            throw new Error(`서버 오류: ${res.status}`);
-        }
-
-		alert('성공적으로 처리되었습니다.');
-        bootstrap.Modal.getInstance(document.getElementById('exampleModal')).hide();
-        currentPage = 0;
-        noticeList(currentPage);
-		
-    } catch (err) {
-		console.error('공지사항 처리 실패:', err);
-        alert('공지사항 처리 중 오류가 발생했습니다.');
-    }
-}
-
-// 수정 버튼 클릭
-function noticeEditMode(noticeId) {
-    fetch(`/SOLEX/api/notice/${noticeId}`)
-        .then(res => res.json())
-        .then(data => showNoticeModal('edit', data))
-        .catch(err => console.error('수정 모드 조회 실패', err));
-}
-
-// 삭제 버튼 클릭
-function noticeDelMode(noticeId) {
-    fetch(`/SOLEX/api/notice/${noticeId}`)
-        .then(res => res.json())
-        .then(data => showNoticeModal('delete', data))
-        .catch(err => console.error('삭제 모드 조회 실패', err));
-}
-
-// 모달 표시 함수
-function showNoticeModal(mode, data = {}) {
-    const modalContainer = document.getElementById('showModal');
-    const modalFooter = document.getElementById('modalFooter');
-    const isEditable = (mode == 'new' || mode == 'edit');
-    const now = new Date();
-
-    const title = isEditable ? 
-		`<input type="text" id="noticeTitle" class="form-control" value="${data.NOT_TT || ''}" placeholder="제목을 입력하세요">` : 
-		`<span id="modalTitle">${data.NOT_TT || ''}</span>`;
-
-    const content = isEditable ?
-        `<div id="editor"></div>` :
-        `${(data.NOT_CON || '내용 없음').replace(/\n/g, '<br>')}`; // \n줄바꿈 , /g 전역 검색 플래그
-
-    modalContainer.innerHTML = `
-        <div class="custom-modal-detail">
-            <div class="custom-modal-header">
-                <h4 class="custom-modal-title" id="exampleModalLabel">${title}</h4>
-                <ul class="custom-modal-meta">
-                    <li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM }</span></li>
-                    <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span></li>
-                    <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? 
-										new Date(data.NOT_REG_DATE).toLocaleString('ko-KR', {
-										          year: 'numeric', month: '2-digit', day: '2-digit',
-										          hour: '2-digit', minute: '2-digit',
-										          hour12: true }).replace(/\. /g, '. ') 
-											: formatter.format(now)}</span></li>
-                </ul>
-            </div>
-            <div class="custom-modal-content" id="modalContent">${content}</div>
-        </div>
-    `;
-
-    modalFooter.innerHTML = `
-        ${mode === 'view' ? `<button class="btn custom-btn-blue mt-3" onclick="noticeEditMode(${data.NOT_ID})">수정</button>` : ''}
-		${mode === 'view' ? `<button class="btn custom-btn-blue mt-3" onclick="changeNotice('delete', ${data.NOT_ID})">삭제</button>` : ''}
-        ${isEditable ? `<button class="btn custom-btn-blue mt-3"  onclick="changeNotice('${mode}', ${data.NOT_ID || null})">저장</button>` : ''}
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-    `;
-
-    // 모달 표시
-    const modalEl = document.getElementById('exampleModal');
-    const bsModal = new bootstrap.Modal(modalEl);
-    bsModal.show();
-
-    // 모달 닫힐 때 editor 제거
-    modalEl.addEventListener('hidden.bs.modal', () => {	// editor.js의 editorInstance가 알아서 관리하니 여기서 따로 처리 안 해도 됨
-	        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-	        document.body.classList.remove('modal-open');
-	    }, { once: true });
-
-	    if (isEditable) {
-	        loadEditorScript(() => {
-	            // editor.js에서 제공하는 initEditor() 사용
-	            initEditor('#editor', data.NOT_CON || '');
-	        });
-    }
-	
-	
+	    vacationList(currentPage, keyword);
 }
 
 
-
-// 에디터 스크립트 동적 로딩
-function loadEditorScript(callback) {
-    if (editorLoaded) {
-        callback();
-        return;
-    }
-
-    const script = document.createElement('script');
-    script.src = '/SOLEX/js/editor.js';
-    script.onload = () => {
-        editorLoaded = true;
-        callback();
-    };
-	
-    document.body.appendChild(script);
-}
-*/
