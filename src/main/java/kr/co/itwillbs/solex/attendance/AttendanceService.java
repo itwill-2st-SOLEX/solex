@@ -84,16 +84,16 @@ public class AttendanceService {
 	@Transactional
     public Map<String, Object> recordPunchOut(Long empId) {
         LocalDate today = LocalDate.now();
-        LocalDateTime att_out_time = LocalDateTime.now();
+        LocalDateTime punchOutTime = LocalDateTime.now();
 
         // 오늘 출근 기록 조회 (Map으로 반환됨)
         Map<String, Object> attendanceData = attendanceMapper.findByEmpIdAndAttendanceDate(empId, today)
                 .orElseThrow(() -> new IllegalArgumentException("오늘 출근 기록이 없습니다."));
-
+        System.out.println("출근기록 조회 : attendanceData - " + attendanceData); 
         // Map에서 기존 출근 시간 가져오기
-//        LocalDateTime punchInTime = (LocalDateTime) attendanceData.get("ATT_IN_TIME");
         LocalDateTime punchInTime = LocalDateTime.parse((String)attendanceData.get("ATT_IN_TIME"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
+        
         if (punchInTime == null) {
             throw new IllegalStateException("출근 기록이 유효하지 않습니다."); // 또는 오류 처리
         }
@@ -102,11 +102,12 @@ public class AttendanceService {
         }
 
         // Map에 퇴근 시간 및 근무 시간 업데이트
-        attendanceData.put("punchOutTime", att_out_time);
-
+        attendanceData.put("punchOutTime", punchOutTime);
+        
         // 총 근무 시간 계산
-        Duration duration = Duration.between(punchInTime, att_out_time);
+        Duration duration = Duration.between(punchInTime, punchOutTime);
         long totalMinutes = duration.toMinutes();
+        
 
         // 점심 시간 등 비근무 시간 제외 로직 (예: 1시간 = 60분 제외)
         int breakTimeMinutes = 60;
@@ -136,8 +137,9 @@ public class AttendanceService {
 
         attendanceMapper.updatePunchOut(attendanceData); // DB 업데이트
 
+        // 조회후 바로 화면단에 보여주기 위하
         Map<String, Object> result = new HashMap<>();
-        result.put("att_out_time", att_out_time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        result.put("att_out_time", punchOutTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.put("totalWorkMinutes", (int) totalMinutes);
         result.put("att_sts", attSts);
         

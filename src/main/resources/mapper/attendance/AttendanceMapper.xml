@@ -16,7 +16,7 @@
              attendance att 
         JOIN code_detail cd 
           ON cd.det_id = att.att_sts
-        WHERE att.emp_id = 5
+        WHERE att.emp_id = #{empId}
 		  AND TO_CHAR(att_in_time, 'YYYY') = #{year}  
  		  AND TO_CHAR(att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0') 
      ORDER BY att.att_day ASC
@@ -29,8 +29,6 @@
 		       TO_CHAR(att_in_time, 'YYYY-MM-DD HH:MI AM') AS att_in_time,
 		       TO_CHAR(att_out_time, 'YYYY-MM-DD HH:MI AM') AS att_out_time,
 		       TO_CHAR(att_day, 'YYYY-MM-DD HH:MI AM') AS att_day,
-    
- 			   
 		     e.dep_id,          				-- 휘하 직원의 부서
 		     e.dep_position,     				-- 휘하 직원의 직위
 		     cd_e.det_sort
@@ -45,7 +43,7 @@
             ON e.emp_id = a.emp_id				-- 출퇴근 data
             
         <where>
-               m.emp_id = 5 					-- 결재권자의 id
+               m.emp_id = #{emp_id} 					-- 결재권자의 id
            AND cd_e.det_sort > cd_m.det_sort		-- 결재권자 보다 직급이 아래(dep_sort가 더 높다)
 		   AND TO_CHAR(a.att_in_time, 'YYYY') = #{year}  
  		   AND TO_CHAR(a.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
@@ -56,30 +54,22 @@
 		</where>    
     </select>
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <select id="findByEmpIdAndAttendanceDate" resultType="java.util.Map">
         SELECT
-              att_id,
-              emp_id,
-              att_day,
-              NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
- 			  att_out_time,
-              NVL(TO_CHAR(att_day, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_day
-         FROM attendance
+              att.att_id,
+              att.emp_id,
+              att.att_day,
+              -- NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
+              -- NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
+              TO_CHAR(att.att_in_time, 'YYYY-MM-DD HH24:MI:SS') as att_in_time,
+        	  TO_CHAR(att.att_out_time, 'YYYY-MM-DD HH24:MI:SS') as att_out_time, -- NULL이면 그대로 NULL이 넘어감
+ 			  cd.det_nm,
+              TO_CHAR(att.att_day, 'YYYY-MM-DD HH24:MI:SS') as att_day
+         FROM attendance att
+         JOIN code_detail cd 
+           ON cd.det_id = att.att_sts
         WHERE
-              emp_id = #{emp_id} AND att_day = #{att_day}
+              att.emp_id = #{emp_id} AND att.att_day = #{att_day}
     </select>
 
     <insert id="insertPunchIn">
