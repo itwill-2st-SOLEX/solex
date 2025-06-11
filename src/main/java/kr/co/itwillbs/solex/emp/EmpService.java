@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -19,16 +16,15 @@ public class EmpService {
 
 	@Autowired
 	private EmpMapper mapper;
-	
-	
-	//인사등록 
+
+	//인사등록
 	public int registerEmp(Map<String, Object> empMap) {
 		return mapper.insertEmp(empMap);
 	}
 
 	//인사목록 (재직중)
 	 public List<Map<String, Object>> getEmpList(String searchType, String searchKeyword, String includeEmpSts) {
-		 
+
 	        System.out.println("Service: getEmpList called with searchType=" + searchType +
 	                           ", searchKeyword=" + searchKeyword + ", includeEmpSts=" + includeEmpSts);
 
@@ -38,15 +34,15 @@ public class EmpService {
 	        return empList;
 	    }
 
-	
+
 	  public List<Map<String, Object>> getAllCommonCodesForJson() {
-		  
+
 	        List<Map<String, Object>> allCodes = mapper.getAllCodeDetails();
 
 	        List<Map<String, Object>> resultList = new ArrayList<>();
 	        for (Map<String, Object> codeMap : allCodes) {
 	            Map<String, Object> formattedMap = new HashMap<>();
-	            
+
 	            // empCatCd
 	            if (codeMap.get("empCatCd") != null) {
 	                formattedMap.put("empCatCd", codeMap.get("empCatCd").toString().trim());
@@ -75,15 +71,38 @@ public class EmpService {
 	        System.out.println("가공 후 최종 resultList: " + resultList); // 추가: 이 로그도 꼭 확인!
 	        return resultList;
 	    }
-	  
+
 	public List<Map<String, Object>> getEmpCodeListFromMapper() {
 	    List<Map<String, Object>> empCodeList = mapper.getAllCodeDetails();
-	    
-	    return empCodeList; 
+
+	    return empCodeList;
 	}
 
 	public List<Map<String, Object>> getempList(int offset, int size) {
 		return mapper.getempList(offset, size);
+	}
+
+	//등록에서 공통코드 가져오기 위한
+	public List<Map<String, Object>> getAllcodes() {
+		// TODO Auto-generated method stub
+		return mapper.getAllcodes();
+	}
+
+
+	//수정 모달창 가져오기 위한
+	public Map<String, Object> getEmpDetail(String empNum) {
+//		System.out.println("service empNum = " + empNum); // ok
+		 
+//		System.out.println("service result = " + mapper.getEmpDetail(empNum)); // null이였던 이유 = sql의 char 공백때문에
+
+		return mapper.getEmpDetail(empNum);
+	}
+	
+	// 수정된 사원 정보를 저장
+	public int modifyMap(HashMap<String, Object> empModifyMap) {
+		// TODO Auto-generated method stub
+		System.out.println("service map = " + mapper.modifyMap(empModifyMap));
+		return mapper.modifyMap(empModifyMap);
 	}
 
 

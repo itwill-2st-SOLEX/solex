@@ -19,7 +19,7 @@
         #{emp_nm, jdbcType=VARCHAR},
         #{emp_gd, jdbcType=VARCHAR},
         #{emp_birth, jdbcType=DATE},    
-        #{emp_pw, jdbcType=VARCHAR},
+        #{emp_birth, jdbcType=VARCHAR},
         #{emp_phone, jdbcType=VARCHAR},
         #{emp_email, jdbcType=VARCHAR},
         #{emp_add, jdbcType=VARCHAR},
@@ -187,4 +187,27 @@
         AND sts.cod_id = 'sts'
         
     </select>
+    <select id="getAllcodes" resultType="map">
+		SELECT 
+		    det_id AS "DET_ID",
+		    det_nm AS "DET_NM"
+		FROM code_detail
+		WHERE cod_id in('cat', 'pos', 'dep_erp', 'dep_mes', 'team')
+    </select>
+    
+    <select id="getEmpDetail" resultType="map">
+    	SELECT *
+    	FROM employee
+    	WHERE TRIM(emp_num) = #{empNum}
+    </select>
+    
+    
+    <update id="modifyMap">
+    	UPDATE employee
+    	SET emp_cat_cd = #{empCatCd},
+    	emp_dep_cd = #{empDepCd},
+    	emp_pos_cd = #{empPosCd},
+    	emp_team_cd = #{empTeamCd}
+    	WHERE emp_num = #{emp_num}
+    </update>
 </mapper>

@@ -16,14 +16,14 @@
 	</head>
 
 <body>
+	
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			<!-- 여기서 부터 작성하시면 됩니다  -->
 			<h2>사원목록</h2>
 			<!-- 본문 영역-->
-			<button type="button" class="btn custom-btn-blue float-end mb-4" data-bs-toggle="modal"
-				data-bs-target="#exampleModal">사원등록</button>
+			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">사원등록</button>
 			<div class="custom-content">
 
 				<!-- 그리드 작성 시 width 없이 사용. -->
@@ -35,103 +35,13 @@
 		<!-- 등록모달창 -->
 		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
-				<div class="modal-content">
-
-					<div class="modal-header">
-						<h4 class="modal-title" id="exampleModalLabel">사원 등록</h4>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-
-					<div class="modal-body">
-						<form th:action="@{/emp/registration}" id="joinForm" method="post">
-							<div class="mb-3">
-								<label>사번</label>
-								<input type="text" class="form-control d-inline-block w-25" name="emp_num" required><br>
-							</div>
-							<div class="mb-3">
-								<label>이름</label>
-								<input type="text" class="form-control d-inline-block w-25" name="emp_nm" required><br>
-							</div>
-							<div class="mb-3">
-								<label>입사일</label>
-								<input type="date" class="form-control d-inline-block w-25" name="emp_hire"
-									required><br>
-							</div>
-							<div class="mb-3">
-								<label>성별</label>
-								<label><input type="radio" name="emp_gd" value="M" checked="checked">남</label>
-								<label><input type="radio" name="emp_gd" value="W"> 여</label><br>
-							</div>
-							<div class="mb-3">
-								<label>생년월일</label>
-								<input type="text" class="form-control d-inline-block w-25" name="emp_birth"
-									id="emp_birth" pattern="\d{6}" placeholder="ex)990101" required>
-								<input type="hidden" name="emp_pw" id="emp_pw"><br>
-							</div>
-							<div class="inline-container">
-								<span>사원</span>
-								<select name="empCatCd" class="form-select">
-									<option value="">-- 사원을 선택하세요 --</option>
-									<th:block th:each="code : ${codeList}"
-										th:if="${#strings.startsWith(code.DET_ID, 'cat_')}">
-										<option th:value="${code.DET_ID}" th:text="${code.DET_NM}"></option>
-									</th:block>
-								</select>
-								<span>부서</span>
-								<select name="empDepCd" class="form-select">
-									<option value="">-- 부서를 선택하세요 --</option>
-									<th:block th:each="code : ${codeList}"
-										th:if="${#strings.startsWith(code.DET_ID, 'dep_')}">
-										<option th:value="${code.DET_ID}" th:text="${code.DET_NM}"></option>
-									</th:block>
-								</select>
-								<div>직급</div>
-								<select name="emp_pos_cd" class="form-select">
-									<option value="">-- 직급을 선택하세요 --</option>
-									<th:block th:each="code : ${codeList}"
-										th:if="${#strings.startsWith(code.DET_ID, 'pos_')}">
-										<option th:value="${code.DET_ID}" th:text="${code.DET_NM}"></option>
-									</th:block>
-								</select>
-								<span>팀</span>
-								<select name="emp_team_cd" class="form-select">
-									<option value="">-- 팀을 선택하세요 --</option>
-									<th:block th:each="code : ${codeList}"
-										th:if="${#strings.startsWith(code.DET_ID, 'team_')}">
-										<option th:value="${code.DET_ID}" th:text="${code.DET_NM}"></option>
-									</th:block>
-								</select>
-							</div>
-							<div class="mb-3">
-								<label>연락처</label>
-								<input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
-								<input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
-								<input type="text" id="emp_phone3" class="form-control d-inline-block w-25"
-									required><br>
-							</div>
-							<div class="mb-3">
-								<label>이메일</label>
-								<input type="text" id="email1" class="form-control d-inline-block w-25" required>@<input
-									type="text" id="email2" class="form-control d-inline-block w-25" required><br>
-							</div>
-							<div class="mb-3">
-								<label>주소</label><br>
-								<input type="text" id="sample6_postcode" name="emp_pc"
-									class="form-control d-inline-block w-25" placeholder="우편번호" required>
-								<input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-								<input type="text" id="sample6_address" name="emp_add" class="form-control"
-									placeholder="주소" required>
-								<input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1"
-									placeholder="상세주소" required>
-								<input type="text" id="sample6_extraAddress" placeholder="참고항목">
-							</div>
-
-							<div class="modal-footer">
-								<button type="submit" class="btn btn-success">등록</button>
-								<button type="reset" class="btn btn-secondary">초기화</button>
-								<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-							</div>
-						</form>
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">사원 등록</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			      </div>
+			      <div class="modal-body">
+					        <!-- 여기에 JS가 form을 생성하여 삽입할 예정 -->
 					</div>
 				</div>
 			</div>	
@@ -144,83 +54,10 @@
 
 						<div class="modal-header">
 							<h4 class="modal-title" id="exampleModalLabel">사원 수정</h4>
-							<button type="button" class="btn-close" data-bs-dismiss="modal"
-								aria-label="Close"></button>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"aria-label="Close"></button>
 						</div>
+					    <div class="modal-body">
 
-						<div class="modal-body">
-							<form th:action="@{/emp/registration}" id="joinForm" method="post">
-								<div class="mb-3">
-									<label>사번</label>
-									<input type="text" class="form-control d-inline-block w-25" name="emp_num"
-										readonly>
-									<label>이름</label>
-									<input type="text" class="form-control d-inline-block w-25" name="emp_nm"
-										readonly>
-									<label>입사일</label>
-									<input type="text" class="form-control d-inline-block w-25" name="emp_hire"
-										readonly>
-								</div>
-								<div class	="mb-3">
-									<label>성별</label>
-									<label><input type="radio" name="emp_gd" value="M"
-											checked="checked">남</label>
-									<label><input type="radio" name="emp_gd" value="W"> 여</label>
-									<label>생년월일</label>
-									<input type="text" class="form-control d-inline-block w-25" name="emp_birth"
-										id="emp_birth" pattern="\d{6}" placeholder="ex)990101" readonly>
-									<input type="hidden" name="emp_pw" id="emp_pw">
-								</div>
-								<div class="inline-container">
-									<span>부서</span>
-									<select name="dep_id" class="form-select">
-										<option value="관리부">관리부</option>
-										<option value="인사부">인사부</option>
-										<option value="개발부">개발부</option>
-										<option value="마케팅부">마케팅부</option>
-									</select>
-									<span>직급</span>
-									<select name="dep_position" class="form-select">
-										<option value="사원">사원</option>
-										<option value="대리">대리</option>
-										<option value="과장">과장</option>
-									</select>
-								</div>
-								<div class="mb-3">
-									<label>연락처</label>
-									<input type="text" id="emp_phone1" class="form-control d-inline-block w-25"
-										readonly> -
-									<input type="text" id="emp_phone2" class="form-control d-inline-block w-25"
-										readonly> -
-									<input type="text" id="emp_phone3" class="form-control d-inline-block w-25"
-										readonly>
-								</div>
-								<div class="mb-3">
-									<label>이메일</label>
-									<input type="text" id="email1" class="form-control d-inline-block w-25"
-										readonly>@<input type="text" id="email2"
-										class="form-control d-inline-block w-25" readonly>
-								</div>
-								<div class="mb-3">
-									<label>주소</label>
-									<input type="button" onclick="sample6_execDaumPostcode()"
-										value="우편번호 찾기"><br>
-									<input type="text" id="sample6_postcode" name="emp_pc"
-										class="form-control d-inline-block w-25" placeholder="우편번호" readonly>
-									<input type="text" id="sample6_address" name="emp_add" class="form-control"
-										placeholder="주소" readonly>
-									<input type="text" id="sample6_detailAddress" name="emp_da"
-										class="form-control mt-1" placeholder="상세주소" readonly>
-									<input type="text" id="sample6_extraAddress" placeholder="참고항목">
-								</div>
-
-								<div class="modal-footer">
-									<button type="submit" class="btn custom-btn-blue">등록</button>
-									<button type="reset" class="btn btn-secondary">초기화</button>
-									<button type="button" class="btn btn-danger"
-										data-bs-dismiss="modal">취소</button>
-								</div>
-							</form>
 						</div>
 					</div>
 				</div>
