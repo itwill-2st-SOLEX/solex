@@ -7,6 +7,10 @@
 	margin-bottom: 16px;
 	margin-right: 25px;
 }
+.text-red {
+  color: #4169E1;
+  font-weight: bold; /* 선택 사항 */
+}
 .approval-table th,
 .approval-table td {
 	border: 1px solid #ccc;
