@@ -332,6 +332,7 @@ $(function () {
 			if (!response.ok) throw new Error("상세 조회 실패");
 	
 			const dataList = await response.json();
+			debugger;
 			const data = dataList[0]; 
 			
 			// 일반 input, textarea, select 값 주입
@@ -366,36 +367,36 @@ $(function () {
 		    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 		    modal.show();
 			
-			const modalBody = document.querySelector('.modal-body');
-	 		 // 날짜 필드 처리 (docType별 분기)
-			 
-		     if (docTypeCode === "doc_type_01") {
-		       const val = data.DBDATERANGE;
-			   debugger;
-		       modalBody.querySelector('input[name="dbdateRange"]').value = val;
-			   
-			   console.log(modalBody.querySelector('input[name="dbdateRange"]'));
-		     } 
-		     else if (docTypeCode === "doc_type_02") {
-		       const val = data.DBDATERANGE;
-		       if (start && end) {
-		         modalBody.querySelector('input[name="bus_start_time"]').value = start;
-		         modalBody.querySelector('input[name="bus_end_time"]').value = end;
-		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-		         fp?.setDate([start, end]);
-		       }
-			   debugger;
-		     } 
-		     else if (docTypeCode === "doc_type_03") {
-		       const start = data.RES_START_DATE;
-		       if (start) {
-				debugger;
-		         modalBody.querySelector('input[name="res_start_date"]').value = start;
-		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
-		         fp?.setDate(start);
-		       }
-				   
-		     }
+//			const modalBody = document.querySelector('.modal-body');
+//	 		 // 날짜 필드 처리 (docType별 분기)
+//			 
+//		     if (docTypeCode === "doc_type_01") {
+//		       const val = data.DBDATERANGE;
+//			   debugger;
+//		       modalBody.querySelector('input[name="dbdateRange"]').value = val;
+//			   
+//			   console.log(modalBody.querySelector('input[name="dbdateRange"]'));
+//		     } 
+//		     else if (docTypeCode === "doc_type_02") {
+//		       const val = data.DBDATERANGE;
+//		       if (start && end) {
+//		         modalBody.querySelector('input[name="bus_start_time"]').value = start;
+//		         modalBody.querySelector('input[name="bus_end_time"]').value = end;
+//		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+//		         fp?.setDate([start, end]);
+//		       }
+//			   debugger;
+//		     } 
+//		     else if (docTypeCode === "doc_type_03") {
+//		       const start = data.RES_START_DATE;
+//		       if (start) {
+//				debugger;
+//		         modalBody.querySelector('input[name="res_start_date"]').value = start;
+//		         const fp = modalBody.querySelector("#dateRange")?._flatpickr;
+//		         fp?.setDate(start);
+//		       }
+//				   
+//		     }
 
 //			     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
 //			     modal.show();
