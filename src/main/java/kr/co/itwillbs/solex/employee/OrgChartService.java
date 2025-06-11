@@ -86,10 +86,8 @@ public class OrgChartService {
         String pos = emp.get("EMP_POS_CD") != null ? emp.get("EMP_POS_CD").toString().trim() : "";
         String cat = emp.get("EMP_CAT") != null ? emp.get("EMP_CAT").toString().trim() : "";
         
-        System.out.println("pos : " + pos + ", cat : " + cat);
-		
         if ("pos_01".equals(pos)) return "ceo";
-        if ("pos_02".equals(pos)) return "erpDirector";
+        if ("pos_02".equals(pos)) return cat.equals("erp") ? "erpDirector" : "mesDirector";
         if ("pos_03".equals(pos)) return cat.equals("erp") ? "erpManager" : "mesManager";
         if ("pos_04".equals(pos)) return "teamManager";
 
