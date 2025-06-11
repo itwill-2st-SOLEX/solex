@@ -17,16 +17,16 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [],
     columns: [
-		{ header: '부서', name: 'leaEndDate', align: 'center',  sortable: true },
-		{ header: '팀', name: 'leaUsedDay', align: 'center',  sortable: true },
-        { header: '사번', name: 'leaType', align: 'center', filter: 'select',sortable: true },
-        { header: '이름', name: 'leaStartDate', align: 'center', filter: 'select', sortable: true },
-		{ header: '직급', name: 'leaUsedDay', align: 'center',  sortable: true },
-		{ header: '입사일', name: 'leaUsedDay', align: 'center',  sortable: true },
-		{ header: '총 휴가일수', name: 'leaUsedDay', align: 'center',  sortable: true },
-		{ header: '사용 휴가일수', name: 'leaUsedDay', align: 'center',  sortable: true },
-		{ header: '잔여 휴가일수', name: 'leaUsedDay', align: 'center',  sortable: true },
-		{ header: '휴가소멸일', name: 'leaUsedDay', align: 'center',  sortable: true },
+		{ header: '부서', name: 'empDepNm', align: 'center', filter: 'select',  sortable: true },
+		{ header: '팀', name: 'empTeamNm', align: 'center', filter: 'select',  sortable: true },
+        { header: '사번', name: 'empNum', align: 'center',sortable: true },
+        { header: '이름', name: 'empNm', align: 'center', sortable: true },
+		{ header: '직급', name: 'empPosNm', align: 'center',  sortable: true },
+		{ header: '입사일', name: 'empHire', align: 'center',  sortable: true },
+		{ header: '총 휴가일수', name: 'vacTotal', align: 'center',  sortable: true },
+		{ header: '사용 휴가일수', name: 'vacUsed', align: 'center',  sortable: true },
+		{ header: '잔여 휴가일수', name: 'vacRemain', align: 'center',  sortable: true },
+		{ header: '휴가소멸일', name: 'periodEnd', align: 'center',  sortable: true },
 
     ],
 
@@ -34,11 +34,10 @@ const grid = new tui.Grid({
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
-	vacationList(currentPage);
 	
 	searchKeyword = document.getElementById('searchInput').value.trim();
+	vacationList(currentPage);
 	document.getElementById('searchBtn').addEventListener('click', searchVacation);
-	//document.getElementById('writeBtn').addEventListener('click', onWriteVacation);
 	
 });
 
@@ -50,7 +49,7 @@ function bindScrollEvent() {
 	//무한스크롤시 검색어 유지를 위해 재전달
     grid.on('scrollEnd', () => {
         const keyword = document.getElementById('searchInput').value.trim();
-        vacationDetail(currentPage);
+        vacationList(currentPage, keyword);
     });
 }
 
@@ -79,25 +78,25 @@ async function vacationList(page, keyword = '') {
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 		
 		const list = data.list;
-		const vacationCount = data.vacationCount;
+		const totalCount = data.totalCount;
 		
 		console.log(data)
 		
         const gridData = list.map((n) => ({
+			empId: n.EMP_ID,
 			empNum: n.EMP_NUM,
 			empNm: n.EMP_NM,
 			empHire: formatter.format(new Date(n.EMP_HIRE))  || '-',
-/*			empCatCd: n.EMP_CAT_CD,
-			empDepCd: n.EMP_DEP_CD,
-			empTeamCd: n.EMP_TEAM_CD,
-			empPosCd: n.EMP_POS_CD,*/
 			vacTotal: n.VAC_TOTAL,
-            vacUsed: n.VAC_USER,
+            vacUsed: n.VAC_USED,
             vacRemain: n.VAC_REMAIN,
 			empCatNm: n.EMP_CAT_NM,
 			empDepNm: n.EMP_DEP_NM,
 			empTeamNm: n.EMP_TEAM_NM,
-			empPosNm: n.EMP_POS_NM
+			empPosNm: n.EMP_POS_NM,
+			//periodEnd: formatPeriodEnd(n.PERIOD_END, n.DAYS_LEFT),  // 디데이 함께 표시
+			periodEnd: formatter.format(new Date(n.PERIOD_END)),
+			//DaysLeft: formatter.format(new Date(n.DAYS_LEFT))
         }));
 		
 		//첫 페이지면 초기화 후 새로 보여줌
@@ -110,9 +109,9 @@ async function vacationList(page, keyword = '') {
 		// 무한스크롤 종료
         if (data.length < pageSize) {
             grid.off('scrollEnd');
-        } /*else {
+        } else {
 			bindScrollEvent();
-		}*/
+		}
 
     } catch (e) {
         console.error('fetch 에러 : ', e);
@@ -128,4 +127,14 @@ function searchVacation() {
 	    vacationList(currentPage, keyword);
 }
 
+function formatPeriodEnd(dateString, daysLeft) {
+    if (!dateString) return '-';
 
+    const formattedDate = formatter.format(new Date(dateString));
+    
+    if (daysLeft != null) {
+        return `${formattedDate} (D-${daysLeft})`;
+    } else {
+        return formattedDate;
+    }
+}

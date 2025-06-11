@@ -6,7 +6,27 @@
 	
 	<!-- 개인별 휴가 사용 개수 조회 -->
 	<select id="getVacationSummary" resultType="map">
-		SELECT e.emp_id, e.emp_nm, e.emp_hire, v.vac_total, v.vac_used, v.vac_total - v.vac_used AS vac_remain
+		SELECT e.emp_id, e.emp_nm, e.emp_hire, v.vac_total, v.vac_used, v.vac_total - v.vac_used AS vac_remain,
+			  <!-- 연차 시작일: 입사일 기준 가장 가까운 연도-->
+		       CASE
+		           WHEN ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12)) > SYSDATE
+		           THEN ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1))
+		           ELSE ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12))
+		       END AS period_start,
+		
+		       <!-- 연차 종료일 = 시작일 + 1년 - 1일-->
+		       CASE
+		           WHEN ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12)) > SYSDATE
+		           THEN ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1) + 1) - 1
+		           ELSE ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) + 1)) - 1
+		       END AS period_end,
+		
+		       <!-- 남은 일수: 종료일 - 오늘-->
+		       CASE
+		           WHEN ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12)) > SYSDATE
+		           THEN ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1) + 1) - SYSDATE
+		           ELSE ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) + 1)) - SYSDATE
+		       END AS days_left
 		FROM vacation v RIGHT JOIN employee e ON v.emp_id = e.emp_id
 		WHERE v.emp_id = #{empId}
 	</select>
@@ -35,11 +55,31 @@
 	
 	<!-- 직급별 각 담당 직원의 연차 확인하기 -->
 	<select id="getVacationList" resultType="map">
-		SELECT e.emp_num, e.emp_nm, e.emp_hire,
+		SELECT e.emp_id, e.emp_num, e.emp_nm, e.emp_hire,
 			   v.vac_total, v.vac_used, v.vac_total - v.vac_used AS vac_remain,
-			   ve.emp_cat_nm, ve.emp_dep_nm, ve.emp_team_nm, ve.emp_pos_nm
+			   ve.emp_cat_nm, ve.emp_dep_nm, ve.emp_team_nm, ve.emp_pos_nm,
+			  <!-- 연차 시작일: 입사일 기준 가장 가까운 연도-->
+		       CASE
+		           WHEN ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12)) > SYSDATE
+		           THEN ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1))
+		           ELSE ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12))
+		       END AS period_start,
+		
+		       <!-- 연차 종료일 = 시작일 + 1년 - 1일-->
+		       CASE
+		           WHEN ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12)) > SYSDATE
+		           THEN ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1) + 1) - 1
+		           ELSE ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) + 1)) - 1
+		       END AS period_end,
+		
+		       <!-- 남은 일수: 종료일 - 오늘-->
+		       CASE
+		           WHEN ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12)) > SYSDATE
+		           THEN ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1) + 1) - SYSDATE
+		           ELSE ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) + 1)) - SYSDATE
+		       END AS days_left
 		FROM vacation v RIGHT JOIN employee e ON v.emp_id = e.emp_id
-                JOIN view_employee ve ON e.emp_id = v.emp_id 
+                JOIN view_employee ve ON e.emp_id = ve.emp_id 
 		WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) >= TO_NUMBER(SUBSTR(#{empPosCd}, -2))
 			<choose>
 				<!-- 팀장 조건 -->
@@ -56,9 +96,13 @@
 				</when>
 				<!-- 사장 조건 -->
 				<when test="empPosCd == 'pos_01'">
-					AND e.emp_pos_cd = #{empPosCd}
+					
 				</when>
 			</choose>
+			<if test="keyword != null and keyword != ''">
+				AND (LOWER(e.emp_nm) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(e.emp_num) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
 		ORDER BY e.emp_dep_cd, e.emp_team_cd
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
@@ -66,8 +110,8 @@
 	<select id="getVacationAllCount">
 		SELECT count(*)
 		FROM vacation v RIGHT JOIN employee e ON v.emp_id = e.emp_id
-                JOIN view_employee v ON e.emp_id = v.emp_id 
-		WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) > TO_NUMBER(SUBSTR(#{empPosCd}, -2))
+                JOIN view_employee ve ON e.emp_id = ve.emp_id 
+		WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) >= TO_NUMBER(SUBSTR(#{empPosCd}, -2))
 			<choose>
 				<!-- 팀장 조건 -->
 				<when test="empTeamCd != 'team_00'">
@@ -83,9 +127,13 @@
 				</when>
 				<!-- 사장 조건 -->
 				<when test="empPosCd = 'pos_01'">
-					AND e.emp_pos_cd = #{empPosCd}
+					
 				</when>
 			</choose>
+			<if test="keyword != null and keyword != ''">
+				AND (LOWER(e.emp_nm) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(e.emp_num) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
 	</select>
 	
 	<!-- 로그인한 사용자의 직급, 부서, 팀 등의 정보 가져오기 -->

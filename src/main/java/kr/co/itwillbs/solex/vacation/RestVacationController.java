@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kr.co.itwillbs.solex.code.CodeController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,11 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class RestVacationController {
+
+    private final CodeController codeController;
 	
 	@Autowired
 	public VacationService vacationService;
 	
-	Long empId = 35L;
+	Long empId = 1L;
+
+
+    RestVacationController(CodeController codeController) {
+        this.codeController = codeController;
+    }
 	
 	
 	//휴가 요약 정보
@@ -32,17 +40,17 @@ public class RestVacationController {
 	@GetMapping("/vacation/api/detail")
 	public Map<String, Object> getVacationDetail(@RequestParam(name = "page", required = false) Integer page,
 										         @RequestParam(name = "size", required = false) Integer size,
-										         @RequestParam("empId") String empId) {
+										         @RequestParam("empId") Long empId) {
 
-	    Long userId = Long.parseLong(empId);
+	    //Long userId = Long.parseLong(empId);
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);
 	    params.put("size", size);
-	    params.put("empId", userId);
+	    params.put("empId", empId);
 
 	    List<Map<String, Object>> vacationList = vacationService.getVacationDetail(params);
-	    int vacationCount = vacationService.getVacationCount(userId);
+	    int vacationCount = vacationService.getVacationCount(empId);
 
 	    Map<String, Object> result = new HashMap<>();
 	    result.put("list", vacationList);
@@ -63,7 +71,7 @@ public class RestVacationController {
 		
 		Map<String,Object> info = vacationService.getEmployeeInfo(empId);
 		
-		System.out.println(info);
+		
 	    params.put("keyword", keyword);
 	    params.put("offset", page * size);// 페이징 계산
 	    params.put("size", size);
@@ -76,8 +84,8 @@ public class RestVacationController {
 	    params.put("empTeamCd", info.get("EMP_TEAM_CD"));
 	    params.put("empPosCd", info.get("EMP_POS_CD"));
 	    
-	    System.out.println(params);
 	    
+
 
 	    List<Map<String, Object>> vacationList = vacationService.getVacationList(params);
 	    
@@ -89,6 +97,7 @@ public class RestVacationController {
 	    result.put("list", vacationList);
 	    result.put("totalCount", totalCount);
 	    
+	    System.out.println(vacationList);
 	    return result;
 										
 	}

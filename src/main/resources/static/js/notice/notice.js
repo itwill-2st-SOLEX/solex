@@ -6,6 +6,7 @@ const gridHeight = 600;
 let editorInstance = null;
 let editorLoaded = false;
 let searchKeyword = '';
+let empId = null;
 
 // ToastUI Grid 생성
 const grid = new tui.Grid({
@@ -16,9 +17,10 @@ const grid = new tui.Grid({
     data: [],
     columns: [
 		{ header: '번호', name: 'rowNum', width: 100, sortable: true },
-        { header: '제목', name: 'notTt', width: 600, sortable: true },
-        { header: '부서', name: 'detNm', align: 'center',  sortable: true },
+        { header: '부서', name: 'empDepNm', align: 'center',  sortable: true },
+        { header: '제목', name: 'notTt', width: 500, sortable: true },
         { header: '작성자', name: 'empNm', align: 'center',  sortable: true },
+        { header: '직급', name: 'empPosNm', align: 'center',  sortable: true },
         { header: '등록일', name: 'notRegDate', align: 'center',  sortable: true }
     ],
 });
@@ -66,6 +68,8 @@ async function noticeList(page, keyword = '') {
             url += `&keyword=${encodeURIComponent(keyword)}`;
         }
 		
+		
+		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 		
@@ -80,7 +84,8 @@ async function noticeList(page, keyword = '') {
             id: n.NOT_ID,
             notTt: n.NOT_TT,
             notCon: n.NOT_CON,
-            detNm: n.DET_NM  == '공통' ? '-' : n.DET_NM,
+            empDepNm: n.EMP_DEP_NM  == '공통' ? '-' : n.EMP_DEP_NM,
+            empPosNm: n.EMP_POS_NM  == '공통' ? '-' : n.EMP_POS_NM,
             empNm: n.EMP_NM || '-',
             notRegDate: formatter.format(new Date(n.NOT_REG_DATE)),
 			rowNum: totalCount - (page * pageSize + idx) // 역순 번호 계산
@@ -128,13 +133,6 @@ grid.on('click', async (ev) => {
         }
     }
 });
-
-// 글쓰기 버튼 클릭
-function onWriteNotice() {
-	
-	
-    showNoticeModal('new');
-}
 
 
 // 게시글 등록/수정/삭제 - 비동기
@@ -203,6 +201,25 @@ async function changeNotice(mode, noticeId = null) {
         alert('공지사항 처리 중 오류가 발생했습니다.');
     }
 }
+// 글쓰기 버튼 클릭
+async function onWriteNotice() {
+	
+	try {
+        // 사용자 정보만 받아오기
+        const res = await fetch('/SOLEX/notice/api/userinfo');
+        if (!res.ok) throw new Error('사용자 정보 로드 실패');
+        const userInfo = await res.json();
+        
+		console.log(userInfo)
+        // 모달 띄우기 (빈 제목, 내용과 사용자 정보 포함)
+        showNoticeModal('new', userInfo);
+
+    } catch (e) {
+        console.error('글 작성 모달창 표시 실패', e);
+        // 사용자 정보 없을 때 기본값 처리 가능
+        showNoticeModal('new', { EMP_NM: '알 수 없음', DET_NM: '-', POS_NM: '-' });
+    }
+}
 
 // 수정 버튼 클릭
 function noticeEditMode(noticeId) {
@@ -240,8 +257,8 @@ function showNoticeModal(mode, data = {}) {
             <div class="custom-modal-header">
                 <h4 class="custom-modal-title" id="exampleModalLabel">${title}</h4>
                 <ul class="custom-modal-meta">
-					<li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM == '공통' ? '-' : data.DET_NM}</span></li>
-                    <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span></li>
+					<li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM == '공통' ? '-' : data.EMP_DEP_NM}</span></li>
+                    <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span> &nbsp; </li>
                     <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? 
 										new Date(data.NOT_REG_DATE).toLocaleString('ko-KR', {
 										          year: 'numeric', month: '2-digit', day: '2-digit',

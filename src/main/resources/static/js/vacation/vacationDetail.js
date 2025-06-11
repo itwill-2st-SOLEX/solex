@@ -59,14 +59,15 @@ async function vacationSummary() {
 			
 	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
 	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
+			
 			console.log(data)
 			
 			empId = data.EMP_ID;
 			
 			document.getElementById('empNm').textContent = data.EMP_NM || '-';
 			document.getElementById('empHire').textContent = formatter.format(new Date(data.EMP_HIRE))  || '-';
-			document.getElementById('periodEnd').textContent = formatter.format(new Date(data.periodEnd)) || '-';
-			document.getElementById('daysLeft').textContent = data.daysLeft != null ? `(D-${data.daysLeft})` : '';
+			document.getElementById('periodEnd').textContent = formatter.format(new Date(data.PERIOD_END)) || '-';
+			document.getElementById('daysLeft').textContent = data.daysLeft != null ? `(D-${data.DAYS_LEFT})` : '';
 			document.getElementById('vacTotal').textContent = data.VAC_TOTAL || 0;
 			document.getElementById('vacUsed').textContent = data.VAC_USED || 0;
 			document.getElementById('vacRemain').textContent = data.VAC_REMAIN || 0;
@@ -115,9 +116,9 @@ async function vacationDetail(page) {
 		// 무한스크롤 종료
         if (data.length < pageSize) {
             grid.off('scrollEnd');
-        } /*else {
+        } else {
 			bindScrollEvent();
-		}*/
+		}
 
     } catch (e) {
         console.error('fetch 에러 : ', e);

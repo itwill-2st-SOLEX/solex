@@ -17,35 +17,43 @@ public class RestNoticeController {
 	@Autowired
 	private NoticeService noticeService;
 	
-		// 공지사항 목록
-		// 비동기: JSON 데이터 반환 (fetch API 호출용)
-	    @GetMapping("/notice/api")
-	    public Map<String, Object> apiNoticeList(@RequestParam("page") int page, 
-											     @RequestParam("size") int size,
-											     @RequestParam(name="keyword", required = false) String keyword) {
+	Long empId = 11L;
+	
+	// 공지사항 목록
+	// 비동기: JSON 데이터 반환 (fetch API 호출용)
+    @GetMapping("/notice/api")
+    public Map<String, Object> apiNoticeList(@RequestParam("page") int page, 
+										     @RequestParam("size") int size,
+										     @RequestParam(name="keyword", required = false) String keyword) {
 
-	    	Map<String, Object> params = new HashMap<>();
-	    	
-		    params.put("keyword", keyword);
-		    params.put("offset", page * size);// 페이징 계산
-		    params.put("size", size);
-	    	
-		    List<Map<String, Object>> noticeList = noticeService.getNoticeList(params);
-		    int totalCount = noticeService.getNoticeCount(params);  // ← 키워드 포함된 카운트로 변경
+    	Map<String, Object> params = new HashMap<>();
+    	
+	    params.put("keyword", keyword);
+	    params.put("offset", page * size);// 페이징 계산
+	    params.put("size", size);
+    	
+	    List<Map<String, Object>> noticeList = noticeService.getNoticeList(params);
+	    int totalCount = noticeService.getNoticeCount(params);  // ← 키워드 포함된 카운트로 변경
 
-		    Map<String, Object> result = new HashMap<>();
-		    result.put("list", noticeList);
-		    result.put("totalCount", totalCount);
-		    
-		    return result;
-	    }
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("list", noticeList);
+	    result.put("totalCount", totalCount);
 	    
-	    // 공지사항 내용 모달창 띄우기
-	    @GetMapping("/notice/api/{id}")
-	    public Map<String, Object> apiNoticeContent(@PathVariable("id") int notId) {
-	    	 
-	    	Map<String, Object> detail = noticeService.getNoticeDetail(notId);
-	    	 
-	    	 return detail;
-	    }
+	    return result;
+    }
+    
+    // 공지사항 내용 모달창 띄우기
+    @GetMapping("/notice/api/{id}")
+    public Map<String, Object> apiNoticeContent(@PathVariable("id") Long notId) {
+    	 
+    	Map<String, Object> detail = noticeService.getNoticeDetail(notId);
+    	 
+    	 return detail;
+    }
+    
+    @GetMapping("/notice/api/userinfo")
+    public Map<String, Object> getEmployeeInfo() {
+    	 	    	 
+    	 return noticeService.getEmployeeInfo(empId);
+    }
 }
