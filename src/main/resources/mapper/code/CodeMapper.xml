@@ -6,38 +6,33 @@
 
 	<!-- 공통코드 무한스크롤 -->
 	<select id="selectPagedCodeList" resultType="map">
-		SELECT * FROM (
-			SELECT t.*, ROWNUM rnum FROM (
-				SELECT 
-					COD_ID,
-					COD_NM,
-					COD_YN,
-					COD_REG_TIME
-				FROM code
-				<where>
-					<if test="codYn != null and codYn != ''">
-						cod_yn = #{codYn}
-					</if>
-					<if test="keyword != null and keyword != ''">
-						AND (
-							COD_ID LIKE '%' || #{keyword} || '%'
-							OR COD_NM LIKE '%' || #{keyword} || '%'
-						)
-					</if>
-				</where>
-				ORDER BY
-				<choose>
-					<when test="sort != null and dir != null">
-						${sort} ${dir}
-					</when>
-					<otherwise>
-						cod_id ASC
-					</otherwise>
-				</choose>
-			) t
-			WHERE ROWNUM &lt;= #{offset} + #{perPage}
-		)
-		WHERE rnum &gt; #{offset}
+	    SELECT
+	        COD_ID,
+	        COD_NM,
+	        COD_YN,
+	        COD_REG_TIME
+	    FROM code
+	    <where>
+	        <if test="codYn != null and codYn != ''">
+	            cod_yn = #{codYn}
+	        </if>
+	        <if test="keyword != null and keyword != ''">
+	            AND (
+	                COD_ID LIKE '%' || #{keyword} || '%'
+	                OR COD_NM LIKE '%' || #{keyword} || '%'
+	            )
+	        </if>
+	    </where>
+	    ORDER BY
+	    <choose>
+	        <when test="sort != null and dir != null">
+	            ${sort} ${dir}
+	        </when>
+	        <otherwise>
+	            cod_id ASC
+	        </otherwise>
+	    </choose>
+	    OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
 	</select>
 	
 	<select id="selectTotalCount" resultType="int">

@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// 공통코드 그리드 생성
 	window.code_grid = new tui.Grid({
 		el: document.getElementById('code-grid'),
-		bodyHeight: 300,
+		bodyHeight: 550,
 		rowHeaders: ['checkbox'],
 		scrollY: true,
 		pageOptions: {
@@ -48,10 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		},
 		columns: [
-			{ header: '코드', name: 'COD_ID', editor: 'text', sortable: true },
-			{ header: '항목명', name: 'COD_NM', editor: 'text' },
+			{ header: '코드', name: 'COD_ID', editor: 'text', sortable: true, align: 'center' },
+			{ header: '항목명', name: 'COD_NM', editor: 'text', align: 'center' },
 			{ header: '사용여부',
 				name: 'COD_YN',
+				align: 'center',
 			  editor: {
 					type: 'select',
 					options: {
@@ -73,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			{
 			  header: '등록일시',
 			  name: 'COD_REG_TIME',
+			  align: 'center',
 			  formatter: ({ value }) => window.formatDateTime(value)
 			}
 		]
@@ -81,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// 행 클릭 시 상세공통코드 리스트 호출 함수 호출
 	window.selectedCodId = null;
 	
-	code_grid.on('click', ev => {
+	code_grid.on('focusChange', ev => {
 		const rowKey = ev.rowKey;
 		const rowData = code_grid.getRow(rowKey);
 		if (rowData && window.loadDetailCode) {

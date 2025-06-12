@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// 상세공통코드 그리드 생성
 	window.codeDetail_grid = new tui.Grid({
 		el: document.getElementById('codeDetail-grid'),
-		bodyHeight: 300,
+		bodyHeight: 550,
 		rowHeaders: ['checkbox'],
 		scrollY: true,
 		pageOptions: {
@@ -34,10 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			initialRequest: false
 		},
 		columns: [
-			{ header: '상세코드', name: 'DET_ID', editor: 'text', sortable: true },
-			{ header: '항목명', name: 'DET_NM', editor: 'text' },
+			{ header: '상세코드', name: 'DET_ID', editor: 'text', sortable: true, align: 'center' },
+			{ header: '항목명', name: 'DET_NM', editor: 'text', align: 'center' },
 			{ header: '사용여부',
 				name: 'DET_YN',
+				align: 'center',
 			  editor: {
 					type: 'select',
 					options: {
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			      ]
 			    }
 			},
-			{ header: '정렬순서', name: 'DET_SORT', editor: 'text' }
+			{ header: '정렬순서', name: 'DET_SORT', editor: 'text', align: 'center' }
 		]
 	});
 	

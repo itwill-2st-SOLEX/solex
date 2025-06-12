@@ -3,3 +3,76 @@
 .content-area {
 	padding: 20px;
 }
+
+.orgChart-area {
+	padding: 10px;
+}
+
+.title {
+	padding: 10px;
+}
+
+#orgCard {
+	padding: 10px;
+    transform: scale(1.0);
+    transform-origin: top center;
+}
+
+.node-style {
+	width: 100px;
+	height: 80px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', sans-serif;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.node-style:hover {
+    background-color: #ffffff;
+    border-color: #d2d2d2;
+    transform: scale(1.05);
+    box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.2);
+    color: #000000;
+}
+
+.node-style .node-name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.node-style .node-title {
+    font-size: 14px;
+}
+
+.ceo {
+	background-color: #003366;
+	color: #ffffff;
+}
+
+.erpDirector {
+    background-color: #007BFF;
+    color: #ffffff;
+}
+
+.mesDirector {
+    background-color: #00B8D9;
+    color: #ffffff;
+}
+
+.erpManager {
+	background-color: #e3f2fd;
+    color: #000000;
+}
+
+.mesManager {
+	background-color: #e0f7fa;
+    color: #000000;
+}
+.teamManager {
+	background-color: #f9f9f9;
+    color: #697078;
+}
