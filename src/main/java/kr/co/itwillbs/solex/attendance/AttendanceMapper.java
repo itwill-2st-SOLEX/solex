@@ -30,5 +30,5 @@ public interface AttendanceMapper {
 
 	Map<String, Object> selectEmployeeInfo(long loginEmpId);
 
-
+	void updateAttendanceColumn(Map<String, Object> params);
 }

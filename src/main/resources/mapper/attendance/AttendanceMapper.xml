@@ -23,7 +23,8 @@
     </select>
     
     <select id="selectAttendenceByMonthList" resultType="java.util.Map">
-       SELECT e.emp_id, 
+       SELECT att.att_id,
+       		  e.emp_id, 
               e.emp_num, 
               e.emp_nm,
               TO_CHAR(att_in_time, 'YYYY-MM-DD HH:MI AM') AS att_in_time,
@@ -154,5 +155,14 @@
 		FROM employee
 		WHERE EMP_ID = #{empId}
 	</select>
+    
+    <!-- 부하직원의 출퇴근기록 update -->
+    <update id="updateAttendanceColumn" parameterType="map">
+        UPDATE ATTENDANCE
+        SET
+            ${columnName} = #{newValue}
+        WHERE
+            att_id = #{att_id}
+    </update>
     
 </mapper>	

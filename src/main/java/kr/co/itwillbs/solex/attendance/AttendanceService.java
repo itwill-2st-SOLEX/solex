@@ -4,10 +4,14 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,13 @@ public class AttendanceService {
 	private static final int STANDARD_END_MINUTE = 0;
 	private static final int STANDARD_WORK_HOURS = 8; // 8시간 근무 (점심시간 제외)
 	private static final int STANDARD_WORK_MINUTES = STANDARD_WORK_HOURS * 60; // 8시간 = 480분
+	
+	// 업데이트 가능한 컬럼 이름 화이트리스트 (보안을 위해 매우 중요!)
+    private static final Set<String> ALLOWED_UPDATE_COLUMNS = 
+        Arrays.asList("att_in_time", "att_out_time") // 모든 업데이트 가능한 컬럼 추가
+              .stream()
+              .map(String::toLowerCase) // 모두 소문자로 변환
+              .collect(Collectors.toSet());
 
 	public AttendanceService(AttendanceMapper attendanceMapper) {
 		this.attendanceMapper = attendanceMapper;
@@ -188,4 +199,88 @@ public class AttendanceService {
 	public Map<String, Object> getEmployeeInfo(long loginEmpId) {
 		return attendanceMapper.selectEmployeeInfo(loginEmpId);
 	}
+	
+	
+	
+	
+	
+	// 부하직원의 출퇴근 현황 update
+    @Transactional // 데이터 변경 작업은 트랜잭션으로 묶는 것이 일반적
+    public void updateAttendanceCell(Map<String, Object> updateData) {
+        Long attId;
+        Object attIdObj = updateData.get("ATT_ID");
+        if (attIdObj instanceof String) {
+            attId = Long.parseLong((String) attIdObj);
+        } else if (attIdObj instanceof Integer) {
+            attId = ((Integer) attIdObj).longValue();
+        } else if (attIdObj instanceof Long) {
+            attId = (Long) attIdObj;
+        } else {
+            throw new IllegalArgumentException("ATT_ID 형식이 올바르지 않습니다.");
+        }
+    	System.out.println("서비스 updateData : " + updateData);
+        String columnName = null;
+        Object newValue = null;
+        
+        // ATT_ID를 제외한 첫 번째 변경된 컬럼을 찾음
+        for (Map.Entry<String, Object> entry : updateData.entrySet()) {
+            if (!"ATT_ID".equals(entry.getKey())) {
+                columnName = entry.getKey();
+                newValue = entry.getValue();
+                break;
+            }
+        }
+
+        if (columnName == null || newValue == null) {
+            throw new IllegalArgumentException("업데이트할 컬럼 또는 새로운 값이 없습니다.");
+        }
+
+        // ====== 중요: 컬럼 이름 유효성 검증 ======
+        String normalizedColumnName = columnName.toLowerCase(); // 소문자로 통일하여 비교
+        if (!ALLOWED_UPDATE_COLUMNS.contains(normalizedColumnName)) {
+            throw new IllegalArgumentException("허용되지 않는 컬럼 '" + columnName + "'에 대한 업데이트 요청입니다.");
+        }
+
+        Object valueToUpdate = newValue;
+
+        // 데이터 타입 변환 (필요시)
+        // 예: att_in_time은 String으로 넘어오지만, DB에 따라 LocalDateTime으로 변환 필요
+        if ("att_out_time".equals(normalizedColumnName) && newValue instanceof String) {
+             // Mybatis로 String을 직접 넘기는 경우, Mapper에서 DB 타입으로 변환하거나
+             // 여기서 LocalDateTime.parse((String) newValue) 등으로 변환하여 넘길 수 있습니다.
+             // 지금은 String 그대로 넘긴다고 가정 (Mybatis가 적절히 처리)
+        	try {
+                // String을 LocalDateTime으로 파싱
+        		// 프론트엔드에서 넘어오는 날짜/시간 포맷에 따라 DateTimeFormatter를 정확히 지정해야 합니다.
+//                valueToUpdate = LocalDateTime.parse((String) newValue, DateTimeFormatter.ofPattern("YYYY-MM-DD HH24:MI:SS"));
+        		valueToUpdate = LocalDateTime.parse((String) newValue, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("유효하지 않은 날짜/시간 형식입니다: " + newValue, e);
+            }
+        }
+     // 다른 날짜/시간 컬럼이 있다면 여기에 추가 if-else if 블록으로 처리 가능
+
+        // Mapper에 전달할 Map 생성 (Mapper는 파라미터를 하나만 받을 수 있으므로 Map 사용)
+        Map<String, Object> params = new HashMap<>();
+        params.put("att_id", attId); // Mapper XML의 #{attId}와 매핑
+        params.put("columnName", columnName); // Mapper XML의 ${columnName}과 매핑 (안전하게!)
+        params.put("newValue", valueToUpdate);     // Mapper XML의 #{newValue}와 매핑
+        
+//        System.out.println("service params : "  + params); // {newValue=asdfasdf, att_id=132, columnName=det_nm}
+
+        attendanceMapper.updateAttendanceColumn(params); // 예시 메서드명
+        // 또는 더 안전하게, 각 컬럼별 Mapper 메서드를 호출
+        /*
+        if ("det_nm".equals(normalizedColumnName)) {
+            attendanceMapper.updateDetNm(attId, (String) newValue);
+        } else if ("att_in_time".equals(normalizedColumnName)) {
+            attendanceMapper.updateAttInTime(attId, (String) newValue);
+        } else {
+            // (이론적으로 여기까지 오면 안 되지만 방어적 코드)
+            throw new IllegalStateException("알 수 없는 컬럼 이름입니다: " + columnName);
+        }
+        */
+    }
+	
 }

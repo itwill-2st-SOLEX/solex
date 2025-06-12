@@ -23,11 +23,12 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [],
     columns: [
-		{ header: '사원 ID', name: 'emp_num', width: 100, sortable: true, align : 'center'},
-        { header: '사원 직위', name: 'dep_position', sortable: true, align : 'center' },
+		{ header: '사원 ID', name: 'emp_num', width: 100, sortable: true, align: 'center' },
+        { header: '사원 직위', name: 'dep_position', sortable: true, align: 'center' },
+		{ header: '출근 시간', name: 'att_in_time', width: 200, align: 'center',  sortable: true },
         { 
-			header: '출근 시간',
-			name: 'att_in_time',
+			header: '퇴근 시간',
+			name: 'att_out_time',
 			width: 200, align: 'center',
 			sortable: true ,
 			editor: class {
@@ -61,9 +62,9 @@ const grid = new tui.Grid({
 				}
 			}
 		},
-        { header: '퇴근 시간', name: 'att_out_time', width: 200, align: 'center',  sortable: true, align : 'center' },
-        { header: '상태', name: 'det_nm', align: 'center',  sortable: true, editor: 'text', align : 'center' },
-        { header: '날짜', name: 'att_day', width: 200, align: 'center',  sortable: true, align : 'center' }
+        { header: '상태', name: 'det_nm', align: 'center',  sortable: true, align: 'center' },
+        { header: '날짜', name: 'att_day', width: 200, align: 'center',  sortable: true, align: 'center' },
+		{ name: 'att_id', hidden: true } // att_id는 화면에 보이지 않지만, 데이터에 포함되어야 함
     ]
 });
 // JavaScript에서 초기화
@@ -75,110 +76,26 @@ const myDatePicker = flatpickr("#my-datepicker", {
     locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
 });
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
-	window.addEventListener('DOMContentLoaded', () => {
-	bindScrollEvent(); // 스크롤 이벤트 리스너 바인딩
-
-	// 초기 데이터 로드 (검색 입력 필드의 초기 값으로)
-   	const initialKeyword = document.getElementById('searchInput').value.trim();
-   loadInitialData(initialKeyword);
-
-   // 검색 버튼 클릭 이벤트 리스너 (검색 시에도 데이터 재로드)
-   const searchButton = document.getElementById('searchButton'); // 검색 버튼 ID 가정
-   if (searchButton) {
-       searchButton.addEventListener('click', () => {
-           const currentSearchKeyword = document.getElementById('searchInput').value.trim();
-           loadInitialData(currentSearchKeyword);
-       });
-   }
+window.addEventListener('DOMContentLoaded', () => {
+	searchKeyword = document.getElementById('searchInput').value.trim();
+	document.getElementById('searchBtn').addEventListener('click', searchAttendance);
 });
 
 
 //무한 스크롤 이벤트
 function bindScrollEvent() {
 	// 검색으로 화면 목록이 변경되었을 경우를 대비해서 스크롤 초기화
-//    grid.off('scrollEnd');
+    grid.off('scrollEnd');
 	
 	//무한스크롤시 검색어 유지를 위해 재전달
-	grid.on('scrollEnd', async () => { // async/await를 사용하여 비동기 로직 처리
-        // 1. 이미 로딩 중이거나, 더 이상 데이터가 없으면 함수 종료
-        if (isLoading || !hasMoreData) {
-            console.log('데이터 로딩 중이거나, 마지막 페이지입니다.');
-            return;
-        }
-
-        isLoading = true; // 로딩 시작 플래그 설정
-
+    grid.on('scrollEnd', () => {
         const keyword = document.getElementById('searchInput').value.trim();
-        const nextPage = currentPage + 1; // 다음 페이지 번호
-
-        console.log(`스크롤 끝 감지: 다음 페이지 ${nextPage} 로드 시도, 검색어: "${keyword}"`);
-
-        try {
-            // TODO: 데이터를 가져올 백엔드 API URL 및 요청 방식 설정
-            // 이 URL은 검색어, 페이지 번호, 페이지 당 항목 수를 파라미터로 받을 수 있어야 합니다.
-            const apiUrl = `/api/attendance/list?page=${nextPage}&size=${itemsPerPage}&keyword=${encodeURIComponent(keyword)}`;
-
-            const response = await fetch(apiUrl); // fetch API 사용 (jQuery.ajax도 가능)
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json(); // JSON 응답 파싱
-
-            if (data && data.length > 0) {
-                // 2. 새로운 데이터를 Grid에 추가
-                grid.appendRows(data);
-                currentPage = nextPage; // 현재 페이지 번호 업데이트
-                console.log(`페이지 ${currentPage} 데이터 ${data.length}개 추가 완료.`);
-            } else {
-                // 3. 더 이상 데이터가 없음을 표시
-                hasMoreData = false;
-                console.log('더 이상 로드할 데이터가 없습니다.');
-                // 사용자에게 "마지막 페이지입니다" 같은 메시지 표시 가능
-            }
-
-        } catch (error) {
-            console.error('데이터 로딩 중 오류 발생:', error);
-            // 에러 처리 로직 (사용자에게 알림 등)
-        } finally {
-            isLoading = false; // 로딩 완료 플래그 해제
-        }
     });
 }
-// 초기 로드 시 데이터 가져오기 (bindScrollEvent는 스크롤 이벤트만 바인딩)
-// 페이지 로드 시 또는 검색 버튼 클릭 시 이 함수를 호출하여 첫 페이지 데이터를 로드해야 합니다.
-async function loadInitialData(keyword = '') {
-    currentPage = 0; // 첫 페이지 로드를 위해 currentPage를 0으로 설정
-    hasMoreData = true;
-    isLoading = false;
-    grid.clear(); // 기존 그리드 데이터 초기화 (검색 시)
-
-    // 첫 페이지 데이터 로드 (첫 페이지는 보통 page=1 또는 page=0 부터 시작, 서버 설정에 따라 다름)
-    const apiUrl = `/api/attendance/list?page=${currentPage + 1}&size=${itemsPerPage}&keyword=${encodeURIComponent(keyword)}`;
-
-    try {
-        isLoading = true;
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-            grid.setRows(data); // 첫 데이터는 setRows로 설정
-            currentPage = 1; // 첫 페이지 로드 성공 시 페이지 번호 업데이트
-            console.log(`초기 데이터 ${data.length}개 로드 완료.`);
-        } else {
-            hasMoreData = false;
-            console.log('초기 로드할 데이터가 없습니다.');
-        }
-    } catch (error) {
-        console.error('초기 데이터 로딩 중 오류 발생:', error);
-    } finally {
-        isLoading = false;
-    }
-}
 
 
+//페이지 로딩시 무한스크롤 기능이 동작하도록 이벤트 등록
+bindScrollEvent();
 
 
 // updateMonthYearDisplay 함수가 호출될 때 currentDate를 기준으로 화면을 업데이트하고 서버로 데이터 전송
@@ -267,7 +184,8 @@ function displayMyAttendance(data) {
 	    att_in_time: at.ATT_IN_TIME,
 	    att_out_time: at.ATT_OUT_TIME,
 	    det_nm: at.DET_NM,
-	    att_day: at.ATT_DAY
+	    att_day: at.ATT_DAY,
+		
 	}));
 	console.log('내 출퇴근근황의 gridData' + JSON.stringify(gridData));
 	
@@ -281,16 +199,17 @@ function displayTeamAttendance(data) {
         grid.setRows([]); // 빈 배열을 설정하여 기존 데이터를 모두 지우고 emptyMessage를 표시
         return; 
     }
-	
 	gridData = data.map((at, idx) => ({
 		emp_num: at.EMP_NUM,
 	    dep_position: at.DEP_POSITION,
 	    att_in_time: at.ATT_IN_TIME,
 	    att_out_time: at.ATT_OUT_TIME,
 	    att_sts: at.ATT_STS,
-	    att_day: at.ATT_DAY
+	    att_day: at.ATT_DAY,
+		att_id: at.ATT_ID
+		
 	}));
-	
+	console.log('부하직원 출퇴근근황의 gridData' + JSON.stringify(gridData));
 	grid.appendRows(gridData);
 }
 
@@ -332,3 +251,76 @@ function searchAttendance() {
 	attendanceLists(currentDate.getFullYear(), currentDate.getMonth() + 1, requestType, keyword);
 //	noticeList(currentPage, keyword);
 }
+
+
+
+
+
+// toastUI의 afterChange 이벤트 리스너 (셀 편집 후 자동 저장 로직)
+grid.on('afterChange', ev => {
+    const changedRows = ev.changes;
+
+    if (changedRows.length > 0) {
+        // 모든 변경된 셀을 순회하며 처리
+    	changedRows.forEach(change => {
+            const rowKey = change.rowKey;
+            const columnName = change.columnName;
+            const newValue = change.value;
+            const prevValue = change.prevValue; // 이전 값 (필요시 사용)
+
+            // 변경이 실제로 발생했는지 확인 (값은 같지만 타입이 다를 수 있으므로)
+            if (newValue === prevValue) {
+                console.log(`값 변경 없음: RowKey=${rowKey}, Column=${columnName}`);
+                return; // 변경된 값이 이전 값과 동일하면 아무것도 하지 않음
+            }
+
+            // 해당 rowKey의 전체 데이터 조회
+            const rowData = grid.getRow(rowKey);
+			console.log('rowData?? ' + JSON.stringify(rowData));
+			
+            if (!rowData || !rowData.att_id) {
+                console.error(`행 데이터 또는 att_id를 찾을 수 없습니다. RowKey: ${rowKey}`);
+                return;
+            }
+
+            console.log(`Grid 데이터 변경 감지: RowKey=${rowKey}, Column=${columnName}, NewValue=${newValue}, PrevValue=${prevValue}`);
+            console.log('업데이트할 전체 Row 데이터 (예시):', rowData);
+
+            // TODO: 여기서 AJAX 요청을 통해 백엔드로 데이터를 업데이트
+            // 백엔드로 보낼 데이터 구성: att_id와 변경된 컬럼 값만 전송함.
+            const updateData = {
+                ATT_ID: rowData.att_id, // 고유 식별자
+                [columnName]: newValue   // 변경된 컬럼의 이름과 새로운 값
+            };
+			console.log('updateData? ' + JSON.stringify(updateData));
+            // 만약 'det_nm' 컬럼이 특정 ID로 매핑되어야 한다면 추가 로직 필요
+            // 예: if (columnName === 'det_nm') { updateData.DET_ID = getDetIdByDetNm(newValue); }
+
+            $.ajax({
+                url: '/SOLEX/attendance/api/updateGridCell', // 적절한 백엔드 API 엔드포인트
+                method: 'POST', // 또는 PUT (데이터 업데이트는 PUT이 RESTful 하지만 POST도 가능)
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(updateData),
+                success: function(response) {
+					console.log('response ?? ' + response);
+//                    if (response.status === 'success') {
+//                        console.log('서버 업데이트 성공:', response);
+//                        // 사용자에게 성공 메시지 표시 (옵션)
+//                        // Toast 또는 alert('업데이트 성공!');
+//                    } else {
+//                        console.error('서버 업데이트 실패 (응답 오류):', response.message);
+//                        alert('데이터 업데이트에 실패했습니다: ' + response.message);
+//                        // 실패 시 Grid의 셀 값을 이전 값으로 되돌리기
+//                        grid.setValue(rowKey, columnName, prevValue, false);
+//                    }
+                },
+                error: function(xhr, status, error) {
+//                    console.error('서버 업데이트 실패 (AJAX 오류):', error, xhr.responseText);
+////                    alert('데이터 업데이트 중 네트워크 오류가 발생했습니다.');
+//                    // 실패 시 Grid의 셀 값을 이전 값으로 되돌리기
+//                    grid.setValue(rowKey, columnName, prevValue, false);
+                }
+            });
+        });
+    }
+});

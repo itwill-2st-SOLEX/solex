@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -74,6 +75,28 @@ public class AttendanceRestController {
         
         return combinedMap;
 	}
+	
+	// 부하직원 출퇴근현황 update
+    @PostMapping("/updateGridCell") // 프론트엔드에서 이 URL로 요청을 보냄
+    public ResponseEntity<Map<String, Object>> updateGridCell(@RequestBody Map<String, Object> updateData) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // 1. Service 계층으로 데이터 업데이트 위임
+            // Service는 Map을 받아 처리하거나, 특정 DTO를 정의하여 받을 수 있습니다.
+            attendanceService.updateAttendanceCell(updateData);
+
+            response.put("status", "success");
+            response.put("message", "데이터가 성공적으로 업데이트되었습니다.");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            // 예외 처리 (Service에서 던진 예외를 여기서 catch)
+            e.printStackTrace(); // 로깅
+            response.put("status", "fail");
+            response.put("message", "데이터 업데이트 실패: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 	
 	
 	// 오늘 출퇴근 현황 조회 API
@@ -158,6 +181,4 @@ public class AttendanceRestController {
             return ResponseEntity.badRequest().body(errorResponse); // 400 Bad Request
         }
     }
-    
-    
 }
