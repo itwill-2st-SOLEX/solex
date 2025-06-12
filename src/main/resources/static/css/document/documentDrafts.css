@@ -5,10 +5,20 @@
 .approval-table {
 	border-collapse: collapse;
 	margin-bottom: 16px;
+	margin-right: 25px;
+}
+.text-blue {
+  color: #4169E1;
+  font-weight: bold; /* 선택 사항 */
+}
+.text-red {
+  color: red;
+  font-weight: bold; /* 선택 사항 */
 }
 .approval-table th,
 .approval-table td {
-	border: 1px solid #ccc;
+	font-weight: bold;
+	border: 1px solid #999999;
 	text-align: center;
 	padding: 8px;
 	font-size: 14px;

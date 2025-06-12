@@ -19,7 +19,7 @@
 		FROM code_detail
 		WHERE cod_id = 'pos'
 		AND det_sort &lt; #{docEmployeePosSort}
-		ORDER BY det_sort ASC
+		ORDER BY det_sort DESC
 	</select>
 
     <select id="selectOrgChartData" resultType="map">

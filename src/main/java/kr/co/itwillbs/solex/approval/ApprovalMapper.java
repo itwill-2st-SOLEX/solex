@@ -1,5 +1,8 @@
 package kr.co.itwillbs.solex.approval;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,5 +17,9 @@ public interface ApprovalMapper {
 			@Param("teamCd") String teamCd, 
 			@Param("posCd") String posCd
 			);
+	
+	List<Map<String, Object>> selectTodoDocumentList(long loginEmpId);
 
+	void updateApprovalLine(Map<String, Object> approvalRequest);
+	
 }
