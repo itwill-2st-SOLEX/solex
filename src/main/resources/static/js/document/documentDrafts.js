@@ -4,7 +4,7 @@ $(function() {
 
 	const grid = new tui.Grid({
 		el: document.getElementById('grid'),
-		bodyHeight: 700,
+		bodyHeight: 500,
 		scrollY: true,
 		data: [],
 		columns: [
