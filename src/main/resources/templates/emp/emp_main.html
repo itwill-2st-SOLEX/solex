@@ -20,9 +20,14 @@
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
-			<!-- 여기서 부터 작성하시면 됩니다  -->
+			
 			<h2>사원목록</h2>
-			<!-- 본문 영역-->
+			<div id="global-checkbox-container">
+			     <input type="checkbox" id="check-all">
+			     <label for="check-all">퇴사자 포함</label>
+			 </div>
+			 <div id="grid"></div>
+			<!-- 본문 영역 여기서부터 작성-->
 			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">사원등록</button>
 			<div class="custom-content">
 
@@ -37,7 +42,7 @@
 			<div class="modal-dialog modal-dialog-scrollable modal-lg">
 			    <div class="modal-content">
 			      <div class="modal-header">
-			        <h5 class="modal-title" id="exampleModalLabel">사원 등록</h5>
+			        <h5 class="modal-title" id="exampleModalLabel"></h5>
 			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			      </div>
 			      <div class="modal-body">
@@ -47,21 +52,20 @@
 			</div>	
 		</div>
 					<!-- 수정모달창 -->
-			<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel"
-				aria-hidden="true">
-				<div class="modal-dialog modal-dialog-scrollable modal-lg">
-					<div class="modal-content">
+<!--			<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel"-->
+<!--				aria-hidden="true">-->
+<!--				<div class="modal-dialog modal-dialog-scrollable modal-lg">-->
+<!--					<div class="modal-content">-->
 
-						<div class="modal-header">
-							<h4 class="modal-title" id="exampleModalLabel">사원 수정</h4>
-							<button type="button" class="btn-close" data-bs-dismiss="modal"aria-label="Close"></button>
-						</div>
-					    <div class="modal-body">
+<!--						<div class="modal-header">-->
+<!--							<button type="button" class="btn-close" data-bs-dismiss="modal"aria-label="Close"></button>-->
+<!--						</div>-->
+<!--					    <div class="modal-body">-->
 
-						</div>
-					</div>
-				</div>
-			</div>
+<!--						</div>-->
+<!--					</div>-->
+<!--				</div>-->
+<!--			</div>-->
 	</th:block>
 
 

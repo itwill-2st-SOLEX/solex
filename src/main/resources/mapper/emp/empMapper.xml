@@ -26,34 +26,34 @@
         #{emp_da, jdbcType=VARCHAR},
         'sts_01',
         #{emp_pc, jdbcType=NUMERIC},    
-        #{emp_cat_cd, jdbcType=VARCHAR},
-        #{emp_pos_cd, jdbcType=VARCHAR},
-        #{emp_dep_cd, jdbcType=VARCHAR},
-        #{emp_team_cd, jdbcType=VARCHAR}
+        #{empCatCd, jdbcType=VARCHAR},
+        #{empPosCd, jdbcType=VARCHAR},
+        #{empDepCd, jdbcType=VARCHAR},
+        #{empTeamCd, jdbcType=VARCHAR}
     )
 </insert>
 
 	
-<resultMap type="map" id="empResultMap">
-    <id property="empId" column="emp_id" /> 
-    <result property="empNum" column="emp_num" />
-    <result property="empNm" column="emp_nm" />
-    <result property="empPhone" column="emp_phone" />
-    <result property="empHire" column="emp_hire" />
-    <result property="empCatCd" column="emp_cat_cd" />
-    <result property="empPosCd" column="emp_pos_cd" />
-    <result property="empDepCd" column="emp_dep_cd" />
-    <result property="empTeamCd" column="emp_team_cd" />
-    <result property="empStsCd" column="emp_sts_cd" />
-    <result property="empAdd" column="EMP_ADD" />
-    <result property="empBirth" column="EMP_BIRTH" />
-    <result property="empDa" column="EMP_DA" />
-    <result property="empEmail" column="EMP_EMAIL" />
-    <result property="empGd" column="EMP_GD" />
-    <result property="empPc" column="EMP_PC" />
-    <result property="empPw" column="EMP_PW" />
-</resultMap>
-	
+	<resultMap type="map" id="empResultMap">
+	    <id property="empId" column="emp_id" /> 
+	    <result property="empNum" column="emp_num" />
+	    <result property="empNm" column="emp_nm" />
+	    <result property="empPhone" column="emp_phone" />
+	    <result property="empHire" column="emp_hire" />
+	    <result property="empCatCd" column="emp_cat_cd" />
+	    <result property="empPosCd" column="emp_pos_cd" />
+	    <result property="empDepCd" column="emp_dep_cd" />
+	    <result property="empTeamCd" column="emp_team_cd" />
+	    <result property="empStsCd" column="emp_sts_cd" />
+	    <result property="empAdd" column="EMP_ADD" />
+	    <result property="empBirth" column="EMP_BIRTH" />
+	    <result property="empDa" column="EMP_DA" />
+	    <result property="empEmail" column="EMP_EMAIL" />
+	    <result property="empGd" column="EMP_GD" />
+	    <result property="empPc" column="EMP_PC" />
+	    <result property="empPw" column="EMP_PW" />
+	</resultMap>
+		
 	<resultMap type="map" id="codeDetailMap">
 		<result property="empCatCd" column="emp_cat_cd" />
 		<result property="empPosCd" column="emp_pos_cd" />
@@ -105,6 +105,7 @@
 	    ORDER BY COD_ID, DET_ID
 	</select>
 	
+<!--	재직중인 사원만 출력-->
 	<select id="getEmpListFiltered" resultType="map">
         SELECT
             emp_id AS "empId",
@@ -185,8 +186,9 @@
         left JOIN code_detail sts
         ON e.emp_sts_cd = sts.det_id
         AND sts.cod_id = 'sts'
-        
+        ORDER BY emp_num asc
     </select>
+    
     <select id="getAllcodes" resultType="map">
 		SELECT 
 		    det_id AS "DET_ID",
@@ -195,13 +197,29 @@
 		WHERE cod_id in('cat', 'pos', 'dep_erp', 'dep_mes', 'team')
     </select>
     
+<!--    수정을 위한 정보 가져오기-->
     <select id="getEmpDetail" resultType="map">
-    	SELECT *
+    	SELECT 
+    		emp_id AS "empId",
+            emp_num AS "EMP_NUM",
+            emp_nm AS "EMP_NM",
+            emp_phone AS "EMP_PHONE",  
+            emp_hire AS "EMP_HIRE",
+            emp_cat_cd AS "EMP_CAT_CD",
+            emp_pos_cd AS "EMP_POS_CD",
+            emp_dep_cd AS "EMP_DEP_CD",
+            emp_team_cd AS "EMP_TEAM_CD",
+            EMP_ADD AS "EMP_ADD",
+            EMP_BIRTH AS "EMP_BIRTH",
+            EMP_DA AS "EMP_DA",
+            EMP_EMAIL AS "EMP_EMAIL",
+            EMP_GD AS "EMP_GD",
+            EMP_PC AS "EMP_PC"
     	FROM employee
     	WHERE TRIM(emp_num) = #{empNum}
     </select>
     
-    
+<!--    수정 코드-->
     <update id="modifyMap">
     	UPDATE employee
     	SET emp_cat_cd = #{empCatCd},

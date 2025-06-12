@@ -25,12 +25,12 @@ public class EmpService {
 	//인사목록 (재직중)
 	 public List<Map<String, Object>> getEmpList(String searchType, String searchKeyword, String includeEmpSts) {
 
-	        System.out.println("Service: getEmpList called with searchType=" + searchType +
-	                           ", searchKeyword=" + searchKeyword + ", includeEmpSts=" + includeEmpSts);
+//	        System.out.println("Service: getEmpList called with searchType=" + searchType +
+//	                           ", searchKeyword=" + searchKeyword + ", includeEmpSts=" + includeEmpSts);
 
 	        List<Map<String, Object>> empList = mapper.getEmpListFiltered(searchType, searchKeyword, includeEmpSts);
 
-	        System.out.println("Service: getEmpListFiltered returned " + (empList != null ? empList.size() : "null") + " items.");
+//	        System.out.println("Service: getEmpListFiltered returned " + (empList != null ? empList.size() : "null") + " items.");
 	        return empList;
 	    }
 
@@ -82,7 +82,7 @@ public class EmpService {
 		return mapper.getempList(offset, size);
 	}
 
-	//등록에서 공통코드 가져오기 위한
+	//인사 등록에서 공통코드 가져오기 위한
 	public List<Map<String, Object>> getAllcodes() {
 		// TODO Auto-generated method stub
 		return mapper.getAllcodes();
@@ -92,7 +92,6 @@ public class EmpService {
 	//수정 모달창 가져오기 위한
 	public Map<String, Object> getEmpDetail(String empNum) {
 //		System.out.println("service empNum = " + empNum); // ok
-		 
 //		System.out.println("service result = " + mapper.getEmpDetail(empNum)); // null이였던 이유 = sql의 char 공백때문에
 
 		return mapper.getEmpDetail(empNum);
@@ -100,7 +99,6 @@ public class EmpService {
 	
 	// 수정된 사원 정보를 저장
 	public int modifyMap(HashMap<String, Object> empModifyMap) {
-		// TODO Auto-generated method stub
 		System.out.println("service map = " + mapper.modifyMap(empModifyMap));
 		return mapper.modifyMap(empModifyMap);
 	}
