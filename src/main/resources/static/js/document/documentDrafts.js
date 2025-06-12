@@ -300,7 +300,7 @@ $(function() {
 			const modalEl = document.getElementById('exampleModal');
 			const modalInstance = bootstrap.Modal.getInstance(modalEl);
 			modalInstance.hide();
-			form.reset();
+			location.reload();
 
 			// 페이지 리셋 후 목록 다시 불러오기
 			currentPage = 0;
@@ -348,7 +348,7 @@ $(function() {
 			theadRow.innerHTML = "";
 
 			const headLabel = document.createElement("th");
-			headLabel.innerText = "결재";
+			headLabel.innerText = " ";
 			theadRow.appendChild(headLabel);
 
 			nameList.forEach(pos => {
@@ -364,17 +364,40 @@ $(function() {
 			const bodyLabel = document.createElement("td");
 			bodyLabel.innerText = "결재";
 			rowEl.appendChild(bodyLabel);
+//			const returnReason = data.APL_RREMARK || "";
+			
+			// 반려 사유 textarea 추가
+			if (data.APL_STS && data.APL_STS.includes("반려") && data.APL_RREMARK) {
+				const form = document.querySelector("#detailModal .modal-body");
+				if (form && !document.querySelector("#returnReason")) {
+					const returnDiv = document.createElement("div");
+					returnDiv.className = "mb-3 return-reason-area";
 
+					returnDiv.innerHTML = `
+						<label class="form-label text-red">반려 사유</label>
+						<textarea class="form-control" id="returnReason" name="return_reason" rows="3" disabled>${data.APL_RREMARK}</textarea>
+					`;
+
+					form.appendChild(returnDiv);
+					debugger;
+				
+				}
+			}
 			for (let i = 0; i < nameList.length; i++) {
 				const td = document.createElement("td");
 				const status = statusList[i] || "대기";
 				const time = timeList[i] || "-";
-				const statusClass = status === "승인" ? "text-red" : "";
+
+				let statusClass = "";
+				if (status === "승인") statusClass = "text-blue";
+				else if (status === "반려") statusClass = "text-red";
+
 				td.innerHTML = `
-			      <span class="${statusClass}">${status}<br>${time}</span>
-			   `;
+				  <span class="${statusClass}"> ${status}<br>${time}</span>
+				`;
 				rowEl.appendChild(td);
 			}
+
 
 			tbody.appendChild(rowEl);
 

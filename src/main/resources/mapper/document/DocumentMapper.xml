@@ -158,7 +158,7 @@
 		       MAX(l.lea_con) as lea_con,
                LISTAGG(code.det_nm, ',') WITHIN GROUP (ORDER BY code.det_sort DESC) AS apl_emp_pos_nm,
 		       MAX(al.apl_step_no) as apl_step_no,
-		       MAX(code_sts.det_nm) AS apl_sts,
+		       LISTAGG(code_sts.det_nm, ',') AS apl_sts,
 			   MAX(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD')) AS apl_action_time,
 			   MAX(al.apl_rremark) as apl_rremark,
                LISTAGG(code.det_nm, ',') AS app_auth_emp_nm               
@@ -214,7 +214,7 @@
 		       MAX(b.bus_con) AS bus_con,
 		       MAX(al.apl_step_no) AS apl_step_no,
 		       MAX(al.apl_emp_pos) AS apl_emp_pos,
-		       MAX(code_sts.det_nm) AS apl_sts,
+		       LISTAGG(code_sts.det_nm, ',') AS apl_sts,
 			   MAX(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD')) AS apl_action_time,
 			   MAX(al.apl_rremark) AS apl_rremark,
 			   LISTAGG(code.det_nm, ',') WITHIN GROUP (ORDER BY code.det_sort desc) AS apl_emp_pos_nm,
@@ -256,8 +256,8 @@
 		       MAX(r.res_con) AS res_con,
 		       MAX(al.apl_step_no) AS apl_step_no,
 		       MAX(al.apl_emp_pos) AS apl_emp_pos,
-		       MAX(code_sts.det_nm) AS apl_sts,
-			   MAX(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD')) AS apl_action_time,
+		       LISTAGG(code_sts.det_nm, ',') AS apl_sts,
+			   LISTAGG(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD'), ',') AS apl_action_time,
 			   MAX(al.apl_rremark) AS apl_rremark,
 			   LISTAGG(code.det_nm, ',') AS app_auth_emp_nm   
 		  FROM document d
