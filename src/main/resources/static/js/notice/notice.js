@@ -151,7 +151,7 @@ async function changeNotice(mode, noticeId = null) {
 		method = 'PUT';
 	  
 	} else if (mode == 'delete') {
-		url = `/SOLEX/notice/api/${noticeId}`;
+		url = `/SOLEX/notice/${noticeId}`;
 		method = 'DELETE';
 	  
 	}
@@ -231,7 +231,7 @@ function noticeEditMode(noticeId) {
 
 // 삭제 버튼 클릭
 function noticeDelMode(noticeId) {
-    fetch(`/SOLEX/notice/api/${noticeId}`)
+    fetch(`/SOLEX/notice/${noticeId}`)
         .then(res => res.json())
         .then(data => showNoticeModal('delete', data))
         .catch(err => console.error('삭제 모드 조회 실패', err));
@@ -257,7 +257,7 @@ function showNoticeModal(mode, data = {}) {
             <div class="custom-modal-header">
                 <h4 class="custom-modal-title" id="exampleModalLabel">${title}</h4>
                 <ul class="custom-modal-meta">
-					<li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM == '공통' ? '-' : data.EMP_DEP_NM}</span></li>
+					<li><strong>부서명 </strong> <span id="modalDept">${data.EMP_DEP_NM == '공통' ? '-' : data.EMP_DEP_NM}</span></li>
                     <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span> &nbsp; </li>
                     <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? 
 										new Date(data.NOT_REG_DATE).toLocaleString('ko-KR', {

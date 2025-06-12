@@ -70,6 +70,7 @@ async function vacationList(page, keyword = '') {
 		// 무한스크롤 페이지, 검색어 url로 전달
 		let url = `/SOLEX/vacation/api/list?page=${page}&size=${pageSize}`;
 		
+		//검색어 전달
         if (keyword) {
             url += `&keyword=${encodeURIComponent(keyword)}`;
         }
@@ -82,6 +83,7 @@ async function vacationList(page, keyword = '') {
 		
 		console.log(data)
 		
+		//그리드에 값 전달
         const gridData = list.map((n) => ({
 			empId: n.EMP_ID,
 			empNum: n.EMP_NUM,
@@ -90,13 +92,11 @@ async function vacationList(page, keyword = '') {
 			vacTotal: n.VAC_TOTAL,
             vacUsed: n.VAC_USED,
             vacRemain: n.VAC_REMAIN,
-			empCatNm: n.EMP_CAT_NM,
-			empDepNm: n.EMP_DEP_NM,
-			empTeamNm: n.EMP_TEAM_NM,
+			empCatNm: n.EMP_CAT_NM  == '공통' ? '-' : n.EMP_CAT_NM,
+			empDepNm: n.EMP_DEP_NM  == '공통' ? '-' : n.EMP_DEP_NM,
+			empTeamNm: n.EMP_TEAM_NM  == '공통' ? '-' : n.EMP_TEAM_NM,
 			empPosNm: n.EMP_POS_NM,
-			//periodEnd: formatPeriodEnd(n.PERIOD_END, n.DAYS_LEFT),  // 디데이 함께 표시
 			periodEnd: formatter.format(new Date(n.PERIOD_END)),
-			//DaysLeft: formatter.format(new Date(n.DAYS_LEFT))
         }));
 		
 		//첫 페이지면 초기화 후 새로 보여줌

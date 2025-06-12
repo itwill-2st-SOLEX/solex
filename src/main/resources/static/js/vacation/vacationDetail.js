@@ -54,7 +54,6 @@ const formatter = new Intl.DateTimeFormat('ko-KR', {
 //휴가 요약 정보
 async function vacationSummary() {
 	try {
-			//const empId = 31;
 			let url = `/SOLEX/vacation/api/summary`;
 			
 	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
@@ -67,7 +66,7 @@ async function vacationSummary() {
 			document.getElementById('empNm').textContent = data.EMP_NM || '-';
 			document.getElementById('empHire').textContent = formatter.format(new Date(data.EMP_HIRE))  || '-';
 			document.getElementById('periodEnd').textContent = formatter.format(new Date(data.PERIOD_END)) || '-';
-			document.getElementById('daysLeft').textContent = data.daysLeft != null ? `(D-${data.DAYS_LEFT})` : '';
+			document.getElementById('daysLeft').textContent = data.DAYS_LEFT != null ? `(D-${data.DAYS_LEFT})` : '';
 			document.getElementById('vacTotal').textContent = data.VAC_TOTAL || 0;
 			document.getElementById('vacUsed').textContent = data.VAC_USED || 0;
 			document.getElementById('vacRemain').textContent = data.VAC_REMAIN || 0;
@@ -90,7 +89,6 @@ async function vacationDetail(page) {
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 
-		console.log(data)
 		const list = data.list;
 		const vacationCount = data.vacationCount;
 		
