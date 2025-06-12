@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SOLEX</title>
+<link rel="icon" type="image/x-icon"
+	th:href="@{/assets/img/favicon/favicon.ico}" />
+<!-- Google Fonts - Noto Sans KR -->
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/login/login.css}" />
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<!-- 여기서 부터 작성하시면 됩니다  -->
+			<!-- 본문 영역-->
+			<div class="custom-content">
+				<div class="login-page">
+					<div class="login-left">
+						<img th:src="@{/assets/img/solex_logo.png}" alt="solex로고" class="logo" />
+						<h1 class="auth-title">Log in.</h1>
+						<div class="login-tabs">
+							<button class="tab active">ID 로그인</button>
+							<button class="tab">QR 로그인</button>
+						</div>
+
+						<form class="login-form">
+							<input type="text" placeholder="사번" /> 
+							<input type="password" placeholder="비밀번호" />
+							<label><input type="checkbox" /> 사번 저장</label>
+					
+							<button type="submit" class="login-btn">로그인</button>
+						</form>
+
+						<div class="login-footer">
+							<a href="#">비밀번호 찾기</a>
+						</div>
+					</div>
+
+					<div class="login-right">
+						<button class="right-btn">일반 사원 로그인하기</button>
+						<button class="right-btn">중간 관리자 로그인하기</button>
+						<button class="right-btn">상위관리자 로그인하기</button>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</th:block>
+
+
+</body>
+</html>
