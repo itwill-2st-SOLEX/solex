@@ -9,8 +9,8 @@ $(function() {
 		data: [],
 		columns: [
 			{ header: '기안서 번호', name: 'doc_id' },
-			{ header: '기안서 종류', name: 'doc_type' },
-			{ header: '결재상태', name: 'doc_sts' },
+			{ header: '기안서 종류', name: 'doc_type', sortable: 'true' },
+			{ header: '결재상태', name: 'doc_sts', sortable: 'true' },
 			{ header: '등록일', name: 'doc_reg_time' }
 		]
 	});
