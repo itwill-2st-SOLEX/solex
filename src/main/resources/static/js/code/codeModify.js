@@ -16,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		const isNew = row.__isNew;
 
 		// 기존 행은 'cod_yn'만 수정 가능
-		if (!isNew && ev.columnName !== 'cod_yn') {
+		if (!isNew && ev.columnName !== 'COD_YN') {
 			ev.stop();  // 편집 막기
 		}
 
 		// 새 행은 'cod_id', 'cod_nm', 'cod_yn'만 수정 가능
-		if (isNew && ev.columnName === 'cod_reg_time') {
+		if (isNew && ev.columnName === 'COD_REG_TIME') {
 			ev.stop();  // 편집 막기
 		}
 	});

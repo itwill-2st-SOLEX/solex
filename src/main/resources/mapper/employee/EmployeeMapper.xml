@@ -21,7 +21,26 @@
 		AND det_sort &lt; #{docEmployeePosSort}
 		ORDER BY det_sort DESC
 	</select>
-	
-	
+
+    <select id="selectOrgChartData" resultType="map">
+	    SELECT
+	        E.EMP_ID,
+	        E.EMP_NUM,									-- 사번
+	        E.EMP_NM,									-- 사원명
+	        E.EMP_POS_CD,								-- 직급코드
+	        COALESCE(CAT.DET_NM, NULL) AS EMP_CAT,		-- 소속명
+	        COALESCE(POS.DET_NM, NULL) AS EMP_POS,		-- 직급명
+	        COALESCE(DEP.DET_NM, NULL) AS EMP_DEP,		-- 부서명
+	        COALESCE(TEAM.DET_NM, NULL) AS EMP_TEAM,	-- 팀명
+	        COALESCE(E.MEG_NUM, NULL) AS MEG_NUM		-- 상급자 사번
+	    FROM EMPLOYEE E
+	    LEFT JOIN CODE_DETAIL CAT ON CAT.DET_ID = E.EMP_CAT_CD
+	    LEFT JOIN CODE_DETAIL POS ON POS.DET_ID = E.EMP_POS_CD
+	    LEFT JOIN CODE_DETAIL DEP ON DEP.DET_ID = E.EMP_DEP_CD
+	    LEFT JOIN CODE_DETAIL TEAM ON TEAM.DET_ID = E.EMP_TEAM_CD
+	    WHERE	E.EMP_POS_CD != 'pos_05'
+ 	    AND		E.EMP_STS_CD = 'sts_01' 
+	    ORDER BY E.EMP_NUM
+	</select>
 	
 </mapper>
