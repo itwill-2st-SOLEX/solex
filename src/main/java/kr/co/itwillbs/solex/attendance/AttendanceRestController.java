@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,8 +62,6 @@ public class AttendanceRestController {
 	    params.put("empTeamCd", info.get("EMP_TEAM_CD"));
 	    params.put("empPosCd", info.get("EMP_POS_CD"));
 	    
-//	    System.out.println(params);
-	    
 	    Map<String, Object> combinedMap = new HashMap<>();
 	    
 	    if (resultType.equals("my")) { // 1. 내 근태 데이터 조회
@@ -84,7 +83,7 @@ public class AttendanceRestController {
 
     	
         Optional<Map<String, Object>> attendanceRecord = attendanceService.getTodayAttendanceStatus(loginEmpId);
-        System.out.println("today attendanceRecord : " + attendanceRecord);
+        System.out.println("today attendanceRecord ???" + attendanceRecord);
         Map<String, Object> response = new HashMap<>();
 
         if (attendanceRecord.isPresent()) { // 조회 결과가 존재한다면 (Optional 안에 Map이 있다면)
@@ -94,6 +93,7 @@ public class AttendanceRestController {
             response.put("att_out_time", record.get("ATT_OUT_TIME") != null ? record.get("ATT_OUT_TIME") : null);
             response.put("att_sts", record.get("ATT_STS") != null ? record.get("ATT_STS") : null);
             response.put("det_nm", record.get("DET_NM") != null ? record.get("DET_NM") : null);
+            response.put("att_id", record.get("ATT_ID"));
             
             System.out.println("today response : " + response);
         } else { // 조회 결과가 없다면 (Optional이 비어있다면)
@@ -138,11 +138,18 @@ public class AttendanceRestController {
     
     // 퇴근 등록 API
     @PostMapping("/punch-out")
-    public ResponseEntity<Map<String, Object>> punchOut() {
+    public ResponseEntity<Map<String, Object>> punchOut(@RequestBody Map<String, Object> requestData) {
+    	
+//    	System.out.println("requestData : " + requestData); {att_id=135}
+    	String attIdString = String.valueOf(requestData.get("att_id"));
+    	Long attId = Long.parseLong(attIdString);
 
         try {
-            Map<String, Object> result = attendanceService.recordPunchOut(loginEmpId);
+//            Map<String, Object> result = attendanceService.recordPunchOut(loginEmpId);
+            Map<String, Object> result = attendanceService.recordPunchOut(loginEmpId, attId);
             result.put("status", "success");
+            System.out.println("result : " + result);
+            
             return ResponseEntity.ok(result);
         } catch (IllegalStateException | IllegalArgumentException e) {
             Map<String, Object> errorResponse = new HashMap<>();

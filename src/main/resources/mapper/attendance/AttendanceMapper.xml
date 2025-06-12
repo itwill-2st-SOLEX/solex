@@ -133,13 +133,13 @@
     </insert>
     
     <update id="updatePunchOut" parameterType="java.util.Map">
-        UPDATE attendance
-        SET
-            att_out_time = #{punchOutTime, jdbcType=DATE},
-            att_sts = #{att_sts, jdbcType=DATE}
-<!--             total_work_minutes = #{totalWorkMinutes} -->
+       UPDATE attendance
+          SET
+              att_out_time = #{punchOutTime, jdbcType=DATE},
+              att_sts = #{att_sts, jdbcType=DATE}
         WHERE
-            emp_id = #{EMP_ID, jdbcType=NUMERIC}
+              emp_id = #{EMP_ID, jdbcType=NUMERIC}
+          AND att_id = #{att_id, jdbcType=NUMERIC}
     </update>
     <select id="selectDetNm" resultType="string">
         SELECT det_nm

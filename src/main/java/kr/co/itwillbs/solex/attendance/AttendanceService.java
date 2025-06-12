@@ -101,7 +101,7 @@ public class AttendanceService {
 	
 	// 퇴근기록
 	@Transactional
-	public Map<String, Object> recordPunchOut(Long empId) {
+	public Map<String, Object> recordPunchOut(Long empId, Long attId) {
 		LocalDateTime today = LocalDateTime.now();
 		LocalDateTime punchOutTime = LocalDateTime.now();
 
@@ -110,7 +110,7 @@ public class AttendanceService {
 		// 오늘 출근 기록 조회 (Map으로 반환됨)
 		Map<String, Object> attendanceData = attendanceMapper.findByEmpIdAndAttendanceDate(empId, todayDate)
 				.orElseThrow(() -> new IllegalArgumentException("오늘 출근 기록이 없습니다."));
-//        System.out.println("출근기록 조회 : attendanceData - " + attendanceData); 
+		
 		// Map에서 기존 출근 시간 가져오기
 		LocalDateTime punchInTime = LocalDateTime.parse((String) attendanceData.get("ATT_IN_TIME"),
 				DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -152,7 +152,9 @@ public class AttendanceService {
 
 		// DB 업데이트를 위해 ID도 Map에 넣어줘야 함
 		attendanceData.put("id", (Long) attendanceData.get("id"));
+		attendanceData.put("att_id", attId);
 
+		
 		attendanceMapper.updatePunchOut(attendanceData); // DB 업데이트
 		
 		

@@ -1,7 +1,7 @@
 //전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
-const gridHeight = 600;
+const gridHeight = 700;
 let editorInstance = null;
 let editorLoaded = false;
 let searchKeyword = '';
@@ -23,8 +23,8 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [],
     columns: [
-		{ header: '사원 ID', name: 'emp_num', width: 100, sortable: true, align : 'center'},
-        { header: '사원 직위', name: 'dep_position', sortable: true, align : 'center' },
+		{ header: '사원 ID', name: 'emp_num', width: 100, sortable: true },
+        { header: '사원 직위', name: 'dep_position', sortable: true },
         { 
 			header: '출근 시간',
 			name: 'att_in_time',
@@ -61,9 +61,9 @@ const grid = new tui.Grid({
 				}
 			}
 		},
-        { header: '퇴근 시간', name: 'att_out_time', width: 200, align: 'center',  sortable: true, align : 'center' },
-        { header: '상태', name: 'det_nm', align: 'center',  sortable: true, editor: 'text', align : 'center' },
-        { header: '날짜', name: 'att_day', width: 200, align: 'center',  sortable: true, align : 'center' }
+        { header: '퇴근 시간', name: 'att_out_time', width: 200, align: 'center',  sortable: true },
+        { header: '상태', name: 'det_nm', align: 'center',  sortable: true, editor: 'text' },
+        { header: '날짜', name: 'att_day', width: 200, align: 'center',  sortable: true }
     ]
 });
 // JavaScript에서 초기화
@@ -75,110 +75,26 @@ const myDatePicker = flatpickr("#my-datepicker", {
     locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
 });
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
-	window.addEventListener('DOMContentLoaded', () => {
-	bindScrollEvent(); // 스크롤 이벤트 리스너 바인딩
-
-	// 초기 데이터 로드 (검색 입력 필드의 초기 값으로)
-   	const initialKeyword = document.getElementById('searchInput').value.trim();
-   loadInitialData(initialKeyword);
-
-   // 검색 버튼 클릭 이벤트 리스너 (검색 시에도 데이터 재로드)
-   const searchButton = document.getElementById('searchButton'); // 검색 버튼 ID 가정
-   if (searchButton) {
-       searchButton.addEventListener('click', () => {
-           const currentSearchKeyword = document.getElementById('searchInput').value.trim();
-           loadInitialData(currentSearchKeyword);
-       });
-   }
+window.addEventListener('DOMContentLoaded', () => {
+	searchKeyword = document.getElementById('searchInput').value.trim();
+	document.getElementById('searchBtn').addEventListener('click', searchAttendance);
 });
 
 
 //무한 스크롤 이벤트
 function bindScrollEvent() {
 	// 검색으로 화면 목록이 변경되었을 경우를 대비해서 스크롤 초기화
-//    grid.off('scrollEnd');
+    grid.off('scrollEnd');
 	
 	//무한스크롤시 검색어 유지를 위해 재전달
-	grid.on('scrollEnd', async () => { // async/await를 사용하여 비동기 로직 처리
-        // 1. 이미 로딩 중이거나, 더 이상 데이터가 없으면 함수 종료
-        if (isLoading || !hasMoreData) {
-            console.log('데이터 로딩 중이거나, 마지막 페이지입니다.');
-            return;
-        }
-
-        isLoading = true; // 로딩 시작 플래그 설정
-
+    grid.on('scrollEnd', () => {
         const keyword = document.getElementById('searchInput').value.trim();
-        const nextPage = currentPage + 1; // 다음 페이지 번호
-
-        console.log(`스크롤 끝 감지: 다음 페이지 ${nextPage} 로드 시도, 검색어: "${keyword}"`);
-
-        try {
-            // TODO: 데이터를 가져올 백엔드 API URL 및 요청 방식 설정
-            // 이 URL은 검색어, 페이지 번호, 페이지 당 항목 수를 파라미터로 받을 수 있어야 합니다.
-            const apiUrl = `/api/attendance/list?page=${nextPage}&size=${itemsPerPage}&keyword=${encodeURIComponent(keyword)}`;
-
-            const response = await fetch(apiUrl); // fetch API 사용 (jQuery.ajax도 가능)
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json(); // JSON 응답 파싱
-
-            if (data && data.length > 0) {
-                // 2. 새로운 데이터를 Grid에 추가
-                grid.appendRows(data);
-                currentPage = nextPage; // 현재 페이지 번호 업데이트
-                console.log(`페이지 ${currentPage} 데이터 ${data.length}개 추가 완료.`);
-            } else {
-                // 3. 더 이상 데이터가 없음을 표시
-                hasMoreData = false;
-                console.log('더 이상 로드할 데이터가 없습니다.');
-                // 사용자에게 "마지막 페이지입니다" 같은 메시지 표시 가능
-            }
-
-        } catch (error) {
-            console.error('데이터 로딩 중 오류 발생:', error);
-            // 에러 처리 로직 (사용자에게 알림 등)
-        } finally {
-            isLoading = false; // 로딩 완료 플래그 해제
-        }
     });
 }
-// 초기 로드 시 데이터 가져오기 (bindScrollEvent는 스크롤 이벤트만 바인딩)
-// 페이지 로드 시 또는 검색 버튼 클릭 시 이 함수를 호출하여 첫 페이지 데이터를 로드해야 합니다.
-async function loadInitialData(keyword = '') {
-    currentPage = 0; // 첫 페이지 로드를 위해 currentPage를 0으로 설정
-    hasMoreData = true;
-    isLoading = false;
-    grid.clear(); // 기존 그리드 데이터 초기화 (검색 시)
-
-    // 첫 페이지 데이터 로드 (첫 페이지는 보통 page=1 또는 page=0 부터 시작, 서버 설정에 따라 다름)
-    const apiUrl = `/api/attendance/list?page=${currentPage + 1}&size=${itemsPerPage}&keyword=${encodeURIComponent(keyword)}`;
-
-    try {
-        isLoading = true;
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-            grid.setRows(data); // 첫 데이터는 setRows로 설정
-            currentPage = 1; // 첫 페이지 로드 성공 시 페이지 번호 업데이트
-            console.log(`초기 데이터 ${data.length}개 로드 완료.`);
-        } else {
-            hasMoreData = false;
-            console.log('초기 로드할 데이터가 없습니다.');
-        }
-    } catch (error) {
-        console.error('초기 데이터 로딩 중 오류 발생:', error);
-    } finally {
-        isLoading = false;
-    }
-}
 
 
+//페이지 로딩시 무한스크롤 기능이 동작하도록 이벤트 등록
+bindScrollEvent();
 
 
 // updateMonthYearDisplay 함수가 호출될 때 currentDate를 기준으로 화면을 업데이트하고 서버로 데이터 전송

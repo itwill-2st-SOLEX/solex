@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pubchStatusSpan = document.getElementById('punch-sts');
     const resetButton = document.getElementById('reset-attendance-button'); // 초기화 버튼 (이전 단계에서 추가했다면)
 
+
     // 서버 API 엔드포인트 정의 
     const API_BASE_URL = '/SOLEX/attendance/api'; // 예시. 실제 API 경로에 따라 변경
     const PUNCH_IN_URL = `${API_BASE_URL}/punch-in`;
@@ -27,7 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const punchInDbTime = response.att_in_time;
                 const punchOutDbTime = response.att_out_time;
 				const punchStatus = response.det_nm;
+				const currentAttId = response.att_id; 
                 
+				
+				// 숨겨진 필드에 att_id 값 할당
+		        const currentAttIdInput = document.getElementById('current-att-id');
+		        if (currentAttId) {
+		            currentAttIdInput.value = currentAttId; 
+		            console.log('숨겨진 필드에 ATT_ID 설정됨:', currentAttIdInput.value);
+		        } else {
+		            currentAttIdInput.value = ''; 
+		            console.log('ATT_ID가 없어 숨겨진 필드가 비어있음.');
+		        }
+				
+				
                 // 출근 시간 표시 및 버튼 상태
                 if (punchInDbTime) {
                     const date = new Date(punchInDbTime); // 서버에서 받은 시간 (ISO 8601 문자열)을 Date 객체로 변환
@@ -167,14 +181,21 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('출근 기록이 없습니다. 먼저 출근 등록을 해주세요.');
             return;
         }
-//		console.log('AJAX 요청 시작 직전! punchInTimeSpan.textContent:', punchInTimeSpan.textContent); // 추가
+		
+	    const currentAttId = document.getElementById('current-att-id').value; // 또는 localStorage.getItem('currentAttendanceId');
+	    console.log('전송하려는 ATT_ID:', currentAttId);
+	    console.log('JSON.stringify(currentAttId) 결과:', JSON.stringify(currentAttId));
 
+		
         $.ajax({
             url: PUNCH_OUT_URL,
             method: 'POST', // POST 요청
-            dataType: 'json',
-			   
+            contentType: 'application/json',
+			data: JSON.stringify({ 
+			    att_id: currentAttId
+			}),
             success: function(response) {
+//				debugger;
                 // 서버 응답 예시: { "status": "success", "punchOutTime": "2025-06-09T18:00:00", "totalWorkMinutes": 535 }
                 alert('퇴근 등록이 완료되었습니다!');
 				
