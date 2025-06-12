@@ -68,6 +68,12 @@ body {
    border-color: #4169E1 !important;
    color: white !important;
 }
+.modal-dialog{
+    overflow-y: initial !important
+}
+.modal-body{
+    overflow-y: auto
+}
 
 
 .modal-header{

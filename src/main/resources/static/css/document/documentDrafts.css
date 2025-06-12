@@ -1,0 +1,76 @@
+@charset "UTF-8";
+#docTypeSelect {
+	width: 180px;
+}
+.approval-table {
+	border-collapse: collapse;
+	margin-bottom: 16px;
+}
+.approval-table th,
+.approval-table td {
+	border: 1px solid #ccc;
+	text-align: center;
+	padding: 8px;
+	font-size: 14px;
+}
+#dateRange,
+#dept-nm,
+#dept-nms,
+#emp-nm,
+#docdept_position,
+#emp-id,
+#emp-nm,
+#curr-rank,
+#transfer-dept,
+#curr-rank,
+#transfer-posi,
+#emp-nms,
+#curr-nm,
+#cost-detail,
+#promotion-posi,
+#dept-team,
+.team,
+#curr-team,
+#promotion-team,
+#transfer-team,
+#curr-ranks,
+#dept-teams,
+#job-posit,
+#job-posits {
+	width: 310px;
+}
+.doc-type01,
+.doc-type02,
+.doc-type04,
+.doc-type05,
+.doc-type03 {
+	display: flex;
+}
+#curr-ranks,
+#emp-nms,
+#cost-detail,
+#job-posi,
+#curr-team,
+#promotion-posi,
+#transfer-team,
+#dept-teams,
+#last-day,
+#dates {
+	margin-left: 70px;
+}
+.approval-line{
+	display: flex;
+}
+
+.btn-purple {
+   color: #4169E1;
+   background-color: #fff;
+}
+
+.btn-purple:hover,
+.btn-purple:focus,
+.btn-check:checked + .btn-purple {
+  color: #fff;
+  background-color: #365acb; 
+  border-color: #365acb;
+  }
