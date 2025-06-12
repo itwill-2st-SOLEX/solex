@@ -36,7 +36,7 @@ public interface OrderMapper {
 
 	List<Map<String, Object>> getSelectTop5PopularProducts();
 
-	List<Map<String, Object>> getSearchProductList(@Param("offset") int offset, @Param("limit")  int limit, @Param("searchKeyword") String searchKeyword);
+	List<Map<String, Object>> getSearchProductList(@Param("searchKeyword") String searchKeyword);
 
 	int getStockCount(@Param("productCode") String productCode);
 
@@ -53,5 +53,7 @@ public interface OrderMapper {
 	void deductStock(Map<String, Object> orderData);
 
 	List<Map<String, Object>> getLackingMaterials(Map<String, Object> orderData);
+
+	List<Map<String, Object>> getColors(String prd_cd);
 	
 }

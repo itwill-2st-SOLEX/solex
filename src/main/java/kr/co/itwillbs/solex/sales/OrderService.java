@@ -55,6 +55,7 @@ public class OrderService {
         return resultList;
     }
 
+    
 	public List<Map<String, Object>> getSearchClientList(int page, int pageSize, String searchKeyword,int emp_id) {
 		int offset = page * pageSize;
 		
@@ -78,8 +79,8 @@ public class OrderService {
         return orderMapper.getSearchClientList(offset, pageSize, searchKeyword);
 	}
 
-	public List<Map<String, Object>> getSearchProductList(int page, int pageSize, String searchKeyword) {
-		int offset = page * pageSize;
+	public List<Map<String, Object>> getSearchProductList( String searchKeyword) {
+
 		
 		
 		if(searchKeyword == null) {
@@ -87,7 +88,7 @@ public class OrderService {
 		}
 		
 		
-		return orderMapper.getSearchProductList(offset, pageSize, searchKeyword);
+		return orderMapper.getSearchProductList(searchKeyword);
 	}
 
 	public int getStockCount(String productCode) {
@@ -126,6 +127,11 @@ public class OrderService {
 	    }
 	    
 	    return 1;
+	}
+
+
+	public List<Map<String,Object>> getColors(String prd_cd) {
+		return orderMapper.getColors(prd_cd);
 	}
 
 	

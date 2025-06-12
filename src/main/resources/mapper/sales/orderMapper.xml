@@ -4,21 +4,20 @@
 
 <mapper namespace="kr.co.itwillbs.solex.sales.OrderMapper">
   <select id="selectPagedOrderDataAsMap" parameterType="Map" resultType="Map">
-    SELECT
-        prd.prd_cd,
+  	SELECT
+    	ord.ord_id,
         prd.prd_nm,
         cli.cli_nm,
-        cd.det_nm,
-        ord.ord_reg_date,
         odd.odd_cnt,
         NVL(odd.odd_add, '') || ' ' || NVL(odd.odd_da, '') AS ODD_ADDRESS,
-        TO_CHAR(odd.odd_mod_date, 'YYYY-MM-DD') AS ORD_REG_DATE
-    FROM suju_order_detail odd
-    JOIN suju_order ord ON odd.ord_id = ord.ord_id
-    JOIN client cli ON ord.cli_id = cli.cli_id
-    JOIN product_option opt ON opt.opt_id = odd.odd_id
-    JOIN product prd ON prd.prd_cd = opt.prd_cd 
-    JOIN code_detail cd ON odd.odd_sts = cd.det_id
+        cd.det_nm,
+        TO_CHAR(odd.odd_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE
+    FROM suju_order ord
+    left JOIN suju_order_detail odd ON odd.ord_id = ord.ord_id
+    left JOIN client cli ON ord.cli_id = cli.cli_id
+    left JOIN product_option opt ON opt.opt_id = odd.opt_id
+    left JOIN product prd ON prd.prd_cd = opt.prd_cd
+    left JOIN code_detail cd ON odd.odd_sts = cd.det_id
     <if test="searchKeyword != null and searchKeyword != ''">
         AND (
             cli.cli_nm LIKE '%' || #{searchKeyword} || '%' OR  -- 거래처명 검색
@@ -37,7 +36,7 @@
     	cli_nm, cli_id
     FROM client
     <where>
-	  cli_type = 'SELLER'
+	  cli_type = 'BUYER'
       <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
       <if test="searchKeyword != null and searchKeyword != ''">
         AND LOWER(cli_nm) LIKE '%' || #{searchKeyword} || '%'
@@ -53,14 +52,14 @@
   <select id="countClientsByEmployeeId" resultType="int">
   	SELECT count(*)
   	FROM client
-  	WHERE emp_id = #{emp_id} and cli_type = 'SELLER' 
+  	WHERE emp_id = #{emp_id} and cli_type = 'BUYER' 
   </select>
   
   <select id="getSelectClientsByEmployeeId" resultType="Map">
   	SELECT cli_nm
   	FROM client
   	WHERE emp_id = #{emp_id}
-  	and cli_type = 'SELLER'
+  	and cli_type = 'BUYER'
   	ORDER BY cli_nm 
   </select>
   
@@ -74,7 +73,7 @@
         FROM client cli 
         JOIN suju_order suju    
         ON cli.cli_id = suju.cli_id
-        WHERE cli.cli_type = 'SELLER'    
+        WHERE cli.cli_type = 'BUYER'    
         GROUP BY
             cli.cli_nm,cli.cli_id
         ORDER BY order_count DESC
@@ -116,9 +115,26 @@
 	      </if>
 	    </where>
 	    ORDER BY prd_nm
-	    OFFSET #{offset} ROWS
-	    FETCH NEXT #{limit} ROWS ONLY
 	</select>
+	<!-- 컬러 -->
+	<select id="getColors" resultType="Map">
+		SELECT DISTINCT opt_color
+		FROM product_option 
+		WHERE prd_cd = #{prd_cd}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	<!--    이거 수정 해야 됨 조인 해서 코드 받아ㅑㅇ 됨  -->
 	<select id="getStockCount" resultType="int">
@@ -205,6 +221,10 @@
         #{lacking_qty}  -- getLackingMaterials에서 계산한 부족 수량
     )
 	</insert>
+	
+	
+	
+	
   	
   	
   	

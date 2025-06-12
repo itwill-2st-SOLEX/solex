@@ -116,17 +116,14 @@ public class OrderRestController {
 	
 	
 	@GetMapping("/products")
-	public List<Map<String, Object>> getSearchProductList(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
-            @RequestParam(name = "searchKeyword", required = false) String searchKeyword
+	public List<Map<String, Object>> getSearchProductList(@RequestParam(name = "searchKeyword", required = false) String searchKeyword
     ) throws Exception {
-        log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}, searchKeyword={}", page, pageSize, searchKeyword);
+        log.info("API - 그리드 데이터 조회 요청 파라미터: searchKeyword={}", searchKeyword);
         
         // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
         int emp_id = 2000;
         
-        List<Map<String, Object>> list = orderService.getSearchProductList(page, pageSize, searchKeyword);
+        List<Map<String, Object>> list = orderService.getSearchProductList(searchKeyword);
         
         log.info("API - 그리드 데이터 조회 결과 건수: {}", list.size());
         log.info("API - 그리드 데이터 조회 결과 건수: {}", list);
@@ -146,6 +143,12 @@ public class OrderRestController {
         Map<String, Integer> body = Collections.singletonMap("stockCount", count);
         return ResponseEntity.ok(body);
     }
+	
+	@GetMapping("/color/{prd_cd}")
+	public List<Map<String, Object>> getColor(@PathVariable(name = "prd_cd") String prd_cd) {
+		log.info("API - 재고 조회 요청 파라미터: prd_cd={}", prd_cd);
+		return orderService.getColors(prd_cd);
+	}
 	
 	
 	

@@ -58,7 +58,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body big-box">
-            <div class="row mb-5">
+            <div class="row mb-3">
                  <div class="col">
 			        <label for="cli_nm_virtual_select" class="form-label">거래처명 <span style="color:red">*</span></label>
 			        <div class="input-group">
@@ -68,14 +68,56 @@
 			    </div>
                 <div class="col">
 			        <label for="prd_nm_virtual_select" class="form-label">제품명 <span style="color:red">*</span></label>
-			        <div class="input-group mb-4">
+			        <div class="input-group">
 			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="제품명을 선택하거나 검색하세요." ></select>
 			        </div>
-		            <div class="form-text ms-4" style="color: #f35a5a; display: none;" id="stockCount"></div>
 			    </div>
             </div>
+			<div class="row mb-3">
+				<div class="col">
+		            <label for="" class="form-label">색상 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <select id="opt_color" class="form-select" disabled="disabled">
+                          <option>색상을 선택하세요.</option>
+                          <option value="1">One</option>
+                          <option value="2">Two</option>
+                          <option value="3">Three</option>
+                        </select>
+		            </div>
+				</div>
+				<div class="col">
+		            <label for="" class="form-label">사이즈 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <select id="opt_size" class="form-select" disabled="disabled">
+                          <option>사이즈를 선택하세요.</option>
+                          <option value="1">One</option>
+                          <option value="2">Two</option>
+                          <option value="3">Three</option>
+                        </select>
+		            </div>
+				</div>
+	        </div>
+			<div class="row mb-3">
+				<div class="col">
+		            <label for="" class="form-label">굽 높이 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <select id="opt_height" class="form-select" disabled="disabled">
+                          <option>굽 높이를 선택하세요.</option>
+                          <option value="1">One</option>
+                          <option value="2">Two</option>
+                          <option value="3">Three</option>
+                        </select>
+		            </div>
+				</div>
+				<div class="col">
+		            <label for="" class="form-label">제품 재고량 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input class="form-control" type="text" value="" placeholder="제품 재고량" id="stockCount" disabled="disabled">
+		            </div>
+				</div>
+	        </div>
             
-			<div class="row mb-4">
+			<div class="row mb-3">
 				<div class="col">
 		            <label for="odd_cnt" class="form-label">주문 수량 <span style="color:red;">*</span></label>
 		            <div class="d-flex align-items-center">
@@ -89,7 +131,7 @@
 		            </div>
 				</div>
 	        </div>
-            <div class="row mb-4">
+            <div class="row mb-2">
 				<div class="col">
 				<!-- 이거는 자동 계산 -->
 		            <label for="odd_pay" class="form-label">결제 금액 <span style="color:red;">*</span></label>
@@ -105,18 +147,13 @@
 				</div>
             </div>
             
-            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐 쿼리 만들어야 됨? 맞음... -->
-            
-            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐 쿼리 만들어야 됨? 맞음... -->
-            
-            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐  -->
-            <div class="mb-4">
+            <div class="mb-2">
                 <label for="cli_phone" class="form-label">거래처 연락처 <span style="color:red">*</span></label>
                 <br>
                 <input type="text" id="cli_phone" name="cli_phone" class="form-control" placeholder="거래처 연락처"  readonly="readonly">
             </div>
 
-            <div class="row mb-4">
+            <div class="row mb-3">
                 <div class="col">
                     <label for="cli_mgr_name" class="form-label">담당자명 <span style="color:red">*</span></label>
                     <input type="text" id="cli_mgr_name" class="form-control" placeholder="담당자명"  readonly="readonly">
@@ -126,9 +163,8 @@
                     <input type="text" id="cli_mgr_phone" class="form-control" placeholder="담당자 연락처"  readonly="readonly">
                 </div>
             </div>
-            <!-- 거래처가 선택이 되면 자동으로 값이 채워짐  -->
 
-            <div class="mb-4">
+            <div class="mb-3">
                 <div class="form-label">주소 <span style="color:red">*</span></div>
                 <div class="d-flex align-items-center mb-2">
                     <input type="text" id="cli_pc" name="cli_pc" class="form-control" style="width: 48.4%;" readonly="readonly" placeholder="우편번호">
