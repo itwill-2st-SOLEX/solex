@@ -217,7 +217,7 @@ window.openDetailModal = async (clientId) => { // TUI Grid formatter에서 호�
 
     try {
         // API 엔드포인트에 맞게 URL 수정
-        const response = await fetch(`/solex/clients/${clientId}`); // /clients/{cli_id} API 호출
+        const response = await fetch(`/SOLEX/clients/${clientId}`); // /clients/{cli_id} API 호출
         if (!response.ok) {
             throw new Error('거래처 정보를 가져오지 못했습니다.');
         }
@@ -426,13 +426,13 @@ async function submitClientForm() {
     let errorMessage = '';
 
     if (currentClientId) { // 수정 모드
-        url = `/solex/clients/${currentClientId}`; // API 엔드포인트 수정
+        url = `/SOLEX/clients/${currentClientId}`; // API 엔드포인트 수정
         method = 'PUT';
         successMessage = '거래처 수정이 완료되었습니다.';
         errorMessage = '거래처 수정 중 오류가 발생했습니다.';
         console.log("전송할 수정 데이터:", clientData);
     } else { // 등록 모드
-        url = '/solex/clients'; // API 엔드포인트 수정
+        url = '/SOLEX/clients'; // API 엔드포인트 수정
         method = 'POST';
         successMessage = '거래처 등록이 완료되었습니다.';
         errorMessage = '거래처 등록 중 오류가 발생했습니다.';
@@ -493,7 +493,7 @@ async function scrollMoreClient(isInitialLoad = false) {
         }
 		
         // 백엔드 API 엔드포인트 호출 (새로 정의한 /clients/data 경로)
-        const response = await fetch(`/solex/clients/data?${params.toString()}`);
+        const response = await fetch(`/SOLEX/clients/data?${params.toString()}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -574,7 +574,7 @@ function getBizRegNoInfo() {
         return;
     }
 
-    fetch('/solex/clients/check-biz', {
+    fetch('/SOLEX/clients/check-biz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bizNumber: cleanedInput })
@@ -704,7 +704,7 @@ async function loadClientTypes(selectedValue = null) {
     }
 
     try {
-        const response = await fetch('/solex/clients/client-types');
+        const response = await fetch('/SOLEX/clients/client-types');
         if (!response.ok) {
             throw new Error('거래처 유형을 불러오지 못했습니다.');
         }

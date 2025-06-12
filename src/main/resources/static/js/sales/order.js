@@ -155,7 +155,7 @@ async function fetchGridData(page = currentPage, currentSearchKw = searchKeyword
             params.append('searchKeyword', currentSearchKw); 
         }
         
-        const url = `/solex/orders/gridData?${params.toString()}`; 
+        const url = `/SOLEX/orders/gridData?${params.toString()}`; 
 		
         
         const response = await fetch(url);
@@ -273,7 +273,7 @@ async function fetchAndSetClientOptions(searchValue, virtualSelectInstance) {
     params.append('searchKeyword', searchValue.trim());
   }
   
-  const url = `/solex/orders/clients?${params.toString()}`;
+  const url = `/SOLEX/orders/clients?${params.toString()}`;
 
   try {
     const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
@@ -368,7 +368,7 @@ async function fetchAndSetProductOptions(searchValue, virtualSelectInstance) {
     params.append('searchKeyword', searchValue.trim());
   }
   
-  const url = `/solex/orders/products?${params.toString()}`; // 상품 데이터를 가져오는 URL로 변경
+  const url = `/SOLEX/orders/products?${params.toString()}`; // 상품 데이터를 가져오는 URL로 변경
 
   try {
     const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
@@ -409,7 +409,7 @@ async function getStockCount(productCode) {
 	 
     // 2) URLSearchParams 로 안전하게 쿼리 생성
     const params = new URLSearchParams({ productCode: productCode.trim() });
-    const url = `/solex/orders/stock?${params.toString()}`;
+    const url = `/SOLEX/orders/stock?${params.toString()}`;
 
 	try {
 	   const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
@@ -444,7 +444,7 @@ async function getClientInfo(clientCode) {
 	}
 	  
     
-    const url = `/solex/clients/${clientCode}`;
+    const url = `/SOLEX/clients/${clientCode}`;
 
 	try {
 	   const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
@@ -682,7 +682,7 @@ async function submitForm() {
   
   // --- 에러 핸들링 및 fetch 로직 ---
   try {
-      const response = await fetch('/solex/orders', {
+      const response = await fetch('/SOLEX/orders', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json'

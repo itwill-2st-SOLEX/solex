@@ -16,7 +16,8 @@
     FROM suju_order_detail odd
     JOIN suju_order ord ON odd.ord_id = ord.ord_id
     JOIN client cli ON ord.cli_id = cli.cli_id
-    JOIN product prd ON odd.prd_cd = prd.prd_cd
+    JOIN product_option opt ON opt.opt_id = odd.odd_id
+    JOIN product prd ON prd.prd_cd = opt.prd_cd 
     JOIN code_detail cd ON odd.odd_sts = cd.det_id
     <if test="searchKeyword != null and searchKeyword != ''">
         AND (
@@ -86,15 +87,20 @@
     	prd_nm, prd_cd
     FROM (
         SELECT
-            prd.prd_nm,prd.prd_cd,
-            COUNT(odd.prd_cd) AS order_count
-        FROM product prd 
-        JOIN suju_order_detail odd    
-        ON prd.prd_cd = odd.prd_cd
-        GROUP BY
-            prd.prd_nm,prd.prd_cd
-        ORDER BY order_count DESC
-    )
+	        p.prd_nm,
+	        p.prd_cd,
+	        SUM(od.odd_cnt) AS total_sales
+	    FROM
+	        product p 
+	    JOIN
+	        product_option opt ON p.prd_cd = opt.prd_cd 
+	    JOIN
+	        suju_order_detail od ON opt.opt_id = od.opt_id 
+	    GROUP BY
+	        p.prd_nm, p.prd_cd
+	    ORDER BY
+	        total_sales DESC
+    	)
     WHERE ROWNUM <![CDATA[ <= ]]> 5
    </select>
    
@@ -114,14 +120,14 @@
 	    FETCH NEXT #{limit} ROWS ONLY
 	</select>
 	
-	
+	<!--    이거 수정 해야 됨 조인 해서 코드 받아ㅑㅇ 됨  -->
 	<select id="getStockCount" resultType="int">
-		select 
+		SELECT 
 			stk_cnt
-		from stock stk join product prd
-		on stk.item_id = prd.prd_cd
-		where prd.prd_cd = #{productCode}
-		and stk_cat = 'stk_cat_01'
+		FROM stock stk join product prd
+		ON stk.item_id = prd.prd_cd
+		WHERE prd.prd_cd = #{productCode}
+		AND stk_cat = 'stk_cat_01'
 	</select>
   	
   	<!-- 1 -->
@@ -172,7 +178,7 @@
 	</update>
   	
   	
-  	
+  	<!-- 3-2 부족한 수량을 가져옴 -->
   	<select id="getLackingMaterials" parameterType="map" resultType="map">
 	    SELECT
 	        b.mat_id,
@@ -187,7 +193,7 @@
 	        AND s.stk_cat = 'stk_cat_02'
 	</select>
 	
-	
+	<!-- 3-2에서 부족한 수량을 발주 테이블에 insert -->
 	<insert id="createPurchaseRequest" parameterType="map">
     INSERT INTO  (
         mat_id,
