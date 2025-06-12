@@ -2,10 +2,11 @@
 //전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
-const gridHeight = 700;
+const gridHeight = 600;
 let editorInstance = null;
 let editorLoaded = false;
 let searchKeyword = '';
+let empId = null;
 
 // ToastUI Grid 생성
 const grid = new tui.Grid({
@@ -16,22 +17,17 @@ const grid = new tui.Grid({
     data: [],
     columns: [
 		{ header: '번호', name: 'rowNum', width: 100, sortable: true },
-        { header: '제목', name: 'notTt', width: 600, sortable: true },
-        { header: '부서', name: 'detNm', align: 'center',  sortable: true },
+        { header: '부서', name: 'empDepNm', align: 'center',  sortable: true },
+        { header: '제목', name: 'notTt', width: 500, sortable: true },
         { header: '작성자', name: 'empNm', align: 'center',  sortable: true },
+        { header: '직급', name: 'empPosNm', align: 'center',  sortable: true },
         { header: '등록일', name: 'notRegDate', align: 'center',  sortable: true }
     ],
-	/*rowHeaders: [
-	        {
-				header: '번호',
-	            type: 'rowNum',
-	            width: 100 // 원하는 너비(px)로 설정
-	        }
-	    ]*/
 });
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
+		
 	searchKeyword = document.getElementById('searchInput').value.trim();
     noticeList(currentPage, searchKeyword);
 	document.getElementById('searchBtn').addEventListener('click', searchNotice);
@@ -66,24 +62,31 @@ async function noticeList(page, keyword = '') {
     try {
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/api/notice?page=${page}&size=${pageSize}`;
+		let url = `/SOLEX/notice/api?page=${page}&size=${pageSize}`;
 		
         if (keyword) {
             url += `&keyword=${encodeURIComponent(keyword)}`;
         }
 		
+		
+		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
-
+		
 		const list = data.list;
 		const totalCount = data.totalCount;
 		
+		empId = data.empId;
+		
+		console.log(data)
+		
         const gridData = list.map((n, idx) => ({
-            notId: n.NOT_ID,
+            id: n.NOT_ID,
             notTt: n.NOT_TT,
             notCon: n.NOT_CON,
-            detNm: n.DET_NM,
-            empNm: n.EMP_NM,
+            empDepNm: n.EMP_DEP_NM  == '공통' ? '-' : n.EMP_DEP_NM,
+            empPosNm: n.EMP_POS_NM  == '공통' ? '-' : n.EMP_POS_NM,
+            empNm: n.EMP_NM || '-',
             notRegDate: formatter.format(new Date(n.NOT_REG_DATE)),
 			rowNum: totalCount - (page * pageSize + idx) // 역순 번호 계산
         }));
@@ -119,10 +122,10 @@ function searchNotice() {
 // 제목 클릭 시 상세조회
 grid.on('click', async (ev) => {
     if (ev.columnName === 'notTt') {
-        const noticeId = grid.getRow(ev.rowKey).notId;
+        const noticeId = grid.getRow(ev.rowKey).id;
 
         try {
-            const res = await fetch(`/SOLEX/api/notice/${noticeId}`);
+            const res = await fetch(`/SOLEX/notice/api/${noticeId}`);
             const detail = await res.json();
             showNoticeModal('view', detail);
         } catch (e) {
@@ -130,12 +133,6 @@ grid.on('click', async (ev) => {
         }
     }
 });
-
-
-// 글쓰기 버튼 클릭
-function onWriteNotice() {
-    showNoticeModal('new');
-}
 
 
 // 게시글 등록/수정/삭제 - 비동기
@@ -146,15 +143,15 @@ async function changeNotice(mode, noticeId = null) {
 	let payload = null;
 	
 	if (mode == 'new') {
-		url = '/SOLEX/api/notice';
+		url = '/SOLEX/notice/api';
 		method = 'POST';
 	  
 	} else if (mode == 'edit') {
-		url = `/SOLEX/api/notice/${noticeId}`;
+		url = `/SOLEX/notice/api/${noticeId}`;
 		method = 'PUT';
 	  
 	} else if (mode == 'delete') {
-		url = `/SOLEX/api/notice/${noticeId}`;
+		url = `/SOLEX/notice/${noticeId}`;
 		method = 'DELETE';
 	  
 	}
@@ -204,10 +201,29 @@ async function changeNotice(mode, noticeId = null) {
         alert('공지사항 처리 중 오류가 발생했습니다.');
     }
 }
+// 글쓰기 버튼 클릭
+async function onWriteNotice() {
+	
+	try {
+        // 사용자 정보만 받아오기
+        const res = await fetch('/SOLEX/notice/api/userinfo');
+        if (!res.ok) throw new Error('사용자 정보 로드 실패');
+        const userInfo = await res.json();
+        
+		console.log(userInfo)
+        // 모달 띄우기 (빈 제목, 내용과 사용자 정보 포함)
+        showNoticeModal('new', userInfo);
+
+    } catch (e) {
+        console.error('글 작성 모달창 표시 실패', e);
+        // 사용자 정보 없을 때 기본값 처리 가능
+        showNoticeModal('new', { EMP_NM: '알 수 없음', DET_NM: '-', POS_NM: '-' });
+    }
+}
 
 // 수정 버튼 클릭
 function noticeEditMode(noticeId) {
-    fetch(`/SOLEX/api/notice/${noticeId}`)
+    fetch(`/SOLEX/notice/api/${noticeId}`)
         .then(res => res.json())
         .then(data => showNoticeModal('edit', data))
         .catch(err => console.error('수정 모드 조회 실패', err));
@@ -215,7 +231,7 @@ function noticeEditMode(noticeId) {
 
 // 삭제 버튼 클릭
 function noticeDelMode(noticeId) {
-    fetch(`/SOLEX/api/notice/${noticeId}`)
+    fetch(`/SOLEX/notice/${noticeId}`)
         .then(res => res.json())
         .then(data => showNoticeModal('delete', data))
         .catch(err => console.error('삭제 모드 조회 실패', err));
@@ -241,8 +257,8 @@ function showNoticeModal(mode, data = {}) {
             <div class="custom-modal-header">
                 <h4 class="custom-modal-title" id="exampleModalLabel">${title}</h4>
                 <ul class="custom-modal-meta">
-                    <li><strong>부서명 </strong> <span id="modalDept">${data.DET_NM }</span></li>
-                    <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span></li>
+					<li><strong>부서명 </strong> <span id="modalDept">${data.EMP_DEP_NM == '공통' ? '-' : data.EMP_DEP_NM}</span></li>
+                    <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span> &nbsp; </li>
                     <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? 
 										new Date(data.NOT_REG_DATE).toLocaleString('ko-KR', {
 										          year: 'numeric', month: '2-digit', day: '2-digit',
