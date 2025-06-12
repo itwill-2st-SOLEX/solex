@@ -3,13 +3,14 @@
 .content-area {
 	display: flex;
     flex-direction: row;
+    justify-content: space-around;
     padding: 20px;
 }
 
 .code {
 	padding: 10px;
 	width: 50%;
-	height: 700px;
+	height: auto;
 }
 
 .c-title {
@@ -47,9 +48,4 @@
 
 .delete-btn {
 	height: 100%;
-}
-
-.table-area {
-	border: 1px solid #ddd;
-	width: 100%;
 }
