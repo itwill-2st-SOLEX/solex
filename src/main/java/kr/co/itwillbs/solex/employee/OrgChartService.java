@@ -13,7 +13,6 @@ public class OrgChartService {
     public Map<String, Object> getOrgChartTree() {
         // 🔹 1. DB에서 조직도 데이터 조회 (Map 리스트 형태)
         List<Map<String, Object>> orgList = employeeMapper.selectOrgChartData();
-        System.out.println("orgList : " + orgList);
 
         // 🔹 2. 각 계층을 담을 자료구조 선언
         Map<String, Object> ceo = null; // 사장
@@ -43,26 +42,34 @@ public class OrgChartService {
             }
         }
 
-        System.out.println("departments keys : " + departments.keySet());
-
         // 🔹 4. CEO 노드 구성
         Map<String, Object> root = new HashMap<>();
         root.put("text", Map.of(
             "name", "CEO",
             "title", ceo != null ? ceo.get("EMP_NM") : "미정"
         ));
+        root.put("HTMLclass", "ceo");
 
         // 🔹 5. 이사 → 부장 → 팀장 순으로 트리 구성
         List<Object> directorNodes = new ArrayList<>();
         for (Map.Entry<String, Map<String, Object>> dirEntry : directors.entrySet()) {
             Map<String, Object> dirEmp = dirEntry.getValue();
             String dirNum = dirEntry.getKey(); // 이사 empNum
+            String cat = dirEmp.get("EMP_CAT").toString().trim();
+            String empCat = dirEmp.get("EMP_CAT") != null ? dirEmp.get("EMP_CAT").toString().trim().toUpperCase() + "이사" : "";
 
             Map<String, Object> dirNode = new HashMap<>();
             dirNode.put("text", Map.of(
-                "name", dirEmp.get("EMP_CAT"), // 소속
+                "name", empCat, // 소속
                 "title", dirEmp.get("EMP_NM")  // 이름
             ));
+            
+            // 🔹 이사 역할에 따른 클래스 지정
+            if ("ERP".equalsIgnoreCase(cat)) {
+                dirNode.put("HTMLclass", "erpDirector");
+            } else if ("MES".equalsIgnoreCase(cat)) {
+                dirNode.put("HTMLclass", "mesDirector");
+            }
 
             // 🔸 이사 아래 부장들 구성
             List<Object> depNodes = new ArrayList<>();
@@ -71,12 +78,21 @@ public class OrgChartService {
             if (depList != null) {
                 for (Map<String, Object> dep : depList) {
                     String depNum = dep.get("EMP_NUM") != null ? dep.get("EMP_NUM").toString().trim() : null;
-
+                    String depCat = dep.get("EMP_CAT").toString().trim();
+                    
                     Map<String, Object> depNode = new HashMap<>();
                     depNode.put("text", Map.of(
                         "name", dep.get("EMP_DEP"),
                         "title", dep.get("EMP_NM")
                     ));
+                    
+                 	// 🔹 부서장 역할에 따른 클래스 지정
+                    if ("ERP".equalsIgnoreCase(depCat)) {
+                        depNode.put("HTMLclass", "erpManager");
+                    } else if ("MES".equalsIgnoreCase(depCat)) {
+                        depNode.put("HTMLclass", "mesManager");
+                    }
+                    
                     depNode.put("stackChildren", true); // 팀장이 옆으로 정렬되도록 설정
 
                     // 🔹 부장 아래 팀장들 구성
@@ -102,7 +118,6 @@ public class OrgChartService {
         }
 
         root.put("children", directorNodes);
-        System.out.println("root : " + root);
         return root;
     }
 }
