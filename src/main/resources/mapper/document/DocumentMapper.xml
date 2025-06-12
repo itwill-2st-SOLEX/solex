@@ -133,56 +133,92 @@
 	
 <!--	반연차 기안서 상세조회-->
 	<select id="selectDetailLeave" resultType="map">
-		SELECT d.emp_id,
-			   e.emp_nm,
-			   pos.det_nm AS emp_pos_nm,
-			   dep.det_nm AS emp_dep_nm,
-			   team.det_nm AS emp_team_nm,
-			   TO_CHAR(r.res_start_date, 'YYYY-MM-DD') AS res_start_date,
-			   r.res_con,
-			   al.apl_step_no,
-		       al.apl_emp_pos,
-		       al.apl_sts,
-			   al.apl_action_time,
-			   al.apl_rremark
+		SELECT MAX(d.emp_id) AS emp_id,
+	 		   MAX(e.emp_nm) as emp_nm,
+		       MAX(pos.det_nm) AS emp_pos_nm,
+			   MAX(dep.det_nm) AS emp_dep_nm,
+			   MAX(team.det_nm) AS emp_team_nm,
+			   MAX(
+				  CASE 
+				    WHEN TO_CHAR(l.lea_start_date, 'HH24:MI:SS') != '00:00:00' THEN 
+				      TO_CHAR(l.lea_start_date, 'YYYY-MM-DD HH24:MI')
+				    ELSE 
+				      TO_CHAR(l.lea_start_date, 'YYYY-MM-DD')
+				  END
+				  || ' ~ ' ||
+				  CASE 
+				    WHEN TO_CHAR(l.lea_end_date, 'HH24:MI:SS') != '00:00:00' THEN 
+				      TO_CHAR(l.lea_end_date, 'YYYY-MM-DD HH24:MI')
+				    ELSE 
+				      TO_CHAR(l.lea_end_date, 'YYYY-MM-DD')
+				  END
+			   ) AS dbdateRange,
+			   MAX(l.lea_type) AS lea_type,
+		       MAX(l.lea_tt) as lea_tt,
+		       MAX(l.lea_con) as lea_con,
+               LISTAGG(code.det_nm, ',') WITHIN GROUP (ORDER BY code.det_sort DESC) AS apl_emp_pos_nm,
+		       MAX(al.apl_step_no) as apl_step_no,
+		       LISTAGG(code_sts.det_nm, ',') AS apl_sts,
+			   MAX(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD')) AS apl_action_time,
+			   MAX(al.apl_rremark) as apl_rremark,
+               LISTAGG(code.det_nm, ',') AS app_auth_emp_nm               
 		  FROM document d
-		  LEFT JOIN resignation_doc r
-		    ON d.doc_id = r.doc_id
+		  LEFT JOIN leave_doc l
+			ON d.doc_id = l.doc_id
 		  LEFT JOIN approval_line al
-		    ON d.doc_id = al.doc_id
+			ON d.doc_id = al.doc_id
 		  LEFT JOIN employee e
 		    ON d.emp_id = e.emp_id
-		  LEFT JOIN code_detail pos 
-			ON e.emp_pos_cd = pos.det_id 
+		  LEFT JOIN code_detail pos
+		    ON e.emp_pos_cd = pos.det_id 
 		   AND pos.cod_id = 'pos'
-		  LEFT JOIN code_detail dep 
-			ON e.emp_dep_cd = dep.det_id 
+		  LEFT JOIN code_detail dep
+		    ON e.emp_dep_cd = dep.det_id
 		   AND dep.cod_id IN ('dep_erp', 'dep_mes')
-		  LEFT JOIN code_detail team 
-			ON e.emp_team_cd = team.det_id 
+		  LEFT JOIN code_detail team
+		    ON e.emp_team_cd = team.det_id
 		   AND team.cod_id = 'team'
+          LEFT JOIN code_detail code
+            ON al.apl_emp_pos = code.det_id
+          LEFT JOIN code_detail code_sts 
+            ON al.apl_sts = code_sts.det_id 
+           AND code_sts.cod_id = 'apl_sts'
 		 WHERE d.doc_id = #{doc_id}
-		 ORDER BY al.apl_step_no
+		 GROUP BY d.doc_id
 	</select>
 	
 <!--	출장/외근 기안서 상세조회-->	
 	<select id="selectDetailOutwork" resultType="map">
-		SELECT d.emp_id,
-			   e.emp_nm,
-		       pos.det_nm AS emp_pos_nm,
-			   dep.det_nm AS emp_dep_nm,
-			   team.det_nm AS emp_team_nm,
-		       b.bus_type,
-		       TO_CHAR(b.bus_start_time, 'YYYY-MM-DD') AS bus_start_time,
-		       TO_CHAR(b.bus_end_time, 'YYYY-MM-DD') AS bus_end_time,
-		       b.bus_type,
-		       TO_CHAR(b.bus_cost, 'FM999,999,999') AS bus_cost,
-		       b.bus_con,
-		       al.apl_step_no,
-		       al.apl_emp_pos,
-		       al.apl_sts,
-			   al.apl_action_time,
-			   al.apl_rremark
+		SELECT MAX(d.emp_id) AS emp_id,
+			   MAX(e.emp_nm) AS emp_nm,
+		       MAX(pos.det_nm) AS emp_pos_nm,
+			   MAX(dep.det_nm) AS emp_dep_nm,
+			   MAX(team.det_nm) AS emp_team_nm,
+		       MAX(b.bus_type) AS bus_type,
+		       MAX(
+				  CASE 
+				    WHEN TO_CHAR(b.bus_start_time, 'HH24:MI:SS') != '00:00:00' THEN 
+				      TO_CHAR(b.bus_start_time, 'YYYY-MM-DD HH24:MI')
+				    ELSE 
+				      TO_CHAR(b.bus_start_time, 'YYYY-MM-DD')
+				  END
+				  || ' ~ ' ||
+				  CASE 
+				    WHEN TO_CHAR(b.bus_end_time, 'HH24:MI:SS') != '00:00:00' THEN 
+				      TO_CHAR(b.bus_end_time, 'YYYY-MM-DD HH24:MI')
+				    ELSE 
+				      TO_CHAR(b.bus_end_time, 'YYYY-MM-DD')
+				  END
+			   ) AS dbdateRange,
+		       MAX(TO_CHAR(b.bus_cost, 'FM999,999,999')) AS bus_cost,
+		       MAX(b.bus_con) AS bus_con,
+		       MAX(al.apl_step_no) AS apl_step_no,
+		       MAX(al.apl_emp_pos) AS apl_emp_pos,
+		       LISTAGG(code_sts.det_nm, ',') AS apl_sts,
+			   MAX(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD')) AS apl_action_time,
+			   MAX(al.apl_rremark) AS apl_rremark,
+			   LISTAGG(code.det_nm, ',') WITHIN GROUP (ORDER BY code.det_sort desc) AS apl_emp_pos_nm,
+			   LISTAGG(code.det_nm, ',') AS app_auth_emp_nm  
 		 FROM document d
 		 LEFT JOIN business_outwork_doc b
 		   ON d.doc_id = b.doc_id
@@ -198,25 +234,32 @@
 		  AND dep.cod_id IN ('dep_erp', 'dep_mes')
 		 LEFT JOIN code_detail team
 		   ON e.emp_team_cd = team.det_id
-		  AND team.cod_id = 'team' 
+		  AND team.cod_id = 'team'
+		 LEFT JOIN code_detail code
+           ON al.apl_emp_pos = code.det_id
+         LEFT JOIN code_detail code_sts 
+           ON al.apl_sts = code_sts.det_id 
+          AND code_sts.cod_id = 'apl_sts'
 		WHERE d.doc_id = #{doc_id}
-		ORDER BY al.apl_step_no
+		GROUP BY d.doc_id
 	</select>
 	
 <!--	사직서 기안서 상세조회-->	
 	<select id="selectDetailResignation" resultType="map">
-		SELECT d.emp_id,
-	 		   e.emp_nm,
-		       pos.det_nm AS emp_pos_nm,
-			   dep.det_nm AS emp_dep_nm,
-			   team.det_nm AS emp_team_nm,
-			   TO_CHAR(r.res_start_date, 'YYYY-MM-DD') AS res_start_date,
-		       r.res_con,
-		       al.apl_step_no,
-		       al.apl_emp_pos,
-		       al.apl_sts,
-			   al.apl_action_time,
-			   al.apl_rremark
+		SELECT MAX(d.emp_id) AS emp_id,
+	 		   MAX(e.emp_nm) AS emp_nm,
+		       MAX(pos.det_nm) AS emp_pos_nm,
+			   MAX(dep.det_nm) AS emp_dep_nm,
+			   MAX(team.det_nm) AS emp_team_nm,
+			   LISTAGG(code.det_nm, ',') WITHIN GROUP (ORDER BY code.det_sort desc) AS apl_emp_pos_nm,
+			   MAX(TO_CHAR(r.res_start_date, 'YYYY-MM-DD')) AS dbdateRange,
+		       MAX(r.res_con) AS res_con,
+		       MAX(al.apl_step_no) AS apl_step_no,
+		       MAX(al.apl_emp_pos) AS apl_emp_pos,
+		       LISTAGG(code_sts.det_nm, ',') AS apl_sts,
+			   LISTAGG(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD'), ',') AS apl_action_time,
+			   MAX(al.apl_rremark) AS apl_rremark,
+			   LISTAGG(code.det_nm, ',') AS app_auth_emp_nm   
 		  FROM document d
 		  LEFT JOIN resignation_doc r
 			ON d.doc_id = r.doc_id
@@ -232,15 +275,29 @@
 		   AND dep.cod_id IN ('dep_erp', 'dep_mes')
 		  LEFT JOIN code_detail team
 		    ON e.emp_team_cd = team.det_id
-		   AND team.cod_id = 'team' 
-		  WHERE d.doc_id = #{doc_id}  
-		  ORDER BY al.apl_step_no
+		   AND team.cod_id = 'team'
+		  LEFT JOIN code_detail code
+            ON al.apl_emp_pos = code.det_id
+          LEFT JOIN code_detail code_sts 
+            ON al.apl_sts = code_sts.det_id 
+           AND code_sts.cod_id = 'apl_sts' 
+		 WHERE d.doc_id = #{doc_id}
+		 GROUP BY d.doc_id
 	</select>
+	
+	<update id="updateDocumentStatus" parameterType="map">
+	    UPDATE approval_line
+	    SET 
+	      apl_sts = #{status},
+	      doc_app_day = SYSDATE
+	    WHERE 
+	      doc_id = #{docId}
+  </update>
 	
 <!-- 	결재 유형별 결재선 찾아오기 -->
 	<select id="findSteps" resultType="java.lang.Integer">
 		SELECT upper_steps
-		  FROM doc_type_rule
+		 FROM doc_type_rule
 		 WHERE doc_type = #{docType}
 	</select>
 	
