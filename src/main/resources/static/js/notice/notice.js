@@ -51,11 +51,40 @@ function bindScrollEvent() {
 bindScrollEvent();
 
 //날짜 형식 함수
-const formatter = new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-});
+//날짜만 넣으면 년-월-일 형식, (날짜, true)하면 년-월-일 오전?오후 시:분 형식으로 출력
+function formatter(date, includeTime = false) {
+	const d = new Date(date);
+	
+	//Intl.DateTimeFormat(...).formatToParts() : 날짜를 구성 요소별로 나눠서 배열 형태로 반환
+	//DateTimeFormat이 날짜를 무조건 .으로 구분해서 저장하므로 배열에 '.'리터럴도 한칸씩 저장됨
+	const parts = new Intl.DateTimeFormat('ko-KR', {
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: includeTime ? '2-digit' : undefined,
+		minute: includeTime ? '2-digit' : undefined,
+		hour12: true // 오전/오후 포함
+	}).formatToParts(d);
+	
+	//저장된 parts 배열을 반복하면서 원하는 값만 가져올 수 있도록 함수를 정의함
+	const get = type => parts.find(p => p.type === type)?.value;
+	
+	//get함수를 이용하여 각 년, 월, 일의 값만 배열에서 찾아와서 저장
+	const year = get('year');
+	const month = get('month');
+	const day = get('day');
+	
+	let result = `${year}-${month}-${day}`;
+	
+	if (includeTime) {
+		const dayPeriod = get('dayPeriod'); // '오전' or '오후'
+		const hour = get('hour');
+		const minute = get('minute');
+		result += ` ${dayPeriod} ${hour}:${minute}`;
+	}
+
+	return result;
+}
 
 // 게시글 목록 불러오기
 async function noticeList(page, keyword = '') {
@@ -87,7 +116,7 @@ async function noticeList(page, keyword = '') {
             empDepNm: n.EMP_DEP_NM  == '공통' ? '-' : n.EMP_DEP_NM,
             empPosNm: n.EMP_POS_NM  == '공통' ? '-' : n.EMP_POS_NM,
             empNm: n.EMP_NM || '-',
-            notRegDate: formatter.format(new Date(n.NOT_REG_DATE)),
+            notRegDate: formatter(new Date(n.NOT_REG_DATE)),
 			rowNum: totalCount - (page * pageSize + idx) // 역순 번호 계산
         }));
 		
@@ -259,13 +288,8 @@ function showNoticeModal(mode, data = {}) {
                 <ul class="custom-modal-meta">
 					<li><strong>부서명 </strong> <span id="modalDept">${data.EMP_DEP_NM == '공통' ? '-' : data.EMP_DEP_NM}</span></li>
                     <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span> &nbsp; </li>
-                    <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? 
-										new Date(data.NOT_REG_DATE).toLocaleString('ko-KR', {
-										          year: 'numeric', month: '2-digit', day: '2-digit',
-										          hour: '2-digit', minute: '2-digit',
-										          hour12: true }).replace(/\. /g, '. ') 
-											: formatter.format(now)}</span></li>
-                </ul>
+                    <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? formatter(data.NOT_REG_DATE, true) : formatter(now)}</span></li>
+					                </ul>
             </div>
             <div class="custom-modal-content" id="modalContent">${content}</div>
         </div>
