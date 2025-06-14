@@ -36,6 +36,7 @@ public class AttendanceService {
 	private static final int STANDARD_END_MINUTE = 0;
 	private static final int STANDARD_WORK_HOURS = 8; // 8시간 근무 (점심시간 제외)
 	private static final int STANDARD_WORK_MINUTES = STANDARD_WORK_HOURS * 60; // 8시간 = 480분
+ 
 	
 	// 업데이트 가능한 컬럼 이름 화이트리스트 (보안을 위해 매우 중요!)
     private static final Set<String> ALLOWED_UPDATE_COLUMNS = 
@@ -200,13 +201,9 @@ public class AttendanceService {
 		return attendanceMapper.selectEmployeeInfo(loginEmpId);
 	}
 	
-	
-	
-	
-	
-	// 부하직원의 출퇴근 현황 update
     @Transactional // 데이터 변경 작업은 트랜잭션으로 묶는 것이 일반적
     public void updateAttendanceCell(Map<String, Object> updateData) {
+        // 1. ATT_ID 파싱 및 유효성 검증
         Long attId;
         Object attIdObj = updateData.get("ATT_ID");
         if (attIdObj instanceof String) {
@@ -218,13 +215,15 @@ public class AttendanceService {
         } else {
             throw new IllegalArgumentException("ATT_ID 형식이 올바르지 않습니다.");
         }
-    	System.out.println("서비스 updateData : " + updateData);
+    	System.out.println("서비스 updateData (초기): " + updateData);
+
         String columnName = null;
         Object newValue = null;
         
-        // ATT_ID를 제외한 첫 번째 변경된 컬럼을 찾음
+        // 2. 변경된 컬럼 이름과 새 값 추출
+        // ATT_ID를 제외한 첫 번째 변경된 컬럼을 찾음 (TUI Grid의 한 셀 업데이트 시 보통 하나의 컬럼만 있음)
         for (Map.Entry<String, Object> entry : updateData.entrySet()) {
-            if (!"ATT_ID".equals(entry.getKey())) {
+            if (!"ATT_ID".equalsIgnoreCase(entry.getKey())) { // 대소문자 무시하고 ATT_ID 비교
                 columnName = entry.getKey();
                 newValue = entry.getValue();
                 break;
@@ -235,52 +234,173 @@ public class AttendanceService {
             throw new IllegalArgumentException("업데이트할 컬럼 또는 새로운 값이 없습니다.");
         }
 
-        // ====== 중요: 컬럼 이름 유효성 검증 ======
+        // 3. 컬럼 이름 유효성 검증
         String normalizedColumnName = columnName.toLowerCase(); // 소문자로 통일하여 비교
         if (!ALLOWED_UPDATE_COLUMNS.contains(normalizedColumnName)) {
             throw new IllegalArgumentException("허용되지 않는 컬럼 '" + columnName + "'에 대한 업데이트 요청입니다.");
         }
 
-        Object valueToUpdate = newValue;
-
-        // 데이터 타입 변환 (필요시)
-        // 예: att_in_time은 String으로 넘어오지만, DB에 따라 LocalDateTime으로 변환 필요
-        if ("att_out_time".equals(normalizedColumnName) && newValue instanceof String) {
-             // Mybatis로 String을 직접 넘기는 경우, Mapper에서 DB 타입으로 변환하거나
-             // 여기서 LocalDateTime.parse((String) newValue) 등으로 변환하여 넘길 수 있습니다.
-             // 지금은 String 그대로 넘긴다고 가정 (Mybatis가 적절히 처리)
-        	try {
-                // String을 LocalDateTime으로 파싱
-        		// 프론트엔드에서 넘어오는 날짜/시간 포맷에 따라 DateTimeFormatter를 정확히 지정해야 합니다.
-//                valueToUpdate = LocalDateTime.parse((String) newValue, DateTimeFormatter.ofPattern("YYYY-MM-DD HH24:MI:SS"));
-        		valueToUpdate = LocalDateTime.parse((String) newValue, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-
-            } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException("유효하지 않은 날짜/시간 형식입니다: " + newValue, e);
-            }
+        // 4. DB에서 해당 ATT_ID의 최신 출결 정보 조회
+        // 이 맵에는 DB의 ATT_IN_TIME, ATT_OUT_TIME 등이 포함됩니다.
+        Map<String, Object> existingAttendanceData = attendanceMapper.getAttendanceById(attId);
+        if (existingAttendanceData == null) {
+            throw new IllegalArgumentException("해당 ATT_ID (" + attId + ")의 출결 정보를 찾을 수 없습니다.");
         }
-     // 다른 날짜/시간 컬럼이 있다면 여기에 추가 if-else if 블록으로 처리 가능
-
-        // Mapper에 전달할 Map 생성 (Mapper는 파라미터를 하나만 받을 수 있으므로 Map 사용)
-        Map<String, Object> params = new HashMap<>();
-        params.put("att_id", attId); // Mapper XML의 #{attId}와 매핑
-        params.put("columnName", columnName); // Mapper XML의 ${columnName}과 매핑 (안전하게!)
-        params.put("newValue", valueToUpdate);     // Mapper XML의 #{newValue}와 매핑
         
-//        System.out.println("service params : "  + params); // {newValue=asdfasdf, att_id=132, columnName=det_nm}
+        // 기존 출근 시간 (DB에서 조회된 값)
+        // DB에서 LocalDateTime 타입으로 조회될 수도 있고, String으로 조회될 수도 있으므로 유연하게 처리
+        LocalDateTime currentAttInTime = parseDbTime(existingAttendanceData.get("ATT_IN_TIME"));
+        // 기존 퇴근 시간 (DB에서 조회된 값)
+        LocalDateTime currentAttOutTime = parseDbTime(existingAttendanceData.get("ATT_OUT_TIME"));
+
+        // 날짜/시간 파싱을 위한 공통 포맷터
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        LocalDateTime parsedNewValue = null; // 새로 파싱된 값 (LocalDateTime 타입)
+        String attSts = "att_sts_01"; // 기본 상태값 (예: '미정', '정상' 등 비워두면 안 됨)
+
+        // 5. 컬럼별 업데이트 로직 처리
+        if ("att_out_time".equals(normalizedColumnName) && newValue instanceof String) {
+            String newAttOutTimeString = (String) newValue;
+            System.out.println("Service: 받은 새로운 att_out_time 문자열 = " + newAttOutTimeString);
+            
+            try {
+                parsedNewValue = LocalDateTime.parse(newAttOutTimeString, formatter);
+                System.out.println("Service: 파싱된 새로운 att_out_time LocalDateTime = " + parsedNewValue);
+            } catch (DateTimeParseException e) {
+                System.err.println("Service: 새 퇴근 시간 LocalDateTime 파싱 실패: " + e.getMessage());
+                throw new IllegalArgumentException("새 퇴근 시간 형식 오류입니다: " + newAttOutTimeString, e);
+            }
+
+            // 근무 시간 계산 및 상태 업데이트 로직 (출근 시간이 있어야 계산 가능)
+            if (currentAttInTime != null) {
+                Duration duration = Duration.between(currentAttInTime, parsedNewValue);
+                long totalMinutes = duration.toMinutes();
+                System.out.println("Service: 총 근무 시간 (Duration) = " + duration);
+                
+                int breakTimeMinutes = 60; // 1시간 휴게
+                if (totalMinutes > (4 * 60)) { // 4시간 이상 근무 시 휴게 시간 적용
+                    totalMinutes -= breakTimeMinutes;
+                }
+                updateData.put("totalWorkMinutes", (int) totalMinutes); // 맵에 총 근무시간 추가
+
+                // 퇴근 상태 판단
+                if (totalMinutes >= STANDARD_WORK_MINUTES) {
+                    attSts = "att_sts_03"; // 퇴근 (정상 근무 시간 충족)
+                } else if (totalMinutes >= 4 * 60) {
+                    attSts = "att_sts_05"; // 조퇴 (4시간 이상 근무 후 퇴근)
+                } else if (totalMinutes < 2 * 60) {
+                    attSts = "att_sts_06"; // 결근 (정시 출근했더라도 2시간 미만 근무는 결근으로 처리)
+                } else {
+                    attSts = "att_sts_05"; // 조퇴 (2시간 이상 4시간 미만)
+                }
+            } else {
+                attSts = "att_sts_01"; // 출근 시간 정보가 없어 계산 불가
+                System.err.println("Service: 기존 출근 시간이 없어 att_out_time 수정 시 att_sts 계산 불가.");
+            }
+
+        } else if ("att_in_time".equals(normalizedColumnName) && newValue instanceof String) {
+            String newAttInTimeString = (String) newValue;
+            System.out.println("Service: 받은 새로운 att_in_time 문자열 = " + newAttInTimeString);
+
+            try {
+                parsedNewValue = LocalDateTime.parse(newAttInTimeString, formatter);
+                System.out.println("Service: 파싱된 새로운 att_in_time LocalDateTime = " + parsedNewValue);
+            } catch (DateTimeParseException e) {
+                System.err.println("Service: 새 출근 시간 LocalDateTime 파싱 실패: " + e.getMessage());
+                throw new IllegalArgumentException("새 출근 시간 형식 오류입니다: " + newAttInTimeString, e);
+            }
+
+            // 출근 시간만 수정된 경우의 att_sts 및 근무 시간 재계산
+            if (currentAttOutTime != null) { // 퇴근 시간이 이미 있는 경우에만 재계산
+                Duration duration = Duration.between(parsedNewValue, currentAttOutTime); // 새 출근 시간과 기존 퇴근 시간
+                long totalMinutes = duration.toMinutes();
+                
+                int breakTimeMinutes = 60;
+                if (totalMinutes > (4 * 60)) {
+                    totalMinutes -= breakTimeMinutes;
+                }
+                updateData.put("totalWorkMinutes", (int) totalMinutes);
+
+                // 재계산된 근무 시간에 따른 상태 업데이트
+                if (totalMinutes >= STANDARD_WORK_MINUTES) {
+                    attSts = "att_sts_03"; // 퇴근 (정상)
+                } else if (totalMinutes >= 4 * 60) {
+                    attSts = "att_sts_05"; // 조퇴
+                } else if (totalMinutes < 2 * 60) {
+                    attSts = "att_sts_06"; // 결근
+                } else {
+                    attSts = "att_sts_05"; // 조퇴
+                }
+            } else {
+                // 퇴근 시간이 아직 없는 경우 (출근만 찍은 상태)
+                attSts = "att_sts_02"; // 출근 (기본 상태)
+                // TODO: 지각 여부 판단 로직 추가 가능
+            }
+        } else if ("det_nm".equals(normalizedColumnName)) {
+            // det_nm 컬럼이 수정된 경우 (상태값 자체를 변경하는 경우)
+            // newValue는 이미 String일 것이므로 그대로 사용
+            attSts = (String) newValue; // 직접 attSts에 할당 (det_nm이 att_sts 값을 나타낸다고 가정)
+            parsedNewValue = null; // 날짜/시간 컬럼이 아니므로 parsedNewValue는 null로 유지하거나 처리하지 않음
+        }
+        // 다른 컬럼이 있다면 여기에 else if로 추가 로직 구현
+
+        System.out.println("Service: 최종 바뀐 상태값 (attSts) = " + attSts);
+        System.out.println("Service: 최종 파싱된 값 (parsedNewValue) = " + parsedNewValue);
+
+        // 6. Mapper에 전달할 최종 Map 준비 및 호출
+        Map<String, Object> params = new HashMap<>();
+        params.put("att_id", attId); // 필수
+        params.put("att_sts", attSts); // 필수 (계산되거나 초기화된 값)
+
+        // 실제로 변경된 컬럼과 그 값을 Map에 추가 (이것이 Mapper에서 ${columnName}과 #{newValue}로 매핑될 것임)
+        params.put("columnName", columnName); // ${columnName}으로 SQL에 컬럼 이름 동적 삽입
+        
+        // newValue는 String 또는 LocalDateTime 등이 될 수 있으므로, 
+        // Mapper에서 해당 컬럼에 맞는 JDBC Type이 자동으로 매핑되도록 합니다.
+        params.put("newValue", parsedNewValue != null ? parsedNewValue : newValue); 
+        // 날짜/시간 컬럼이면 parsedNewValue (LocalDateTime) 사용, 아니면 원래 newValue 사용.
+        // 예를 들어 det_nm은 String이므로 newValue를 사용.
+
+        // TUI Grid의 updateData에서 바로 Map을 넘겨준 경우, 추가적인 put을 해줍니다.
+        // 예를 들어 att_out_time을 변경했을 때, parsedNewValue는 LocalDateTime이 되고,
+        // 이 값을 att_out_time 컬럼에 업데이트할 예정.
+        // att_in_time이 변경되었을 때도 마찬가지.
+
+        // Mapper는 보통 하나의 update 메서드를 통해 동적으로 컬럼을 업데이트합니다.
+        // Mapper XML의 updateAttendanceColumn(params) 또는 updateAttendance(params) 메서드가
+        // ${columnName}과 #{newValue}를 사용하여 업데이트 쿼리를 구성해야 합니다.
+        // 예: UPDATE ATTENDANCE SET ${columnName} = #{newValue} WHERE ATT_ID = #{att_id}
 
         attendanceMapper.updateAttendanceColumn(params); // 예시 메서드명
-        // 또는 더 안전하게, 각 컬럼별 Mapper 메서드를 호출
-        /*
-        if ("det_nm".equals(normalizedColumnName)) {
-            attendanceMapper.updateDetNm(attId, (String) newValue);
-        } else if ("att_in_time".equals(normalizedColumnName)) {
-            attendanceMapper.updateAttInTime(attId, (String) newValue);
-        } else {
-            // (이론적으로 여기까지 오면 안 되지만 방어적 코드)
-            throw new IllegalStateException("알 수 없는 컬럼 이름입니다: " + columnName);
+    }   
+    // DB에서 조회된 시간 값을 LocalDateTime으로 파싱
+    private LocalDateTime parseDbTime(Object dbTimeObj) {
+        if (dbTimeObj == null) {
+            return null;
         }
-        */
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if (dbTimeObj instanceof LocalDateTime) {
+            return (LocalDateTime) dbTimeObj;
+        } else if (dbTimeObj instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) dbTimeObj).toLocalDateTime();
+        } else if (dbTimeObj instanceof String) {
+            try {
+                // DB에서 넘어오는 String 형식도 'YYYY-MM-DD HH:MI:SS' 또는 'YYYY-MM-DD HH24:MI:SS.S' 등 다양할 수 있음
+                // 필요한 경우 더 유연한 포맷터를 사용하거나 여러 포맷을 시도할 수 있습니다.
+                // Oracle DATE 컬럼은 초까지 저장하므로, 'YYYY-MM-DD HH:mm:ss' 포맷이 일반적입니다.
+                // 만약 DB에서 초 단위가 잘려서 오거나 다른 형식이면 여기서 ParseException 발생 가능
+                if (((String) dbTimeObj).contains(".")) { // 밀리초가 포함된 경우
+                    return LocalDateTime.parse((String) dbTimeObj, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+                }
+                return LocalDateTime.parse((String) dbTimeObj, formatter);
+            } catch (DateTimeParseException e) {
+                System.err.println("DB 조회 시간 문자열 파싱 오류: " + dbTimeObj + " - " + e.getMessage());
+                return null;
+            }
+        }
+        // 다른 날짜/시간 타입 (java.util.Date 등)이 있을 경우 추가 처리
+        return null;
     }
 	
 }

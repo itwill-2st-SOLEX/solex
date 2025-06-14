@@ -5,25 +5,9 @@
 
 <mapper namespace="kr.co.itwillbs.solex.attendance.AttendanceMapper">
     <select id="selectMyAttendenceByMonthList" resultType="java.util.Map">
-    	SELECT
-             att.att_id,
-             att.emp_id,
-             NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
- 			 NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
-             cd.det_nm,
-             NVL(TO_CHAR(att_day, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_day
-        FROM
-             attendance att 
-        JOIN code_detail cd 
-          ON cd.det_id = att.att_sts
-        WHERE att.emp_id = #{empId}
-		  AND TO_CHAR(att_in_time, 'YYYY') = #{year}  
- 		  AND TO_CHAR(att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0') 
-     ORDER BY att.att_day ASC
-    </select>
-    
-    <select id="selectAttendenceByMonthList" resultType="java.util.Map">
-       SELECT att.att_id,
+    	SELECT att.att_id,
+       		  cd.det_nm,
+       		  e.emp_nm,
        		  e.emp_id, 
               e.emp_num, 
               e.emp_nm,
@@ -40,6 +24,56 @@
            ON e.emp_id = ve.emp_id
          JOIN attendance att
            ON e.emp_id = att.emp_id				-- 출퇴근 data
+         JOIN code_detail cd 
+           ON cd.det_id = att.att_sts
+           
+		WHERE e.emp_id = #{empId}
+		  AND TO_CHAR(att.att_in_time, 'YYYY') = #{year}  
+ 		  AND TO_CHAR(att.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
+	<choose>
+		<!-- 팀장 조건 -->
+		<when test="empTeamCd != 'team_00'">
+		  AND e.emp_team_cd = #{empTeamCd} AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 부장 조건 -->
+		<when test="empDepCd != 'dep_00'">
+		  AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 이사 조건 -->
+		<when test="empCatCd != 'cat_00'">
+		  AND e.emp_cat_cd = #{empCatCd}
+		</when>
+		<!-- 사장 조건 -->
+		<when test="empPosCd == 'pos_01'">
+		  AND e.emp_pos_cd = #{empPosCd}
+		</when>
+	</choose>
+		ORDER BY e.emp_dep_cd, e.emp_team_cd
+	   OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+    
+    <select id="selectAttendenceByMonthList" resultType="java.util.Map">
+       SELECT att.att_id,
+       		  cd.det_nm,
+       		  e.emp_nm,
+       		  e.emp_id, 
+              e.emp_num, 
+              e.emp_nm,
+              TO_CHAR(att_in_time, 'YYYY-MM-DD HH:MI AM') AS att_in_time,
+		      TO_CHAR(att_out_time, 'YYYY-MM-DD HH:MI AM') AS att_out_time,
+		      TO_CHAR(att_day, 'YYYY-MM-DD HH:MI AM') AS att_day, 
+			  ve.emp_dep_nm, 
+			  ve.emp_team_nm, 
+			  ve.emp_pos_nm
+		 FROM vacation v 
+		RIGHT JOIN employee e 
+		   ON v.emp_id = e.emp_id
+         JOIN view_employee ve 
+           ON e.emp_id = ve.emp_id
+         JOIN attendance att
+           ON e.emp_id = att.emp_id				-- 출퇴근 data
+         JOIN code_detail cd 
+           ON cd.det_id = att.att_sts
            
 		WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) >= TO_NUMBER(SUBSTR(#{empPosCd}, -2))
 		  AND TO_CHAR(att.att_in_time, 'YYYY') = #{year}  
@@ -156,12 +190,27 @@
 		WHERE EMP_ID = #{empId}
 	</select>
     
-    <!-- 부하직원의 출퇴근기록 update -->
-    <update id="updateAttendanceColumn" parameterType="map">
-        UPDATE ATTENDANCE
-        SET
-            ${columnName} = #{newValue}
+    
+	<select id="getAttendanceById" resultType="map">
+        SELECT
+	            ATT_ID,
+	            ATT_IN_TIME, -- DB 컬럼명 그대로 (대소문자 일치)
+	            ATT_OUT_TIME, -- DB 컬럼명 그대로 (대소문자 일치)
+	            ATT_STS
+	            -- 다른 컬럼들도 필요한 경우 추가
+        FROM
+            	ATTENDANCE
         WHERE
+            	ATT_ID = #{attId}
+    </select>
+	<!-- 부하직원의 출퇴근기록 update -->
+    <update id="updateAttendanceColumn" parameterType="map">
+     UPDATE ATTENDANCE
+        SET
+            -- ${columnName}을 사용하여 컬럼 이름을 동적으로 설정
+            ${columnName} = #{newValue, jdbcType=DATE}, 
+            att_sts = #{att_sts, jdbcType=VARCHAR} 
+      WHERE
             att_id = #{att_id}
     </update>
     

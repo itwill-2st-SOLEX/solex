@@ -26,7 +26,7 @@ class FlatpickrDateEditor {
         this.el = el;
         this.flatpickrInstance = flatpickr(el, {
             enableTime: true,
-            dateFormat: "Y-m-d H:i:S",
+            dateFormat: "Y-m-d H:i",
         });
     }
     getElement() {return this.el;}
@@ -115,79 +115,47 @@ function calculateFormattedWorkTime(attInTimeStr, attOutTimeStr) {
     }
 }
 
-
-
-let currentPath = window.location.pathname; 
-if (currentPath.includes('/my_attendance_list')) {
-    mode = 'my';
-} else if (currentPath.includes('/attendance_list')) {
-    mode = 'team';
-}
-	
-// mode에 따라 각 다른 정보 출력
-let columnsConfig = [
-    {
-        header: '출근 시간',
-        name: 'att_in_time',
-        width: 200,
-        align: 'center',
-        sortable: true
-//        editor: FlatpickrDateEditor // 기본 에디터
-    },
-    {
-        header: '퇴근 시간',
-        name: 'att_out_time',
-        width: 200,
-        align: 'center',
-        sortable: true
-//        editor: FlatpickrDateEditor // 기본 에디터
-    },
-    { header: '상태', name: 'det_nm', align: 'center', sortable: true, align: 'center' },
-    { header: '총 근무시간', name: 'total', width: 200, align: 'center', sortable: true, align: 'center' },
-    { header: '날짜', name: 'att_day', width: 200, align: 'center', sortable: true, align: 'center' },
-    { name: 'att_id', hidden: true }
-];
-
-// 'mode' 파라미터가 'team'인 경우 특정 컬럼을 맨 앞에 추가
-if (mode === 'team') {
-    const teamSpecificColumns = [
-        { header: '사원 이름', name: 'emp_nm', width: 100, sortable: true, align: 'center' },
-        { header: '사원 부서', name: 'emp_dep_nm', sortable: true, align: 'center' },
-        { header: '사원 직위', name: 'emp_pos_nm', sortable: true, align: 'center' }
-    ];
-    // teamSpecificColumns를 기존 columnsConfig의 맨 앞에 추가
-    columnsConfig = [...teamSpecificColumns, ...columnsConfig];
-
-    // 출퇴근 시간의 편집 가능 여부 변경 
-    const inTimeColumn = columnsConfig.find(col => col.name === 'att_in_time');
-    if (inTimeColumn) {
-        inTimeColumn.editor = FlatpickrDateEditor; // 또는 다른 적절한 에디터
-    }
-    const outTimeColumn = columnsConfig.find(col => col.name === 'att_out_time');
-    if (outTimeColumn) {
-        outTimeColumn.editor = FlatpickrDateEditor; // 또는 다른 적절한 에디터
-    }
-	
-}
-
+// ToastUI Grid 생성
 const grid = new tui.Grid({
     el: document.getElementById('grid'),
     bodyHeight: gridHeight,
     scrollY: true,
     scrollX: false,
     data: [],
-    columns: columnsConfig // 동적으로 생성된 컬럼 설정 사용
+    columns: [
+        { header: '사원 이름', name: 'emp_nm', width: 100, sortable: true, align: 'center' },
+        { header: '사원 부서', name: 'emp_dep_nm', sortable: true, align: 'center' },
+        { header: '사원 직위', name: 'emp_pos_nm', sortable: true, align: 'center' },
+		{
+		    header: '출근 시간',
+		    name: 'att_in_time',
+		    width: 200,
+		    align: 'center',
+		    sortable: true,
+		    // 여기에 커스텀 에디터 클래스 적용
+		    editor: FlatpickrDateEditor
+		},
+        {
+            header: '퇴근 시간',
+            name: 'att_out_time',
+            width: 200,
+            align: 'center',
+            sortable: true,
+            // 여기에 커스텀 에디터 클래스 적용
+            editor: FlatpickrDateEditor
+        },
+        { header: '상태', name: 'det_nm', align: 'center', sortable: true, align: 'center' },
+        { header: '총 근무시간', name: 'total', width: 200, align: 'center', sortable: true, align: 'center' },
+        { header: '날짜', name: 'att_day', width: 200, align: 'center', sortable: true, align: 'center' },
+        { name: 'att_id', hidden: true } // att_id는 화면에 보이지 않지만, 데이터에 포함되어야 함
+    ]
 });
-
-
-// ------------------------------------------------------------------------------------------
-
 
 // JavaScript에서 초기화
 const myDatePicker = flatpickr("#my-datepicker", {
     // 옵션 객체
     enableTime: true,        // 시간 선택 활성화
-    dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
+    dateFormat: "Y-m-d H:i", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
     time_24hr: true,         // 24시간 형식 사용
     locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
 });
@@ -296,7 +264,6 @@ function displayMyAttendance(data) {
 	    att_in_time: at.ATT_IN_TIME,
 	    att_out_time: at.ATT_OUT_TIME,
 	    det_nm: at.DET_NM,
-		total: calculateFormattedWorkTime(at.ATT_IN_TIME, at.ATT_OUT_TIME),
 	    att_day: at.ATT_DAY,
 		att_id: at.ATT_ID
 		

@@ -30,7 +30,7 @@ public class AttendanceRestController {
 	@Autowired
 	private AttendanceService attendanceService;
 	
-	long loginEmpId = 6L; // 임시 ID
+	long loginEmpId = 7L; // 임시 ID
 
 	
 	// 근태현황조회
