@@ -9,16 +9,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface OrderMapper {
 	
-//	List<Map<String, Object>> selectClients(Map<String, Object> params);
-//
-//	int createClients(Map<String , Object>param);
-//
-//	Map<String, Object> getClientById(int clientId);
-//
-//	int updateClient(Map<String, Object> param);
-//
-//	List<Map<String, Object>> getSearchClients(Map<String, Object> keyword);
-	
 	// 페이징된 주문 상세 목록 쿼리
 	List<Map<String, Object>> selectPagedOrderDataAsMap(
 	    @Param("offset") int offset,
@@ -38,7 +28,6 @@ public interface OrderMapper {
 
 	List<Map<String, Object>> getSearchProductList(@Param("searchKeyword") String searchKeyword);
 
-	int getStockCount(@Param("productCode") String productCode);
 
 	int createSujuOrder(Map<String, Object> safe);
 
@@ -54,6 +43,27 @@ public interface OrderMapper {
 
 	List<Map<String, Object>> getLackingMaterials(Map<String, Object> orderData);
 
-	List<Map<String, Object>> getColors(String prd_cd);
+	List<Map<String, Object>> getColorsByProduct(String prd_cd);
+
+	List<Map<String, Object>> getSizesByProductAndColor(@Param("prd_cd")String prd_cd,@Param("opt_color") String color);
+	
+	
+	
+	String getOptionIdByCombination(Map<String, Object> orderData);
+
+	List<Map<String, Object>> getLackingMaterialsWithMine(@Param("opt_id") String opt_id,@Param("odd_cnt") int orderCount);
+	
+	List<Map<String, Object>> getHeightsByProductColorSize(
+			@Param("prd_cd") String prd_cd,
+			@Param("opt_color") String color,
+			@Param("opt_size") String size);
+	
+	int getStockCount(
+			@Param("prd_cd") String productCode, 
+			@Param("opt_color") String color, 
+			@Param("opt_size") String size, 
+			@Param("opt_height") String height);
+
+
 	
 }

@@ -44,7 +44,7 @@
         cli_nm = #{cli_nm},
         cli_pc = #{cli_pc},
         cli_phone = #{cli_phone},
-        cli_type = #{cli_type}
+        cli_type = #{cli_type},
         cli_mod_date = SYSDATE
   	 WHERE cli_id = #{cli_id}
   </update>

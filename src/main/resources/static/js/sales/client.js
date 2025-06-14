@@ -114,6 +114,7 @@ function generateModalHtml(mode, data = {}, clientId = null) {
     const cli_pc = data.CLI_PC || '';
     const cli_add = data.CLI_ADD || '';
     const cli_da = data.CLI_DA || '';
+    const cli_id = data.CLI_ID || '';
 
 	// '사업자 등록번호 미보유' 상태 결정
     const isNoBizRegNo = biz_reg_no_value === '-';

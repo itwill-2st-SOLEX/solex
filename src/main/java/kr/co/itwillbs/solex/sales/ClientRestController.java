@@ -101,6 +101,7 @@ public class ClientRestController {
 	@PutMapping("/{cli_id}")
     public ResponseEntity<Map<String, Object>> updateClient(@PathVariable("cli_id") int cli_id, @RequestBody Map<String , Object> param) {
 		Map<String, Object> response = new HashMap<>();
+		param.put("cli_id", cli_id);
 
         try {
 

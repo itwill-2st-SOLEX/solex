@@ -1,25 +1,13 @@
 package kr.co.itwillbs.solex.sales;
 
-import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -91,52 +79,88 @@ public class OrderService {
 		return orderMapper.getSearchProductList(searchKeyword);
 	}
 
-	public int getStockCount(String productCode) {
-		return orderMapper.getStockCount(productCode);
+	public List<Map<String,Object>> getColors(String prd_cd) {
+		return orderMapper.getColorsByProduct(prd_cd);
 	}
 
+	public List<Map<String, Object>> getSizesByProductAndColor(String prd_cd, String color) {
+		return orderMapper.getSizesByProductAndColor(prd_cd,color);
+	}
+
+
+	public List<Map<String, Object>> getHeightsByProductColorSize(String prd_cd, String color, String size) {
+		return orderMapper.getHeightsByProductColorSize(prd_cd,color,size);
+	}
+	public int getStockCount(String productCode, String color, String size, String height) {
+		return orderMapper.getStockCount(productCode,color,size,height);
+	}
+	
+	@Transactional
+	public List<Map<String, Object>> checkLackingMaterials(Map<String, Object> orderData) {
+		String opt_id = orderMapper.getOptionIdByCombination(orderData);
+		log.info(opt_id);
+		 if (opt_id == null) {
+			throw new RuntimeException("해당 옵션 조합의 상품이 존재하지 않습니다.");
+		}
+		 
+		// 2. 주문 수량 추출
+        int orderCount = Integer.parseInt(orderData.get("odd_cnt").toString());
+        
+		// 3. 자재 부족 계산
+        return orderMapper.getLackingMaterialsWithMine(opt_id, orderCount);
+
+	}
 	
 	
 	
 	@Transactional
 	public int createOrderProcess(Map<String, Object> orderData) {
+		
 	    // 1. 주문 마스터 테이블에 INSERT
 	    orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
+	    String opt_id = orderMapper.getOptionIdByCombination(orderData);
+		// 수주 상세 등록
+		orderData.put("ord_sts", "ord_sts_00"); // 상태값을 '00'로 설정 상태 : 수주등록(검토 느낌s)
+		orderData.put("opt_id", opt_id); // 상태값을 '00'로 설정 상태 : 수주등록(검토 느낌s)
+		
+		// 이후 수주 요청 관리에서  밑에 있는 내용들이 실행됨
+		
+		// 수주 등록 승인 / 반려로 갈림.
+		
+		// 1. 승인시
+		// 기존 재고에서 제품을 줄껀지 정보를 받아야됨.
+		// 재고에서 완제품을 뺴고 충분한가?
+		// 1-1. 충분한 경우 -> 바로 출고 or 출고대기
+		// 1-2. 완제품을 주는데 부족한 경우 -> 주문온 수량을 생산하기 위해 제품에 들어가는 원재자들이 충분한가?
+		// 1-2-1. 원자재들이 생산하기전 시점에서 충분하면 -> 발주 없음(현상태 수주 등록) -> 생산대기(상태변경);
+		// 1-2-2. 원자재들이 부족한 경우 -> 발주해야됨(현상태 수주 등록) -> 주문이 들어온 수량을 확인을 하여
+		//        완제품을 생산하는데 필요한 수량을 추가적인 원자재 발주(상태 : 자재요청) -> 원자재 들어옴 ->
+		//        갯수를 카운팅 하여 자재들이 도착하면 -> 입고 검사 끝나면 -> 재고갯수 업데이트 -> 생산대기로 (상태 변경)
+		// 주문 수량 > 재고 수량
+		// int orderCount = Integer.parseInt(orderData.get("odd_cnt").toString());
+		// int stockCount = Integer.parseInt(orderData.get("stk_cn").toString());
+		// if (orderCount > stockCount) {
+		// 	orderData.put("ord_sts", "ord_sts_01"); // 상태값을 '01'로 설정 자재 요청
+			
+		// } else {
+		// 	orderData.put("ord_sts", "ord_sts_02"); // 상태값을 '02'로 설정 생산 대기
+		// }
 
-	    // 2. 필요한 자재 재고 확인
-	    boolean isStockSufficient = orderMapper.checkMaterialStock(orderData);
+		// ★★★ 핵심: 부족한 자재에 대한 발주 요청을 추가로 INSERT ★★★
+		// List<Map<String, Object>> lackingMaterials = orderMapper.getLackingMaterials(orderData);
+		// for (Map<String, Object> material : lackingMaterials) {
+		// 	orderMapper.createPurchaseRequest(material);
+		// }
 
-	    if (isStockSufficient) {
-	        // 2-1. 재고가 충분할 경우
-	        orderData.put("ord_sts", "ord_sts_02"); // 상태값을 '02'로 설정
-	        orderMapper.createSujuOrderDetail(orderData); // 주문 상세 등록
-
-	        // 필요하다면, 예약된 재고를 차감하는 로직을 호출
-	        orderMapper.deductStock(orderData);
-
-	    } else {
-	        // 2-2. 재고가 부족할 경우
-	        orderData.put("ord_sts", "ord_sts_01"); // 상태값을 '01'로 설정
-	        orderMapper.createSujuOrderDetail(orderData); // 주문 상세 등록
-
-	        // ★★★ 핵심: 부족한 자재에 대한 발주 요청을 추가로 INSERT ★★★
-	        List<Map<String, Object>> lackingMaterials = orderMapper.getLackingMaterials(orderData);
-	        for (Map<String, Object> material : lackingMaterials) {
-	            orderMapper.createPurchaseRequest(material);
-	        }
-	    }
+		// 2. 반려시
+		//   기존 수주 테이블, 수주 상세 테이블에서 승인 반려 컬럼을 추가로 생성을 하여 YN으로 관리함,
+		//   수주 요청메뉴에서는 보이지 않음.
+		//   주문 등록 페이지에서는 반려인 상태로 보임
 	    
-	    return 1;
+	    return orderMapper.createSujuOrderDetail(orderData);
 	}
 
 
-	public List<Map<String,Object>> getColors(String prd_cd) {
-		return orderMapper.getColors(prd_cd);
-	}
-
 	
-    
-    
 
-	
 }

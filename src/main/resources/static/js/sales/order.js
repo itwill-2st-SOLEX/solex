@@ -117,15 +117,9 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
         } else {
           el.value = '';
         }
+        el.disabled = true;
       }
     });
-
-    // 재고 표시 숨기기
-    // const stockEl = document.getElementById('stockCount');
-    // if (stockEl) {
-    //   stockEl.textContent = '';
-    //   stockEl.style.display = 'none';
-    // }
 
     // 날짜 피커 다시 오늘 날짜로 초기화
     initDate();
@@ -242,6 +236,7 @@ async function loadClientDataForModal() {
 	  } else {
 	    // clear(빈값)이면 false 세팅
 	    isSelectClient = false;
+      initOptions();
 	  }
 	  await getClientInfo(cliNm);  
     updateInputState();
@@ -332,8 +327,8 @@ async function loadProductDataForModal() {
     } else {
       // clear(빈값)이면 false 세팅
       isSelectProduct = false;
+      initOptions();
     }
-      // await getStockCount(prdCd);  
       updateInputState();
   
   });
@@ -384,29 +379,6 @@ async function fetchAndSetProductOptions(searchValue, virtualSelectInstance) {
     virtualSelectInstance.setServerOptions([], false);
   }
 }
-
-// 서버 호출
-async function getStockCount(productCode) {
-	updateInputState();
-
-  // 2) URLSearchParams 로 안전하게 쿼리 생성
-  const params = new URLSearchParams({ productCode: productCode.trim() });
-  const url = `/SOLEX/orders/stock?${params.toString()}`;
-
-	try {
-	   const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-	   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-	   const json = await resp.json();
-       /* if (stockEl) {
-         stockEl.textContent = `(재고 ${json.stockCount}개)`;
-		 stockEl.style.display =  "flex";
-       } */
-	 } catch (err) {
-	   console.error('getStockCount 오류:', err);
-	   throw err;    // 상위 로직에서 처리하려면 다시 throw
-	 }
-}
-
 
 // 서버 호출
 async function getClientInfo(clientCode) {
@@ -460,16 +432,17 @@ function findPostCode() {
 
 function updateInputState() {
   const shouldEnable = isSelectProduct && isSelectClient;
-  // ['odd_cnt','odd_end_date','odd_pay','odd_pay_date','opt_color'].forEach(id => {
-  //   const el = document.getElementById(id);
-  //   if (el) el.disabled = !shouldEnable;
-  // });
   ['opt_color'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.disabled = !shouldEnable;
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0; // 기본 옵션으로
+      el.disabled = !shouldEnable; // 상태에 따라 활성화/비활성화
+    } else {
+      el.value = '';
+    }
   });
 }
-
+// ================== 데이터 초기화 함수들 ===================== //
 // 3) initDate: 오직 min/value 세팅만
 function initDate() {
   const endDateEl = document.getElementById('odd_end_date');
@@ -485,9 +458,64 @@ function initDate() {
   [endDateEl, payDateEl].forEach(el => {
     el.min   = todayStr;
     el.value = todayStr;
+
+    el.disabled = true;
   });
 }
 
+function initOptions() {
+  ['opt_color','opt_size','opt_height'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0; // 기본 옵션으로
+      el.disabled = true; // 상태에 따라 활성화/비활성화
+    }
+  });
+}
+
+function initOrderInputs () {
+  const inputPlaceholders = {
+    stockCount : '제품 재고량',
+    odd_cnt: '주문 수량을 입력하세요.',
+    odd_pay: '결제 금액을 입력하세요.'
+  };
+
+  Object.entries(inputPlaceholders).forEach(([id, placeholder]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = '';
+      el.placeholder = placeholder;
+      el.disabled = true;
+    }
+  });
+  initDate();
+}
+
+function initSize(shouldEnable) {
+  const selectSize = document.getElementById('opt_size');
+  if(shouldEnable) {
+    selectSize.innerHTML = '<option value="">사이즈를 선택하세요</option>';
+    selectSize.value = '';
+    selectSize.disabled = true;
+  }else {
+    selectSize.disabled = false;   
+  }
+}
+
+
+function initHeight(shouldEnable) {
+  const selectHeight = document.getElementById('opt_height');
+  if(shouldEnable) {
+    selectHeight.innerHTML = '<option value="">굽 높이를 선택하세요</option>';
+    selectHeight.value = '';
+    selectHeight.disabled = true;   
+  } else {
+    selectHeight.disabled = false;   
+  }
+}
+
+
+// ================== 데이터 초기화 함수들 ===================== //
 
 
 function formatWithComma(str) {
@@ -523,6 +551,210 @@ function onPayDateChange(e) {
   console.log('선택한 결제 요청일:', e.target.value);
 }
 
+async function getColor() {
+  if(isSelectClient && isSelectProduct) {
+    try {
+      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}`, {
+        method: 'GET',        
+      });
+      if (!response.ok) {
+        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
+        throw new Error(errorMessage);
+      }
+      // 응답 본문을 JSON으로 파싱
+      const datas = await response.json();
+      console.log(datas);
+      
+      const el = document.getElementById('opt_color');
+      if (el) {
+        el.disabled = false;
+        el.options.length = 0;
+        el.options.add(new Option('색상을 선택하세요.', ''));
+      
+        datas.forEach(data => {
+          el.options.add(new Option(data.DET_NM,data.OPT_COLOR));
+        });
+      }
+    } catch (error) {
+      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
+      console.error('에러 발생:', error);
+      alert(`오류가 발생했습니다: ${error.message}`);
+    }
+  }
+}
+
+// 색상 선택시 함수 호출
+const ColeorEl = document.getElementById('opt_color');
+
+if (ColeorEl) {
+  ColeorEl.addEventListener('change', handleColorChange);
+}
+
+ // 이벤트 핸들러 함수
+function handleColorChange(event) {
+  const selectedColor = event.target.value;
+  initOrderInputs();
+  initHeight(true);
+  if (!selectedColor) {
+    initSize(true);
+    return;
+  }
+  initSize(false);
+  getSize(selectedColor);
+}
+
+
+async function getSize(color) {
+  if(isSelectClient && isSelectProduct) {
+    try {
+      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}/color/${color}`, {
+        method: 'GET',        
+      });
+      if (!response.ok) {
+        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
+        throw new Error(errorMessage);
+      }
+      // 응답 본문을 JSON으로 파싱
+      const datas = await response.json();
+      console.log(datas);
+      
+      const el = document.getElementById('opt_size');
+      if (el) {
+        el.disabled = false;
+        el.options.length = 0;
+        el.options.add(new Option('사이즈를 선택하세요.', ''));
+      
+        datas.forEach(data => {
+          el.options.add(new Option(data.DET_NM,data.OPT_SIZE));
+        });
+      }
+    } catch (error) {
+      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
+      console.error('에러 발생:', error);
+      alert(`오류가 발생했습니다: ${error.message}`);
+    }
+  }
+}
+
+// 색상 선택시 함수 호출
+const siezEl = document.getElementById('opt_size');
+if (siezEl) {
+  siezEl.addEventListener('change', handleSizeChange);
+}
+
+ // 이벤트 핸들러 함수
+function handleSizeChange(event) {
+  const selectedSize = event.target.value;
+  const selectedColor = document.getElementById('opt_color').value;
+  initOrderInputs();
+
+  if (!selectedSize) {
+    initHeight(true);
+    return;
+  }
+  initHeight(false);
+
+  getHeight(selectedSize,selectedColor);
+}
+
+async function getHeight(size,color) {
+  if(isSelectClient && isSelectProduct) {
+    try {
+      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}/color/${color}/size/${size}`, {
+        method: 'GET',        
+      });
+      if (!response.ok) {
+        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
+        throw new Error(errorMessage);
+      }
+      // 응답 본문을 JSON으로 파싱
+      const datas = await response.json();
+      console.log(datas);
+      
+      const el = document.getElementById('opt_height');
+      if (el) {
+        el.disabled = false;
+        el.options.length = 0;
+        el.options.add(new Option('굽 높이를 선택하세요.', ''));
+      
+        datas.forEach(data => {
+          el.options.add(new Option(data.DET_NM,data.OPT_HEIGHT));
+        });
+      }
+    } catch (error) {
+      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
+      console.error('에러 발생:', error);
+      alert(`오류가 발생했습니다: ${error.message}`);
+    }
+  }
+}
+
+const heightEl = document.getElementById('opt_height');
+if (heightEl) {
+  heightEl.addEventListener('change', handleHeightChange);
+}
+
+function handleHeightChange(event) {
+  initOrderInputs();
+  // 선택된 값
+  const selectedHeight = event.target.value;
+
+  // 제품 재고량 수량 input 태그 가져오기
+  const stockCount = document.getElementById('stockCount');
+  
+  if (!selectedHeight) {
+    // 값 초기화
+    stockCount.value = '';
+    stockCount.placeholder  = '제품 재고량';
+    return;
+  }
+  // 제폼/bom , 자재발주, 수주요청, 작업지시, 로트, 창고관리, 현장사원  
+  //  태그 값 가져오기
+  const color = document.getElementById('opt_color').value;
+  const size = document.getElementById('opt_size').value;
+  // 여기서 제품 재고량 호출
+  getStockCount(color,size,selectedHeight);
+  
+  // odd_cnt,odd_end_date, odd_pay,odd_pay_date 값도 초기화 되면을 듯 한데. 
+  ['odd_cnt','odd_end_date','odd_pay','odd_pay_date'].forEach(id => {
+    const el = document.getElementById(id);
+      el.disabled = false; // 상태에 따라 활성화/비활성화
+  });
+
+}
+
+// 서버 호출
+async function getStockCount(color, size, height) {
+	if(isSelectClient && isSelectProduct) {
+    try {
+      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}/color/${color}/size/${size}/height/${height}`, {
+        method: 'GET',        
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
+        throw new Error(errorMessage);
+      }
+      // 응답 본문을 JSON으로 파싱
+      const datas = await response.json();
+      console.log(datas);
+      
+      const el = document.getElementById('stockCount');
+      el.value = datas;
+    } catch (error) {
+      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
+      console.error('에러 발생:', error);
+      alert(`오류가 발생했습니다: ${error.message}`);
+    }
+  }
+}
+
 
 
 function validateOrderForm() {
@@ -533,6 +765,23 @@ function validateOrderForm() {
   }
   if (!isSelectProduct) {
     alert('상품을 선택해주세요.');
+    return false;
+  }
+  const selectedColor = document.getElementById('opt_color')?.value || '';
+  if (!selectedColor) {
+    alert('색상을 선택해주세요.');
+    return false;
+  }
+
+  const selectedSize = document.getElementById('opt_size')?.value || '';
+  if (!selectedSize) {
+    alert('사이즈를 선택해주세요.');
+    return false;
+  }
+
+  const selectedHeight = document.getElementById('opt_height')?.value || '';
+  if (!selectedHeight) {
+    alert('굽 높이를 선택해주세요.');
     return false;
   }
 
@@ -598,127 +847,133 @@ function validateOrderForm() {
       alert('결제 요청일은 오늘 날짜 이후로 선택해야 합니다.');
       return false;
     }
-  
-  // 2) 우편번호
-  const postCodeEl = document.getElementById('cli_pc');
-  const postCode   = postCodeEl?.value.trim() || '';
-  if (!postCode) {
-    alert('배송지를 입력해주세요.');
-    return false;
-  }
-  
- const postDetailEl = document.getElementById("cli_da");
- const postDetail   = postDetailEl?.value.trim() || '';
- if (!postDetail) {
-     alert('배송지의 상세 주소를 입력해주세요.');
-     return false;
-   }
-  
-
+    
+    // 2) 우편번호
+    const postCodeEl = document.getElementById('cli_pc');
+    const postCode   = postCodeEl?.value.trim() || '';
+    if (!postCode) {
+      alert('배송지를 입력해주세요.');
+      return false;
+    }
+    
+    const postDetailEl = document.getElementById("cli_da");
+    const postDetail   = postDetailEl?.value.trim() || '';
+    if (!postDetail) {
+      alert('배송지의 상세 주소를 입력해주세요.');
+      return false;
+    }
   // 모든 검증 통과
   return true;
 }
 
 
+// ✅ 자재 부족 목록 보여주는 함수 -> 좀 별로면 모달 만들어서 보여줘도 됨
+function showLackingMaterialsModal(lackingMaterials) {
+  const htmlContent = lackingMaterials.map(item => `
+    <div style="margin-bottom: 12px;">
+      <strong>자재코드 ${item.MAT_ID} : ${item.MAT_NM}</strong><br />
+      - 전체 필요 : ${item.REQUIRED_QTY_TOTAL.toLocaleString()}개<br />
+      - 내 주문 : ${item.REQUIRED_QTY_MINE.toLocaleString()}개<br />
+      - 현재 재고 : ${item.CURRENT_STOCK.toLocaleString()}개
+    </div>
+  `).join('');
+
+  return Swal.fire({
+    title: '📦 자재 부족 경고',
+    html: `<div style="max-height:300px; overflow-y:auto; text-align:left;">${htmlContent}</div>`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '수주 계속 진행',
+    cancelButtonText: '취소'
+  });
+}
+
 
 async function submitForm() {
-  if (!validateOrderForm()) {
-    return;
-  }
+  if (!validateOrderForm()) return;
 
-  console.log('✅ 검증 통과! 서버로 전송합니다.');
-
-  // 3) 주문 수량
-  const cntRaw   = document.getElementById('odd_cnt')?.value.replace(/,/g, '') || '0';
+  const selectedColor = document.getElementById('opt_color')?.value || '';
+  const selectedSize = document.getElementById('opt_size')?.value || '';
+  const selectedHeight = document.getElementById('opt_height')?.value || '';
+  const cntRaw = document.getElementById('odd_cnt')?.value.replace(/,/g, '') || '0';
   const orderCnt = parseInt(cntRaw, 10);
-
-  // 4) 결제 금액
-  const payRaw  = document.getElementById('odd_pay')?.value.replace(/,/g, '') || '0';
-  const payAmt  = parseInt(payRaw, 10);
-
-  // 5) 납품 요청일
+  const payRaw = document.getElementById('odd_pay')?.value.replace(/,/g, '') || '0';
+  const payAmt = parseInt(payRaw, 10);
   const deliverDate = document.getElementById('odd_end_date')?.value || '';
-
-  // 6) 결제 요청일
-  const payDate     = document.getElementById('odd_pay_date')?.value || '';
-
-  // 7) 우편번호
-  const postCode    = document.getElementById('cli_pc')?.value.trim() || '';
-  
-  // 7-1) 우편번호
-  const postAdd    = document.getElementById('cli_add')?.value.trim() || '';
-
-  // 8) 상세주소
-  const postDetail  = document.getElementById('cli_da')?.value.trim() || '';
+  const payDate = document.getElementById('odd_pay_date')?.value || '';
+  const postCode = document.getElementById('cli_pc')?.value.trim() || '';
+  const postAdd = document.getElementById('cli_add')?.value.trim() || '';
+  const postDetail = document.getElementById('cli_da')?.value.trim() || '';
 
   const formData = {
-	  selectClientCd,
-    selectProductCd,
-    orderCnt,
-    payAmt,
-    deliverDate,
-    payDate,
-    postCode,
-	  postAdd,
-    postDetail
+    cli_id: selectClientCd,
+    prd_cd: selectProductCd,
+    opt_color: selectedColor,
+    opt_size: selectedSize,
+    opt_height: selectedHeight,
+    odd_cnt: orderCnt,
+    odd_pay: payAmt,
+    odd_end_date: deliverDate,
+    odd_pay_date: payDate,
+    odd_pc: postCode,
+    odd_add: postAdd,
+    odd_da: postDetail
   };
 
-  console.log('▶️ 전송할 데이터:', formData);
+  // ✅ 1. 자재 부족 여부 확인
+  const lackingMaterials = await checkStock(formData);
+
+  if (lackingMaterials && lackingMaterials.length > 0) {
+    const result = await showLackingMaterialsModal(lackingMaterials);
+    if (!result.isConfirmed) {
+      return; // ❌ 취소 시 진행 중단
+    }
+  }
   
-  // --- 에러 핸들링 및 fetch 로직 ---
+  
+
+  // ✅ 2. 수주 등록 요청
   try {
     const response = await fetch('/SOLEX/orders', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
     });
 
-    // HTTP 상태 코드가 200-299 범위가 아닐 경우 에러로 처리
     if (!response.ok) {
-        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
-        throw new Error(errorMessage);
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `서버 오류 (${response.status})`);
     }
-    // 응답 본문을 JSON으로 파싱
+
     const data = await response.json();
-    console.log('✅ 등록 완료 응답:', data);
-    // 서버에서 받은 메시지를 alert 창으로 보여줌
     alert(data.message);
-    // 서버 응답의 status가 'OK'일 경우에만 페이지를 새로고침
-    if (data.status === 'OK') {
-        location.reload();
-    }
+    if (data.status === 'OK') location.reload();
   } catch (error) {
-      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
-      console.error('⛔️ 등록 중 에러 발생:', error);
-      alert(`오류가 발생했습니다: ${error.message}`);
+    console.error('⛔️ 등록 실패:', error);
+    alert(`오류: ${error.message}`);
   }
 }
 
-async function getColor() {
-  if(isSelectClient && isSelectProduct) {
-    try {
-      const response = await fetch(`/SOLEX/orders/color/${selectProductCd}`, {
-        method: 'GET',        
-      });
-      if (!response.ok) {
-        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-      // 응답 본문을 JSON으로 파싱
-      const datas = await response.json();
-      console.log(datas);
-      
-    } catch (error) {
-      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
-      console.error('⛔️ 등록 중 에러 발생:', error);
-      alert(`오류가 발생했습니다: ${error.message}`);
+async function checkStock(formData) {
+  try {
+    const response = await fetch('/SOLEX/orders/check-stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `서버 오류 (${response.status})`);
     }
+
+    const data = await response.json();
+	  console.log(data);
+    return data || []; // ← 자재 부족 리스트 반환
+  } catch (error) {
+    console.error('⛔️ 재고 확인 실패:', error);
+    alert(`재고 확인 오류: ${error.message}`);
+    return [];
   }
 }
 
