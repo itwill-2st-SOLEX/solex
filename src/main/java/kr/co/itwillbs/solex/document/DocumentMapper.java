@@ -18,15 +18,17 @@ public interface DocumentMapper {
 	// 로그인한 사원정보 들고오기
 	Map<String, Object> getEmpInfo(int emp_id);
 	// 기안서 등록
-	long registerDocument(Map<String, Object> map);
+	void registerDocument(Map<String, Object> map);
 	void registerLeaveDoc(Map<String, Object> map);
 	void registerbusinessOutworkDoc(Map<String, Object> map);
 	void resignationDoc(Map<String, Object> map);
 	
 	// 기안서 상세조회
-	List<Map<String, Object>> selectDetailLeave(String doc_id);
-	List<Map<String, Object>> selectDetailOutwork(String doc_id);
-	List<Map<String, Object>> selectDetailResignation(String doc_id);
+	Map<String, Object> selectDetailLeave(String doc_id);
+	Map<String, Object> selectDetailOutwork(String doc_id);
+	Map<String, Object> selectDetailResignation(String doc_id);
 	
 	Integer findSteps(String docType);
+	
+	void updateDocumentStatus(Map<String, Object> approvalRequest);
 }

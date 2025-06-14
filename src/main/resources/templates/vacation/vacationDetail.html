@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/vacation/vacation.css}" />
+<style>
+</style>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+		<!-- 여기서 부터 작성하시면 됩니다  -->
+			<h2>연차사용내역</h2>
+			<!-- 본문 영역-->
+			<div class="custom-summary">
+				<div>
+					<p class="cc-title" id="empNm"></p>
+				</div>
+				<div>
+					<p class="cc-title">입사일</p>
+					<p class="cc-day" id="empHire"></p>
+				</div>
+				<div>
+					<p class="cc-title">휴가 소멸일</p>
+					<p class="cc-day" id="periodEnd"></p>
+					<span id="daysLeft"></span>
+				</div>
+				<div>
+					<p class="cc-title">총 휴가일수 </p>
+					<p class="cc-day" id="vacTotal"></p>
+				</div>
+
+				<div>
+					<p class="cc-title">사용휴가일수 </p>
+					<p class="cc-day" id="vacUsed"></p>
+				</div>
+				<div>
+					<p class="cc-title">잔여 휴가일수 </p>
+					<p class="cc-day" id="vacRemain"></p>
+				</div>
+
+			</div>
+		
+			<div id="grid"></div>
+        </div>
+
+		
+		<script th:src="@{/js/vacation/vacationDetail.js}"></script>
+		
+	</th:block>
+	
+	
+</body>
+</html>
