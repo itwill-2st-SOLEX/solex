@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
     [
       'cli_phone','cli_mgr_name','cli_mgr_phone',
       'odd_cnt','odd_end_date','odd_pay','odd_pay_date',
-      'opt_color','opt_size','opt_height'
+      'opt_color','opt_size','opt_height','stockCount','cli_pc','cli_add','cli_da'
     ].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -117,7 +117,11 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
         } else {
           el.value = '';
         }
-        el.disabled = true;
+        if(el.id === 'cli_pc' || el.id === 'cli_add' || el.id === 'cli_da') {
+          el.disabled = false;
+        } else {
+          el.disabled = true;
+        }
       }
     });
 
@@ -215,7 +219,7 @@ async function loadClientDataForModal() {
   // 1) VirtualSelect 초기화 (서버 검색 콜백만 설정)
   const vsInst = VirtualSelect.init({
     ele: el,
-    placeholder: "거래처명을 검색하세요...",
+    placeholder: "거래처를 검색하세요...",
     search: true,
     clearButton: true,
     autoSelectFirstOption: false,
@@ -307,7 +311,7 @@ async function loadProductDataForModal() {
   // 1) VirtualSelect 초기화 (서버 검색 콜백만 설정)
   const vsInst = VirtualSelect.init({
     ele: el,
-    placeholder: "거래처명을 검색하세요...",
+    placeholder: "제품명을 검색하세요...",
     search: true,
     clearButton: true,
     autoSelectFirstOption: false,
@@ -872,9 +876,9 @@ function showLackingMaterialsModal(lackingMaterials) {
   const htmlContent = lackingMaterials.map(item => `
     <div style="margin-bottom: 12px;">
       <strong>자재코드 ${item.MAT_ID} : ${item.MAT_NM}</strong><br />
-      - 전체 필요 : ${item.REQUIRED_QTY_TOTAL.toLocaleString()}개<br />
-      - 내 주문 : ${item.REQUIRED_QTY_MINE.toLocaleString()}개<br />
-      - 현재 재고 : ${item.CURRENT_STOCK.toLocaleString()}개
+      - 총 자재 소요량 : ${item.REQUIRED_QTY_TOTAL.toLocaleString()}개<br />
+      - 내 주문 필요량 : ${item.REQUIRED_QTY_MINE.toLocaleString()}개<br />
+      - 현재 재고 수량 : ${item.CURRENT_STOCK.toLocaleString()}개
     </div>
   `).join('');
 

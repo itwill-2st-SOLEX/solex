@@ -172,7 +172,7 @@
 
 	<!-- 자재 부족 계산 -->
 	<select id="getLackingMaterialsWithMine" resultType="map">
-	  SELECT
+	   SELECT
 	    r.mat_id,
 	    r.mat_nm,
 	    NVL(s.stk_cnt, 0) AS current_stock,
@@ -184,13 +184,19 @@
 	      b.mat_id,
 	      m.mat_nm,
 	      SUM(b.bom_cnt * d.odd_cnt) AS required_qty_existing,
-	      (SELECT SUM(b2.bom_cnt * #{odd_cnt})
-	         FROM bom b2
-	        WHERE b2.opt_id = #{opt_id}) AS required_qty_mine,
+	      (
+	        SELECT bom_cnt * #{odd_cnt}
+	        FROM bom b2
+	        WHERE b2.opt_id = #{opt_id}
+	          AND b2.mat_id = b.mat_id
+	      ) AS required_qty_mine,
 	      SUM(b.bom_cnt * d.odd_cnt) +
-	      (SELECT SUM(b2.bom_cnt * #{odd_cnt})
-	         FROM bom b2
-	        WHERE b2.opt_id = #{opt_id}) AS required_qty_total
+	      (
+	        SELECT bom_cnt * #{odd_cnt}
+	        FROM bom b2
+	        WHERE b2.opt_id = #{opt_id}
+	          AND b2.mat_id = b.mat_id
+	      ) AS required_qty_total
 	    FROM suju_order_detail d
 	    JOIN bom b ON b.opt_id = d.opt_id
 	    JOIN material m ON m.mat_id = b.mat_id

@@ -160,7 +160,4 @@ public class OrderService {
 	    return orderMapper.createSujuOrderDetail(orderData);
 	}
 
-
-	
-
 }

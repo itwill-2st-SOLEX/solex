@@ -142,7 +142,7 @@ function generateModalHtml(mode, data = {}, clientId = null) {
                 </div>
             </div>
 			<div class="mb-4">
-	            <label for="biz_reg_no" class="form-label">사업자 등록번호</label>
+	            <label for="biz_reg_no" class="form-label">사업자 등록번호 <span style="color:red">*</span></label>
 	            <div class="d-flex align-items-center">
 	                <input type="text" maxlength="10" id="biz_reg_no" name="biz_reg_no" class="form-control" placeholder="사업자 등록번호 (숫자만)" style="width: 48.4%;" value="${actual_biz_reg_no_for_input}" ${biz_reg_input_disabled}>
 	                <button type="button" class="btn btn-primary ms-2" id="getBizRegNoInfo" ${biz_reg_input_disabled}>사업자 등록번호 조회</button>
