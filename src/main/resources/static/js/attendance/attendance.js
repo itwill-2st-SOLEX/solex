@@ -132,7 +132,6 @@ let columnsConfig = [
         width: 200,
         align: 'center',
         sortable: true
-//        editor: FlatpickrDateEditor // 기본 에디터
     },
     {
         header: '퇴근 시간',
@@ -140,9 +139,19 @@ let columnsConfig = [
         width: 200,
         align: 'center',
         sortable: true
-//        editor: FlatpickrDateEditor // 기본 에디터
     },
-    { header: '상태', name: 'det_nm', align: 'center', sortable: true, align: 'center' },
+	{
+        header: '상태',
+        name: 'det_nm',
+        align: 'center',
+        sortable: true,
+        // '상태' 컬럼에 필터 추가
+        filter: {
+            type: 'text', // 텍스트 필터를 사용합니다.
+            showApplyBtn: true, // 필터 적용 버튼을 보여줍니다.
+            showClearBtn: true // 필터 초기화 버튼을 보여줍니다.
+        }
+    },
     { header: '총 근무시간', name: 'total', width: 200, align: 'center', sortable: true, align: 'center' },
     { header: '날짜', name: 'att_day', width: 200, align: 'center', sortable: true, align: 'center' },
     { name: 'att_id', hidden: true }
@@ -151,9 +160,48 @@ let columnsConfig = [
 // 'mode' 파라미터가 'team'인 경우 특정 컬럼을 맨 앞에 추가
 if (mode === 'team') {
     const teamSpecificColumns = [
-        { header: '사원 이름', name: 'emp_nm', width: 100, sortable: true, align: 'center' },
-        { header: '사원 부서', name: 'emp_dep_nm', sortable: true, align: 'center' },
-        { header: '사원 직위', name: 'emp_pos_nm', sortable: true, align: 'center' }
+		{
+	        header: '사원 이름',
+	        name: 'emp_nm',
+	        align: 'center',
+			width: 100,
+	        sortable: true,
+			align: 'center',
+	        // '상태' 컬럼에 필터 추가
+	        filter: {
+	            type: 'text', // 텍스트 필터를 사용합니다.
+	            showApplyBtn: true, // 필터 적용 버튼을 보여줍니다.
+	            showClearBtn: true // 필터 초기화 버튼을 보여줍니다.
+	        }
+	    },
+		{
+	        header: '사원 부서',
+	        name: 'emp_dep_nm',
+	        align: 'center',
+			width: 100,
+	        sortable: true,
+			align: 'center',
+	        // '상태' 컬럼에 필터 추가
+	        filter: {
+	            type: 'text', // 텍스트 필터를 사용합니다.
+	            showApplyBtn: true, // 필터 적용 버튼을 보여줍니다.
+	            showClearBtn: true // 필터 초기화 버튼을 보여줍니다.
+	        }
+	    },
+		{
+	        header: '사원 직위',
+	        name: 'emp_pos_nm',
+	        align: 'center',
+			width: 100,
+	        sortable: true,
+			align: 'center',
+	        // '상태' 컬럼에 필터 추가
+	        filter: {
+	            type: 'text', // 텍스트 필터를 사용합니다.
+	            showApplyBtn: true, // 필터 적용 버튼을 보여줍니다.
+	            showClearBtn: true // 필터 초기화 버튼을 보여줍니다.
+	        }
+	    }
     ];
     // teamSpecificColumns를 기존 columnsConfig의 맨 앞에 추가
     columnsConfig = [...teamSpecificColumns, ...columnsConfig];
@@ -178,10 +226,6 @@ const grid = new tui.Grid({
     data: [],
     columns: columnsConfig // 동적으로 생성된 컬럼 설정 사용
 });
-
-
-// ------------------------------------------------------------------------------------------
-
 
 // JavaScript에서 초기화
 const myDatePicker = flatpickr("#my-datepicker", {
