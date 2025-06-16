@@ -9,7 +9,7 @@
 <title>SOLEX</title>
 <!-- 개별페이지 전용 스타일시트 영역 -->
 	<th:block layout:fragment="style">
-		<link rel="stylesheet" th:href="@{/css/client/client.css}" />
+		<link rel="stylesheet" th:href="@{/css/sales/client.css}" />
 	</th:block>
 </head>
 <body>
@@ -30,7 +30,7 @@
 											</span>
 											<input id="searchInput" name="searchInput" style="width: 25%;" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none" type="text" aria-label="검색" placeholder="검색">
 										</div>
-										<button type="button" class="btn btn-primary mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openClientModalBtn">거래처 등록</button>
+										<button type="button" class="btn custom-btn-blue mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openClientModalBtn">거래처 등록</button>
 									</div>
 									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
 								</div>
@@ -58,7 +58,7 @@
 	</th:block>
 	
 	<th:block layout:fragment="script">
-		<script type="text/javascript" th:src="@{/js/client/client.js}"></script>
+		<script type="text/javascript" th:src="@{/js/sales/client.js}"></script>
 		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 	</th:block>
 	
