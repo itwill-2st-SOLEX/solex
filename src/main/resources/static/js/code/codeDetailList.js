@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// 상세공통코드 그리드 생성
 	window.codeDetail_grid = new tui.Grid({
 		el: document.getElementById('codeDetail-grid'),
-		bodyHeight: 550,
+		bodyHeight: 600,
 		rowHeaders: ['checkbox'],
 		scrollY: true,
 		pageOptions: {
