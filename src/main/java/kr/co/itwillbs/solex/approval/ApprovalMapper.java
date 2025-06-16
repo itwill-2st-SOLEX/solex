@@ -18,7 +18,7 @@ public interface ApprovalMapper {
 			@Param("posCd") String posCd
 			);
 	
-	List<Map<String, Object>> selectTodoDocumentList(long loginEmpId);
+	List<Map<String, Object>> selectTodoDocumentList(@Param("offset") int offset, @Param("size") int size, @Param("loginEmpId") long loginEmpId);
 
 	void updateApprovalLine(Map<String, Object> approvalRequest);
 	

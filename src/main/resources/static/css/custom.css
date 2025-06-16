@@ -99,3 +99,7 @@ body {
 	margin-left: 10px;
 }
 
+.side-div {
+	display: flex;
+	padding-left: 10% !important;
+}

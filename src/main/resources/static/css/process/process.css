@@ -1,0 +1,14 @@
+@charset "UTF-8";
+
+#category-tab {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+}
+
+.category-list-area {
+	width: 45%;
+}
+
+.catProcess-area {
+	width: 45%;
+}

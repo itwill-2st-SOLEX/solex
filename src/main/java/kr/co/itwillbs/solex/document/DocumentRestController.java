@@ -63,6 +63,7 @@ public class DocumentRestController {
 	@ResponseBody
 	@GetMapping("/select/detail/{doc_id}")
 	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
+		System.out.println(service.selectDetailDoc(doc_id, docTypeCode));
 		return service.selectDetailDoc(doc_id, docTypeCode);
 	}
 	
