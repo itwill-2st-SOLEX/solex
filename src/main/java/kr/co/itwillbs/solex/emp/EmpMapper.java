@@ -13,7 +13,7 @@ public interface EmpMapper {
 	int insertEmp(Map<String, Object> empMap);
 
 	//인사목록 (재직중)
-	List<Map<String, Object>> getEmpListFiltered(@Param("searchType")String searchType, @Param("searchKeyword")String searchKeyword, @Param("includeEmpSts")String includeEmpSts);
+	List<Map<String, Object>> getEmpListFiltered(@Param("includeEmpSts")String includeEmpSts);
 
 	//인사수정을 위한 json 생성
     List<Map<String, Object>> findAllItems();

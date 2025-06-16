@@ -14,34 +14,35 @@ document.addEventListener('DOMContentLoaded', function(){
 		
 	    columns: [
 	        { header: '자재ID', name: 'matId', align : 'center', sortable: true}, // 백엔드 DTO 필드명 (camelCase)
-	        { header: '거래처ID', name: 'CliId', align : 'center', sortable: true}, // 백엔드 DTO 필드명 (camelCase)
+	        { header: '거래처ID', name: 'cliId', align : 'center', sortable: true}, // 백엔드 DTO 필드명 (camelCase)
 	        { header: '자재코드', name: 'matCd', align : 'center', sortable: true}, // 백엔드 DTO 필드명 (camelCase)
 	        { header: '자재명', name: 'matNm', align : 'center', filter: 'select'},
 	        { header: '단위', name: 'matUnit', align : 'center', filter: 'select' },
 	        { header: '가격', name: 'matPrice', align : 'center', filter: 'select'},
-	        { header: '설명', name: 'matComm', align : 'center', filter: 'select'},
-	        { header: '등록일', name: 'matRegDate', align : 'center' },
-	        { header: '수정일', name: 'matDate', align : 'center' },
-	        { header: '사용여부', name: 'empHire', align : 'center' , sortable: true}
+	        { header: '설명', name: 'matComm', align : 'center'},
+	        { header: '등록일', name: 'matRegDate', align : 'center',filter: 'select'},
+	        { header: '수정일', name: 'matModDate', align : 'center', filter: 'select'},
+	        { header: '사용여부', name: 'matIsActive', align : 'center' , sortable: true}
 	    ]
 	});
-	// 사원 목록 조회 
-		async function loadDrafts(page) { //page번호를 인자로 받아 사원목록을 불러옴 (30개당 한페이지)
+	// 자재 목록 조회 
+		async function loadDrafts(page) { //page번호를 인자로 받아 자재목록을 불러옴 (30개당 한페이지)
 				try {
 					const response = await fetch(`/SOLEX/material/materialList?page=${page}&size=${pageSize}`); // 백엔드api에 fetch요청 30명씩 끊어서 ... 
 		      		const rawData = await response.json(); // 받은 데이터를 필요한 형태로 가공
 		      		const data = rawData.map(row => ({ // 이게 서버에서 받아온 사원정보 리스트(배열) 이런식으로 들어있음 //
 					// .map()함수는 배열의 요소를 다른형태로 바꿔서 새 배열을 만든다는데 뭔말;
-					//row는 객체를 하나씩 꺼내서 사용할 필드만 골라 새 객체를 만들어 넣음 (=그리드에 넣을 데이터를 원하는 형태로 변환)
-			        empNum: row.empNum,
-					empCatCd: row.empCatCd, 
-			        empDepCd: row.empDepCd,
-			        empTeamCd: row.empTeamCd,
-			        empPosCd: row.empPosCd,
-					empNm: row.empNm,
-					empPhone: row.empPhone,
-					empHire: row.empHire,
-					empStsCd: row.empStsCd
+					// row는 객체를 하나씩 꺼내서 사용할 필드만 골라 새 객체를 만들어 넣음 (=그리드에 넣을 데이터를 원하는 형태로 변환)
+			        matId: row.matId,
+					cliId: row.cliId, 
+			        matCd: row.matCd,
+			        matNm: row.matNm,
+			        matUnit: row.matUnit,
+					matPrice: row.matPrice,
+					matComm: row.matComm,
+					matRegDate: row.matRegDate,
+					matModDate: row.matModDate,
+					matIsActive: row.matIsActive
 		      	}));
 
 				//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 

@@ -28,18 +28,13 @@ public class EmpController {
 	private EmpService empService;
 
 	@GetMapping("")
-	public String main(Model model, @RequestParam(value="includeEmpSts", required = false) String includeEmpSts,
-			@RequestParam(name = "searchType", defaultValue = "") String searchType,
-			@RequestParam(name = "searchKeyword", defaultValue = "") String searchKeyword){
+	public String main(Model model, @RequestParam(value="includeEmpSts", required = false) String includeEmpSts){
 
-
-		List<Map<String, Object>> empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
+		List<Map<String, Object>> empList = empService.getEmpList(includeEmpSts);
 //		empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
 
 		model.addAttribute("empList", empList);
 		model.addAttribute("includeEmpSts", includeEmpSts); // 체크박스 유지용
-		model.addAttribute("searchType", searchType);
-		model.addAttribute("searchKeyword", searchKeyword);
 
 		return "emp/emp_main";
 	}

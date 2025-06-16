@@ -19,19 +19,14 @@ public class EmpService {
 
 	//인사등록
 	public int registerEmp(Map<String, Object> empMap) {
-		System.out.println("##################################empMap = " + empMap);
 		return mapper.insertEmp(empMap);
 	}
 
 	//인사목록 (재직중)
-	 public List<Map<String, Object>> getEmpList(String searchType, String searchKeyword, String includeEmpSts) {
+	 public List<Map<String, Object>> getEmpList(String includeEmpSts) {
 
-//	        System.out.println("Service: getEmpList called with searchType=" + searchType +
-//	                           ", searchKeyword=" + searchKeyword + ", includeEmpSts=" + includeEmpSts);
+	        List<Map<String, Object>> empList = mapper.getEmpListFiltered(includeEmpSts);
 
-	        List<Map<String, Object>> empList = mapper.getEmpListFiltered(searchType, searchKeyword, includeEmpSts);
-
-//	        System.out.println("Service: getEmpListFiltered returned " + (empList != null ? empList.size() : "null") + " items.");
 	        return empList;
 	    }
 

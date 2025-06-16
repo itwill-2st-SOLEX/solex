@@ -44,15 +44,12 @@ public class EmpRestController {
 	// AJAX 를 통해 목록 조회 요청 결과를 JSON 으로 리턴하기 위한 요청 매핑
     @GetMapping("/listJson")
     public Map<String, Object> getEmpListJson(
-        @RequestParam(name = "searchType", defaultValue = "", required = false) String searchType,
-        @RequestParam(name = "searchKeyword", defaultValue = "", required = false) String searchKeyword,
         @RequestParam(value="includeEmpSts", required = false) String includeEmpSts) {
 
-    	System.out.println("searchType " + searchType);
-    	System.out.println("searchKeyword " +  searchKeyword);
+
     	System.out.println("includeEmpSts " + includeEmpSts);
 
-        List<Map<String, Object>> empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
+        List<Map<String, Object>> empList = empService.getEmpList(includeEmpSts);
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("empList", empList);
