@@ -506,7 +506,6 @@ document.addEventListener('DOMContentLoaded', function(){
 							const month = (date.getMonth() + 1).toString().padStart(2,'0');
 							const day = date.getDate().toString().padStart(2,'0');
 							const formattedDate = `${year}.${month}.${day}`; // YYYY.MM.DD
-							debugger;
 
 							document.querySelector('input[name="emp_nm"]').value = empData.EMP_NM;
 							document.querySelector('input[name="emp_nm"]').readOnly = true; // 이름 수정 불가
