@@ -20,7 +20,7 @@ public class RestVacationController {
 	public VacationService vacationService;
 	
 	//로그인 구현 필요
-	Long empId = 1L;
+	Long empId = 35L;
 
 	
 	//내 휴가 요약 정보

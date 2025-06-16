@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>SOLEX</title>
+<link rel="icon" type="image/x-icon"
+	th:href="@{/assets/img/favicon/favicon.ico}" />
+<!-- Google Fonts - Noto Sans KR -->
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/login/login.css}" />
+</head>
+<body>
+	<!-- 여기서 부터 작성하시면 됩니다  -->
+	<div class="login-wrapper">
+		<!-- 상단 영역 -->
+		<div class="login-top"></div>
+
+		<!-- 하단 영역 -->
+		<div class="login-bottom"></div>
+
+		<!-- 로그인 박스 (중앙 부유 형태) -->
+		<div class="login-box">
+			<img th:src="@{/assets/img/solex_logo.png}" alt="solex로고"
+				style="display: block; margin: 0 auto 1rem; width: 150px;" />
+			<h1 class="auth-title">로그인</h1>
+
+			<div class="login-tabs">
+				<button class="tab active">ID 로그인</button>
+				<button class="tab">QR 로그인</button>
+			</div>
+
+			<form class="login-form">
+				<input type="text"id= "empNo" name="emp_num" placeholder="사번" />
+				<input type="password" id="empPw" name="emp_pw" placeholder="비밀번호" />
+				<label><input type="checkbox" /> 사번 저장</label>
+				<button type="submit" id="loginBtn" class="login-btn">로그인</button>
+			</form>
+
+<!-- 			<div class="login-footer"> -->
+<!-- 				<a href="#">비밀번호 찾기</a> -->
+<!-- 			</div> -->
+
+			<div class="admin-login-buttons">
+				<button class="right-btn">일반 사원 로그인하기</button>
+				<button class="right-btn">중간 관리자 로그인하기</button>
+				<button class="right-btn">상위관리자 로그인하기</button>
+			</div>
+		</div>
+	</div>
+	<th:block layout:fragment="script">
+		<script th:src="@{/assets/vendor/libs/jquery/jquery.js}"></script>
+		<script th:src="@{/js/login/login.js}"></script>
+	</th:block>
+
+</body>
+</html>

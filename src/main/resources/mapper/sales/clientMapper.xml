@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.sales.ClientMapper">
+  <select id="selectClients" resultType="map">
+     SELECT
+            cli_id, biz_reg_no, cli_add, cli_ceo, cli_da,
+            cli_mgr_name, cli_mgr_phone, cli_nm, cli_pc, cli_phone, cli_type
+        FROM client
+        <where>
+            <if test="search_term != null and search_term != ''">
+                AND (
+                     cli_nm LIKE '%' || #{search_term} || '%'
+	                OR cli_ceo LIKE '%' || #{search_term} || '%'
+	                OR biz_reg_no LIKE '%' || #{search_term} || '%'
+                )
+            </if>
+            </where>
+        ORDER BY cli_id ASC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+  </select>
+  
+  <insert id="createClients"  parameterType="map" >
+  	insert into client( emp_id,cli_nm,cli_type,cli_phone,cli_pc,cli_add,cli_da,cli_ceo,cli_reg_date,cli_mgr_name,cli_mgr_phone,biz_reg_no,cli_mod_date) 
+  		        VALUES (#{emp_id},#{cli_nm},#{cli_type},#{cli_phone},#{cli_pc},#{cli_add},#{cli_da},#{cli_ceo},SYSDATE,#{cli_mgr_name},#{cli_mgr_phone},#{biz_reg_no},SYSDATE)
+  </insert>
+  
+  <select id="getClientById" parameterType="int" resultType="map">
+	SELECT cli_id, emp_id, cli_nm, cli_type, cli_phone, cli_pc, cli_add, cli_da, cli_ceo, cli_reg_date, cli_mgr_name, cli_mgr_phone, biz_reg_no
+	FROM client
+	WHERE cli_id = #{clientId}
+  </select>
+  	
+  <update id="updateClient">
+	UPDATE client
+	 SET
+	    biz_reg_no = #{biz_reg_no},
+	    cli_add = #{cli_add},
+	    cli_ceo = #{cli_ceo},
+        cli_da = #{cli_da},
+        cli_mgr_name = #{cli_mgr_name},
+        cli_mgr_phone = #{cli_mgr_phone},
+        cli_nm = #{cli_nm},
+        cli_pc = #{cli_pc},
+        cli_phone = #{cli_phone},
+        cli_type = #{cli_type},
+        cli_mod_date = SYSDATE
+  	 WHERE cli_id = #{cli_id}
+  </update>
+
+  <select id="getSearchClients" resultType="map">
+  	SELECT *
+  	FROM client
+  	<where>
+			<if test="keyword != null and keyword != ''">
+				(LOWER(n.not_tt) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(n.not_con) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
+	</where>
+  	WHERE cli_nm LIKE '%' || #{keyword} || '%'
+  </select>
+	
+  
+  
+  
+</mapper>

@@ -15,17 +15,10 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/approval")
 public class ApprovalController {
 	
-	private final ApprovalService approvalService;
-	
 	// 결재할 기안서 리스트 페이지
     @GetMapping("/todo")
-    public String getTodoDocumentList(Model model) {
-    	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	Long loginEmpId = 1L;
-    	
-    	List<Map<String, Object>> listMap = approvalService.getTodoDocumentList(loginEmpId);
-    	
-        return "";
+    public String getTodoDocumentList() {    	
+        return "approval/approvalDrafts";
     }
     
 }

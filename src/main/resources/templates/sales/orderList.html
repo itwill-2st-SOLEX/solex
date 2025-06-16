@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<!-- 개별페이지 전용 스타일시트 영역 -->
+	<th:block layout:fragment="style">
+		<link rel="stylesheet" th:href="@{/css/sales/order.css}" />
+		<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.css" rel="stylesheet">
+		<!-- sweetalert2 CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+		
+	</th:block>
+	
+	<style>
+	  .swal2-container {
+	    z-index: 9999 !important;
+	  }
+	</style>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="container-xxl flex-grow-1 container-p-y" style="background-color: transparent; padding-left: 0; padding-right: 0;">
+			<div class="row">
+				<div class="col-xxl-12 mb-6">
+					<div class="card">
+						<div class="d-flex align-items-start row">
+							<div class="col-sm-12">
+								<div class="card-body">
+									<h5 class="card-title mb-3">수주 관리</h5>
+									<div class="d-flex justify-content-between align-items-center">
+										<div style="width : 100%;" class="d-flex align-items-center">
+											<span class="w-px-22 h-px-22">
+												<i class="icon-base bx bx-search icon-md"></i>
+											</span>
+											<input id="searchInput" name="searchInput" style="width: 25%;" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none" type="text" aria-label="검색" placeholder="검색">
+										</div>
+										<button type="button" class="btn custom-btn-blue mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openOrderModalBtn">수주 등록</button>
+									</div>
+									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+	            </div>
+			</div>
+        </div>
+		
+	<!-- 배경 + 스피너 컨테이너 -->
+	<div id="loadingOverlay" style="display:none;">
+	  <div class="spinner-border text-primary" role="status">
+	    <span class="visually-hidden">Loading...</span>
+	  </div>
+	</div>
+
+	
+	<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+	        <div class="modal-content" id="modalContentContainer">
+	        	<div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">수주 등록</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body big-box">
+            <div class="row mb-3">
+                 <div class="col">
+			        <label for="cli_nm_virtual_select" class="form-label">거래처명 <span style="color:red">*</span></label>
+			        <div class="input-group">
+			            <select id="cli_nm_virtual_select" name="cli_nm" placeholder="거래처명을 선택하거나 검색하세요.">
+			            </select>
+			        </div>
+			    </div>
+                <div class="col">
+			        <label for="prd_nm_virtual_select" class="form-label">제품명 <span style="color:red">*</span></label>
+			        <div class="input-group">
+			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="제품명을 선택하거나 검색하세요." ></select>
+			        </div>
+			    </div>
+            </div>
+			<div class="row mb-3">
+				<div class="col">
+		            <label class="form-label">색상 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <select id="opt_color"  class="form-select" disabled="disabled">
+                          <option>색상을 선택하세요.</option>
+                        </select>
+		            </div>
+				</div>
+				<div class="col">
+		            <label  class="form-label">사이즈 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <select id="opt_size"  class="form-select" disabled="disabled">
+                          <option>사이즈를 선택하세요.</option>
+                        </select>
+		            </div>
+				</div>
+	        </div>
+			<div class="row mb-3">
+				<div class="col">
+		            <label  class="form-label">굽 높이 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <select id="opt_height" class="form-select" disabled="disabled">
+                          <option>굽 높이를 선택하세요.</option>
+                          <option value="1">One</option>
+                          <option value="2">Two</option>
+                          <option value="3">Three</option>
+                        </select>
+		            </div>
+				</div>
+				<div class="col">
+		            <label  class="form-label">제품 재고량</label>
+		            <div class="d-flex align-items-center">
+		                <input class="form-control" type="text" value="" placeholder="제품 재고량" id="stockCount" disabled="disabled">
+		            </div>
+				</div>
+	        </div>
+            
+			<div class="row mb-3">
+				<div class="col">
+		            <label for="odd_cnt" class="form-label">주문 수량 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input type="text" id="odd_cnt" name="odd_cnt" min="0" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
+		            </div>
+				</div>
+				<div class="col">
+		            <label for="odd_end_date" class="form-label">납품 요청일 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input class="form-control" type="date" value="" name ="odd_pay_date" id="odd_end_date" disabled="disabled">
+		            </div>
+				</div>
+	        </div>
+            <div class="row mb-2">
+				<div class="col">
+				<!-- 이거는 자동 계산 -->
+		            <label for="odd_pay" class="form-label">결제 금액 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input type="text" id="odd_pay" name="odd_pay" min="0" class="form-control" placeholder="결제 금액 입력하세요." disabled="disabled">
+		            </div>
+				</div>
+                <div class="col">
+		            <label for="odd_pay_date" class="form-label">결제 예정일 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date" value="" disabled="disabled">
+		            </div>
+				</div>
+            </div>
+            
+            <div class="mb-2">
+                <label for="cli_phone" class="form-label">거래처 연락처</label>
+                <br>
+                <input type="text" id="cli_phone" name="cli_phone" class="form-control" placeholder="거래처 연락처"  readonly="readonly">
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label for="cli_mgr_name" class="form-label">담당자명</label>
+                    <input type="text" id="cli_mgr_name" class="form-control" placeholder="담당자명"  readonly="readonly">
+                </div>
+                <div class="col">
+                    <label for="cli_mgr_phone" class="form-label">담당자 연락처</label>
+                    <input type="text" id="cli_mgr_phone" class="form-control" placeholder="담당자 연락처"  readonly="readonly">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-label">배송지 주소 <span style="color:red">*</span></div>
+                <div class="d-flex align-items-center mb-2">
+                    <input type="text" id="cli_pc" name="cli_pc" class="form-control" style="width: 48.4%;" readonly="readonly" placeholder="우편번호">
+                    <button type="button" class="btn btn-primary ms-6" onclick="findPostCode()">우편번호 찾기</button>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <input type="text" id="cli_add" name="cli_add" class="form-control" readonly="readonly" placeholder="기본주소" >
+                </div>
+                <div class="d-flex align-items-center">
+                    <input type="text" id="cli_da" name="cli_da" class="form-control" placeholder="상세주소" >
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitForm()">등록</button>
+        </div>
+	        </div>
+	    </div>
+	</div>
+			
+	</th:block>
+	
+	<th:block layout:fragment="script">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		<!-- sweetalert2 JS -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
+	    <script th:src="@{/js/sales/order.js}"></script>
+	</th:block>
+	
+</body>
+</html>

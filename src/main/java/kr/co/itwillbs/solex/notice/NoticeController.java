@@ -26,10 +26,11 @@ public class NoticeController {
 	
 	Long empId = 11L;
 
+
     // 공지사항 페이지로 단순 이동
     @GetMapping("")
     public String getNoticePage() {
-        return "notice/noticeList"; 
+        return "notice/noticeList";
     }
     
 
