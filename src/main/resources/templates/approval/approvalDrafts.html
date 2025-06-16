@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<title>SOLEX</title>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" th:href="@{/css/document/documentDrafts.css}" />
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<h2 style="margin-bottom: 0;">기안서 목록</h2>
+			<button type="button" class="btn custom-btn-blue float-end mb-4"
+				data-bs-toggle="modal" data-bs-target="#exampleModal">기안서
+				등록</button>
+
+			<!-- Modal -->
+			<div class="modal fade" id="exampleModal" tabindex="-1"
+				aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-scrollable modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<select id="docTypeSelect"
+								class="form-select form-select-sm mb-3" aria-label="기안서 종류 선택">
+								<th:block th:each="type : ${docTypes}">
+									<option th:value="${type['DET_ID']}"
+										th:text="${type['DET_NM']}"
+										th:selected="${type['DET_NM'] == '반/연차신청서'}"></option>
+								</th:block>
+							</select>
+						</div>
+						<div class="modal-body">
+							<div class="approval-line">
+								<!-- 							JS에서 h2태그 채움 -->
+								<h2></h2>
+							</div>
+							<!-- 여기에 기안서 등록 form(JS) -->
+							<form id="draftForm" method="post">
+								<div id="dynamicFormArea"></div>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+								data-bs-dismiss="modal">닫기</button>
+							<button type="submit" id="submitApproval"
+								class="btn custom-btn-blue">등록</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 상세 모달 -->
+			<div class="modal fade" id="detailModal" tabindex="-1"
+				aria-labelledby="detailModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h2 class="modal-title" id="detailModalLabel">기안서 상세조회</h2>
+						</div>
+						<div class="approval-line">
+							<table class="approval-table ms-auto">
+								<thead>
+									<tr></tr>
+									<!-- JS가 여기에 <th>를 동적으로 추가함 -->
+								</thead>
+								<tbody>
+									<tr></tr>
+									<!-- JS가 여기에 <td>를 동적으로 추가함 -->
+								</tbody>
+							</table>
+						</div>
+						<!-- 					상세조회 js에서 채움 -->
+						<div class="modal-body"></div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+								data-bs-dismiss="modal">닫기</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 본문 영역-->
+			<div class="custom-content">
+				<div id="grid"></div>
+			</div>
+		</div>
+		<th:block layout:fragment="script">
+			<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+			<script th:src="@{/js/document/documentDrafts.js}"></script>
+			<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+		</th:block>
+</body>
+</html>
