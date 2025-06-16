@@ -11,10 +11,10 @@
         emp_id, emp_num, emp_hire, emp_nm, emp_gd,
         emp_birth, emp_pw, emp_phone, emp_email, emp_add,
         emp_da, emp_sts_cd, emp_pc, emp_cat_cd, emp_pos_cd,
-        emp_dep_cd, emp_team_cd
+        emp_dep_cd, emp_team_cd,emp_img
     ) VALUES (
         emp_seq.NEXTVAL,
-        #{emp_num, jdbcType=VARCHAR},
+        emp_seq.NEXTVAL,
         #{emp_hire, jdbcType=DATE},     
         #{emp_nm, jdbcType=VARCHAR},
         #{emp_gd, jdbcType=VARCHAR},
@@ -29,39 +29,11 @@
         #{empCatCd, jdbcType=VARCHAR},
         #{empPosCd, jdbcType=VARCHAR},
         #{empDepCd, jdbcType=VARCHAR},
-        #{empTeamCd, jdbcType=VARCHAR}
+        #{empTeamCd, jdbcType=VARCHAR},
+        #{emp_img, jdbcType=VARCHAR}
     )
 </insert>
 
-	
-	<resultMap type="map" id="empResultMap">
-	    <id property="empId" column="emp_id" /> 
-	    <result property="empNum" column="emp_num" />
-	    <result property="empNm" column="emp_nm" />
-	    <result property="empPhone" column="emp_phone" />
-	    <result property="empHire" column="emp_hire" />
-	    <result property="empCatCd" column="emp_cat_cd" />
-	    <result property="empPosCd" column="emp_pos_cd" />
-	    <result property="empDepCd" column="emp_dep_cd" />
-	    <result property="empTeamCd" column="emp_team_cd" />
-	    <result property="empStsCd" column="emp_sts_cd" />
-	    <result property="empAdd" column="EMP_ADD" />
-	    <result property="empBirth" column="EMP_BIRTH" />
-	    <result property="empDa" column="EMP_DA" />
-	    <result property="empEmail" column="EMP_EMAIL" />
-	    <result property="empGd" column="EMP_GD" />
-	    <result property="empPc" column="EMP_PC" />
-	    <result property="empPw" column="EMP_PW" />
-	</resultMap>
-		
-	<resultMap type="map" id="codeDetailMap">
-		<result property="empCatCd" column="emp_cat_cd" />
-		<result property="empPosCd" column="emp_pos_cd" />
-		<result property="empDepCd" column="emp_dep_cd" />
-		<result property="empTeamCd" column="emp_team_cd" />
-		<result property="empStsCd" column="emp_sts_cd" />
-	</resultMap>
-	
 	<select id="findAllItems" resultMap="empResultMap">
 		SELECT emp_num, emp_nm, emp_phone, emp_hire
 		FROM employee
@@ -228,4 +200,32 @@
     	emp_team_cd = #{empTeamCd}
     	WHERE emp_num = #{emp_num}
     </update>
+    
+    <resultMap type="map" id="empResultMap">
+	    <id property="empId" column="emp_id" /> 
+	    <result property="empNum" column="emp_num" />
+	    <result property="empNm" column="emp_nm" />
+	    <result property="empPhone" column="emp_phone" />
+	    <result property="empHire" column="emp_hire" />
+	    <result property="empCatCd" column="emp_cat_cd" />
+	    <result property="empPosCd" column="emp_pos_cd" />
+	    <result property="empDepCd" column="emp_dep_cd" />
+	    <result property="empTeamCd" column="emp_team_cd" />
+	    <result property="empStsCd" column="emp_sts_cd" />
+	    <result property="empAdd" column="EMP_ADD" />
+	    <result property="empBirth" column="EMP_BIRTH" />
+	    <result property="empDa" column="EMP_DA" />
+	    <result property="empEmail" column="EMP_EMAIL" />
+	    <result property="empGd" column="EMP_GD" />
+	    <result property="empPc" column="EMP_PC" />
+	    <result property="empPw" column="EMP_PW" />
+	</resultMap>
+		
+	<resultMap type="map" id="codeDetailMap">
+		<result property="empCatCd" column="emp_cat_cd" />
+		<result property="empPosCd" column="emp_pos_cd" />
+		<result property="empDepCd" column="emp_dep_cd" />
+		<result property="empTeamCd" column="emp_team_cd" />
+		<result property="empStsCd" column="emp_sts_cd" />
+	</resultMap>
 </mapper>

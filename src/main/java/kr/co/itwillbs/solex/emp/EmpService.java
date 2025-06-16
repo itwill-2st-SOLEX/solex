@@ -19,6 +19,7 @@ public class EmpService {
 
 	//인사등록
 	public int registerEmp(Map<String, Object> empMap) {
+		System.out.println("##################################empMap = " + empMap);
 		return mapper.insertEmp(empMap);
 	}
 

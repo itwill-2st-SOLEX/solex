@@ -42,6 +42,46 @@ document.addEventListener('DOMContentLoaded', function(){
 		}
 	});
 	
+	
+	function sample6_execDaumPostcode() {
+								    new daum.Postcode({
+								        oncomplete: function(data) {
+								            // 주소 변수
+								            var addr = ''; // 주소
+								            var extraAddr = ''; // 참고항목
+						
+								            // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+								            if (data.userSelectedType === 'R') { // 도로명 주소
+								                addr = data.roadAddress;
+								            } else { // 지번 주소
+								                addr = data.jibunAddress;
+								            }
+						
+								            // 참고항목
+								            if(data.userSelectedType === 'R'){
+								                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+								                    extraAddr += data.bname;
+								                }
+								                if(data.buildingName !== '' && data.apartment === 'Y'){
+								                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+								                }
+								                if(extraAddr !== ''){
+								                    extraAddr = ' (' + extraAddr + ')';
+								                }
+								                document.getElementById("sample6_extraAddress").value = extraAddr;
+								            } else {
+								                document.getElementById("sample6_extraAddress").value = '';
+								            }
+						
+								            // 우편번호와 주소 정보를 해당 필드에 넣는다.
+								            document.getElementById('sample6_postcode').value = data.zonecode;
+								            document.getElementById("sample6_address").value = addr;
+						
+								            // 상세주소 입력칸으로 포커스 이동
+								            document.getElementById("sample6_detailAddress").focus();
+								        }
+								    }).open();
+					}
 
 	
 	// 사원 목록 조회 
@@ -113,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function(){
 		  	   return true; // 이 함수는 값을 조합하는 역할만 하고, 유효성 검사는 각 버튼의 이벤트 리스너에서 수행합니다.
 		  	}
 			
-//			//이미지 보여주기
+			//이미지 보여주기
 			document.getElementById('emp_img').addEventListener('change', function(event) {
 			  const [file] = event.target.files;
 			  if (file) {
@@ -138,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function(){
 			const form = document.createElement('form');
 			form.setAttribute('id', 'joinForm');
 			form.setAttribute('method', 'post');
-			form.setAttribute('enctype', 'multipart/form-data'); // 이미지
 			
 			
 			// ===== 사진 =====
@@ -152,13 +191,13 @@ document.addEventListener('DOMContentLoaded', function(){
 			form.appendChild(div0);
 			
 			// ===== 사번 =====
-//			let div1 = document.createElement('div');
-//			div1.className = 'mb-3';
-//			div1.innerHTML = `
-//			  <label>사번</label>
-//			  <input type="text" class="form-control d-inline-block w-25" name="emp_num" required><br>
-//			`;
-//			form.appendChild(div1);
+			let div1 = document.createElement('div');
+			div1.className = 'mb-3';
+			div1.innerHTML = `
+			  <label>사번</label>
+			  <input type="text" class="form-control d-inline-block w-25" name="emp_num" required><br>
+			`;
+			form.appendChild(div1);
 
 			// ===== 이름 =====
 			let div2 = document.createElement('div');
@@ -329,6 +368,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			async function sendData(url, method, payload, isModifyMode) {
 			    try {
 					
+					
 			        const response = await fetch(url, {
 			            method: method,
 			            headers: { 'Content-Type': 'application/json' },
@@ -336,9 +376,12 @@ document.addEventListener('DOMContentLoaded', function(){
 			        });
 
 			        if (!response.ok) {
+//			            const errorData = await response.json();
 			            throw new Error(`서버 오류: ${response.status} - ${errorData.message || '알 수 없는 오류'}`);
 			        }
 
+//			        const result = await response.json();
+//			        console.log('성공:', result);
 
 			        alert(isModifyMode ? '직원 정보가 성공적으로 수정되었습니다!' : '직원이 성공적으로 등록되었습니다!');
 			        
@@ -385,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 					        const formData = new FormData(form); // 동적으로 생성된 'form' 사용
 					        const payload = {
-//					            emp_num: formData.get('emp_num'),
+					            emp_num: formData.get('emp_num'),
 					            emp_nm: formData.get('emp_nm'),
 					            emp_birth: formData.get('emp_birth').replace(/\./g, '-'), // YYYY.MM.DD -> YYYY-MM-DD
 					            emp_hire: formData.get('emp_hire'),
@@ -616,43 +659,3 @@ document.addEventListener('DOMContentLoaded', function(){
 				
 				
 			}); // DOMContentLoaded 끝
-			
-function sample6_execDaumPostcode() {
-							    new daum.Postcode({
-							        oncomplete: function(data) {
-							            // 주소 변수
-							            var addr = ''; // 주소
-							            var extraAddr = ''; // 참고항목
-					
-							            // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
-							            if (data.userSelectedType === 'R') { // 도로명 주소
-							                addr = data.roadAddress;
-							            } else { // 지번 주소
-							                addr = data.jibunAddress;
-							            }
-					
-							            // 참고항목
-							            if(data.userSelectedType === 'R'){
-							                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-							                    extraAddr += data.bname;
-							                }
-							                if(data.buildingName !== '' && data.apartment === 'Y'){
-							                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-							                }
-							                if(extraAddr !== ''){
-							                    extraAddr = ' (' + extraAddr + ')';
-							                }
-							                document.getElementById("sample6_extraAddress").value = extraAddr;
-							            } else {
-							                document.getElementById("sample6_extraAddress").value = '';
-							            }
-					
-							            // 우편번호와 주소 정보를 해당 필드에 넣는다.
-							            document.getElementById('sample6_postcode').value = data.zonecode;
-							            document.getElementById("sample6_address").value = addr;
-					
-							            // 상세주소 입력칸으로 포커스 이동
-							            document.getElementById("sample6_detailAddress").focus();
-							        }
-							    }).open();
-				}
