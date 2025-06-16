@@ -86,15 +86,44 @@ public class DocumentService {
         for (int i = 0; i < total; i++) {
             Map<String, Object> rank = upperRanks.get(i);
             String posCd = (String) rank.get("POS_CD");
-            
+
             int stepNo = total - i;
-            
+
+            // 기본값은 ‘실제 코드’를 그대로 사용
+            String catParam  = catCd;
+            String depParam  = depCd;
+            String teamParam = teamCd;
+
+            switch (posCd) {
+                case "pos_01":
+                    // 사장 (예시) – 모두 공통 코드 00
+                    catParam  = "cat_00";
+                    depParam  = "dep_00";
+                    teamParam = "team_00";
+                    break;
+
+                case "pos_02":
+                    // 이사 – 부서·팀만 00
+                    depParam  = "dep_00";
+                    teamParam = "team_00";
+                    break;
+
+                case "pos_03":
+                    // 부장 – 팀만 00
+                    teamParam = "team_00";
+                    break;
+
+                case "pos_04":
+                    // 팀장 – 그대로 사용
+                    break;
+            }
+
             approvalMapper.insertApprovalLine(
                 docId,
                 stepNo,
-                catCd,
-                depCd,
-                teamCd,
+                catParam,
+                depParam,
+                teamParam,
                 posCd
             );
         }
