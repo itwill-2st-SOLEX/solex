@@ -27,7 +27,6 @@ public class DocumentRestController {
 	@GetMapping("/api/drafts")
     public List<Map<String, Object>> getDraftList(@RequestParam("page") int page, @RequestParam("size") int size) {
 		int offset = page * size;
-		System.out.println("page:" + page + "size: " + size);
         return service.getDraftList(offset, size);
     }
 	

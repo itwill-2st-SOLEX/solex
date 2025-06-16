@@ -51,13 +51,13 @@ public class DocumentService {
 		String docType = (String) map.get("doc_type");
 
 	    switch (docType) {
-	        case "doc_type_01":  // 반/연차
+	        case "doc_type_01":
 	            documentMapper.registerLeaveDoc(map);
 	            break;
-	        case "doc_type_02":  // 출장/외근
+	        case "doc_type_02":
 	            documentMapper.registerbusinessOutworkDoc(map);
 	            break;
-	        case "doc_type_03":   // 사직
+	        case "doc_type_03":
 	            documentMapper.resignationDoc(map);
 	            break;
 	    }
@@ -81,7 +81,6 @@ public class DocumentService {
         
         // 상위 결재자 체인 탐색
         List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
-        
         int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
         for (int i = 0; i < total; i++) {
             Map<String, Object> rank = upperRanks.get(i);
