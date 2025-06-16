@@ -114,6 +114,7 @@ function generateModalHtml(mode, data = {}, clientId = null) {
     const cli_pc = data.CLI_PC || '';
     const cli_add = data.CLI_ADD || '';
     const cli_da = data.CLI_DA || '';
+    const cli_id = data.CLI_ID || '';
 
 	// '사업자 등록번호 미보유' 상태 결정
     const isNoBizRegNo = biz_reg_no_value === '-';
@@ -141,7 +142,7 @@ function generateModalHtml(mode, data = {}, clientId = null) {
                 </div>
             </div>
 			<div class="mb-4">
-	            <label for="biz_reg_no" class="form-label">사업자 등록번호</label>
+	            <label for="biz_reg_no" class="form-label">사업자 등록번호 <span style="color:red">*</span></label>
 	            <div class="d-flex align-items-center">
 	                <input type="text" maxlength="10" id="biz_reg_no" name="biz_reg_no" class="form-control" placeholder="사업자 등록번호 (숫자만)" style="width: 48.4%;" value="${actual_biz_reg_no_for_input}" ${biz_reg_input_disabled}>
 	                <button type="button" class="btn btn-primary ms-2" id="getBizRegNoInfo" ${biz_reg_input_disabled}>사업자 등록번호 조회</button>
@@ -217,7 +218,7 @@ window.openDetailModal = async (clientId) => { // TUI Grid formatter에서 호�
 
     try {
         // API 엔드포인트에 맞게 URL 수정
-        const response = await fetch(`/solex/clients/${clientId}`); // /clients/{cli_id} API 호출
+        const response = await fetch(`/SOLEX/clients/${clientId}`); // /clients/{cli_id} API 호출
         if (!response.ok) {
             throw new Error('거래처 정보를 가져오지 못했습니다.');
         }
@@ -426,13 +427,13 @@ async function submitClientForm() {
     let errorMessage = '';
 
     if (currentClientId) { // 수정 모드
-        url = `/solex/clients/${currentClientId}`; // API 엔드포인트 수정
+        url = `/SOLEX/clients/${currentClientId}`; // API 엔드포인트 수정
         method = 'PUT';
         successMessage = '거래처 수정이 완료되었습니다.';
         errorMessage = '거래처 수정 중 오류가 발생했습니다.';
         console.log("전송할 수정 데이터:", clientData);
     } else { // 등록 모드
-        url = '/solex/clients'; // API 엔드포인트 수정
+        url = '/SOLEX/clients'; // API 엔드포인트 수정
         method = 'POST';
         successMessage = '거래처 등록이 완료되었습니다.';
         errorMessage = '거래처 등록 중 오류가 발생했습니다.';
@@ -491,9 +492,9 @@ async function scrollMoreClient(isInitialLoad = false) {
         if (currentSearchTerm) { // 검색어가 있을 경우 추가
             params.append('search_term', currentSearchTerm);
         }
-
+		
         // 백엔드 API 엔드포인트 호출 (새로 정의한 /clients/data 경로)
-        const response = await fetch(`/solex/clients/data?${params.toString()}`);
+        const response = await fetch(`/SOLEX/clients/data?${params.toString()}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -564,13 +565,17 @@ function getBizRegNoInfo() {
     const input = bizRegNoInput ? bizRegNoInput.value.trim() : '';
     const cleanedInput = input.replace(/[^0-9]/g, '');
 
+	const overlay = document.getElementById('loadingOverlay');
+	// API 호출 전에 스피너를 보여줍니다.
+	overlay.style.display = 'block'; 
+
     if (cleanedInput.length !== 10) {
         alert('사업자등록번호는 숫자 10자리여야 합니다.');
         if (overlay) overlay.style.display = 'none';
         return;
     }
 
-    fetch('/solex/clients/check-biz', {
+    fetch('/SOLEX/clients/check-biz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bizNumber: cleanedInput })
@@ -700,7 +705,7 @@ async function loadClientTypes(selectedValue = null) {
     }
 
     try {
-        const response = await fetch('/solex/clients/client-types');
+        const response = await fetch('/SOLEX/clients/client-types');
         if (!response.ok) {
             throw new Error('거래처 유형을 불러오지 못했습니다.');
         }
