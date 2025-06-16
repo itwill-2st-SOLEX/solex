@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	// ✅ 추가 버튼
 	document.querySelector('#code-add').addEventListener('click', () => {
 		code_grid.prependRow({
-			cod_id: '',
-			cod_nm: '',
-			cod_yn: '',
+			COD_ID: '',
+			COD_NM: '',
+			COD_YN: '',
 			__isNew: true  // 새 행 여부
 		}, { focus: true });
 	});
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	    }
 		
 		// 필드 검증
-		const requiredFields = ['cod_id', 'cod_nm', 'cod_yn'];
+		const requiredFields = ['COD_ID', 'COD_NM', 'COD_YN'];
 	    const invalidRows = [...createdRows, ...updatedRows].filter(row =>
 	        requiredFields.some(field => !row[field])
 	    );
@@ -52,14 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		// 데이터 가공
 	    const payload = {
 	        createdRows: createdRows.map(row => ({
-	            cod_id: row.cod_id,
-	            cod_nm: row.cod_nm,
-	            cod_yn: row.cod_yn
+	            COD_ID: row.COD_ID,
+	            COD_NM: row.COD_NM,
+	            COD_YN: row.COD_YN
 	        })),
 	        updatedRows: updatedRows.filter(row => !row.__isNew).map(row => ({
-	            cod_id: row.cod_id,
-	            cod_nm: row.cod_nm,
-	            cod_yn: row.cod_yn
+	            COD_ID: row.COD_ID,
+	            COD_NM: row.COD_NM,
+	            COD_YN: row.COD_YN
 	        }))
 	    };
 		

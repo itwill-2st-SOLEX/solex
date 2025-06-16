@@ -44,7 +44,7 @@
 		</where>
 	</select>
 	
-	<!-- 공통코드 신규 행 추가 -->
+	<!-- 공통코드 신규 행 저장 -->
 	<insert id="insertCodes" parameterType="java.util.List">
 	    INSERT ALL
 	    <foreach collection="list" item="code">
@@ -54,9 +54,9 @@
 	            COD_YN,
 	            COD_REG_TIME
 	        ) VALUES (
-	            #{code.cod_id},
-	            #{code.cod_nm},
-	            #{code.cod_yn},
+	            #{code.COD_ID},
+	            #{code.COD_NM},
+	            #{code.COD_YN},
 	            sysdate)
 	    </foreach>
 	    SELECT * FROM dual
@@ -68,17 +68,17 @@
 	    USING (
 	        <foreach collection="list" item="code" separator="UNION ALL">
 	            SELECT 
-	                #{code.cod_id} AS cod_id,
-	                #{code.cod_nm} AS cod_nm,
-	                #{code.cod_yn} AS cod_yn
+	                #{code.COD_ID} AS cod_id,
+	                #{code.COD_NM} AS cod_nm,
+	                #{code.COD_YN} AS cod_yn
 	            FROM DUAL
 	        </foreach>
 	    ) src
-	    ON (c.COD_ID = src.cod_id)
+	    ON (c.COD_ID = src.COD_ID)
 	    WHEN MATCHED THEN
 	    UPDATE SET 
-	        c.COD_NM = src.cod_nm,
-	        c.COD_YN = src.cod_yn
+	        c.COD_NM = src.COD_NM,
+	        c.COD_YN = src.COD_YN
 	</update>
 	
 	<!-- 상세공통코드 무한스크롤 -->
