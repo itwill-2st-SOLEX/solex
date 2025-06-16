@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.client;
+package kr.co.itwillbs.solex.sales;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,41 +21,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.log4j.Log4j2;
 
 
 
 @Log4j2
-@Controller
+@RestController
 @RequestMapping("/clients")
-public class ClientController {
+public class ClientRestController {
 
 	@Autowired
 	ClientService clientService;
-
-	@GetMapping("")
-	public String getAllClients(Model model) throws Exception {
-		log.info("이거 시작됨");
-        Map<String, Object> initialParams = new HashMap<>();
-        initialParams.put("limit", 30);
-        initialParams.put("offset", 0);
-        List<Map<String,Object>> clientList = clientService.selectClients(initialParams); // 서비스 호출
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule()); // LocalDateTime 처리용
-
-        String clientJsonList = mapper.writeValueAsString(clientList);
-        model.addAttribute("clientList", clientJsonList); // JSON 문자열을 Model에 추가
-
-        return "client/list"; // client/list.jsp 또는 client/list.html 뷰 반환
-    }
-
+	
     @GetMapping("/data") // 예: /clients/data?limit=20&offset=0&search_term=김미
-    @ResponseBody
     public ResponseEntity<Map<String, Object>> getClientsData(@RequestParam Map<String, Object> params) {
         log.info("API - 거래처 목록 조회 요청 파라미터: {}", params);
 
@@ -124,6 +104,7 @@ public class ClientController {
 	@PutMapping("/{cli_id}")
     public ResponseEntity<Map<String, Object>> updateClient(@PathVariable("cli_id") int cli_id, @RequestBody Map<String , Object> param) {
 		Map<String, Object> response = new HashMap<>();
+		param.put("cli_id", cli_id);
 
         try {
 
@@ -149,7 +130,6 @@ public class ClientController {
 
 
 	@GetMapping("/client-types")
-	@ResponseBody
 	public List<Map<String, String>> getClientType() throws Exception {
 		return Arrays.stream(ClientType.values())
 		        .map(ct -> Map.of(
@@ -160,7 +140,6 @@ public class ClientController {
 	}
 
 	@PostMapping("/check-biz")
-	@ResponseBody
 	 public ResponseEntity<Map<String, Object>> checkBiz(@RequestBody Map<String, String> request) {
 		log.info("정보 받아옴");
         String bizNumber = request.get("bizNumber");
@@ -169,12 +148,5 @@ public class ClientController {
         log.info("taxType : "+taxType);
         return ResponseEntity.ok(Map.of("taxType", taxType));
     }
-
-
-
-
-
-
-
-
+	
 }

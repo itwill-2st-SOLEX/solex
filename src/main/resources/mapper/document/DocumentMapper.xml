@@ -286,13 +286,13 @@
 	</select>
 	
 	<update id="updateDocumentStatus" parameterType="map">
-	    UPDATE approval_line
+	    UPDATE document
 	    SET 
-	      apl_sts = #{status},
+	      doc_sts = #{status},
 	      doc_app_day = SYSDATE
 	    WHERE 
 	      doc_id = #{docId}
-  </update>
+	</update>
 	
 <!-- 	결재 유형별 결재선 찾아오기 -->
 	<select id="findSteps" resultType="java.lang.Integer">

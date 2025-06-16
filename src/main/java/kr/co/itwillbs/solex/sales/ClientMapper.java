@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.client;
+package kr.co.itwillbs.solex.sales;
 
 import java.util.List;
 import java.util.Map;
