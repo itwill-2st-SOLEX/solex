@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.emp.EmpMapper">
+
+<!-- 인사등록 -->
+  <insert id="insertEmp" parameterType="map">
+    INSERT INTO employee (
+        emp_id, emp_num, emp_hire, emp_nm, emp_gd,
+        emp_birth, emp_pw, emp_phone, emp_email, emp_add,
+        emp_da, emp_sts_cd, emp_pc, emp_cat_cd, emp_pos_cd,
+        emp_dep_cd, emp_team_cd,emp_img
+    ) VALUES (
+        emp_seq.NEXTVAL,
+        emp_seq.NEXTVAL,
+        #{emp_hire, jdbcType=DATE},     
+        #{emp_nm, jdbcType=VARCHAR},
+        #{emp_gd, jdbcType=VARCHAR},
+        #{emp_birth, jdbcType=DATE},    
+        #{emp_birth, jdbcType=VARCHAR},
+        #{emp_phone, jdbcType=VARCHAR},
+        #{emp_email, jdbcType=VARCHAR},
+        #{emp_add, jdbcType=VARCHAR},
+        #{emp_da, jdbcType=VARCHAR},
+        'sts_01',
+        #{emp_pc, jdbcType=NUMERIC},    
+        #{empCatCd, jdbcType=VARCHAR},
+        #{empPosCd, jdbcType=VARCHAR},
+        #{empDepCd, jdbcType=VARCHAR},
+        #{empTeamCd, jdbcType=VARCHAR},
+        #{emp_img, jdbcType=VARCHAR}
+    )
+</insert>
+
+	<select id="findAllItems" resultMap="empResultMap">
+		SELECT emp_num, emp_nm, emp_phone, emp_hire
+		FROM employee
+		ORDER BY emp_num asc
+	</select>
+	
+	<select id="findAllCodeDetails" resultMap="codeDetailMap">
+		SELECT emp_cat_cd, emp_pos_cd, emp_dep_cd, emp_team_cd, emp_sts_cd
+		FROM employee
+	</select>
+
+	<select id="getDepCode" resultMap="empResultMap">
+		SELECT det_id, det_nm
+		  FROM code_detail
+		 WHERE cod_id IN ('cat' ,'dep', 'pos', 'team','sts')
+		  OR cod_id LIKE 'dep%'
+	</select>
+	
+   <select id="getAllCodeDetails" resultType="map">
+	    SELECT
+	        CASE
+	            WHEN COD_ID = 'cat' THEN DET_ID
+	            ELSE NULL END AS "empCatCd",    
+            CASE
+	            WHEN COD_ID = 'pos' THEN DET_ID
+	            ELSE NULL END AS "empPosCd",    
+            CASE
+	            WHEN COD_ID LIKE 'dep%' THEN DET_ID
+	            ELSE NULL END AS "empDepCd",    
+            CASE
+	            WHEN COD_ID = 'team' THEN DET_ID
+	            ELSE NULL END AS "empTeamCd",   
+            CASE
+	            WHEN COD_ID = 'sts' THEN DET_ID
+	            ELSE NULL END AS "empStsCd",    
+	            DET_ID AS "codeValue",   
+	            DET_NM AS "codeName"     
+	            FROM code_detail
+	    WHERE
+	        COD_ID IN ('cat', 'pos', 'team', 'sts') OR COD_ID LIKE 'dep%'
+	    ORDER BY COD_ID, DET_ID
+	</select>
+	
+<!--	재직중인 사원만 출력-->
+	<select id="getEmpListFiltered" resultType="map">
+        SELECT
+            emp_id AS "empId",
+            emp_num AS "empNum",
+            emp_nm AS "empNm",
+            emp_phone AS "empPhone",  
+            emp_hire AS "empHire",
+            emp_cat_cd AS "empCatCd",
+            emp_pos_cd AS "empPosCd",
+            emp_dep_cd AS "empDepCd",
+            emp_team_cd AS "empTeamCd",
+            emp_sts_cd AS "empStsCd",
+            EMP_ADD AS "empAdd",
+            EMP_BIRTH AS "empBirth",
+            EMP_DA AS "empDa",
+            EMP_EMAIL AS "empEmail",
+            EMP_GD AS "empGd",
+            EMP_PC AS "empPc",
+            EMP_PW AS "empPw"
+        FROM
+            employee
+        WHERE 1=1
+         <choose>
+        <when test="includeEmpSts == 'includeRetired'">
+            AND emp_sts_cd IN ('sts_01', 'sts_02', 'sts_03')
+        </when>
+        <otherwise>
+            AND emp_sts_cd = 'sts_01'
+        </otherwise>
+    </choose>
+
+    <if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+        <choose>
+            <when test="searchType == 'empNm'">
+                AND emp_nm LIKE '%' || #{searchKeyword} || '%'
+            </when>
+            <when test="searchType == 'empNum'">
+                AND emp_num LIKE '%' || #{searchKeyword} || '%'
+            </when>
+        </choose>
+    </if>
+        ORDER BY emp_num ASC
+    </select>
+    
+    <select id="getempList" resultType="map">
+      SELECT
+        	emp_id AS "empId",
+    		emp_num AS "empNum",
+            emp_nm AS "empNm",
+            emp_phone AS "empPhone",  
+            TO_CHAR(emp_hire,'YYYY-MM-DD') AS "empHire",
+            cat.det_nm AS "empCatCd",
+            pos.det_nm AS "empPosCd",
+            dep.det_nm AS "empDepCd",
+            team.det_nm AS "empTeamCd",
+            sts.det_nm AS "empStsCd",
+            EMP_ADD AS "empAdd",
+            EMP_BIRTH AS "empBirth",
+            EMP_DA AS "empDa",
+            EMP_EMAIL AS "empEmail",    
+            EMP_GD AS "empGd",
+            EMP_PC AS "empPc",
+            EMP_PW AS "empPw"
+        FROM
+            employee e
+        left JOIN code_detail cat
+          ON e.emp_cat_cd = cat.det_id
+        AND cat.cod_id = 'cat'
+        left JOIN code_detail pos
+          ON e.emp_pos_cd = pos.det_id
+       AND pos.cod_id = 'pos'
+       left JOIN code_detail dep
+       ON  e.emp_dep_cd = dep.det_id
+        AND dep.cod_id in ('dep_erp', 'dep_mes')
+        left JOIN code_detail team
+        ON e.emp_team_cd = team.det_id
+        AND team.cod_id = 'team'
+        left JOIN code_detail sts
+        ON e.emp_sts_cd = sts.det_id
+        AND sts.cod_id = 'sts'
+        ORDER BY emp_num asc
+    </select>
+    
+    <select id="getAllcodes" resultType="map">
+		SELECT 
+		    det_id AS "DET_ID",
+		    det_nm AS "DET_NM"
+		FROM code_detail
+		WHERE cod_id in('cat', 'pos', 'dep_erp', 'dep_mes', 'team')
+    </select>
+    
+<!--    수정을 위한 정보 가져오기-->
+    <select id="getEmpDetail" resultType="map">
+    	SELECT 
+    		emp_id AS "empId",
+            emp_num AS "EMP_NUM",
+            emp_nm AS "EMP_NM",
+            emp_phone AS "EMP_PHONE",  
+            emp_hire AS "EMP_HIRE",
+            emp_cat_cd AS "EMP_CAT_CD",
+            emp_pos_cd AS "EMP_POS_CD",
+            emp_dep_cd AS "EMP_DEP_CD",
+            emp_team_cd AS "EMP_TEAM_CD",
+            EMP_ADD AS "EMP_ADD",
+            EMP_BIRTH AS "EMP_BIRTH",
+            EMP_DA AS "EMP_DA",
+            EMP_EMAIL AS "EMP_EMAIL",
+            EMP_GD AS "EMP_GD",
+            EMP_PC AS "EMP_PC"
+    	FROM employee
+    	WHERE TRIM(emp_num) = #{empNum}
+    </select>
+    
+<!--    수정 코드-->
+    <update id="modifyMap">
+    	UPDATE employee
+    	SET emp_cat_cd = #{empCatCd},
+    	emp_dep_cd = #{empDepCd},
+    	emp_pos_cd = #{empPosCd},
+    	emp_team_cd = #{empTeamCd}
+    	WHERE emp_num = #{emp_num}
+    </update>
+    
+    <resultMap type="map" id="empResultMap">
+	    <id property="empId" column="emp_id" /> 
+	    <result property="empNum" column="emp_num" />
+	    <result property="empNm" column="emp_nm" />
+	    <result property="empPhone" column="emp_phone" />
+	    <result property="empHire" column="emp_hire" />
+	    <result property="empCatCd" column="emp_cat_cd" />
+	    <result property="empPosCd" column="emp_pos_cd" />
+	    <result property="empDepCd" column="emp_dep_cd" />
+	    <result property="empTeamCd" column="emp_team_cd" />
+	    <result property="empStsCd" column="emp_sts_cd" />
+	    <result property="empAdd" column="EMP_ADD" />
+	    <result property="empBirth" column="EMP_BIRTH" />
+	    <result property="empDa" column="EMP_DA" />
+	    <result property="empEmail" column="EMP_EMAIL" />
+	    <result property="empGd" column="EMP_GD" />
+	    <result property="empPc" column="EMP_PC" />
+	    <result property="empPw" column="EMP_PW" />
+	</resultMap>
+		
+	<resultMap type="map" id="codeDetailMap">
+		<result property="empCatCd" column="emp_cat_cd" />
+		<result property="empPosCd" column="emp_pos_cd" />
+		<result property="empDepCd" column="emp_dep_cd" />
+		<result property="empTeamCd" column="emp_team_cd" />
+		<result property="empStsCd" column="emp_sts_cd" />
+	</resultMap>
+</mapper>

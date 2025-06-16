@@ -36,7 +36,7 @@ public class ClientService {
     @Value("${business.api.secret}")
     private String serviceKey;
 
-    
+
     public List<Map<String,Object>> selectClients(Map<String, Object> params) {
     	log.info(params);
         if (!params.containsKey("limit")) {
@@ -47,7 +47,7 @@ public class ClientService {
         }
         return clientMapper.selectClients(params);
     }
-    
+
     @Transactional  //
     public int createClient(Map<String, Object> param) {
 		return clientMapper.createClients(param);
@@ -111,5 +111,5 @@ public class ClientService {
 		return clientMapper.getSearchClients(keyword);
 	}
 
-	
+
 }

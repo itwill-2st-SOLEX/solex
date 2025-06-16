@@ -15,13 +15,13 @@ public interface NoticeMapper {
 	Map<String, Object> getNoticeDetail(@Param("notId") Long notId);
 	
 	int getNoticeCount(Map<String, Object> params);
-	
+
 	//글 등록
 	int insertNotice(Map<String, Object> param);
-	
+
 	//글 변경
 	int updateNotice(Map<String, Object> param);
-	
+
 	//글 삭제
 	int deleteNotice(int notId);
 	
