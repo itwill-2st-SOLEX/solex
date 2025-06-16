@@ -57,15 +57,46 @@ function bindScrollEvent() {
 bindScrollEvent();
 
 //날짜 형식 함수
-const formatter = new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-});
+//날짜만 넣으면 년-월-일 형식, (날짜, true)하면 년-월-일 오전?오후 시:분 형식으로 출력
+function formatter(date, includeTime = false) {
+	const d = new Date(date);
+	
+	//Intl.DateTimeFormat(...).formatToParts() : 날짜를 구성 요소별로 나눠서 배열 형태로 반환
+	//DateTimeFormat이 날짜를 무조건 .으로 구분해서 저장하므로 배열에 '.'리터럴도 한칸씩 저장됨
+	const parts = new Intl.DateTimeFormat('ko-KR', {
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: includeTime ? '2-digit' : undefined,
+		minute: includeTime ? '2-digit' : undefined,
+		hour12: true // 오전/오후 포함
+	}).formatToParts(d);
+	
+	//저장된 parts 배열을 반복하면서 원하는 값만 가져올 수 있도록 함수를 정의함
+	const get = type => parts.find(p => p.type === type)?.value;
+	
+	//get함수를 이용하여 각 년, 월, 일의 값만 배열에서 찾아와서 저장
+	const year = get('year');
+	const month = get('month');
+	const day = get('day');
+	
+	let result = `${year}-${month}-${day}`;
+	
+	if (includeTime) {
+		const dayPeriod = get('dayPeriod'); // '오전' or '오후'
+		const hour = get('hour');
+		const minute = get('minute');
+		result += ` ${dayPeriod} ${hour}:${minute}`;
+	}
+
+	return result;
+}
+
 
 // 게시글 목록 불러오기
 async function vacationList(page, keyword = '') {
     try {
+		
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
 		let url = `/SOLEX/vacation/api/list?page=${page}&size=${pageSize}`;
@@ -88,7 +119,7 @@ async function vacationList(page, keyword = '') {
 			empId: n.EMP_ID,
 			empNum: n.EMP_NUM,
 			empNm: n.EMP_NM,
-			empHire: formatter.format(new Date(n.EMP_HIRE))  || '-',
+			empHire: formatter(new Date(n.EMP_HIRE))  || '-',
 			vacTotal: n.VAC_TOTAL,
             vacUsed: n.VAC_USED,
             vacRemain: n.VAC_REMAIN,
@@ -96,7 +127,7 @@ async function vacationList(page, keyword = '') {
 			empDepNm: n.EMP_DEP_NM  == '공통' ? '-' : n.EMP_DEP_NM,
 			empTeamNm: n.EMP_TEAM_NM  == '공통' ? '-' : n.EMP_TEAM_NM,
 			empPosNm: n.EMP_POS_NM,
-			periodEnd: formatter.format(new Date(n.PERIOD_END)),
+			periodEnd: formatter(new Date(n.PERIOD_END)),
         }));
 		
 		//첫 페이지면 초기화 후 새로 보여줌
@@ -130,7 +161,7 @@ function searchVacation() {
 function formatPeriodEnd(dateString, daysLeft) {
     if (!dateString) return '-';
 
-    const formattedDate = formatter.format(new Date(dateString));
+    const formattedDate = formatter(new Date(dateString));
     
     if (daysLeft != null) {
         return `${formattedDate} (D-${daysLeft})`;

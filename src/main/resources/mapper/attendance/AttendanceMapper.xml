@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.attendance.AttendanceMapper">
+    <select id="selectMyAttendenceByMonthList" resultType="java.util.Map">
+    	SELECT att.att_id,
+       		  cd.det_nm,
+       		  e.emp_nm,
+       		  e.emp_id, 
+              e.emp_num, 
+              e.emp_nm,
+              TO_CHAR(att_in_time, 'YYYY-MM-DD HH:MI AM') AS att_in_time,
+		      TO_CHAR(att_out_time, 'YYYY-MM-DD HH:MI AM') AS att_out_time,
+		      TO_CHAR(att_day, 'YYYY-MM-DD HH:MI AM') AS att_day, 
+			  ve.emp_dep_nm, 
+			  ve.emp_team_nm, 
+			  ve.emp_pos_nm
+		 FROM vacation v 
+		RIGHT JOIN employee e 
+		   ON v.emp_id = e.emp_id
+         JOIN view_employee ve 
+           ON e.emp_id = ve.emp_id
+         JOIN attendance att
+           ON e.emp_id = att.emp_id				-- 출퇴근 data
+         JOIN code_detail cd 
+           ON cd.det_id = att.att_sts
+           
+		WHERE e.emp_id = #{empId}
+		  AND TO_CHAR(att.att_in_time, 'YYYY') = #{year}  
+ 		  AND TO_CHAR(att.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
+	<choose>
+		<!-- 팀장 조건 -->
+		<when test="empTeamCd != 'team_00'">
+		  AND e.emp_team_cd = #{empTeamCd} AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 부장 조건 -->
+		<when test="empDepCd != 'dep_00'">
+		  AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 이사 조건 -->
+		<when test="empCatCd != 'cat_00'">
+		  AND e.emp_cat_cd = #{empCatCd}
+		</when>
+		<!-- 사장 조건 -->
+		<when test="empPosCd == 'pos_01'">
+		  AND e.emp_pos_cd = #{empPosCd}
+		</when>
+	</choose>
+		ORDER BY e.emp_dep_cd, e.emp_team_cd
+	   OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+    
+    <select id="selectAttendenceByMonthList" resultType="java.util.Map">
+       SELECT att.att_id,
+       		  cd.det_nm,
+       		  e.emp_nm,
+       		  e.emp_id, 
+              e.emp_num, 
+              e.emp_nm,
+              TO_CHAR(att_in_time, 'YYYY-MM-DD HH:MI AM') AS att_in_time,
+		      TO_CHAR(att_out_time, 'YYYY-MM-DD HH:MI AM') AS att_out_time,
+		      TO_CHAR(att_day, 'YYYY-MM-DD HH:MI AM') AS att_day, 
+			  ve.emp_dep_nm, 
+			  ve.emp_team_nm, 
+			  ve.emp_pos_nm
+		 FROM vacation v 
+		RIGHT JOIN employee e 
+		   ON v.emp_id = e.emp_id
+         JOIN view_employee ve 
+           ON e.emp_id = ve.emp_id
+         JOIN attendance att
+           ON e.emp_id = att.emp_id				-- 출퇴근 data
+         JOIN code_detail cd 
+           ON cd.det_id = att.att_sts
+           
+		WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) >= TO_NUMBER(SUBSTR(#{empPosCd}, -2))
+		  AND TO_CHAR(att.att_in_time, 'YYYY') = #{year}  
+ 		  AND TO_CHAR(att.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
+	<choose>
+		<!-- 팀장 조건 -->
+		<when test="empTeamCd != 'team_00'">
+		  AND e.emp_team_cd = #{empTeamCd} AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 부장 조건 -->
+		<when test="empDepCd != 'dep_00'">
+		  AND e.emp_dep_cd = #{empDepCd}
+		</when>
+		<!-- 이사 조건 -->
+		<when test="empCatCd != 'cat_00'">
+		  AND e.emp_cat_cd = #{empCatCd}
+		</when>
+		<!-- 사장 조건 -->
+		<when test="empPosCd == 'pos_01'">
+		  AND e.emp_pos_cd = #{empPosCd}
+		</when>
+	</choose>
+		ORDER BY e.emp_dep_cd, e.emp_team_cd
+	   OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+    
+    
+    
+    <select id="selectAttendenceByMonthList__" resultType="java.util.Map">
+    	SELECT
+		       e.emp_num,         				-- 휘하 직원의 사번    
+		    -- TO_CHAR(MIN(a.att_in_time), 'YYYY-MM-DD HH24:MI:SS') AS first_att_in_time -- 해당 일자의 첫 출근시간
+		       TO_CHAR(att_in_time, 'YYYY-MM-DD HH:MI AM') AS att_in_time,
+		       TO_CHAR(att_out_time, 'YYYY-MM-DD HH:MI AM') AS att_out_time,
+		       TO_CHAR(att_day, 'YYYY-MM-DD HH:MI AM') AS att_day,
+		     e.dep_id,          				-- 휘하 직원의 부서
+		     e.dep_position,     				-- 휘하 직원의 직위
+		     cd_e.det_sort
+		  FROM employee_copy e         			-- 휘하 직원을 나타내는 별칭
+		  JOIN employee_copy m         			-- 매니저(결재권자)를 나타내는 별칭
+		    ON e.dep_id = m.dep_id 				-- 동일 부서인 경우만 조인
+		  JOIN code_detail cd_e 
+		    ON e.dep_position = cd_e.det_nm -- 휘하 직원의 직위 
+		  JOIN code_detail cd_m 
+		    ON m.dep_position = cd_m.det_nm -- 부서장의 직위 
+		  JOIN attendance a
+            ON e.emp_id = a.emp_id				-- 출퇴근 data
+            
+        <where>
+               m.emp_id = #{emp_id} 					-- 결재권자의 id
+           AND cd_e.det_sort > cd_m.det_sort		-- 결재권자 보다 직급이 아래(dep_sort가 더 높다)
+		   AND TO_CHAR(a.att_in_time, 'YYYY') = #{year}  
+ 		   AND TO_CHAR(a.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
+			<if test="keyword != null and keyword != ''">
+		   AND (LOWER(e.emp_num) LIKE '%' || LOWER(#{keyword}) || '%'
+			OR LOWER(e.dep_position) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
+		</where>    
+    </select>
+    
+    <select id="findByEmpIdAndAttendanceDate" resultType="java.util.Map">
+        SELECT
+              att.att_id,
+              att.emp_id,
+              att.att_day,
+              -- NVL(TO_CHAR(att_in_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_in_time,
+              -- NVL(TO_CHAR(att_out_time, 'YYYY-MM-DD HH24:MI:SS'), '-') as att_out_time,
+              TO_CHAR(att.att_in_time, 'YYYY-MM-DD HH24:MI:SS') as att_in_time,
+        	  TO_CHAR(att.att_out_time, 'YYYY-MM-DD HH24:MI:SS') as att_out_time, -- NULL이면 그대로 NULL이 넘어감
+ 			  cd.det_nm,
+              TO_CHAR(att.att_day, 'YYYY-MM-DD HH24:MI:SS') as att_day
+         FROM attendance att
+         JOIN code_detail cd 
+           ON cd.det_id = att.att_sts
+        WHERE
+              att.emp_id = #{emp_id} 
+          AND TRUNC(att_day) = #{att_day}
+    </select>
+    
+    <insert id="insertPunchIn">
+        INSERT INTO attendance (
+            emp_id,
+            att_day,
+            att_in_time,
+            att_sts
+        ) VALUES (
+            #{emp_id},
+            #{att_day},
+            #{att_in_time},
+            #{att_sts}
+        )
+    </insert>
+    
+    <update id="updatePunchOut" parameterType="java.util.Map">
+       UPDATE attendance
+          SET
+              att_out_time = #{punchOutTime, jdbcType=DATE},
+              att_sts = #{att_sts, jdbcType=DATE}
+        WHERE
+              emp_id = #{EMP_ID, jdbcType=NUMERIC}
+          AND att_id = #{att_id, jdbcType=NUMERIC}
+    </update>
+    <select id="selectDetNm" resultType="string">
+        SELECT det_nm
+          FROM code_detail
+         WHERE det_id = #{attSts} -- 예시: 'ATT_STATUS'라는 그룹 ID의 코드들만 가져온다고 가정. 실제 그룹 ID에 맞게 수정
+         ORDER BY det_id
+    </select>
+    
+    <!-- 로그인한 사용자의 직급, 부서, 팀 등의 정보 가져오기 -->
+	<select id="selectEmployeeInfo">
+		SELECT emp_id, emp_cat_cd, emp_dep_cd, emp_team_cd, emp_pos_cd
+		FROM employee
+		WHERE EMP_ID = #{empId}
+	</select>
+    
+    
+	<select id="getAttendanceById" resultType="map">
+        SELECT
+	            ATT_ID,
+	            ATT_IN_TIME, -- DB 컬럼명 그대로 (대소문자 일치)
+	            ATT_OUT_TIME, -- DB 컬럼명 그대로 (대소문자 일치)
+	            ATT_STS
+	            -- 다른 컬럼들도 필요한 경우 추가
+        FROM
+            	ATTENDANCE
+        WHERE
+            	ATT_ID = #{attId}
+    </select>
+	<!-- 부하직원의 출퇴근기록 update -->
+    <update id="updateAttendanceColumn" parameterType="map">
+     UPDATE ATTENDANCE
+        SET
+            -- ${columnName}을 사용하여 컬럼 이름을 동적으로 설정
+            ${columnName} = #{newValue, jdbcType=DATE}, 
+            att_sts = #{att_sts, jdbcType=VARCHAR} 
+      WHERE
+            att_id = #{att_id}
+    </update>
+    
+</mapper>	

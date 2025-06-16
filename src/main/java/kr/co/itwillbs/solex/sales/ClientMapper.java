@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.client;
+package kr.co.itwillbs.solex.sales;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface ClientMapper {
-	
+
 	List<Map<String, Object>> selectClients(Map<String, Object> params);
 
 	int createClients(Map<String , Object>param);

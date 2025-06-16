@@ -16,8 +16,8 @@ public class ApprovalService {
 	private final ApprovalMapper approvalMapper;
 	private final DocumentMapper documentMapper;
 	// 결재 해야될 기안서 리스트
-	public List<Map<String, Object>> getTodoDocumentList(long loginEmpId) {
-        return approvalMapper.selectTodoDocumentList(loginEmpId);
+	public List<Map<String, Object>> getTodoDocumentList(int offset, int size, long loginEmpId) {
+        return approvalMapper.selectTodoDocumentList(offset, size, loginEmpId);
     }
 	
 	// 결재 해야하는 기안서 상세보기
@@ -35,25 +35,32 @@ public class ApprovalService {
 	}
 	
 	// 기안서 결재 (승인/반려)
-	public void approvalDocument(Map<String, Object> approvalRequest, long loginEmpId) {
+	public void approvalDocument(Map<String, Object> approvalRequest, long docId, long loginEmpId) {
 		approvalRequest.put("emp_id", loginEmpId);
+		approvalRequest.put("docId", docId);
+		
+		System.out.println("---------------------***********************----------------------");
+		System.out.println(approvalRequest);
 		
 		approvalMapper.updateApprovalLine(approvalRequest);
 		
+		System.out.println("---------------------#####################----------------------");
+		
 		String status = (String) approvalRequest.get("status");
-        Long   docId  = ((Number)approvalRequest.get("docId")).longValue();
-        Long   aplId  = ((Number)approvalRequest.get("aplId")).longValue();
-        Integer step  = (Integer)approvalRequest.get("stepNo");
+        Long   aplId  = Long.valueOf(approvalRequest.get("aplId").toString());
+        Integer step  = Integer.valueOf(approvalRequest.get("stepNo").toString());
+        
+        System.out.println("---------------------+++++++++++++++++++++++++++----------------------");
         
         if (status.equals("apl_sts_02")) {
         	approvalRequest.replace("status", "doc_sts_02");
-        	documentMapper.updateDocumentStatus(approvalRequest);
+        	if (step == 1) {
+        		documentMapper.updateDocumentStatus(approvalRequest);
+        	}
         }
         else if (status.equals("apl_sts_03")) {
         	approvalRequest.replace("status", "doc_sts_03");
-        	if (step == 1) {
-        		documentMapper.updateDocumentStatus(approvalRequest);
-        	} 	
+        	documentMapper.updateDocumentStatus(approvalRequest);
         } 
         else {
         	System.out.println("말도 안되는 상태값임");
