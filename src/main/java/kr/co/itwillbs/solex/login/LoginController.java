@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 @Controller
-@RequestMapping("/login")
+@RequestMapping("/auth")
 public class LoginController {
 	
-	@GetMapping("")
+	@GetMapping("login")
 	public String loginMain() {
 		return "login/login";
 	}
