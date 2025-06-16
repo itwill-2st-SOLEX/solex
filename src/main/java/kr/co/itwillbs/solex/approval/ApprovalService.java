@@ -39,21 +39,29 @@ public class ApprovalService {
 		approvalRequest.put("emp_id", loginEmpId);
 		approvalRequest.put("docId", docId);
 		
-		System.out.println("---------------------***********************----------------------");
 		System.out.println(approvalRequest);
 		
 		approvalMapper.updateApprovalLine(approvalRequest);
 		
-		System.out.println("---------------------#####################----------------------");
 		
 		String status = (String) approvalRequest.get("status");
         Long   aplId  = Long.valueOf(approvalRequest.get("aplId").toString());
         Integer step  = Integer.valueOf(approvalRequest.get("stepNo").toString());
+        String docType  = (String) approvalRequest.get("docType");
+        String leaveType  = (String) approvalRequest.get("leaveType");
         
-        System.out.println("---------------------+++++++++++++++++++++++++++----------------------");
         
         if (status.equals("apl_sts_02")) {
         	approvalRequest.replace("status", "doc_sts_02");
+        	
+        	if (docType.equals("doc_type_01")) {
+        		if ("full".equals(leaveType)) {
+        			
+        		}
+        		else if ("half".equals(leaveType)) {
+        			
+        		}
+        	}
         	if (step == 1) {
         		documentMapper.updateDocumentStatus(approvalRequest);
         	}
@@ -62,9 +70,5 @@ public class ApprovalService {
         	approvalRequest.replace("status", "doc_sts_03");
         	documentMapper.updateDocumentStatus(approvalRequest);
         } 
-        else {
-        	System.out.println("말도 안되는 상태값임");
-        }
-       
     }
 }

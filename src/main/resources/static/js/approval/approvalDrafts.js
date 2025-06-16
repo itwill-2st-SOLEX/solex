@@ -97,10 +97,10 @@ $(function() {
 				</div>
 			</div>
   			<div class="btn-group" role="group" aria-label="반차 연차 선택">
-  				<input type="radio" class="btn-check" name="lea_type" id="businessTrip" value="반차" checked>
+  				<input type="radio" class="btn-check" name="lea_type" id="businessTrip" value="half" checked>
   				<label class="btn btn-purple" for="businessTrip">반차</label>
   				
-  				<input type="radio" class="btn-check" name="lea_type" id="fieldWork" value="연차">
+  				<input type="radio" class="btn-check" name="lea_type" id="fieldWork" value="full">
   				<label class="btn btn-purple" for="fieldWork">연차</label>
   			</div>
   			<div class="mb-3">
@@ -247,6 +247,14 @@ $(function() {
 	        const action = btn.dataset.action;
 			const stepNo    = btn.dataset.aplStepNo; 
 			const aplId     = btn.dataset.aplId;      
+			const docType = btn.dataset.docType;
+			
+			const leaveType =
+			      docType === 'doc_type_01'
+			        ? document.querySelector('#detailModal input[name="lea_type"]:checked')?.value
+			        : null;   // 다른 문서 유형에서는 전송 안 함
+
+			
 
 	        try {
 	            const res = await fetch(`/SOLEX/approval/document/${docId}`, {
@@ -259,10 +267,8 @@ $(function() {
 	                    status   : action,      // 결재 결과
 	                    aplId  : aplId,
 						stepNo : stepNo,
-	                    comment    : action === 'apl_sts_03'
-	                                  ? '사유를 입력하세요'
-	                                  : null,
-						
+						docType : docType,
+						leaveType: leaveType
 	                })
 	            });
 
@@ -373,7 +379,8 @@ $(function() {
 				.forEach(btn => {
 					btn.dataset.docId = row.doc_id;
 					btn.dataset.aplStepNo  = row.apl_step_no;   
-					btn.dataset.aplId      = row.apl_id;  
+					btn.dataset.aplId      = row.apl_id; 
+					btn.dataset.docType    = row.doc_type_code; 
 				});
 				
 			// 모달 오픈
