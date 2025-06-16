@@ -113,15 +113,15 @@ document.addEventListener('DOMContentLoaded', function(){
 		  	   return true; // 이 함수는 값을 조합하는 역할만 하고, 유효성 검사는 각 버튼의 이벤트 리스너에서 수행합니다.
 		  	}
 			
-//			//이미지 보여주기
-			document.getElementById('emp_img').addEventListener('change', function(event) {
-			  const [file] = event.target.files;
-			  if (file) {
-			    const preview = document.getElementById('emp_img_preview');
-			    preview.src = URL.createObjectURL(file);
-			    preview.style.display = 'block';
-			  }
-			});
+////			//이미지 보여주기
+//			document.getElementById('emp_img').addEventListener('change', function(event) {
+//			  const [file] = event.target.files;
+//			  if (file) {
+//			    const preview = document.getElementById('emp_img_preview');
+//			    preview.src = URL.createObjectURL(file);
+//			    preview.style.display = 'block';
+//			  }
+//			});
 
 		// 등록 모달 열기
 		async function openModal(empData = null) {
@@ -506,10 +506,7 @@ document.addEventListener('DOMContentLoaded', function(){
 							const month = (date.getMonth() + 1).toString().padStart(2,'0');
 							const day = date.getDate().toString().padStart(2,'0');
 							const formattedDate = `${year}.${month}.${day}`; // YYYY.MM.DD
-							
-							// 필드 값 채우기 및 readOnly 설정 (수정 불가 필드)
-							document.querySelector('input[name="emp_num"]').value = empData.EMP_NUM;
-							document.querySelector('input[name="emp_num"]').readOnly = true; // 사번은 수정 불가
+							debugger;
 
 							document.querySelector('input[name="emp_nm"]').value = empData.EMP_NM;
 							document.querySelector('input[name="emp_nm"]').readOnly = true; // 이름 수정 불가
