@@ -10,10 +10,11 @@
 		prd.prd_cd, -- 제품코드
 		cli.cli_nm, -- 거래처명
 		odd.odd_cnt, -- 주문 수량
-		cd1.det_nm, -- 상태(수주 등록, 자재 요청 , 생산 대기 등등 공통코드)
-		cd2.det_nm, -- 상품 색
-		cd3.det_nm, -- 상품 사이즈
-		cd4.det_nm, -- 상품 굽높이
+		cd1.det_nm as DET_NM, -- 상태(수주 등록, 자재 요청 , 생산 대기 등등 공통코드)
+		cd2.det_nm as OPT_COLOR, -- 상품 색
+		cd3.det_nm as OPT_SIZE, -- 상품 사이즈
+		cd4.det_nm as OPT_HEIGHT, -- 상품 굽높이
+		odd.isapproval,
 		TO_CHAR(odd.odd_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE, -- 수정일
 		TO_CHAR(odd.odd_end_date, 'YYYY-MM-DD') AS ODD_END_DATE -- 납품 예정일
 	FROM suju_order ord

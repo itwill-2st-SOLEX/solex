@@ -3,7 +3,8 @@
 let currentPage = 0;
 const pageSize = 20;
 const gridHeight = 600;
-
+let isLoading = false; // 데이터 로딩 중인지 여부 (중복 요청 방지)
+let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 스크롤 종료 조건)
 
 
 // 2. ToastUI Grid 생성 (변경 없음)
@@ -75,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
 // 초기 grid 테이블에 들어갈 list
 async function fetchGridData(page = currentPage) {
 
+  isLoading = true; // 로딩 중 플래그 설정 (전역 변수)
   try {
     const params = new URLSearchParams();
     params.append('page', currentPage);
@@ -92,10 +94,11 @@ async function fetchGridData(page = currentPage) {
     
     // 3. 응답 데이터를 JSON으로 파싱
     const data = await response.json();
+    console.log(data);
 
     data.forEach(item => {
-      item.isProdPossible = item.isProdPossible === 'Y' ? '가능' : '불가능';
-      item.isApproval = item.isApproval === 'Y' ? '승인' : '미승인';
+      
+      item.isApproval = item.isApproval === 'y' ? '승인' : '미승인';
     });
 
     console.log(data);
