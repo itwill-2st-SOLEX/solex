@@ -22,7 +22,7 @@ public class NoticeService {
 	}
 
 	//글 상세 조회
-	public Map<String, Object> getNoticeDetail(int notId) {
+	public Map<String, Object> getNoticeDetail(Long notId) {
 		return noticeMapper.getNoticeDetail(notId);
 	}
 
@@ -45,5 +45,8 @@ public class NoticeService {
 	public int deleteNotice(int notId) {
 		return noticeMapper.deleteNotice(notId);
 	}
-
+	
+	public Map<String, Object> getEmployeeInfo(Long empId) {
+		return noticeMapper.getEmployeeInfo(empId);
+	}
 }

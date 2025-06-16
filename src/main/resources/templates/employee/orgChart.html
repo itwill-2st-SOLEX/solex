@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<title>SOLEX</title>
+
+<link rel="stylesheet" th:href="@{/css/employee/orgChart.css}">
+<link rel="stylesheet" th:href="@{/treant/Treant.css}">
+
+</head>
+<body>
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<div class="orgChart-area">
+				<h3 class="title">조직도</h3>
+				
+				<div id="orgCard"></div>
+			</div>
+		</div>
+	</th:block>
+	
+	<th:block layout:fragment="script">
+		<script th:src="@{/treant/vendor/raphael.js}"></script>
+		<script th:src="@{/treant/Treant.js}"></script>
+		<script th:src="@{/js/employee/orgChart.js}"></script>
+	</th:block>
+</body>
+</html>

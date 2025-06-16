@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.approval.ApprovalMapper">
+
+	<insert id="insertApprovalLine" parameterType="map">
+		INSERT INTO approval_line (doc_id, apl_step_no, apl_emp_cat, apl_emp_dep, apl_emp_team, apl_emp_pos)
+		VALUES (#{docId}, #{stepNo}, #{catCd}, #{depCd}, #{teamCd}, #{posCd})
+     </insert>
+     
+     <insert id="decisionDocument" parameterType="map">
+		INSERT INTO approval_line (doc_id, apl_step_no, apl_emp_cat, apl_emp_dep, apl_emp_team, apl_emp_pos)
+		VALUES (#{docId}, #{stepNo}, #{catCd}, #{depCd}, #{teamCd}, #{posCd})
+     </insert>
+  		
+	<select id="selectTodoDocumentList" resultType="map">
+  		WITH me AS (
+    		SELECT emp_cat_cd, emp_dep_cd, emp_team_cd, emp_pos_cd
+    		FROM   emp
+    		WHERE  emp_id = #{loginEmpId}
+  		)
+  		SELECT al.doc_id, al.apl_step_no, d.doc_type, d.doc_reg_time
+  		FROM   approval_line al
+  		JOIN   document d ON d.doc_id = al.doc_id
+  		CROSS  JOIN me m
+  		WHERE  al.apl_sts    = 'apl_sts_01'
+    	AND  al.emp_id IS NULL
+    	AND  al.apl_emp_pos  = m.pos_cd    	
+    	AND  al.apl_emp_cat = m.emp_cat_cd
+    	AND  al.apl_emp_dep = m.emp_dep_cd
+    	AND  al.apl_emp_team = m.emp_team_cd
+    	AND  NOT EXISTS (
+          	SELECT 1
+          	FROM   approval_line apl
+          	WHERE  apl.doc_id  = al.doc_id
+            AND  apl.apl_step_no &lt; al.apl_step_no
+            AND  apl.apl_sts != 'apl_sts_02'
+        )
+  		ORDER  BY d.reg_time DESC
+   </select>
+</mapper>

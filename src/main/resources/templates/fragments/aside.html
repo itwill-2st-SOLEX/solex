@@ -4,7 +4,7 @@
 
 	<aside id="layout-menu" class="custom-side layout-menu menu-vertical menu bg-menu-theme">
           <div class="app-brand demo">
-            <a href="" class="app-brand-link">
+            <a href="/SOLEX" class="app-brand-link">
               <span class="app-brand-logo demo">
                 <span class="text-primary">
                 	<img alt="logo" th:src="@{/assets/img/solex_logo.png}" class="logo-img">
@@ -44,7 +44,7 @@
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="layouts-without-navbar.html" class="menu-link">
+                  <a href="/SOLEX/orgChart" class="menu-link">
                     <div class="text-truncate" data-i18n="Without navbar">조직도</div>
                   </a>
                 </li>
@@ -60,18 +60,28 @@
 
               <ul class="menu-sub">
                 <li class="menu-item">
-                  <a href="layouts-without-menu.html" class="menu-link">
+                  <a href="/SOLEX/attendance/attendance_register" class="menu-link">
                     <div class="text-truncate" data-i18n="Without menu">출/퇴근 등록</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="/attendance/my_attend" class="menu-link">
-                    <div class="text-truncate" data-i18n="Without menu">출/퇴근 현황</div>
+                  <a href="/SOLEX/attendance/my_attendance_list" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">나의 출/퇴근 현황</div>
+                  </a>
+                </li>
+                 <li class="menu-item">
+                  <a href="/SOLEX/attendance/attendance_list" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">(부하직원)출/퇴근 현황</div>
                   </a>
                 </li>
                 <li class="menu-item">
-                  <a href="layouts-without-navbar.html" class="menu-link">
-                    <div class="text-truncate" data-i18n="Without navbar">휴가현황조회</div>
+                  <a th:href="@{/vacation/detail}" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">내 연차 정보</div>
+                  </a>
+                </li>
+				<li class="menu-item">
+                  <a th:href="@{/vacation/list}" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">사원 연차 정보</div>
                   </a>
                 </li>
               </ul>
@@ -86,7 +96,7 @@
 
               <ul class="menu-sub">
                 <li class="menu-item">
-                  <a href="layouts-without-menu.html" class="menu-link">
+                  <a href="/SOLEX/approval/drafts" class="menu-link">
                     <div class="text-truncate" data-i18n="Without menu">기안서 목록</div>
                   </a>
                 </li>
@@ -136,6 +146,20 @@
                   </a>
                 </li>
               </ul> -->
+            </li>
+			<!-- MES -->
+			<li class="menu-item">
+              <div class="menu-link ">
+                <i class="menu-icon tf-icons bx bx-bxs-cog"></i>
+                <div class="text-truncate" data-i18n="Dashboards">MES</div>
+              </div>
+            </li>
+			<!-- 공통코드 -->
+			<li class="menu-item">
+              <div class="menu-link ">
+                <i class="menu-icon tf-icons bx bx-bxs-category-alt"></i>
+                <a href="/SOLEX/code" class="text-truncate" data-i18n="Dashboards" style="color:#384551;">공통코드</a>
+              </div>
             </li>
           </ul>
         </aside>
