@@ -51,13 +51,13 @@ public class DocumentService {
 		String docType = (String) map.get("doc_type");
 
 	    switch (docType) {
-	        case "doc_type_01":  // 반/연차
+	        case "doc_type_01":
 	            documentMapper.registerLeaveDoc(map);
 	            break;
-	        case "doc_type_02":  // 출장/외근
+	        case "doc_type_02":
 	            documentMapper.registerbusinessOutworkDoc(map);
 	            break;
-	        case "doc_type_03":   // 사직
+	        case "doc_type_03":
 	            documentMapper.resignationDoc(map);
 	            break;
 	    }
@@ -81,24 +81,55 @@ public class DocumentService {
         
         // 상위 결재자 체인 탐색
         List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
-        
-        for (int i = 0; i < Math.min(steps, upperRanks.size()); i++) {
+        int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
+        for (int i = 0; i < total; i++) {
             Map<String, Object> rank = upperRanks.get(i);
             String posCd = (String) rank.get("POS_CD");
-            
+
+            int stepNo = total - i;
+
+            // 기본값은 ‘실제 코드’를 그대로 사용
+            String catParam  = catCd;
+            String depParam  = depCd;
+            String teamParam = teamCd;
+
+            switch (posCd) {
+                case "pos_01":
+                    // 사장 (예시) – 모두 공통 코드 00
+                    catParam  = "cat_00";
+                    depParam  = "dep_00";
+                    teamParam = "team_00";
+                    break;
+
+                case "pos_02":
+                    // 이사 – 부서·팀만 00
+                    depParam  = "dep_00";
+                    teamParam = "team_00";
+                    break;
+
+                case "pos_03":
+                    // 부장 – 팀만 00
+                    teamParam = "team_00";
+                    break;
+
+                case "pos_04":
+                    // 팀장 – 그대로 사용
+                    break;
+            }
+
             approvalMapper.insertApprovalLine(
                 docId,
-                i + 1,
-                catCd,
-                depCd,
-                teamCd,
+                stepNo,
+                catParam,
+                depParam,
+                teamParam,
                 posCd
             );
         }
 	}
 	
 	// 기안서 상세조회
-	public List<Map<String, Object>> selectDetailDoc(String doc_id, String docTypeCode) {
+	public Map<String, Object> selectDetailDoc(String doc_id, String docTypeCode) {
 	    switch (docTypeCode) {
 	        case "doc_type_01":
 	        	return documentMapper.selectDetailLeave(doc_id);

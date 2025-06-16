@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+	<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+	<!-- <meta charset="UTF-8"> -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" th:href="@{/css/attendance/attendance.css}" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+	<title>SOLEX</title>
+</head>
+
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="container-xxl flex-grow-1 container-p-y">
+			<!-- 여기서 부터 작성하시면 됩니다  -->
+
+			<!-- Bordered Table -->
+			<div class="card">
+
+				<div class="date-navigation card-header">
+			        <span class="arrow" id="prevMonthBtn">&lt;</span>
+			        <span class="month-year" id="currentMonthYear"></span>
+			        <span class="arrow" id="nextMonthBtn">&gt;</span>
+			    </div>
+
+				<div class="card-body">
+					<div class="table-responsive text-nowrap">
+						<div id="grid"></div>
+					</div>
+				</div>
+			</div>
+			
+			<!--/ Bordered Table -->
+
+		</div>
+	</th:block>
+	<th:block layout:fragment="script">
+		<script th:inline="javascript">
+	        /*<![CDATA[*/
+	        // Controller에서 넘겨준 초기 연도와 월을 JavaScript 변수로 사용
+	        const initialYear = [[${initialYear}]];
+	        const initialMonth = [[${initialMonth}]];
+	
+	        // attendance.js 내에서 사용할 전역 변수 또는 초기화 시점에 설정
+	        let currentDate = new Date(initialYear, initialMonth - 1, 1); // JS Month는 0부터 시작 (0=1월)
+	
+	        /*]]>*/
+	    </script>
+		<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+		<script src="https://cdn.jsdelivr.net/npm/flatpickr@latest/dist/l10n/ko.js"></script>
+	    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	    <script th:src="@{/js/attendance/attendance.js}"></script>
+	</th:block>
+</body>
+</html>
