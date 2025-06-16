@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	    ]
 	});
 	
+	//체크박스 
 	const checkAllCheckbox = document.getElementById('check-all');
 	
 	checkAllCheckbox.addEventListener('change', (event) => {
