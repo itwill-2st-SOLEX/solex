@@ -13,5 +13,11 @@ public interface ProcessMapper {
 	List<Map<String, Object>> selectPagedProcessList(@Param("perPage") int perPage, @Param("offset") int offset);
     
 	int selectTotalProcessCount();
+
+	// 부서명 리스트 조회 API
+	List<Map<String, Object>> getDepartmentList();
+
+	// 품질검사명 리스트 조회 API
+	List<Map<String, Object>> getQualityItemList();
     
 }

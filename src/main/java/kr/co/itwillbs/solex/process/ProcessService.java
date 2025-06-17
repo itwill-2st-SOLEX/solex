@@ -24,4 +24,14 @@ public class ProcessService {
 		return processMapper.selectTotalProcessCount();
 	}
 
+	// 부서명 리스트 조회 API
+	public List<Map<String, Object>> getDepartmentList() {
+		return processMapper.getDepartmentList();
+	}
+
+	// 품질검사명 리스트 조회 API
+	public List<Map<String, Object>> getQualityItemList() {
+		return processMapper.getQualityItemList();
+	}
+
 }

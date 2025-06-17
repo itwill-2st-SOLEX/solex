@@ -7,18 +7,39 @@
 	<!-- 공정정보 리스트 무한스크롤 -->
 	<select id="selectPagedProcessList" resultType="map">
 	    SELECT
-	        PRC_ID,
-	        PRC_CD,
-	        PRC_NM,
-	        PRC_DES,
-	        PRC_YN
-	    FROM PROCESS
-	    ORDER BY PRC_ID ASC
-	    OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
+			p.prc_id,
+			p.prc_cd,
+			p.prc_nm,
+			p.prc_des,
+			p.prc_yn,
+			p.qua_id,
+			q.qua_nm,
+			p.det_id,
+			c.det_nm
+		FROM process p
+		JOIN quality_item q ON p.qua_id = q.qua_id
+		JOIN code_detail c ON p.det_id = c.det_id
+		ORDER BY p.prc_id
+		OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
 	</select>
 
     <select id="selectTotalProcessCount" resultType="int">
         SELECT COUNT(*) FROM PROCESS
+    </select>
+    
+    <!-- 부서명 리스트 조회 API -->
+    <select id="getDepartmentList">
+    	SELECT	DET_ID, DET_NM, DET_YN
+    	FROM	CODE_DETAIL
+    	WHERE	COD_ID = 'dep_mes'
+    	AND		DET_YN = 'y'
+    </select>
+    
+    <!-- 품질검사명 리스트 조회 API -->
+    <select id="getQualityItemList">
+    	SELECT	QUA_ID, QUA_NM, QUA_TYPE
+    	FROM	QUALITY_ITEM
+    	WHERE	QUA_TYPE = 'qua_type_03'
     </select>
 
 </mapper>
