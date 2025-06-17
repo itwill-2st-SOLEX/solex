@@ -16,6 +16,6 @@ public interface OrderRequestsMapper {
 	);
 
 	// 주문 상세 조회 쿼리
-	List<Map<String, Object>> selectOrderDetail(@Param("prd_id") int prd_id);
+	List<Map<String, Object>> selectOrderDetail(@Param("ord_id") int ord_id);
 
 }

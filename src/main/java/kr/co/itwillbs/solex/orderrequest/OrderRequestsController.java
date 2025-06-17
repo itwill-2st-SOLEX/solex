@@ -40,6 +40,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class OrderRequestsController {	
 	@GetMapping
 	public String orderRequestsList(){
-        return "orderrequest/List"; 
+        return "orderrequest/list"; 
     }
 }

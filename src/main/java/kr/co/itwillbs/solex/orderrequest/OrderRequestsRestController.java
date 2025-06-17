@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping("/order-request")
+@RequestMapping("/order-requests")
 public class OrderRequestsRestController {
 
 	@Autowired
@@ -34,10 +34,10 @@ public class OrderRequestsRestController {
         return list; 
     }
 	
-	@GetMapping("{prd_id}") // 
-	public List<Map<String, Object>> getOrderDetail(@PathVariable int prd_id) throws Exception {
-		log.info("API - 주문 상세 조회 요청 파라미터: prd_id={}", prd_id);
-		List<Map<String, Object>> list = orderRequestsService.getOrderDetail(prd_id);
+	@GetMapping("{ord_id}") // 
+	public List<Map<String, Object>> getOrderDetail(@PathVariable("ord_id") int ord_id) throws Exception {
+		log.info("API - 주문 상세 조회 요청 파라미터: ord_id={}", ord_id);
+		List<Map<String, Object>> list = orderRequestsService.getOrderDetail(ord_id);
 		log.info("API - 주문 상세 조회 결과: list={}",list);
 		
 		return list; 

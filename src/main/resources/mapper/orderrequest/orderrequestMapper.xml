@@ -39,21 +39,41 @@
     OFFSET #{offset} ROWS
     FETCH NEXT #{limit} ROWS ONLY
 	</select>
+	
+	
 
 	<select id="selectOrderDetail" parameterType="Map" resultType="Map">
+	-- 상세 값이 들어감
 	SELECT
-		ord.ord_id,
-		prd.prd_nm,
 		cli.cli_nm,
+		prd.prd_nm,
+		cd1.det_nm as DET_NM,
+		cd2.det_nm as OPT_COLOR,
+		cd3.det_nm as OPT_SIZE,
+		cd4.det_nm as OPT_HEIGHT,
+		st.stk_cnt,
 		ord.ord_cnt,
-		cd.det_nm,
+		cli.cli_phone,
+		cli.cli_mgr_name,
+		cli.cli_mgr_phone,
+		ord.ord_pc,
+		ord.ord_add,
+		ord.ord_da,
+		ord.ord_cnt,
+		ord.ord_pay,
+		
 		TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE,
-		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE
+		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE,
+		TO_CHAR(ord.ord_pay_date, 'YYYY-MM-DD') AS ORD_PAY_DATE
 	FROM suju_order ord
 	left JOIN client cli ON ord.cli_id = cli.cli_id
 	left JOIN product_option opt ON ord.opt_id = opt.opt_id
 	left JOIN product prd ON prd.prd_cd = opt.prd_cd
-	left JOIN code_detail cd ON ord.ord_sts = cd.det_id
+	left JOIN stock st ON st.item_id = opt.opt_id
+	left JOIN code_detail cd1 ON ord.ord_sts = cd1.det_id
+	left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+	left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+	left JOIN code_detail cd4 ON opt.opt_height= cd4.det_id
 	WHERE ord.ord_id = #{ord_id}
 	</select>
 

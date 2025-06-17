@@ -22,7 +22,7 @@ const grid = new tui.Grid({
         { header: '제품명', name: 'PRD_NM', width: 200, align: 'center', sortable: true },
         { header: '컬러', name: 'OPT_COLOR', width: 80, align: 'center', sortable: true },
         { header: '사이즈', name: 'OPT_SIZE', width: 80, align: 'center', sortable: true },
-        { header: '높이', name: 'OPT_HEIGHT', width: 80, align: 'center', sortable: true },
+        { header: '굽', name: 'OPT_HEIGHT', width: 80, align: 'center', sortable: true },
         { header: '주문 수량', name: 'ORD_CNT', align: 'center', sortable: true },
         { header: '진행 현황', name: 'DET_NM', align: 'center', sortable: true },
         { header: '원자재 재고 여부', name: 'PRODUCTION_STATUS', align: 'center', sortable: true },
@@ -87,7 +87,7 @@ async function fetchGridData(page = currentPage) {
     params.append('page', currentPage);
     params.append('pageSize', pageSize);
     
-    const url = `/SOLEX/order-request/data?${params.toString()}`; 
+    const url = `/SOLEX/order-requests/data?${params.toString()}`; 
 
     
     const response = await fetch(url);
@@ -142,7 +142,12 @@ async function DetailModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
+  data.forEach(element => {
+    Object.keys(element).forEach(key => {
+		const el = document.getElementById(key);
+		    if (el) el.value = element[key];
+    });
+  });
 
 
   const modal = document.getElementById('myModal');

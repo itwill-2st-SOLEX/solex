@@ -23,8 +23,8 @@ public class OrderRequestsService {
 		return resultList;
 	}
 
-	public List<Map<String, Object>> getOrderDetail(int prd_id) {
-		List<Map<String, Object>> resultList = orderRequestsMapper.selectOrderDetail(prd_id);
+	public List<Map<String, Object>> getOrderDetail(int ord_id) {
+		List<Map<String, Object>> resultList = orderRequestsMapper.selectOrderDetail(ord_id);
 		return resultList;
 	}
     

@@ -13,7 +13,9 @@
 		<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.css" rel="stylesheet">
 		<!-- sweetalert2 CSS -->
 		<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
-		
+		<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 	</th:block>
 	
 	<style>
@@ -60,7 +62,7 @@
 
 	
 	<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+	    <div class="modal-dialog modal-dialog-scrollable modal-xl">
 	        <div class="modal-content" id="modalContentContainer">
 	        	<div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">수주 등록</h5>
@@ -84,6 +86,46 @@
             </div>
 			<div class="row mb-3">
 				<div class="col">
+		            <label for="pay_type" class="form-label">결제 방식 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <select type="text" id="pay_type" name="pay_type" class="form-control">
+						<option value="">결제 방식을 선택하세요.</option>
+						<option value="현금">현금</option>
+						<option value="카드">카드</option>
+						<option value="무통장">무통장</option>
+						<option value="기타">기타</option>
+		                </select>
+		            </div>
+				</div>
+				
+				<!-- <div class="col">
+		            <label for="odd_cnt" class="form-label">주문 수량 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input type="text" id="odd_cnt" name="odd_cnt" min="0" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
+		            </div>
+				</div> -->
+				<div class="col">
+		            <label for="odd_end_date" class="form-label">납품 요청일 <span style="color:red;">*</span></label>
+		            <div class="d-flex align-items-center">
+		                <input class="form-control" type="date" value="" name ="odd_pay_date" id="odd_end_date" disabled="disabled">
+		            </div>
+				</div>
+				<div class="col">
+				<!-- 이거는 자동 계산 -->
+					<label for="odd_pay" class="form-label">결제 금액 <span style="color:red;">*</span></label>
+					<div class="d-flex align-items-center">
+						<input type="text" id="odd_pay" name="odd_pay" min="0" class="form-control" placeholder="결제 금액 입력하세요." disabled="disabled">
+					</div>
+				</div>
+				<div class="col">
+					<label for="odd_pay_date" class="form-label">결제 예정일 <span style="color:red;">*</span></label>
+					<div class="d-flex align-items-center">
+						<input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date" value="" disabled="disabled">
+					</div>
+				</div>
+	        </div>
+			<div class="row mb-3">
+				<div class="col">
 		            <label class="form-label">색상 <span style="color:red;">*</span></label>
 		            <div class="d-flex align-items-center">
 		                <select id="opt_color"  class="form-select" disabled="disabled">
@@ -93,79 +135,61 @@
 				</div>
 				<div class="col">
 		            <label  class="form-label">사이즈 <span style="color:red;">*</span></label>
+					<select multiple="" class="form-select" id="exampleFormControlSelect2" aria-label="Multiple select example">
+						<option selected="">Open this select menu</option>
+						<option value="1">One</option>
+						<option value="2">Two</option>
+						<option value="3">Three</option>
+					</select>
+
+		            
+				</div>
+				<!-- 셀렉트 박스 -->
+				<select name="selectedValues" multiple id="mySelect">
+				  <option value="apple">사과</option>
+				  <option value="banana">바나나</option>
+				  <option value="cherry">체리</option>
+				</select>
+				<!-- <span>~</span>
+				<div class="col">
+		            <label  class="form-label"></label>
 		            <div class="d-flex align-items-center">
 		                <select id="opt_size"  class="form-select" disabled="disabled">
                           <option>사이즈를 선택하세요.</option>
                         </select>
 		            </div>
-				</div>
-	        </div>
-			<div class="row mb-3">
+				</div> -->
+
+
+
+
 				<div class="col">
 		            <label  class="form-label">굽 높이 <span style="color:red;">*</span></label>
 		            <div class="d-flex align-items-center">
 		                <select id="opt_height" class="form-select" disabled="disabled">
-                          <option>굽 높이를 선택하세요.</option>
-                          <option value="1">One</option>
-                          <option value="2">Two</option>
-                          <option value="3">Three</option>
+                          <option>굽 높이를 선택하세요.</option>	      
                         </select>
 		            </div>
 				</div>
 				<div class="col">
-		            <label  class="form-label">제품 재고량</label>
+					<label  class="form-label"></label>
 		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="text" value="" placeholder="제품 재고량" id="stockCount" disabled="disabled">
+		                <select id="opt_height" class="form-select" disabled="disabled">
+                          <option>굽 높이를 선택하세요.</option>	      
+                        </select>
 		            </div>
 				</div>
-	        </div>
+				<div class="col">
+					<label  class="form-label"></label>
+		            <div class="d-flex align-items-center">
+						<button>추가</button>
+						<button>초기화</button>
+		            </div>
+				</div>
+	        </div>            
+			
             
-			<div class="row mb-3">
-				<div class="col">
-		            <label for="odd_cnt" class="form-label">주문 수량 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <input type="text" id="odd_cnt" name="odd_cnt" min="0" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
-		            </div>
-				</div>
-				<div class="col">
-		            <label for="odd_end_date" class="form-label">납품 요청일 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" value="" name ="odd_pay_date" id="odd_end_date" disabled="disabled">
-		            </div>
-				</div>
-	        </div>
-            <div class="row mb-2">
-				<div class="col">
-				<!-- 이거는 자동 계산 -->
-		            <label for="odd_pay" class="form-label">결제 금액 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <input type="text" id="odd_pay" name="odd_pay" min="0" class="form-control" placeholder="결제 금액 입력하세요." disabled="disabled">
-		            </div>
-				</div>
-                <div class="col">
-		            <label for="odd_pay_date" class="form-label">결제 예정일 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date" value="" disabled="disabled">
-		            </div>
-				</div>
-            </div>
             
-            <div class="mb-2">
-                <label for="cli_phone" class="form-label">거래처 연락처</label>
-                <br>
-                <input type="text" id="cli_phone" name="cli_phone" class="form-control" placeholder="거래처 연락처"  readonly="readonly">
-            </div>
-
-            <div class="row mb-3">
-                <div class="col">
-                    <label for="cli_mgr_name" class="form-label">담당자명</label>
-                    <input type="text" id="cli_mgr_name" class="form-control" placeholder="담당자명"  readonly="readonly">
-                </div>
-                <div class="col">
-                    <label for="cli_mgr_phone" class="form-label">담당자 연락처</label>
-                    <input type="text" id="cli_mgr_phone" class="form-control" placeholder="담당자 연락처"  readonly="readonly">
-                </div>
-            </div>
 
             <div class="mb-3">
                 <div class="form-label">배송지 주소 <span style="color:red">*</span></div>
@@ -198,6 +222,7 @@
 		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 	    <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
 	    <script th:src="@{/js/sales/order.js}"></script>
+	    
 	</th:block>
 	
 </body>
