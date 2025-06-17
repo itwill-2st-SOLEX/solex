@@ -46,6 +46,19 @@ li.menu-inner {
 	margin-bottom: 1.8rem;
 }
 
+.operator-side {
+	padding-left: 0 !important;
+	margin-left: 0 !important;
+}
+
+.bar {
+	width: 200px !important;
+	height: 2px;
+	margin: 20px auto !important;
+	background-color: #ccc;
+	
+}
+
 /* 모달 */
 
 body {
