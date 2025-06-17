@@ -3,5 +3,40 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.workOrder.WorkOrderMapper">
-
+	<select id="getWorkList" resultType="map">
+		SELECT ord_id
+			   , prd_cd
+			   , prd_nm
+			   , prd_sts
+			   , prd_color
+			   , prd_size
+			   , prd_height
+			   , ord_end_date
+		  FROM vw_suju_summary -- 뷰테이블
+		 WHERE prd_sts = '생산 대기'
+		 ORDER BY ord_id DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<select id="ProcessTeam" resultType="map">
+		SELECT DISTINCT
+		       tp.pcp_seq AS step_seq        -- 공정 순서
+		       , pc.prc_nm AS process_name     -- 공정명
+		       , e.emp_team_cd AS team_code    -- 팀 코드
+		       , ct.det_nm AS team_name         -- 팀 이름
+		  FROM product p
+		  JOIN type_process tp 
+		    ON p.prd_type = tp.prd_type
+		  JOIN process pc 
+		    ON tp.prc_id = pc.prc_id
+		  JOIN code_detail cd 
+		    ON pc.det_id = cd.det_id
+		  LEFT JOIN employee e 
+		    ON pc.det_id = e.emp_dep_cd
+		  LEFT JOIN code_detail ct 
+		    ON e.emp_team_cd = ct.det_id
+		 WHERE p.prd_cd = #{prdCd}
+		   AND ct.det_nm != '공통'
+		 ORDER BY tp.pcp_seq, ct.det_nm
+	</select>
 </mapper>
