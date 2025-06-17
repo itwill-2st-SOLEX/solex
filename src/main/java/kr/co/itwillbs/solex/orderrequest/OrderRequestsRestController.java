@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,5 +33,14 @@ public class OrderRequestsRestController {
         
         return list; 
     }
+	
+	@GetMapping("{prd_id}") // 
+	public List<Map<String, Object>> getOrderDetail(@PathVariable int prd_id) throws Exception {
+		log.info("API - 주문 상세 조회 요청 파라미터: prd_id={}", prd_id);
+		List<Map<String, Object>> list = orderRequestsService.getOrderDetail(prd_id);
+		log.info("API - 주문 상세 조회 결과: list={}",list);
+		
+		return list; 
+	}
 	
 }

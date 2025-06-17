@@ -131,13 +131,13 @@ public class OrderRestController {
 	    Map<String, Object> safe = new HashMap<>();
 	    safe.put("cli_id",       param.get("cli_id"));     // JS에서 보낸 키 이름에 맞춰 가져오기
 	    safe.put("prd_cd",       param.get("prd_cd"));
-	    safe.put("odd_cnt",      param.get("odd_cnt"));
-	    safe.put("odd_pay",      param.get("odd_pay"));
-	    safe.put("odd_end_date", param.get("odd_end_date"));
-	    safe.put("odd_pay_date", param.get("odd_pay_date"));
-	    safe.put("odd_pc",       param.get("odd_pc"));
-	    safe.put("odd_add",       param.get("odd_add"));
-	    safe.put("odd_da",       param.get("odd_da"));
+	    safe.put("ord_cnt",      param.get("ord_cnt"));
+	    safe.put("ord_pay",      param.get("odd_pay"));
+	    safe.put("ord_end_date", param.get("odd_end_date"));
+	    safe.put("ord_pay_date", param.get("odd_pay_date"));
+	    safe.put("ord_pc",       param.get("odd_pc"));
+	    safe.put("ord_add",       param.get("odd_add"));
+	    safe.put("ord_da",       param.get("odd_da"));
 	    
 	    safe.put("opt_color",       param.get("opt_color"));
 	    safe.put("opt_size",       param.get("opt_size"));

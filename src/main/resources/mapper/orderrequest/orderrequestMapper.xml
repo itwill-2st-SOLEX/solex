@@ -3,33 +3,62 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.orderrequest.OrderRequestsMapper">
-  <select id="selectPagedOrderDataAsMap" parameterType="Map" resultType="Map">
+  	<select id="selectPagedOrderDataAsMap" parameterType="Map" resultType="Map">
   	SELECT
 		ord.ord_id, -- 수주 번호
 		prd.prd_nm, -- 제품명
 		prd.prd_cd, -- 제품코드
 		cli.cli_nm, -- 거래처명
-		odd.odd_cnt, -- 주문 수량
+		ord.ord_cnt, -- 주문 수량
 		cd1.det_nm as DET_NM, -- 상태(수주 등록, 자재 요청 , 생산 대기 등등 공통코드)
 		cd2.det_nm as OPT_COLOR, -- 상품 색
 		cd3.det_nm as OPT_SIZE, -- 상품 사이즈
 		cd4.det_nm as OPT_HEIGHT, -- 상품 굽높이
-		odd.isapproval,
-		TO_CHAR(odd.odd_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE, -- 수정일
-		TO_CHAR(odd.odd_end_date, 'YYYY-MM-DD') AS ODD_END_DATE -- 납품 예정일
+		CASE
+			WHEN (
+				SELECT COUNT(*)
+				FROM BOM b
+				LEFT JOIN STOCK s ON b.mat_id = s.item_id AND s.stk_cat = 'stk_cat_02'
+				WHERE b.opt_id = opt.opt_id
+				AND NVL(s.stk_cnt, 0) &lt; (b.bom_cnt * ord.ord_cnt)
+			) &lt; 0 THEN '생산 불가'
+			ELSE '생산 가능'
+		END AS PRODUCTION_STATUS,
+		TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE, -- 수정일
+		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE -- 납품 예정일
 	FROM suju_order ord
-	left JOIN suju_order_detail odd ON odd.ord_id = ord.ord_id
 	left JOIN client cli ON ord.cli_id = cli.cli_id
-	left JOIN product_option opt ON opt.opt_id = odd.opt_id
+	left JOIN product_option opt ON opt.opt_id = ord.opt_id
 	left JOIN product prd ON prd.prd_cd = opt.prd_cd
-	left JOIN code_detail cd1 ON odd.odd_sts = cd1.det_id
+	left JOIN code_detail cd1 ON ord.ord_sts = cd1.det_id
 	left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
 	left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
 	left JOIN code_detail cd4 ON opt.opt_height= cd4.det_id
-    ORDER BY ord.ord_id asc
+	WHERE ord.ord_sts = 'ord_sts_00' -- '수주 등록' 상태인 것들만 조회
+    ORDER BY cd1.det_sort asc
     OFFSET #{offset} ROWS
     FETCH NEXT #{limit} ROWS ONLY
-</select>
+	</select>
+
+	<select id="selectOrderDetail" parameterType="Map" resultType="Map">
+	SELECT
+		ord.ord_id,
+		prd.prd_nm,
+		cli.cli_nm,
+		ord.ord_cnt,
+		cd.det_nm,
+		TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE,
+		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE
+	FROM suju_order ord
+	left JOIN client cli ON ord.cli_id = cli.cli_id
+	left JOIN product_option opt ON ord.opt_id = opt.opt_id
+	left JOIN product prd ON prd.prd_cd = opt.prd_cd
+	left JOIN code_detail cd ON ord.ord_sts = cd.det_id
+	WHERE ord.ord_id = #{ord_id}
+	</select>
+
+
+
   	
   	
   

@@ -15,4 +15,7 @@ public interface OrderRequestsMapper {
 	    @Param("limit") int limit
 	);
 
+	// 주문 상세 조회 쿼리
+	List<Map<String, Object>> selectOrderDetail(@Param("prd_id") int prd_id);
+
 }

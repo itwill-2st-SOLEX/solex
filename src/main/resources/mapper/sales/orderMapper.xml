@@ -8,16 +8,15 @@
     	ord.ord_id,
         prd.prd_nm,
         cli.cli_nm,
-        odd.odd_cnt,
-        NVL(odd.odd_add, '') || ' ' || NVL(odd.odd_da, '') AS ODD_ADDRESS,
+        ord.ord_cnt,
+        NVL(ord.ord_add, '') || ' ' || NVL(ord.ord_da, '') AS ORD_ADDRESS,
         cd.det_nm,
-        TO_CHAR(odd.odd_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE
+        TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE
     FROM suju_order ord
-    left JOIN suju_order_detail odd ON odd.ord_id = ord.ord_id
     left JOIN client cli ON ord.cli_id = cli.cli_id
-    left JOIN product_option opt ON opt.opt_id = odd.opt_id
+    left JOIN product_option opt ON ord.opt_id = opt.opt_id
     left JOIN product prd ON prd.prd_cd = opt.prd_cd
-    left JOIN code_detail cd ON odd.odd_sts = cd.det_id
+    left JOIN code_detail cd ON ord.ord_sts = cd.det_id
     <if test="searchKeyword != null and searchKeyword != ''">
         AND (
             cli.cli_nm LIKE '%' || #{searchKeyword} || '%' OR  -- 거래처명 검색
@@ -88,13 +87,13 @@
         SELECT
 	        p.prd_nm,
 	        p.prd_cd,
-	        SUM(od.odd_cnt) AS total_sales
+	        SUM(ord.ord_cnt) AS total_sales
 	    FROM
 	        product p 
 	    JOIN
 	        product_option opt ON p.prd_cd = opt.prd_cd 
 	    JOIN
-	        suju_order_detail od ON opt.opt_id = od.opt_id 
+	        suju_order ord ON opt.opt_id = ord.opt_id 
 	    GROUP BY
 	        p.prd_nm, p.prd_cd
 	    ORDER BY
@@ -183,96 +182,38 @@
 	    SELECT
 	      b.mat_id,
 	      m.mat_nm,
-	      SUM(b.bom_cnt * d.odd_cnt) AS required_qty_existing,
+	      SUM(b.bom_cnt * ord.ord_cnt) AS required_qty_existing,
 	      (
-	        SELECT bom_cnt * #{odd_cnt}
+	        SELECT bom_cnt * #{ord_cnt}
 	        FROM bom b2
 	        WHERE b2.opt_id = #{opt_id}
 	          AND b2.mat_id = b.mat_id
 	      ) AS required_qty_mine,
-	      SUM(b.bom_cnt * d.odd_cnt) +
+	      SUM(b.bom_cnt * ord.ord_cnt) +
 	      (
-	        SELECT bom_cnt * #{odd_cnt}
+	        SELECT bom_cnt * #{ord_cnt}
 	        FROM bom b2
 	        WHERE b2.opt_id = #{opt_id}
 	          AND b2.mat_id = b.mat_id
 	      ) AS required_qty_total
-	    FROM suju_order_detail d
-	    JOIN bom b ON b.opt_id = d.opt_id
+	    FROM suju_order ord
+	    JOIN bom b ON b.opt_id = ord.opt_id
 	    JOIN material m ON m.mat_id = b.mat_id
-	    WHERE d.odd_sts IN ('ord_sts_00', 'ord_sts_01', 'ord_sts_02')
+	    WHERE ord.ord_sts IN ('ord_sts_00', 'ord_sts_01', 'ord_sts_02')
 	    GROUP BY b.mat_id, m.mat_nm
 	  ) r
 	  LEFT JOIN stock s ON s.item_id = r.mat_id AND s.stk_cat = 'stk_cat_02'
 	  WHERE (NVL(s.stk_cnt, 0) - r.required_qty_total) &lt; 0
 	</select>
 	
-	
-	
   	<!-- 주문 등록 트랜잭션 시작 -->
   	<!-- 1. 수주테이블 등록 -->
-  	<insert id="createSujuOrder" parameterType="map" useGeneratedKeys="true" keyColumn="ord_id"  keyProperty="ord_id">
-  		INSERT INTO suju_order(cli_id, emp_id, ord_reg_date)
-  			VALUES(#{cli_id},#{emp_id},SYSDATE)
-  	</insert>
-  	
-  	<!-- 2. 수주 상세테이블 등록 -->
-  	<insert id="createSujuOrderDetail">
-  		INSERT INTO suju_order_detail(
-  		  ord_id, opt_id, odd_cnt, odd_end_date, odd_sts, odd_pc, odd_add, odd_da, odd_pay, odd_pay_date, odd_mod_date 
-  		)
-  			VALUES(
-  			#{ord_id}, #{opt_id}, #{odd_cnt}, #{odd_end_date}, #{ord_sts}, #{odd_pc}, #{odd_add},#{odd_da}, #{odd_pay}, #{odd_pay_date}, SYSDATE)
-  	</insert>
-  	<!-- 주문 등록 트랜잭션 끝 -->
-  	
-  	
-  	<!-- 지금 사용안함 수주요청 테이블 메뉴에서 작업할때 필요함  -->  	
-  	<!-- 지금 사용안함 수주요청 테이블 메뉴에서 작업할때 필요함  -->  	
-  	<!-- 지금 사용안함 수주요청 테이블 메뉴에서 작업할때 필요함  -->  	
-  	<!-- 부족한 수량을 가져옴 -->
-  	<select id="getLackingMaterials" parameterType="map" resultType="map">
-	    SELECT
-	        b.mat_id,
-	        ( (b.bom_cnt * #{ord_cnt}) - s.stk_cnt ) AS lacking_qty
-	    FROM
-	        BOM b
-	    JOIN
-	        STOCK s ON b.mat_id = s.item_id
-	    WHERE
-	        b.prd_cd = #{prd_cd}
-	        AND s.stk_cnt &lt; (b.bom_cnt * #{ord_cnt})
-	        AND s.stk_cat = 'stk_cat_02'
-	</select>
-	
-	<!-- 부족한 수량을 발주 테이블에 insert -->
-	<insert id="createPurchaseRequest" parameterType="map">
-    INSERT INTO  (
-        mat_id,
-        emp_id,
-        mat_reg_date
-    ) VALUES (
-        #{ord_id},      -- 서비스단에서 추가해준 주문 ID
-        #{MAT_ID},      -- getLackingMaterials에서 조회한 자재 ID
-        #{lacking_qty}  -- getLackingMaterials에서 계산한 부족 수량
-    )
-	</insert>
-	
-  	<!-- 지금 사용안함 수주요청 테이블 메뉴에서 작업할때 필요함  -->  	
-  	<!-- 지금 사용안함 수주요청 테이블 메뉴에서 작업할때 필요함  -->  	
-  	<!-- 지금 사용안함 수주요청 테이블 메뉴에서 작업할때 필요함  -->  	
-	
-	
-  	
-  	
-  	
-	
+  	<insert id="createSujuOrder" parameterType="map">
+		INSERT INTO suju_order(cli_id, emp_id, ord_reg_date, opt_id, ord_cnt, ord_end_date, ord_sts, ord_pc, ord_add, ord_da, ord_pay, ord_pay_date, ord_mod_date ,isapproval)
+		VALUES(#{cli_id},#{emp_id},SYSDATE,#{opt_id},#{ord_cnt},#{ord_end_date},#{ord_sts},#{ord_pc},#{ord_add},#{ord_da},#{ord_pay},#{ord_pay_date},SYSDATE,'n')
+	</insert>	
+	<!-- 주문 등록 트랜잭션 끝 -->
 
-
-	
-  	
-  	
-	
   
   
   

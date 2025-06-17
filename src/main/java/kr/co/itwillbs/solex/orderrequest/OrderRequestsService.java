@@ -16,16 +16,17 @@ public class OrderRequestsService {
 
     @Autowired
     private OrderRequestsMapper orderRequestsMapper;
-
-
-
-
+	
 	public List<Map<String, Object>> getPagedGridDataAsMap(int page, int pageSize) {
 		int offset = page * pageSize;
         List<Map<String, Object>> resultList = orderRequestsMapper.selectPagedOrderDataAsMap(offset, pageSize);
 		return resultList;
 	}
 
+	public List<Map<String, Object>> getOrderDetail(int prd_id) {
+		List<Map<String, Object>> resultList = orderRequestsMapper.selectOrderDetail(prd_id);
+		return resultList;
+	}
     
 
 }

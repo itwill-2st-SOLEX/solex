@@ -7,6 +7,8 @@ let isLoading = false; // 데이터 로딩 중인지 여부 (중복 요청 방�
 let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 스크롤 종료 조건)
 
 
+
+
 // 2. ToastUI Grid 생성 (변경 없음)
 const grid = new tui.Grid({
     el: document.getElementById('grid'),
@@ -16,13 +18,15 @@ const grid = new tui.Grid({
     data: [], // 초기 데이터는 비어있음
     columns: [
         { header: '수주 번호', name: 'ORD_ID', width: 100,align: 'center', sortable: true },
-        { header: '제품명', name: 'PRD_NM', width: 200, sortable: true },
         { header: '거래처', name: 'CLI_NM', align: 'center', sortable: true },
-        { header: '주문 수량', name: 'ODD_CNT', align: 'center', sortable: true },
-        { header: '납품 요청일', name: 'ODD_END_DATE', align: 'center', sortable: true },
-        { header: '생산 여부', name: 'isProdPossible', align: 'center', sortable: true },
-        { header: '승인 여부', name: 'isApproval', align: 'center', sortable: true },
-        { header: '진행 상태', name: 'DET_NM', align: 'center', sortable: true }
+        { header: '제품명', name: 'PRD_NM', width: 200, align: 'center', sortable: true },
+        { header: '컬러', name: 'OPT_COLOR', width: 80, align: 'center', sortable: true },
+        { header: '사이즈', name: 'OPT_SIZE', width: 80, align: 'center', sortable: true },
+        { header: '높이', name: 'OPT_HEIGHT', width: 80, align: 'center', sortable: true },
+        { header: '주문 수량', name: 'ORD_CNT', align: 'center', sortable: true },
+        { header: '진행 현황', name: 'DET_NM', align: 'center', sortable: true },
+        { header: '원자재 재고 여부', name: 'PRODUCTION_STATUS', align: 'center', sortable: true },
+        { header: '납품 요청일', name: 'ORD_END_DATE', align: 'center', sortable: true }
     ],
 });
 
@@ -45,12 +49,12 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
   
 	grid.on('click', (ev) => {
     // 컬럼 id를 선택을 하여 모달을 띄운다.
-		if (ev.columnName === 'doc_id') {
+		if (ev.columnName === 'DET_NM') {
 			const rowData = grid.getRow(ev.rowKey);
-			const docTypeCode = rowData.doc_type_code;
-      // 어떤 데이터를 줄지. 대충 id에 관한 값을 넘겨주면 됨.
-      const selectedId = "";
-			DetailModal(selectedId);
+			const order_id = rowData.ORD_ID;
+      console.log(order_id);  
+      const selectedId = order_id;
+      DetailModal(selectedId);
 		}
 	});
 
@@ -73,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
 
 });
 
+
 // 초기 grid 테이블에 들어갈 list
 async function fetchGridData(page = currentPage) {
 
@@ -94,13 +99,6 @@ async function fetchGridData(page = currentPage) {
     
     // 3. 응답 데이터를 JSON으로 파싱
     const data = await response.json();
-    console.log(data);
-
-    data.forEach(item => {
-      
-      item.isApproval = item.isApproval === 'y' ? '승인' : '미승인';
-    });
-
     console.log(data);
     
     // 4. 그리드 데이터 업데이트
@@ -127,7 +125,10 @@ async function fetchGridData(page = currentPage) {
   }
 }
 
-async function openDetailModal(selectedId) {
+
+
+
+async function DetailModal(selectedId) {
   const url = `/SOLEX/order-requests/${selectedId}`;
 
 
