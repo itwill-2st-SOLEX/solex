@@ -24,7 +24,7 @@ public class OrderService {
     public List<Map<String, Object>> getPagedGridDataAsMap(int page, int pageSize, String searchKeyword) { // 파라미터 변경
         int offset = page * pageSize;
         List<Map<String, Object>> resultList = orderMapper.selectPagedOrderDataAsMap(offset, pageSize, searchKeyword);
-
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> resultList={}" ,resultList);
         // Map의 각 항목을 순회하며 날짜 필드 포맷팅
         // 메서드 내에서 생성
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd"); 
@@ -104,7 +104,7 @@ public class OrderService {
 		}
 		 
 		// 2. 주문 수량 추출
-        int orderCount = Integer.parseInt(orderData.get("odd_cnt").toString());
+        int orderCount = Integer.parseInt(orderData.get("ord_cnt").toString());
         
 		// 3. 자재 부족 계산
         return orderMapper.getLackingMaterialsWithMine(opt_id, orderCount);
@@ -115,13 +115,15 @@ public class OrderService {
 	
 	@Transactional
 	public int createOrderProcess(Map<String, Object> orderData) {
+		String opt_id = orderMapper.getOptionIdByCombination(orderData);
 		
-	    // 1. 주문 마스터 테이블에 INSERT
-	    orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
-	    String opt_id = orderMapper.getOptionIdByCombination(orderData);
-		// 수주 상세 등록
+		// 나중에 여기서 바로 출고라는 결과값이 넘어오묜 그걸 비교해서 sts_00을 나타내는게 어떤가 sts_07로
 		orderData.put("ord_sts", "ord_sts_00"); // 상태값을 '00'로 설정 상태 : 수주등록(검토 느낌s)
-		orderData.put("opt_id", opt_id); // 상태값을 '00'로 설정 상태 : 수주등록(검토 느낌s)
+		orderData.put("opt_id", opt_id);
+		// 1. 주문 마스터 테이블에 INSERT
+		return orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
+		
+		// 수주 상세 등록
 		
 		// 이후 수주 요청 관리에서  밑에 있는 내용들이 실행됨
 		
@@ -157,7 +159,8 @@ public class OrderService {
 		//   수주 요청메뉴에서는 보이지 않음.
 		//   주문 등록 페이지에서는 반려인 상태로 보임
 	    
-	    return orderMapper.createSujuOrderDetail(orderData);
+		// 업데이트 수주 디테일
+	    
 	}
 
 }
