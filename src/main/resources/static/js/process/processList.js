@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 	
+	document.querySelector(".tab-btn[data-tab='process-tab']").click(); // 초기 탭 강제 실행
+	
 	// 탭 이동 이벤트
 	document.querySelectorAll(".tab-btn").forEach(button => {
 		button.addEventListener("click", function () {
@@ -13,17 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
 			this.classList.add("active");
 			
 			// 탭에 따라 해당 그리드 초기화 또는 레이아웃 리프레시
-			if (selected === 'category-process-tab') {
-				initProcessGrid();
-				window.category_list_grid.refreshLayout();
-				window.category_process_grid.refreshLayout();
+			if (selected === 'type-tab') {
+				typeProcess.initProcessGrid();
 			} else if (selected === 'process-tab') {
-				initProcessGrid();
 				window.process_grid.refreshLayout();
+				window.process_grid.readData(1);
 			}
 		});
 	});
-	
+
 	// 공정정보 그리드
 	window.process_grid = new tui.Grid({
 		el: document.getElementById('process-grid'),
@@ -34,56 +34,43 @@ document.addEventListener('DOMContentLoaded', () => {
 			type: 'scroll',
 			perPage: 20
 		},
-		data: [],
+		data: {
+			api: {
+				readData: {
+					url: '/SOLEX/process/data',
+					method: 'GET',
+					responseHandler: function(res) {
+						console.log("서버 응답:", res);  // 콘솔로 확인
+						debugger;
+
+						return {
+							result: true, // ❗❗ 이게 없으면 TOAST UI Grid는 무시함
+							data: res.data || [],
+							pagination: res.pagination || { page: 1, totalCount: 0 }
+						};
+					}
+				}
+			}
+		},
 		columns : [
-			{ header: '순번', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-			{ header: '공정코드', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-			{ header: '공정명', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-			{ header: '공정설명', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-			{ header: '작업장명', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-			{ header: '사용여부', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' }
+			{ header: '순번', name: 'PRC_ID', editor: 'text', align: 'center' },
+			{ header: '공정코드', name: 'PRC_CD', editor: 'text', align: 'center' },
+			{ header: '공정명', name: 'PRC_NM', editor: 'text', align: 'center' },
+			{ header: '공정설명', name: 'PRC_DES', editor: 'text', align: 'center' },
+			{ header: '사용여부', name: 'PRC_YN', editor: 'text', align: 'center' }
 		]
 	});
 	
-	function initProcessGrid() {
-//		if (window.process_grid) return;
-		// 카테고리 리스트 그리드
-		window.category_list_grid = new tui.Grid({
-			el: document.getElementById('category-list-grid'),
-			bodyHeight: 600,
-			scrollY: true,
-			pageOptions: {
-				useClient: false,
-				type: 'scroll',
-				perPage: 20
-			},
-			data: [],
-			columns : [
-				{ header: '순번', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-				{ header: '카테고리명', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' }
-			]
-		});
-		
-		// 카테고리별 공정순서 그리드
-		window.category_process_grid = new tui.Grid({
-			el: document.getElementById('category-process-grid'),
-			bodyHeight: 600,
-			scrollY: true,
-			pageOptions: {
-				useClient: false,
-				type: 'scroll',
-				perPage: 20
-			},
-			data: [],
-			columns : [
-				{ header: '순번', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-				{ header: '공정코드', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-				{ header: '공정명', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-				{ header: '공정설명', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-				{ header: '작업순서', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' },
-				{ header: '사용여부', name: 'PRC_ID', editor: 'text', sortable: true, align: 'center' }
-			]
-		});
-	}
-			
+	// ✅ 추가 버튼
+	document.querySelector('#prs-add').addEventListener('click', () => {
+		process_grid.prependRow({
+			PRC_ID: '',
+			PRC_CD: '',
+			PRC_NM: '',
+			PRC_DES: '',
+			PRC_YN: '',
+			__isNew: true  // 새 행 여부
+		}, { focus: true });
+	});
+	
 });

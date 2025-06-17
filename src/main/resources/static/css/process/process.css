@@ -1,14 +1,37 @@
 @charset "UTF-8";
 
-#category-tab {
+#type-tab {
     flex-direction: row !important;
     justify-content: space-between !important;
+    align-items: flex-end !important;
+    gap: 15px;
 }
 
-.category-list-area {
-	width: 45%;
+.process-area {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
 }
 
-.catProcess-area {
-	width: 45%;
+.type-list-area {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+	width: 50%;
+	height: auto;
+}
+
+.typeProcess-area {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+	width: 50%;
+	height: auto;
+}
+
+.btn-area {
+	display: flex;
+    justify-content: flex-end;
+    gap: 15px;
 }
