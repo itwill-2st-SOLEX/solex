@@ -4,9 +4,69 @@
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.products.ProductsMapper">
+
+
+	<!-- product 무한스크롤 -->
+	<select id="selectPagedProductList" resultType="map">
+	    SELECT
+	    	   p.prd_cd,
+			   p.prd_nm, 
+			   cd_type.det_nm PRD_TYPE, -- 유형
+			   cd_unit.det_nm PRD_UNIT, -- 단위
+			   cd_col.det_nm PRD_COLOR, -- 색상
+			   cd_size.det_nm PRD_SIZE, -- 사이즈
+			   cd_height.det_nm PRD_HEIGHT -- 굽
+	      FROM product p
+	    
+	 LEFT JOIN product_option o 
+	        ON p.prd_cd = o.prd_cd
+	 LEFT JOIN code_detail cd_col 
+	      	ON cd_col.det_id = o.opt_color
+	 LEFT JOIN code_detail cd_size 
+	 	  	ON cd_size.det_id = o.opt_size
+	 LEFT JOIN code_detail cd_height 
+	 		ON cd_height.det_id = o.opt_height
+		
+		 JOIN code_detail cd_type 
+		   ON cd_type.det_id = p.prd_type
+		 JOIN code_detail cd_unit 
+		   ON cd_unit.det_id = p.prd_unit
+	    <where>
+	        <if test="prdYn != null and prdYn != ''">
+	           prd_yn = #{prdYn}
+	        </if>
+	    </where>
+	    OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
+	</select>
+	
+	<select id="selectTotalProductCount" resultType="int">
+		SELECT COUNT(*) 
+		  FROM product p
+	 LEFT JOIN product_option o 
+     		ON p.prd_cd = o.prd_cd
+		<where>
+			<if test="prdYn != null and prdYn != ''">
+			prd_yn = #{prdYn}
+			</if>
+		</where>
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
     <select id="selectProductsLists" resultType="java.util.Map">
-    	SELECT * 
-    	  FROM product
+    	SELECT COUNT(*) 
+    	  FROM product p
+     LEFT JOIN product_option o 
+     		ON p.prd_cd = o.prd_cd
 		 WHERE prd_yn = 'Y'
     </select> 
 </mapper>	

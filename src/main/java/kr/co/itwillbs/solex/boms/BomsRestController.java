@@ -2,6 +2,7 @@ package kr.co.itwillbs.solex.boms;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,20 +32,28 @@ public class BomsRestController {
 	@Autowired
 	private BomsService bomsService;
 	
-	// 상품 list
+	// BOM list
 	@GetMapping("/bomList")
-	public ResponseEntity<List<Map<String, Object>>> getBomsList( // 반환 타입을 DTO로 변경
-			@RequestParam(name = "page", required = false) Integer page
-			) {
-		
-		List<Map<String, Object>> getBomsList = bomsService.getBomsList();
-		System.out.println("rest api + " + getBomsList);
-		
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("page", page);
-	    params.put("empId", loginEmpId);
-        
-	    return ResponseEntity.ok(getBomsList);
+	@ResponseBody
+	public Map<String, Object> getPagedDetailCodeList(
+	    @RequestParam(name = "opt_id") String opt_id,
+	    @RequestParam(name = "page", defaultValue = "1") int page,
+	    @RequestParam(name = "perPage") int perPage
+	) {
+	    int offset = (page - 1) * perPage;
+	    System.out.println("offset ?? " + offset);
+	    List<Map<String, Object>> rows = bomsService.getBomList(opt_id, offset, perPage);
+	    
+	    
+	    System.out.println("getBomList?? " + rows);
+	    if (rows == null) rows = new ArrayList<>();
+
+	    int totalCount = bomsService.getTotalBomCount(opt_id);
+	    
+	    Map<String, Object> pagination = Map.of("page", page, "totalCount", totalCount);
+	    Map<String, Object> data = Map.of("contents", rows, "pagination", pagination);
+
+	    return Map.of("result", true, "data", data);
 	}
 	
 	
