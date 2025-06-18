@@ -19,18 +19,18 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/operator")
-public class OperatorController {
+public class WorkProcessController {
 
 	//@Autowired
 	//private NoticeService noticeService;
 	
-	Long empId = 11L;
+	Long empId = 26L;
 
 
     // 공지사항 페이지로 단순 이동
-    @GetMapping("/operatorTask")
-    public String getNoticePage() {
-        return "operator/operatorTask";
+    @GetMapping("/workProcess")
+    public String getworkProcessPage() {
+        return "operator/workProcess";
     }
     
 

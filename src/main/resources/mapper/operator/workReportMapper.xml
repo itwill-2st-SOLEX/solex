@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.itwillbs.solex.operator.WorkProcessMapper">	
+  	
+  	<!-- with절 정의 -->
+	<!-- 사원 정보 찾아오기 -->
+<!-- 	<sql id="empWith">
+		WITH my_emp AS (
+		    SELECT e.emp_dep_nm, e.emp_team_nm, emp.emp_dep_cd, emp.emp_team_cd
+		    FROM VIEW_EMPLOYEE e
+		    JOIN EMPLOYEE emp ON e.emp_id = emp.emp_id
+		    WHERE e.emp_id = 26
+		)
+	</sql> -->
+	
+	
+	
+  	<!-- 로그인한 사람에 해당하는 공정 정보 가져오기 -->
+  	<select id="getWpSummary">
+  	                
+		SELECT DISTINCT pr.prc_cd,         <!-- 공정코드 -->
+		       		    pr.prc_nm,         <!-- 공정이름 -->
+		       		    cd1.det_nm || ' ' || cd2.det_nm AS dep_nm,  <!-- 부서 + 팀명 -->
+		       		    qi.qua_nm,          <!-- 품질검사명 -->
+		       		    ve.emp_id
+  		FROM   process pr JOIN work_order wo      ON pr.prc_id = wo.prc_id 
+                  		  JOIN work_process wp    ON wo.wrk_id = wp.wrk_id 
+  						  JOIN quality_item qi    ON pr.qua_id = qi.qua_id
+  						  JOIN code_detail cd1    ON pr.det_id = cd1.det_id      
+  						  JOIN code_detail cd2    ON wp.wpo_team = cd2.det_id   
+  						  JOIN view_employee ve   ON ve.emp_dep_nm = cd1.det_nm
+                         									AND ve.emp_team_nm = cd2.det_nm
+ 		WHERE ve.emp_id = #{empId}
+  	</select>
+  	
+  	<!-- 자신에게 해당하는 작업현황 전체 목록 가져오기 -->
+  	<select id="getWpList">
+		SELECT
+		    wo.wrk_id, 			<!-- 작업지시ID  -->
+		    vs.prd_cd,			<!-- 공정ID -->
+		    vs.prd_nm,			<!-- 제품명 -->
+		    
+		    vs.prd_color,		<!-- 제품유형(색상) -->
+		    vs.prd_size,		<!-- 제품유형(사이즈) -->
+		    vs.prd_height,		<!-- 제품유형(굽높이) -->
+		    vs.ord_cnt,			<!-- 주문수량 -->
+		    
+		    wp.wpo_ocount,		<!-- 작업지시수량 -->
+            wp.wpo_jcount,		<!-- 작업완료수량 -->
+            wp.wpo_bcount,		<!-- 불량수량 -->
+		
+		    cd.det_nm AS odd_status,	<!-- 생산상태 -->
+			vs.ord_end_date,		<!-- 납품기일 -->
+		    wp.wpo_team,		<!-- 팀 -->
+		    wp.wpo_step			<!-- 작업순서 -->
+		
+		FROM
+		    work_order wo			<!-- 작업지시 -->
+		    JOIN process p ON wo.prc_id = p.prc_id			<!-- 공정-작업지시 -->
+		    JOIN work_process wp ON wp.wrk_id = wo.wrk_id		<!-- 공정-작업순서 -->
+		    JOIN vw_suju_summary vs ON wo.ord_id = vs.ord_id	<!-- 공정-제품상세(수주 뷰) -->
+		    LEFT JOIN code_detail cd ON wp.wpo_status = cd.det_id	<!-- 상세공코-작업상태 -->
+		
+		JOIN (			<!-- 접속한 사람의 부서와 팀에 해당하는 자료 조회하기 위한 서브쿼리 -->
+	        SELECT e.emp_dep_nm, e.emp_team_nm, emp.emp_dep_cd, emp.emp_team_cd
+	        FROM VIEW_EMPLOYEE e
+	        JOIN EMPLOYEE emp ON e.emp_id = emp.emp_id
+	        WHERE e.emp_id = #{empId}
+	    ) my_emp ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
+		             AND p.det_id = my_emp.emp_dep_cd
+
+		ORDER BY
+		    wo.wrk_id DESC
+  		
+  	</select>
+  	
+  	<!-- 작업지시 전체 개수 가져오기(무한스크롤) -->
+  	<select id="getWpCount">
+  		SELECT COUNT(*) AS ALLCOUNT
+		FROM
+		    work_order wo			<!-- 작업지시 -->
+		    JOIN process p ON wo.prc_id = p.prc_id			<!-- 공정-작업지시 -->
+		    JOIN work_process wp ON wp.wrk_id = wo.wrk_id		<!-- 공정-작업순서 -->
+		    JOIN vw_suju_summary vs ON wo.ord_id = vs.ord_id	<!-- 공정-제품상세(수주 뷰) -->
+		    LEFT JOIN code_detail cd ON wp.wpo_status = cd.det_id	<!-- 상세공코-작업상태 -->
+		
+		JOIN (			<!-- 접속한 사람의 부서와 팀에 해당하는 자료 조회하기 위한 서브쿼리 -->
+	        SELECT e.emp_dep_nm, e.emp_team_nm, emp.emp_dep_cd, emp.emp_team_cd
+	        FROM VIEW_EMPLOYEE e
+	        JOIN EMPLOYEE emp ON e.emp_id = emp.emp_id
+	        WHERE e.emp_id = #{empId}
+	    ) my_emp ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
+		             AND p.det_id = my_emp.emp_dep_cd
+	</select>
+  </mapper>
+	

@@ -9,19 +9,35 @@ let empId = null;
 const grid = new tui.Grid({
     el: document.getElementById('grid'),
     bodyHeight: gridHeight,
+	rowHeaders: ['rowNum'],
     scrollY: true,
     scrollX: false,
     data: [],
+	header: {
+	        height: 80,
+	        complexColumns: [
+				{
+	                header: '옵션',
+	                name: 'optionGroup',
+	                childNames: ['prdColor', 'prdSize', 'prdHeight']
+	            }
+	        ]
+	      },
     columns: [
-		{ header: '번호', name: 'rowNum', width: 100, align: 'center', sortable: true },
-        { header: '작업지시번호', name: '', align: 'center', sortable: true },
-		{ header: '제품코드', name: '', align: 'center',  sortable: true },
-        { header: '작업지시수량', name: '', align: 'center',  sortable: true },
-        { header: '작업수량', name: '', align: 'center',  sortable: true },
-        { header: '불량수량', name: '',  sortable: true },
-		{ header: '작업률', name: '',  sortable: true },
-		{ header: '상태', name: '',  sortable: true }
-
+		{ header: '작업지시번호', name: 'wrkId', align: 'center' },
+		{ header: '제품코드', name: 'prdCd', align: 'center', filter: 'select' },
+		{ header: '제품명', name: 'prdNm', align: 'center', filter: 'select' , width: 200},
+		
+		{ header: '컬러', name: 'prdColor', align: 'center', filter: 'select' , width: 80},
+		{ header: '사이즈', name: 'prdSize', align: 'center', filter: 'select' , width: 80},
+		{ header: '굽높이', name: 'prdHeight', align: 'center', filter: 'select' , width: 80},
+		
+		{ header: '작업지시수량', name: 'wpoOcount', align: 'center', filter: 'select' },
+		{ header: '작업완료수량', name: 'wpoJcount', align: 'center', filter: 'select' },
+		{ header: '불량수량', name: 'wpoBcount', align: 'center', filter: 'select' },
+		{ header: '작업진행률', name: 'oddPer', align: 'center', filter: 'select' },
+		{ header: '진행상태', name: 'oddStatus', align: 'center', filter: 'select' },
+		{ header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: 'true' }
     ],
 	
 
@@ -29,7 +45,7 @@ const grid = new tui.Grid({
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
-	operatorSummary();
+	wpSummary();
 
 });
 
@@ -41,7 +57,7 @@ function bindScrollEvent() {
 	//무한스크롤시 검색어 유지를 위해 재전달
     grid.on('scrollEnd', () => {
         //const keyword = document.getElementById('searchInput').value.trim();
-        operatorDetail(currentPage);
+        wpDetail(currentPage);
     });
 }
 
@@ -86,9 +102,9 @@ function formatter(date, includeTime = false) {
 
 
 //공정 요약 정보
-async function operatorSummary() {
+async function wpSummary() {
 	try {
-			let url = `/SOLEX/operator/api/summary`;
+			let url = `/SOLEX/operator/api/wpSummary`;
 			
 	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
 	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
@@ -99,10 +115,10 @@ async function operatorSummary() {
 			
 			document.getElementById('prcCode').textContent = data.PRC_CD || '-';
 			document.getElementById('prcName').textContent = data.PRC_NM  || '-';
-			document.getElementById('emp_name').textContent = data.DEP_NM || '-';
+			document.getElementById('empName').textContent = data.DEP_NM || '-';
 			document.getElementById('prcTest').textContent = data.QUA_NM || '-';
 		
-			//operatorDetail(currentPage);
+			wpList(currentPage);
 
 	    } catch (e) {
 	        console.error('fetch 에러 : ', e);
@@ -110,29 +126,33 @@ async function operatorSummary() {
 }
 
 // 게시글 목록 불러오기
-async function operatorDetail(page) {
+async function wpList(page) {
     try {
 		
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/operator/api/detail?page=${page}&size=${pageSize}&empId=${empId}`;
+		let url = `/SOLEX/operator/api/wpList?page=${page}&size=${pageSize}&empId=${empId}`;
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 
 		const list = data.list;
-		const operatorCount = data.operatorCount;
+		const wpCount = data.wpCount;
 		
         const gridData = list.map((n, idx) => ({
-			rowNum: operatorCount - (page * pageSize + idx), // 역순 번호 계산
-			leaType: n.LEA_TYPE,
-			vacTotal: n.VAC_TOTAL,
-			vacUsed: n.VAC_USED,
-			vacRemain: n.VAC_REMAIN,
-            leaStartDate: formatter(new Date(n.LEA_START_DATE))  || '-',
-            leaEndDate: formatter(new Date(n.LEA_END_DATE))  || '-',
-            leaUsedDay: n.LEA_USED_DAY,
-            leaCon: n.LEA_CON
+			rowNum: wpCount - (page * pageSize + idx), // 역순 번호 계산
+			wrkId: n.WRK_ID,
+			prdCd: n.PRD_CD,
+			prdNm: n.PRD_NM,
+			prdColor: n.PRD_COLOR,
+            prdSize: n.PRD_SIZE,
+            prdHeight: n.PRD_HEIGHT,
+            wpoOcount: n.WPO_OCOUNT,
+            wpoJcount: n.WPO_JCOUNT,
+			wpoBcount: n.WPO_BCOUNT,
+			oddPer: n.ODD_PER,
+			oddStatus: n.ODD_STATUS,
+			ordEndDate: formatter(new Date(n.ORD_END_DATE))  || '-'
         }));
 		
 		//첫 페이지면 초기화 후 새로 보여줌
