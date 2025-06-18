@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 						return item ? item.text : value;
 					},
 					align: 'center',
-					width: 150
+					width: 100
 				},
 				{
 					header: '실시검사',
@@ -216,6 +216,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 			console.error(err);
 			alert('저장 중 오류 발생');
 		});
+	});
+	
+	// ✅ 삭제버튼
+	document.querySelector('#prs-delete').addEventListener('click', () => {
+		
+		const checkedRows = process_grid.getCheckedRows(); // ✔ row 전체 객체 가져옴
+		if (checkedRows.length === 0) {
+			alert('삭제할 행을 선택해주세요.');
+			return;
+		}
+
+		// ✅ 새로 추가된 행만 필터링
+		const onlyNewRowKeys = checkedRows
+			.filter(row => row.__isNew)
+			.map(row => row.rowKey);
+
+		if (onlyNewRowKeys.length === 0) {
+			alert('추가된 행만 삭제할 수 있습니다.');
+			return;
+		}
+		
+		onlyNewRowKeys
+			.sort((a, b) => b - a)
+			.forEach(rowKey => {
+				process_grid.removeRow(rowKey);
+			});
 	});
 	
 });

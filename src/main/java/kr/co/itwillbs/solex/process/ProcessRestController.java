@@ -63,13 +63,10 @@ public class ProcessRestController {
 	
 	// 공정정보 신규 등록 및 수정
 	@PostMapping("process/save")
-	public Map<String, Object> savePrecess(@RequestBody Map<String, List<Map<String, Object>>> map) {
+	public Map<String, Object> saveProcess(@RequestBody Map<String, List<Map<String, Object>>> map) {
 
 	    List<Map<String, Object>> insertList = map.get("createdRows");
 	    List<Map<String, Object>> updateList = map.get("updatedRows");
-	    
-	    System.out.println("updateList : " + updateList);
-	    // 사용여부만 수정할 시 부서명, 검사명이 코드값이 아닌 한글로 넘어오게됨
 	    
 	    if ((insertList == null || insertList.isEmpty()) && (updateList == null || updateList.isEmpty())) {
 	        return Map.of("success", false, "message", "저장할 데이터가 없습니다.");
@@ -87,6 +84,35 @@ public class ProcessRestController {
 
 	    return Map.of("success", true);
 	}
+	
+	// 제품유형 리스트 무한스크롤
+	@GetMapping("product/type/list")
+	public Map<String, Object> getPagedPrdTypeList(@RequestParam Map<String, String> map) {
+		
+		int page = Integer.parseInt(map.getOrDefault("page", "1"));
+	    int perPage = Integer.parseInt(map.getOrDefault("perPage", "20"));
+	    int offset = (page - 1) * perPage;
+	    
+	    List<Map<String, Object>> rows = processService.selectPagedPrdTypeList(perPage, offset);
+	    if (rows == null) rows = new ArrayList<>();
+	    
+	    int totalCount = processService.selectTotalPrdTypeCount();
+	    
+	    Map<String, Object> pagination = new HashMap<>();
+	    pagination.put("page", page);
+	    pagination.put("totalCount", totalCount);
+	    
+	    Map<String, Object> data = new HashMap<>();
+	    data.put("contents", rows);
+	    data.put("pagination", pagination);
+	    
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("result", true);
+	    result.put("data", data);
+		
+		return result;
+	}
+	
 	
 	
 	

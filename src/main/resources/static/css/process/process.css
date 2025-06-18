@@ -1,5 +1,9 @@
 @charset "UTF-8";
 
+.content-area {
+	padding: 20px;
+}
+
 #type-tab {
     flex-direction: row !important;
     justify-content: space-between !important;
@@ -14,7 +18,7 @@
     width: 100%;
 }
 
-.type-list-area {
+.type-list-area, .typeProcess-area {
 	display: flex;
     flex-direction: column;
     gap: 15px;
@@ -22,12 +26,15 @@
 	height: auto;
 }
 
-.typeProcess-area {
+.title-area {
 	display: flex;
-    flex-direction: column;
-    gap: 15px;
-	width: 50%;
-	height: auto;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.sub-title {
+	font-size: 24px;
+	font-weight: bold;
 }
 
 .btn-area {

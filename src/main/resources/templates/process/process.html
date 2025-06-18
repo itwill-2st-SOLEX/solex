@@ -13,47 +13,55 @@
 		<!-- 콘텐츠 영역 -->
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 		
-			<h3>공정정보</h3>
-			
-			<!-- 탭 버튼 영역 -->
-			<div class="tab-buttons">
-				<button class="btn tab-btn active" data-tab="process-tab">공정정보</button>
-				<button class="btn tab-btn" data-tab="type-tab">제품유형별 공정순서</button>
-			</div>
-			
-			<!-- 공정정보 영역 -->
-			<div id="process-tab" class="tab-content">
-				<div class="process-area">
-					<div class="btn-area">
-						<button id="prs-add" class="btn custom-btn-blue add-btn">추가</button>
-						<button id="prs-save" class="btn btn-info save-btn">저장</button>
-						<button id="prs-delete" class="btn btn-danger delete-btn">삭제</button>
-					</div>
-					<div class="grid-area">
-						<div id="process-grid"></div>
+			<div class="content-area">
+				<h3>공정정보</h3>
+				
+				<!-- 탭 버튼 영역 -->
+				<div class="tab-buttons">
+					<button class="btn tab-btn active" data-tab="process-tab">공정정보</button>
+					<button class="btn tab-btn" data-tab="type-tab">제품유형별 공정순서</button>
+				</div>
+				
+				<!-- 공정정보 영역 -->
+				<div id="process-tab" class="tab-content">
+					<div class="process-area">
+						<div class="btn-area">
+							<button id="prs-add" class="btn custom-btn-blue add-btn">추가</button>
+							<button id="prs-save" class="btn btn-info save-btn">저장</button>
+							<button id="prs-delete" class="btn btn-danger delete-btn">삭제</button>
+						</div>
+						<div class="grid-area">
+							<div id="process-grid"></div>
+						</div>
 					</div>
 				</div>
-			</div>
-			
-			<!-- 제품유형별 공정순서 영역 -->
-			<div id="type-tab" class="tab-content" style="display: none;">
-				<div class="type-list-area">
-					<div class="grid-area">
-						<div id="type-list-grid"></div>
+				
+				<!-- 제품유형별 공정순서 영역 -->
+				<div id="type-tab" class="tab-content" style="display: none;">
+					<div class="type-list-area">
+						<div class="title-area">
+							<span class="sub-title">제품유형</span>
+						</div>
+						<div class="grid-area">
+							<div id="type-list-grid"></div>
+						</div>
+					</div>
+					<div class="typeProcess-area">
+						<div class="title-area">
+							<span class="sub-title">공정순서</span>
+							<div class="btn-area">
+								<button id="tp-add" class="btn custom-btn-blue add-btn">추가</button>
+								<button id="tp-save" class="btn btn-info save-btn">저장</button>
+								<button id="tp-delete" class="btn btn-danger delete-btn">삭제</button>
+							</div>
+						</div>
+						<div class="grid-area">
+							<div id="type-process-grid"></div>
+						</div>
 					</div>
 				</div>
-				<div class="typeProcess-area">
-					<div class="btn-area">
-						<button id="tp-add" class="btn custom-btn-blue add-btn">추가</button>
-						<button id="tp-save" class="btn btn-info save-btn">저장</button>
-						<button id="tp-delete" class="btn btn-danger delete-btn">삭제</button>
-					</div>
-					<div class="grid-area">
-						<div id="type-process-grid"></div>
-					</div>
-				</div>
+				
 			</div>
-			
 		</div>
 	
 		<th:block layout:fragment="script">

@@ -76,4 +76,13 @@ public class ProcessService {
 		processMapper.updateprocesses(updateList);
 	}
 
+	// 제품유형 리스트 무한스크롤
+	public List<Map<String, Object>> selectPagedPrdTypeList(int perPage, int offset) {
+		return processMapper.selectPagedPrdTypeList(perPage, offset);
+	}
+
+	public int selectTotalPrdTypeCount() {
+		return processMapper.selectTotalPrdTypeCount();
+	}
+
 }

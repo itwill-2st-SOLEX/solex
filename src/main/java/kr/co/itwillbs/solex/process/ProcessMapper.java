@@ -25,5 +25,10 @@ public interface ProcessMapper {
 
 	// 공정 기존 수정
 	void updateprocesses(List<Map<String, Object>> updateList);
+	
+	// 제품유형 리스트 무한스크롤
+	List<Map<String, Object>> selectPagedPrdTypeList(@Param("perPage") int perPage, @Param("offset") int offset);
+
+	int selectTotalPrdTypeCount();
     
 }
