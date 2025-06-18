@@ -25,6 +25,7 @@ let INNER_TUI_GRID_INSTANCE;
 let uniqueColors,uniqueSizes,uniqueHeights;
 let selectProductNm = "";
 let productVirtualSelect;
+let originalOptionsData = []; // <<--- 이 줄을 추가해주세요.
 
 // 2. 스크립트 시작점
 document.addEventListener('DOMContentLoaded', init);
@@ -56,7 +57,7 @@ function initializeGrid() {
             { header: '수주 번호', name: 'ORD_ID', width: 100, align: 'center', sortable: true },
             { header: '상품명', name: 'PRD_NM', width: 200, sortable: true },
             { header: '거래처 명', name: 'CLI_NM', align: 'center', sortable: true },
-            { header: '주문 수량', name: 'ORD_CNT', align: 'center', sortable: true },
+            { header: '납품 요청일', name: 'ORD_END_DATE', align: 'center', sortable: true },
             { header: '배송지', name: 'ORD_ADDRESS', width: 300, align: 'center', sortable: true },
             { header: '진행 상태', name: 'DET_NM', align: 'center', sortable: true },
             { header: '상태 변경일', name: 'ORD_MOD_DATE', align: 'center', sortable: true }
@@ -148,13 +149,30 @@ function initializeOrderModal() {
       resetOrderForm();
       setupModalSelectBoxes();
       initializeInnerGrid();
+      initDate();
   });
 
   myModalElement.addEventListener('hidden.bs.modal', () => {
-      const clientSelect = document.getElementById('cli_nm_virtual_select');
-      const productSelect = document.getElementById('prd_nm_virtual_select');
-      if (clientSelect?.virtualSelectInstance) clientSelect.virtualSelectInstance.destroy();
-      if (productSelect?.virtualSelectInstance) productSelect.virtualSelectInstance.destroy();
+      // 거래처 VirtualSelect 인스턴스 완전 파괴
+      if (clientVirtualSelect) {
+        clientVirtualSelect.destroy();
+        clientVirtualSelect = null;
+    }
+    // DOM 요소에 직접 추가된 참조도 만약을 위해 제거
+    const clientEl = document.getElementById('cli_nm_virtual_select');
+    if (clientEl?.virtualSelectInstance) {
+        clientEl.virtualSelectInstance = null;
+    }
+
+    // 제품명 VirtualSelect 인스턴스 완전 파괴
+    if (productVirtualSelect) {
+        productVirtualSelect.destroy();
+        productVirtualSelect = null;
+    }
+    const productEl = document.getElementById('prd_nm_virtual_select');
+    if (productEl?.virtualSelectInstance) {
+        productEl.virtualSelectInstance = null;
+    }
   });
 
   document.getElementById('openOrderModalBtn')?.addEventListener('click', () => orderRegisterModalInstance.show());
@@ -227,52 +245,87 @@ function bindGlobalEventListeners() {
 }
 
 function addRowToInnerGrid() {
-    console.log("조합 생성 및 그리드 추가 함수 실행");
-
-    // 1. 선택된 모든 옵션 값들을 배열로 가져옵니다.
+    // 1. 사용자가 선택한 옵션 값들을 배열로 가져옵니다.
     const selectedColors = document.getElementById('opt_color')?.value.split(',').filter(Boolean);
     const selectedSizes = document.getElementById('opt_size')?.value.split(',').filter(Boolean);
     const selectedHeights = document.getElementById('opt_height')?.value.split(',').filter(Boolean);
-    
-    
-    // 공통으로 적용될 정보들을 미리 가져옵니다.
-    const productName = selectProductNm;
-    const productCode = selectProductCd;
-    
-    console.log(productName);
-    console.log(productCode);
-    
-    // 2. 유효성 검사: 수량 검사를 제거합니다.
+ 
+    // 2. 유효성 검사: 상품 및 각 옵션 그룹이 최소 하나 이상 선택되었는지 확인
+    if (!isSelectProduct) {
+        alert('먼저 상품을 선택해주세요.');
+        return;
+    }
     if (selectedColors.length === 0 || selectedSizes.length === 0 || selectedHeights.length === 0) {
         alert('색상, 사이즈, 굽높이를 각각 하나 이상 선택해주세요.');
         return;
     }
-    
-    // 3. 3중 forEach 루프를 사용하여 모든 조합을 만듭니다.
-    selectedColors.forEach(colorCode => {
-        selectedSizes.forEach(sizeCode => {
-            selectedHeights.forEach(heightCode => {
+ 
+    // 3. 서버에서 받은 원본 데이터에서, 사용자가 선택한 조건과 일치하는 "실존하는 조합"만 필터링합니다.
+    const validCombinations = originalOptionsData.filter(option =>
+        selectedColors.includes(option.OPT_COLOR) &&
+        selectedSizes.includes(option.OPT_SIZE) &&
+        selectedHeights.includes(option.OPT_HEIGHT)
+    );
+ 
+    if (validCombinations.length === 0) {
+        alert("선택하신 옵션에 해당하는 유효한 제품 조합이 없습니다.");
+        return;
+    }
+ 
+    // 4. 그리드에 추가하기 전, 현재 그리드에 있는 데이터와 비교하여 중복을 방지합니다.
+    const existingRows = INNER_TUI_GRID_INSTANCE.getData(); // 현재 그리드의 모든 데이터를 가져옵니다.
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    const productName = selectProductNm;
+    const productCode = selectProductCd;
+
+    validCombinations.forEach(item => {
+        // "이미 그리드에 동일한 조합이 있는지" 확인합니다.
+        const isDuplicate = existingRows.some(row =>
+            row.productCode === productCode &&
+            row.colorCode === item.OPT_COLOR &&
+            row.sizeCode === item.OPT_SIZE &&
+            row.heightCode === item.OPT_HEIGHT
+        );
+
+        if (!isDuplicate) {
+            // 중복이 아닐 때만 행을 추가합니다.
+            const newRowData = {
+                // 공통 정보 (루프 바깥에서 미리 정의)
+                productName: productName,
+                productCode: productCode,
+
+                // 현재 조합(item)에서 가져온 정보
+                colorName: item.OPT_COLOR_NM,   // '색상' 컬럼에 표시될 이름
+                colorCode: item.OPT_COLOR,      // 실제 색상 코드 값
+
+                sizeName: item.OPT_SIZE_NM,     // '사이즈' 컬럼에 표시될 이름
+                sizeCode: item.OPT_SIZE,        // 실제 사이즈 코드 값
+
+                heightName: item.OPT_HEIGHT_NM, // '굽높이' 컬럼에 표시될 이름
+                heightCode: item.OPT_HEIGHT,    // 실제 굽높이 코드 값
                 
-                // 각 조합에 대한 행(row) 데이터를 생성합니다.
-                const newRowData = {
-                    productName: productName,
-                    productCode: productCode,
-                    colorName: uniqueColors.get(colorCode),
-                    colorCode: colorCode,
-                    sizeName: uniqueSizes.get(sizeCode),
-                    sizeCode: sizeCode,
-                    heightName: uniqueHeights.get(heightCode),
-                    heightCode: heightCode,
-                    quantity: 0 // 기본 수량을 1로 설정합니다.
-                };
-                
-                // 생성된 행 데이터를 그리드에 추가합니다.
-                INNER_TUI_GRID_INSTANCE.appendRow(newRowData);
-            });
-        });
+                // 기본값으로 설정하는 정보
+                quantity: 1 // 그리드에서 직접 수정하도록 기본값 1로 설정
+            };
+            INNER_TUI_GRID_INSTANCE.appendRow(newRowData);
+            addedCount++;
+        } else {
+            skippedCount++;
+        }
     });
-    
-    // 4. 모든 조합을 추가한 후, 옵션 선택 폼을 초기화합니다.
+ 
+    // 6. 사용자에게 처리 결과를 알려줍니다.
+    if (addedCount > 0) {
+        // 너무 많은 알림을 피하기 위해 console.log로 변경하거나, 다른 UI 피드백 방식으로 변경 가능
+        console.log(`${addedCount}개의 새로운 항목이 추가되었습니다.`);
+    }
+    if (skippedCount > 0) {
+        alert(`${skippedCount}개의 항목은 이미 목록에 존재하여 추가되지 않았습니다.`);
+    }
+ 
+    // 7. 모든 조합을 추가한 후, 옵션 선택 폼을 초기화합니다.
     resetOptionForms();
 }
 
@@ -439,7 +492,7 @@ async function loadAllProductOptions(productCd) {
         const response = await fetch(`/SOLEX/orders/product/${productCd}`);
         if (!response.ok) throw new Error('상품 옵션 로딩 실패');
         const optionsData = await response.json();
-        console.log(optionsData);
+        originalOptionsData = optionsData;
         // 1. Map을 사용해 각 옵션의 고유한 값들을 추출합니다.
          uniqueColors = new Map();
          uniqueSizes = new Map();
@@ -613,7 +666,6 @@ function resetOrderForm() {
     isSelectClient = false;
     isSelectProduct = false;
     lastLoadedProductCd = null;
-    initDate();
     
 }
 
@@ -630,15 +682,7 @@ function resetOrderStep(step) {
                 const hiddenInput = document.getElementById(`opt_${currentStep}`);
                 if(hiddenInput) hiddenInput.value = '';
             }
-        } else {
-            const stockEl = document.getElementById('stockCount');
-            if(stockEl) stockEl.value = '';
-            ['odd_cnt', 'odd_pay', 'odd_end_date', 'odd_pay_date'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) { el.value = '';}
-            });
-            initDate();
-        }
+        } 
     }
 }
 
@@ -804,6 +848,34 @@ async function submitForm() {
 
     // 2. 그리드의 모든 데이터를 배열로 가져옵니다. (가장 중요!)
     const gridData = INNER_TUI_GRID_INSTANCE.getData();
+    // ▼▼▼ 여기에 중복 데이터 검사 로그를 추가합니다 ▼▼▼
+    console.log("--- 서버 전송 직전 데이터 검사 ---");
+    console.log("전체 그리드 데이터:", gridData);
+
+    const uniqueCheck = new Set();
+    const duplicates = [];
+
+    gridData.forEach(row => {
+        // 각 행을 식별할 고유한 키를 만듭니다. (예: "21-opt_color_03-opt_size_07-opt_height_03")
+        const rowKeyString = `${row.productCode}-${row.colorCode}-${row.sizeCode}-${row.heightCode}`;
+        
+        if (uniqueCheck.has(rowKeyString)) {
+            // Set에 이미 이 키가 있다면, 중복된 항목입니다.
+            duplicates.push(row);
+        } else {
+            // Set에 없다면, 새로 추가합니다.
+            uniqueCheck.add(rowKeyString);
+        }
+    });
+
+    if (duplicates.length > 0) {
+        console.error("❌ 중복된 항목이 발견되었습니다! 아래는 중복된 항목들입니다:", duplicates);
+        alert("오류: 그리드에 중복된 항목이 포함되어 있습니다. F12 개발자 도구의 콘솔을 확인해주세요.");
+        return; // 중복이 있으면 전송을 중단
+    } else {
+        console.log("✅ 중복된 항목이 없습니다. 정상입니다.");
+    }
+    // ▲▲▲ 중복 데이터 검사 로그 끝 ▲▲▲
 
     // 3. 유효성 검사: 그리드에 항목이 하나 이상 있는지 확인
     if (gridData.length === 0) {
@@ -821,7 +893,7 @@ async function submitForm() {
         // 상단 폼에서 가져온 공통 정보
         cli_id: selectClientCd,
         pay_type: document.getElementById('pay_type')?.value,
-        paymentAmount: (document.getElementById('odd_pay')?.value || '0').replace(/,/g, ''),
+        ord_pay: (document.getElementById('odd_pay')?.value || '0').replace(/,/g, ''),
         ord_end_date: document.getElementById('odd_end_date')?.value,
         ord_pay_date: document.getElementById('odd_pay_date')?.value,
         ord_pc: document.getElementById('cli_pc')?.value,

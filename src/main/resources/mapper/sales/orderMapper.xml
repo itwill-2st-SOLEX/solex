@@ -8,15 +8,16 @@
     	ord.ord_id,
         prd.prd_nm,
         cli.cli_nm,
-        ord.ord_cnt,
         NVL(ord.ord_add, '') || ' ' || NVL(ord.ord_da, '') AS ORD_ADDRESS,
-        cd.det_nm,
-        TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE
+        cd.det_nm,	
+        TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE,
+		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE
     FROM suju_order ord
-    left JOIN client cli ON ord.cli_id = cli.cli_id
-    left JOIN product_option opt ON ord.opt_id = opt.opt_id
-    left JOIN product prd ON prd.prd_cd = opt.prd_cd
-    left JOIN code_detail cd ON ord.ord_sts = cd.det_id
+	left JOIN suju_order_detail odd ON ord.ord_id = odd.ord_id
+	left JOIN product_option opt ON odd.opt_id = opt.opt_id
+	left JOIN product prd ON prd.prd_cd = opt.prd_cd
+	left JOIN client cli ON ord.cli_id = cli.cli_id
+	left JOIN code_detail cd ON odd.odd_sts = cd.det_id
     <if test="searchKeyword != null and searchKeyword != ''">
         AND (
             cli.cli_nm LIKE '%' || #{searchKeyword} || '%' OR  -- 거래처명 검색
@@ -87,13 +88,13 @@
         SELECT
 	        p.prd_nm,
 	        p.prd_cd,
-	        SUM(ord.ord_cnt) AS total_sales
+	        SUM(odd.odd_cnt) AS total_sales
 	    FROM
 	        product p 
 	    JOIN
 	        product_option opt ON p.prd_cd = opt.prd_cd 
 	    JOIN
-	        suju_order ord ON opt.opt_id = ord.opt_id 
+	        suju_order_detail odd ON opt.opt_id = odd.opt_id 
 	    GROUP BY
 	        p.prd_nm, p.prd_cd
 	    ORDER BY
@@ -156,24 +157,24 @@
 	    SELECT
 	      b.mat_id,
 	      m.mat_nm,
-	      SUM(b.bom_cnt * ord.ord_cnt) AS required_qty_existing,
+	      SUM(b.bom_cnt * odd.odd_cnt) AS required_qty_existing,
 	      (
-	        SELECT bom_cnt * #{ord_cnt}
+	        SELECT bom_cnt * #{odd_cnt}
 	        FROM bom b2
 	        WHERE b2.opt_id = #{opt_id}
 	          AND b2.mat_id = b.mat_id
 	      ) AS required_qty_mine,
-	      SUM(b.bom_cnt * ord.ord_cnt) +
+	      SUM(b.bom_cnt * odd.odd_cnt) +
 	      (
-	        SELECT bom_cnt * #{ord_cnt}
+	        SELECT bom_cnt * #{odd_cnt}
 	        FROM bom b2
 	        WHERE b2.opt_id = #{opt_id}
 	          AND b2.mat_id = b.mat_id
 	      ) AS required_qty_total
-	    FROM suju_order ord
-	    JOIN bom b ON b.opt_id = ord.opt_id
+	    FROM suju_order_detail odd
+	    JOIN bom b ON b.opt_id = odd.opt_id
 	    JOIN material m ON m.mat_id = b.mat_id
-	    WHERE ord.ord_sts IN ('ord_sts_00', 'ord_sts_01', 'ord_sts_02')
+	    WHERE odd.odd_sts IN ('odd_sts_00', 'odd_sts_01', 'odd_sts_02')
 	    GROUP BY b.mat_id, m.mat_nm
 	  ) r
 	  LEFT JOIN stock s ON s.item_id = r.mat_id AND s.stk_cat = 'stk_cat_02'
@@ -184,24 +185,56 @@
   	<!-- 1. 수주테이블 등록 -->
   	<insert id="createSujuOrder" parameterType="map" keyProperty="ord_id" keyColumn="ord_id" useGeneratedKeys="true">
 		INSERT INTO suju_order(cli_id, emp_id,ord_pay,ord_pay_date,ord_reg_date,ord_end_date, ord_pc, ord_add, ord_da,ord_mod_date)
-		VALUES(#{cli_id},#{emp_id},#{ord_pay},#{ord_pay_date},#{ord_reg_date},#{ord_end_date},#{ord_pc},#{ord_add},#{ord_da},#{ord_mod_date})
+		VALUES(#{cli_id},#{emp_id},#{ord_pay},#{ord_pay_date},SYSDATE,#{ord_end_date},#{ord_pc},#{ord_add},#{ord_da},SYSDATE)
 	</insert>	
 	<!-- 주문 등록 트랜잭션 끝 -->
+
+	<select id="selectOptIdsForItems" parameterType="java.util.List" resultType="map">
+		SELECT
+			opt_id,
+			prd_cd,
+			opt_color,
+			opt_size,
+			opt_height
+		FROM
+			product_option
+		WHERE
+			<foreach collection="list" item="item" open="(" close=")" separator="OR">
+				(
+					prd_cd = #{item.productCode}
+					AND opt_color = #{item.colorCode}
+					AND opt_size = #{item.sizeCode}
+					AND opt_height = #{item.heightCode}
+				)
+			</foreach>
+	</select>
 	
 	<!-- 2. 수주상세테이블 등록 -->
-	<insert id="createSujuOrderDetail" parameterType="map">
-		INSERT INTO suju_order_detail(ord_id, opt_id, ord_cnt,ord_sts,ord_mod_date,odd_isapproval)
-		VALUES
-		<foreach collection="list" item="item" separator=",">	
-		(#{item.ord_id},
-			(SELECT opt_id from product_option 
-			 WHERE prd_cd = #{item.prd_cd} 
-			 and opt_color = #{item.opt_color}
-			 and opt_size = #{item.opt_size}
-			 and opt_height = #{item.opt_height}),
-			#{item.ord_cnt},#{item.ord_sts},SYSDATE,'n')
-		</foreach>
-	</insert>	
+	<insert id="createSujuOrderDetail" parameterType="java.util.List">
+    INSERT INTO suju_order_detail (
+        ord_id, 
+        opt_id, 
+        odd_cnt,
+        odd_sts,
+        odd_mod_date,
+        odd_isapproval
+    )
+    <foreach item="item" collection="list" separator="UNION ALL">
+        SELECT
+            #{item.ord_id},
+            -- 각 행마다 서브쿼리를 실행하여 opt_id를 찾습니다.
+            (SELECT opt_id from product_option 
+             WHERE prd_cd = #{item.productCode} 
+               and opt_color = #{item.colorCode}
+               and opt_size = #{item.sizeCode}
+               and opt_height = #{item.heightCode}),
+            #{item.quantity},
+            #{item.ord_sts},
+            SYSDATE,
+            'n'
+        FROM DUAL
+    </foreach>
+</insert>
 	<!-- 주문 등록 트랜잭션 끝 -->
 
   
