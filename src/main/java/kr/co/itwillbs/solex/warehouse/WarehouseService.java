@@ -15,9 +15,9 @@ public class WarehouseService {
 	@Autowired
 	public WarehouseMapper warehouseMapper;
 
-	public List<Map<String, Object>> getWarehouseList(int offset, int size, Long loginEmpId) {
+	public List<Map<String, Object>> getWarehouseList(int offset, int size) {
 		// TODO Auto-generated method stub
-		return warehouseMapper.selectWarehouseList(offset, size, loginEmpId);
+		return warehouseMapper.selectWarehouseList(offset, size);
 	}
 
 	public Map<String, Object> getWarehouseDetail(String whsId, Long loginEmpId) {

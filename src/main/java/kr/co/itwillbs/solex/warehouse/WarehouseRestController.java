@@ -32,7 +32,7 @@ public class WarehouseRestController {
     	int offset = page * size;
 		System.out.println("page:" + page + "size: " + size);
     	
-    	List<Map<String, Object>> listMap = warehouseService.getWarehouseList(offset, size, loginEmpId);
+    	List<Map<String, Object>> listMap = warehouseService.getWarehouseList(offset, size);
     	return listMap;
     }
     

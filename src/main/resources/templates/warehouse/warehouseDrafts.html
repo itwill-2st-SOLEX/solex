@@ -12,7 +12,59 @@
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
-			<h2 style="margin-bottom: 0;">기안서 목록</h2>
+			<h2 style="margin-bottom: 0;">창고 목록</h2>
+			<button type="button" 
+					class="btn custom-btn-blue float-end mb-4"
+					data-bs-toggle="modal" 
+					data-bs-target="#warehouseModal">
+				창고 등록
+			</button>
+			
+			<!-- (2) 창고 등록 모달 -->
+			<div class="modal fade" id="warehouseModal" tabindex="-1"
+				aria-labelledby="warehouseModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-scrollable modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h2 class="modal-title" id="warehouseModalLabel">창고 등록</h2>
+						</div>
+
+						<div class="modal-body">
+  							<!-- ① 창고 기본 정보 -->
+							<div class="row mb-3">
+								<div class="col">
+									<label for="whsName" class="form-label">창고명</label>
+									<input type="text" class="form-control" id="whsName" name="whs_nm"
+           									placeholder="예: 1공장 창고" required>
+								</div>
+								<div class="col">
+									<label for="whsManager" class="form-label">담당자 사번</label>
+									<input type="text" class="form-control" id="whsManager" name="whs_mgr_id"
+           									placeholder="예: 2100123" required>
+								</div>
+							</div>
+
+							<hr>
+
+							<!-- ② 구역 영역 -->
+							<h4 class="mb-2">구역</h4>
+							<div id="areaContainer"></div>
+
+							<button type="button" id="addAreaBtn"
+							          class="btn btn-outline-primary btn-sm mt-2">
+							    + 구역 추가
+							</button>
+						</div>	
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+						          data-bs-dismiss="modal">닫기</button>
+							<button type="button" id="submitWarehouse"
+						          class="btn custom-btn-blue">등록</button>
+						</div>
+					</div>
+				</div>
+			</div>
 
 			<!-- 상세 모달 -->
 			<div class="modal fade" id="detailModal" tabindex="-1"
@@ -20,7 +72,7 @@
 				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h2 class="modal-title" id="detailModalLabel">기안서 결재</h2>
+							<h2 class="modal-title" id="detailModalLabel">창고 등록</h2>
 						</div>
 						<div class="approval-line">
 							<table class="approval-table ms-auto">
@@ -42,21 +94,6 @@
 									data-action="apl_sts_02"
 									data-bs-dismiss="modal">
 								승인
-							</button>
-						</div>
-						<div class="modal-footer">
-							<button type="button" 
-									class="btn btn-secondary submit-btn"
-									data-action="apl_sts_03"
-									data-bs-dismiss="modal">
-								반려
-							</button>
-						</div>
-						<div class="modal-footer">
-							<button type="button" 
-									class="btn btn-secondary"
-									data-bs-dismiss="modal">
-								닫기
 							</button>
 						</div>
 					</div>

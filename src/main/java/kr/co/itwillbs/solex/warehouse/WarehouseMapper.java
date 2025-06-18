@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface WarehouseMapper {
 
-	List<Map<String, Object>> selectWarehouseList(int offset, int size, Long loginEmpId);
+	List<Map<String, Object>> selectWarehouseList(@Param("offset") int offset, @Param("size") int size);
 
 	Map<String, Object> selectWarehouseDetail(String whsId, Long loginEmpId);
 
