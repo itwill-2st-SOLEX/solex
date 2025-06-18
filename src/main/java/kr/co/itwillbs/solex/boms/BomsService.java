@@ -14,8 +14,13 @@ public class BomsService {
 	private BomsMapper bomsMapper;
 	
 
-	public List<Map<String, Object>> getBomsList() {
-		return bomsMapper.selectBomsList();
+	public List<Map<String, Object>> getBomList(String opt_id, int offset, int limit) {
+		return bomsMapper.selectBomList(opt_id, offset, limit);
+	}
+
+
+	public int getTotalBomCount(String opt_id) {
+		return bomsMapper.selectTotalBomCount(opt_id);
 	}
 
 

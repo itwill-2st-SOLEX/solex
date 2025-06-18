@@ -6,7 +6,7 @@
 <title>SOLEX</title>
 
 <link rel="stylesheet" th:href="@{/css/products/products.css}">
-
+<script type="module" th:src="@{/js/products/pro_bom_comm.js}"></script>
 </head>
 <body>
 	<th:block layout:fragment="content">
@@ -60,7 +60,31 @@
 					<div id="prod-grid"></div>
 					<div class="modal-body big-box" id="showModal"></div>
 				</div>
+				
 			</div>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			<!-- BOM 영역 -->
 			<div id="bom-area" class="product">
 				<h3 class="p-title">BOM List</h3>
@@ -111,8 +135,8 @@
 	</th:block>
 	
 	<th:block layout:fragment="script">
-		<script th:src="@{/js/products/product_list.js}"></script>
-		<script th:src="@{/js/boms/bom_list.js}"></script>
+		<script type="module" th:src="@{/js/products/product_list.js}"></script>
+<!-- 		<script type="module" th:src="@{/js/boms/bom_list.js}"></script> -->
 	</th:block>
 </body>
 </html>
