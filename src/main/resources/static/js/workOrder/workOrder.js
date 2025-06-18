@@ -7,11 +7,22 @@ $(function() {
 		bodyHeight: 600,
 		scrollY: true,
 		data: [],
+		header: {
+			height: 80,
+			complexColumns: [
+				{
+					header: '옵션',
+					name: 'optionGroup',
+					childNames: ['prd_color', 'prd_size', 'prd_height']
+				}
+			]
+		},
 		columns: [
 			{ header: '주문 번호', name: 'ord_id', align: 'center' },
 			{ header: '제품코드', name: 'prd_cd', align: 'center', filter: 'select' },
 			{ header: '제품명', name: 'prd_nm', align: 'center', filter: 'select' },
 			{ header: '진행현황', name: 'prd_sts', align: 'center', sortable: 'true', className: 'clickable-cell' },
+			{ header: '생산수량', name: 'ord_cnt', align: 'center', filter: 'select' },
 			{ header: '제품컬러', name: 'prd_color', align: 'center', filter: 'select' },
 			{ header: '제품 사이즈', name: 'prd_size', align: 'center', filter: 'select' },
 			{ header: '굽 높이', name: 'prd_height', align: 'center', filter: 'select' },
@@ -28,6 +39,7 @@ $(function() {
 				prd_cd: row.PRD_CD,
 				prd_nm: row.PRD_NM,
 				prd_sts: row.PRD_STS,
+				ord_cnt: row.ORD_CNT,
 				prd_color: row.PRD_COLOR,
 				prd_size: row.PRD_SIZE,
 				prd_height: row.PRD_HEIGHT,
@@ -50,12 +62,17 @@ $(function() {
 	grid.on('click', (ev) => {
 		if (ev.columnName === 'prd_sts') {
 			const rowData = grid.getRow(ev.rowKey);
-			openWorkModal(rowData.prd_cd);
+
+			if (rowData.prd_sts === '작업 대기') {
+				openWorkModal(rowData.prd_cd, rowData.ord_id, rowData.ord_cnt);
+			} else {
+				alert('작업 대기 상태에서만 작업 지시를 할 수 있습니다.');
+			}
 		}
 	});
 });
 
-function openWorkModal(prd_cd) {
+function openWorkModal(prd_cd, ord_id, ord_cnt) {
 	$.ajax({
 		url: `/SOLEX/workOrders/${prd_cd}`,
 		type: 'GET',
@@ -68,12 +85,15 @@ function openWorkModal(prd_cd) {
 				if (!grouped[seq]) {
 					grouped[seq] = {
 						name: item.PROCESS_NAME,
-						availableTeams: []
+						availableTeams: [],
+						prd_cd: item.PRD_CD,
+						prc_id: item.PRC_ID,
+						ord_cnt: ord_cnt
 					};
 				}
 				grouped[seq].availableTeams.push({
 					id: item.TEAM_CODE,
-					name: item.TEAM_NAME 
+					name: item.TEAM_NAME
 				});
 			});
 
@@ -82,9 +102,12 @@ function openWorkModal(prd_cd) {
 				.sort((a, b) => Number(a) - Number(b))
 				.map(seq => ({
 					name: grouped[seq].name,
-					availableTeams: grouped[seq].availableTeams
+					availableTeams: grouped[seq].availableTeams,
+					prd_cd: grouped[seq].prd_cd,
+					prc_id: grouped[seq].prc_id,
+					ord_cnt: grouped[seq].ord_cnt,
+					ord_id: ord_id
 				}));
-
 			// 3. 렌더링
 			renderProcessSteps(processList);
 
@@ -95,48 +118,55 @@ function openWorkModal(prd_cd) {
 			console.error('에러:', err);
 		}
 	});
-	
-	// 작업지시 등록 버튼 클릭시
-	// [TODO]
-	document.getElementById('submitWorkOrder').addEventListener('click', function() {
-		const steps = document.querySelectorAll('.timeline-step');
-		const selectedTeams = [];
-		
-		// 유효성
-		let valid = true;
-		if (!teamCode) {
-			alert(`${index + 1}단계에서 팀을 선택해주세요.`);
-			valid = false;
-			return;
-		}
-		
-		selectedTeams.push({
-			stepSeq: index + 1,
-			teamCode: teamCode
-		});
-	});
-	
-	if (!valid) return;
-	
-	// 여기서 prd_cd 같이 넘겨줘야 함 (어디서든 가져오거나 파라미터로 받아올 수 있음)
-	const prdCd = document.getElementById('hidden-prd-cd').value; // 예시용
 
-	$.ajax({
-		url: '/SOLEX/workOrders',
-		type: 'POST',
-		contentType: 'application/json',
-		data: JSON.stringify({
-			prdCd: prdCd,
-			teams: selectedTeams
-		}),
-		success: function(res) {
-			alert('작업 지시 등록 성공!');
-			// 모달 닫기 등 추가 처리
-		},
-		error: function(err) {
-			console.error('등록 에러:', err);
-			alert('작업 지시 등록 실패!');
-		}
+	// 작업지시 등록 버튼 클릭시
+	document.getElementById('submitWorkOrder').addEventListener('click', function() {
+		let steps = document.querySelectorAll('.timeline-step');
+		let prdCd = document.getElementById('hidden-prd-cd').value;
+		let ordId = document.getElementById('hidden-ord-id').value;
+		let prcId = document.getElementById('hidden-prc-id').value;
+		let ordCnt = document.getElementById('hidden-ord-cnt').value;
+		let payload = [];
+
+		let valid = true;
+
+		for (let i = 0; i < steps.length; i++) {
+			let select = steps[i].querySelector(`select[id="team-${i}"]`);
+			let teamCode = select.value;
+
+			// 유효성
+			if (!teamCode) {
+				alert(`${i + 1}단계에서 팀을 선택해주세요.`);
+				valid = false;
+				break;
+			}
+
+			payload.push({
+				prdCd: prdCd,
+				ordId: ordId,
+				prcId: prcId,
+				ordCnt: ordCnt,
+				stepSeq: i + 1,
+				teamCode: teamCode
+			});
+		};
+
+		if (!valid) return;
+
+		$.ajax({
+			url: '/SOLEX/workOrders',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify(payload),
+			success: function() {
+				alert('작업 지시 등록 성공!');
+				$('#WorkModal').modal('hide');
+			},
+			error: function(err) {
+				console.error('등록 에러:', err);
+				alert('작업 지시 등록 실패!');
+			}
+		});
 	});
 }
 
@@ -167,8 +197,13 @@ function renderProcessSteps(processList) {
 				<select class="form-select" id="team-${index}" name="team-${index}">
 					<option value="">-- 팀 선택 --</option>
 					${process.availableTeams.map(team =>
-					`<option value="${team.id}">${team.name}</option>`).join('')}
+			`<option value="${team.id}">${team.name}</option>`).join('')}
 				</select>
+				
+				<input type="hidden" id="hidden-prd-cd" value="${process.prd_cd}" />
+				<input type="hidden" id="hidden-ord-id" value="${process.ord_id}" />
+				<input type="hidden" id="hidden-prc-id" value="${process.prc_id}" />
+				<input type="hidden" id="hidden-ord-cnt" value="${process.ord_cnt}" />
 			</div>
 		`;
 		container.appendChild(step);

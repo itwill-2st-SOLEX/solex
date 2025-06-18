@@ -3,24 +3,36 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.workOrder.WorkOrderMapper">
+<!-- 	작업지시 조회 -->
 	<select id="getWorkList" resultType="map">
 		SELECT ord_id
 			   , prd_cd
 			   , prd_nm
+			   , ord_cnt
 			   , prd_sts
 			   , prd_color
 			   , prd_size
 			   , prd_height
 			   , ord_end_date
 		  FROM vw_suju_summary -- 뷰테이블
-		 WHERE prd_sts = '생산 대기'
+		 WHERE prd_sts IN (
+			 '작업 대기',
+			 '작업중',
+			 '작업 완료',
+			 '출고 대기(공장 > 창고)',
+			 '창고 대기',
+			 '출고 대기(창고 > 거래처)'
+		 )
 		 ORDER BY ord_id DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
 	
+<!-- 	해당 제품코드 등록 모달 조회 -->
 	<select id="ProcessTeam" resultType="map">
 		SELECT DISTINCT
 		       tp.pcp_seq AS step_seq        -- 공정 순서
+		       , p.prd_cd					 -- 제품 코드
+		       , pc.prc_id					 -- 공정 id
 		       , pc.prc_nm AS process_name     -- 공정명
 		       , e.emp_team_cd AS team_code    -- 팀 코드
 		       , ct.det_nm AS team_name         -- 팀 이름
@@ -39,4 +51,42 @@
 		   AND ct.det_nm != '공통'
 		 ORDER BY tp.pcp_seq, ct.det_nm
 	</select>
+	
+<!-- 	작업지시 등록 -->
+	<insert id="workOrderInsert">
+	<selectKey keyProperty="wrk_id" resultType="int" order="BEFORE">
+        SELECT work_order_seq.NEXTVAL FROM dual
+    </selectKey>
+		INSERT INTO work_order (wrk_id,
+								prc_id,
+			    				ord_id,
+			    				prd_cd,
+			    				wrk_ord_date
+		) VALUES (#{wrk_id},
+				  #{prcId},         -- 공정id
+			      #{ordId},			-- 주문 id
+			      #{prdCd},         -- 주문 cd
+			      SYSDATE + 9/24  -- 작업 지시일
+		)
+	</insert>
+<!-- 	작업지시 공정테아블 등록 -->
+	<insert id="workProcessInsert">
+		INSERT INTO work_process (wrk_id,
+			    				  wpo_team,
+			    				  wpo_step,
+			    				  wpo_ocount,
+				    			  wpo_status
+		) VALUES (#{wrk_id},    
+				  #{teamCode},
+				  #{stepSeq},
+				  #{ordCnt},
+				  DEFAULT
+		)
+	</insert>
+	
+	<update id="updateSujuOrderSts">
+		UPDATE suju_order
+	       SET ord_sts = 'ord_sts_03'
+	     WHERE ord_id = #{ordId}
+	</update>
 </mapper>

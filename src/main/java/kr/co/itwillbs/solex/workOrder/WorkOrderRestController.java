@@ -23,14 +23,22 @@ public class WorkOrderRestController {
 	@GetMapping("/list")
 	public List<Map<String, Object>> getWorkList(@RequestParam("page") int page, @RequestParam("size") int size) {
 		int offset = page * size;
+		System.out.println(service.getWorkList(offset, size));
 		return service.getWorkList(offset, size);
 	}
 	
-	// 
+	// 해당 제품코드 등록 모달 조회
 	@GetMapping("/{prd_cd}")
-	public List<Map<String, Object>> postMethodName(@PathVariable("prd_cd") String prdCd) {
+	public List<Map<String, Object>> getProcessTeam(@PathVariable("prd_cd") String prdCd) {
 		System.out.println(service.getProcessTeam(prdCd));
 		return service.getProcessTeam(prdCd);
+	}
+	
+	// 작업지시 등록
+	@PostMapping("")
+	public void workOrderInsert(@RequestBody List<Map<String, Object>> prdInfo) {
+		System.out.println("prdInfo" + prdInfo);
+		service.workOrderInsert(prdInfo);
 	}
 	
 }
