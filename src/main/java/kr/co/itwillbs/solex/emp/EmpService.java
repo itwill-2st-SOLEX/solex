@@ -55,7 +55,7 @@ public class EmpService {
 	            if (codeMap.get("empTeamCd") != null) {
 	                formattedMap.put("empTeamCd", codeMap.get("empTeamCd").toString().trim());
 	            }
-	            // empStsCd (핵심!)
+	            // empStsCd
 	            if (codeMap.get("empStsCd") != null) {
 	                formattedMap.put("empStsCd", codeMap.get("empStsCd").toString().trim());
 	            }
@@ -64,13 +64,12 @@ public class EmpService {
 	                resultList.add(formattedMap);
 	            }
 	        }
-	        System.out.println("가공 후 최종 resultList: " + resultList); // 추가: 이 로그도 꼭 확인!
+	        System.out.println("가공 후 최종 resultList: " + resultList);
 	        return resultList;
 	    }
 
 	public List<Map<String, Object>> getEmpCodeListFromMapper() {
 	    List<Map<String, Object>> empCodeList = mapper.getAllCodeDetails();
-
 	    return empCodeList;
 	}
 

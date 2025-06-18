@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.material.MaterialMapper">
+
+<!-- 	자재 가져오기  -->
+	<select id="getMaterial" resultType="map">
+		SELECT 
+			mat_id as "matId",
+			cli_id as "cliId",
+			mat_cd as "matCd",
+			mat_nm as "matNm",
+			mat_unit as "matUnit",
+			mat_price as "matPrice",
+			mat_comm as "matComm",
+			mat_reg_date as "matRegDate",
+			mat_mod_date as "matModDate",
+			mat_is_active as "matIsActive"
+		FROM material
+	</select>
+	
+<!-- 	자재 가져오기 -->
+	<select id="getMaterialList" resultType="map">
+		SELECT 
+			mat_id as "matId",
+			cli_id as "cliId",
+			mat_cd as "matCd",
+			mat_nm as "matNm",
+			mat_unit as "matUnit",
+			TO_CHAR(mat_price, 'FM999,999,999') as "matPrice",
+			mat_comm as "matComm",
+			TO_CHAR(mat_reg_date,'yyyy-MM-dd') as "matRegDate",
+			TO_CHAR(mat_mod_date,'yyyy-MM-dd') as "matModDate",
+			mat_is_active as "matIsActive"
+		FROM material
+	</select>
+<!-- 	등록에서 공통코드 가져오기 -->
+	<select id="getCommoncodes" resultType="map">
+		SELECT 
+			det_id AS "DET_ID",
+			det_nm AS "DET_NM"
+		FROM code_detail
+		WHERE code_id in ('mat', 'mat_sts')
+	</select>
+<!-- 	등록에서 공통코드 가져오기 -->
+	<select id="getCommonCodeDetails" resultType="map">
+		SELECT 
+			CASE
+				WHEN COD_ID = 'mat' THEN DET_ID
+				ELSE NULL END AS "matUnit",
+			CASE 
+				WHEN COD_ID = 'mat_sts' THEN DET_ID
+				ELSE NULL END AS "matIsActive"	 
+		FROM code_detail
+		WHERE 
+			COD_ID IN ('mat', 'mat_sts')
+		ORDER BY COD_ID, DET_ID
+	</select>
+	
+</mapper>

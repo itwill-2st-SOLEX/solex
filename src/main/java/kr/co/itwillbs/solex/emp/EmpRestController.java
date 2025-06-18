@@ -30,6 +30,12 @@ public class EmpRestController {
         return empService.getempList(offset, size);
     }
 
+	// 등록 json으로 반환하기 위한 매핑
+	@GetMapping("/codes")
+	public List<Map<String, Object>> getCodes() {
+		return empService.getAllcodes();
+	}
+	
 	 // ajax를 통해 json으로 공통 코드 목록을 리턴
     @GetMapping("/codelistJson")
     public Map<String, Object> getCommonCodeListJson() {
@@ -46,7 +52,6 @@ public class EmpRestController {
     public Map<String, Object> getEmpListJson(
         @RequestParam(value="includeEmpSts", required = false) String includeEmpSts) {
 
-
     	System.out.println("includeEmpSts " + includeEmpSts);
 
         List<Map<String, Object>> empList = empService.getEmpList(includeEmpSts);
@@ -57,11 +62,6 @@ public class EmpRestController {
         return responseMap;
     }
 
-    // 등록 json으로 반환하기 위한 매핑
-    @GetMapping("/codes")
-    public List<Map<String, Object>> getCodes() {
-        return empService.getAllcodes();
-    }
 
     // 수정을 위한 매핑
     @GetMapping("/codes/{empNum}")
