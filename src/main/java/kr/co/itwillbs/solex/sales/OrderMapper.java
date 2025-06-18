@@ -53,6 +53,8 @@ public interface OrderMapper {
 	// 상품별 옵션 가져오기
 	List<Map<String, Object>> getOptionsByProduct(@Param("prd_cd")String prd_cd);
 
+	List<Map<String, Object>> selectOptIdsForItems(List<Map<String, Object>> items);
+
 
 	
 }

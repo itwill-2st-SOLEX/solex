@@ -125,6 +125,7 @@ public class OrderRestController {
 	    
 	    
 	    int rows = orderService.createOrderProcess(safe); 
+		log.info("rows = {}", rows)	;
 		Map<String, Object> response = new HashMap<>();
 
 		if (rows == 1) { 

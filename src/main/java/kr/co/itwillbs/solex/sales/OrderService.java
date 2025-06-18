@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.sales;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -101,27 +102,25 @@ public class OrderService {
     //     return orderMapper.getLackingMaterialsWithMine(opt_id, orderCount);
 
 	// }
-	
-	
+
 	
 	@Transactional
-	public int createOrderProcess(Map<String, Object> orderData) {
-		// 1. 주문 테이블에 INSERT
-		orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
-		log.info("여기 실행됨?");
+public int createOrderProcess(Map<String, Object> orderData) {
+    // 1. 주문 테이블 INSERT (기존과 동일)
+    orderMapper.createSujuOrder(orderData);
+    Long orderId = ((BigDecimal) orderData.get("ord_id")).longValue();
 
-		List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
-		
-		// 나중에 여기서 바로 출고라는 결과값이 넘어오묜 그걸 비교해서 sts_00을 나타내는게 어떤가 sts_07로
-		for (Map<String, Object> item : items) {
-			item.put("ord_sts", "ord_sts_00");
-			item.put("ord_id", orderData.get("ord_id"));
-		}
-		log.info("items = {}", items);
-		
-		// 3. 주문 상세 테이블에 INSERT
-		return orderMapper.createSujuOrderDetail(items);
-		
+    List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
+
+    // 2. 각 item에 ord_id와 기본 상태만 추가 (opt_id 조회 로직 전체 삭제)
+    for (Map<String, Object> item : items) {
+        item.put("ord_id", orderId);
+        item.put("ord_sts", "ord_sts_00");
+    }
+
+    // 3. 단순화된 items 리스트를 Mapper로 전달
+    // 이제 XML이 모든 것을 처리합니다.
+    return orderMapper.createSujuOrderDetail(items);		
 		// 수주 상세 등록
 		
 		// 이후 수주 요청 관리에서  밑에 있는 내용들이 실행됨
