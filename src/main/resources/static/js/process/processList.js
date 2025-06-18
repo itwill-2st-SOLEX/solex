@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 		}));
 		
 	}
-
+	
 	// 공정정보 그리드
 	function initProcessGrid() {
 		window.process_grid = new tui.Grid({
@@ -145,6 +145,77 @@ document.addEventListener('DOMContentLoaded', async () => {
 			QUA_NM: '',
 			__isNew: true  // 새 행 여부
 		}, { focus: true });
+	});
+	
+	// ✅ 저장 버튼
+	document.querySelector('#prs-save').addEventListener('click', () => {
+		
+		// 변경사항 추출
+		const changes = process_grid.getModifiedRows();
+	    const { createdRows, updatedRows } = changes;
+		
+		// 변경사항 없음 체크
+		if (createdRows.length === 0 && updatedRows.length === 0) {
+	        alert('변경된 내용이 없습니다.');
+	        return;
+	    }
+		
+		// 필드 검증
+		const requiredFields = ['PRC_CD', 'PRC_NM', 'PRC_DES', 'PRC_YN', 'DET_NM', 'QUA_NM'];
+	    const invalidRows = [...createdRows, ...updatedRows].filter(row =>
+	        requiredFields.some(field => !row[field])
+	    );
+	    if (invalidRows.length > 0) {
+	        alert('필수 항목이 입력되지 않은 행이 있습니다.');
+	        return;
+	    }
+		
+		// 데이터 가공
+	    const payload = {
+	        createdRows: createdRows.map(row => ({
+	            PRC_CD: row.PRC_CD,
+	            PRC_NM: row.PRC_NM,
+	            PRC_DES: row.PRC_DES,
+				PRC_YN: row.PRC_YN,
+				DET_NM: row.DET_NM,
+				QUA_NM: row.QUA_NM
+	        })),
+			updatedRows: updatedRows.filter(row => !row.__isNew).map(row => {
+				// 부서명 → 부서코드
+				const det = window.departmentOptions.find(opt => opt.text === row.DET_NM);
+				const qua = window.qualityOptions.find(opt => opt.text === row.QUA_NM);
+
+				return {
+					PRC_CD: row.PRC_CD,
+					PRC_NM: row.PRC_NM,
+					PRC_DES: row.PRC_DES,
+					PRC_YN: row.PRC_YN,
+					DET_NM: det ? det.value : row.DET_NM,   // 찾으면 코드, 없으면 기존 값 유지
+					QUA_NM: qua ? qua.value : row.QUA_NM
+				};
+			})
+	    };
+		
+		// ✅ 서버로 데이터 전송
+		fetch('/SOLEX/process/save', {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(payload)
+		})
+		.then(res => {
+			if (!res.ok) throw new Error('저장 실패');
+			return res.json();
+		})
+		.then(data => {
+			alert('저장 완료!');
+			location.reload();  // 저장 후 새로고침
+		})
+		.catch(err => {
+			console.error(err);
+			alert('저장 중 오류 발생');
+		});
 	});
 	
 });

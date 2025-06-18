@@ -41,5 +41,53 @@
     	FROM	QUALITY_ITEM
     	WHERE	QUA_TYPE = 'qua_type_03'
     </select>
+    
+    <!-- 공정 신규 등록 -->
+    <insert id="insertProcesses" parameterType="java.util.List">
+    	INSERT ALL
+    	<foreach collection="list" item="prc">
+    		INTO PROCESS (
+    			PRC_CD,
+    			DET_ID,
+    			PRC_NM,
+    			PRC_DES,
+    			PRC_YN,
+    			QUA_ID
+    		) VALUES (
+    			#{prc.PRC_CD},
+    			#{prc.DET_NM},
+    			#{prc.PRC_NM},
+    			#{prc.PRC_DES},
+    			#{prc.PRC_YN},
+    			#{prc.QUA_ID}
+    		)
+    	</foreach>
+    	SELECT	*	FROM DUAL
+    </insert>
+    
+    <!-- 공정 기존 수정 -->
+    <update id="updateprocesses" parameterType="java.util.List">
+    	MERGE INTO PROCESS p
+	    USING (
+	        <foreach collection="list" item="prc" separator="UNION ALL">
+	            SELECT
+	                #{prc.PRC_CD} AS PRC_CD,
+	                #{prc.PRC_NM} AS PRC_NM,
+	                #{prc.PRC_DES} AS PRC_DES,
+	                #{prc.PRC_YN} AS PRC_YN,
+	                #{prc.DET_NM} AS DET_ID,     <!-- 가공된 코드값 -->
+	                #{prc.QUA_NM} AS QUA_ID      <!-- 가공된 코드값 -->
+	            FROM DUAL
+	        </foreach>
+	    ) src
+	    ON (p.PRC_CD = src.PRC_CD)
+	    WHEN MATCHED THEN
+	    UPDATE SET
+	        p.PRC_NM = src.PRC_NM,
+	        p.PRC_DES = src.PRC_DES,
+	        p.PRC_YN = src.PRC_YN,
+	        p.DET_ID = src.DET_ID,
+	        p.QUA_ID = src.QUA_ID
+    </update>
 
 </mapper>

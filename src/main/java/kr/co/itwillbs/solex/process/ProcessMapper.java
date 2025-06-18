@@ -9,15 +9,21 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ProcessMapper {
 
-	// 공정정보 리스트 무한스크롤
-	List<Map<String, Object>> selectPagedProcessList(@Param("perPage") int perPage, @Param("offset") int offset);
-    
-	int selectTotalProcessCount();
-
 	// 부서명 리스트 조회 API
 	List<Map<String, Object>> getDepartmentList();
-
+	
 	// 품질검사명 리스트 조회 API
 	List<Map<String, Object>> getQualityItemList();
+	
+	// 공정정보 리스트 무한스크롤
+	List<Map<String, Object>> selectPagedProcessList(@Param("perPage") int perPage, @Param("offset") int offset);
+
+	int selectTotalProcessCount();
+
+	// 공정 신규 등록
+	void insertProcesses(List<Map<String, Object>> insertList);
+
+	// 공정 기존 수정
+	void updateprocesses(List<Map<String, Object>> updateList);
     
 }
