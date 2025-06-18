@@ -3,8 +3,8 @@
 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.co.itwillbs.solex.boms.BomsMapper">
-    <select id="selectTotalBomCount" resultType="java.util.Map">
+<mapper namespace="kr.co.itwillbs.solex.products.BomsMapper">
+    <select id="selectTotalBomCount" resultType="int">
     	SELECT COUNT(*) 
     	  FROM bom
     	 WHERE opt_id = #{opt_id}
@@ -14,19 +14,18 @@
     <!-- bom 무한스크롤 -->
 	<select id="selectBomList" resultType="java.util.Map">
 		 SELECT	
-		        BOM_ID, 
-				OPT_ID, -- 옵션
-				MAT_ID, -- 원자재
-				BOM_CNT, -- 소모량
-				BOM_UNIT, -- 단위
-				BOM_COMM, -- 설명
-				BOM_REG_DATE, -- 등록일
-				BOM_MOD_DATE -- 수정일
+		        b.BOM_ID, 
+				b.OPT_ID, -- 옵션
+				m.MAT_NM, -- 원자재
+				b.BOM_CNT, -- 소모량
+				b.BOM_UNIT, -- 단위
+				b.BOM_COMM, -- 설명
+				b.BOM_REG_DATE, -- 등록일
+				b.BOM_MOD_DATE -- 수정일
 						       
-		   FROM	bom
+		   FROM	bom b
+		   JOIN material m on m.MAT_ID = b.MAT_ID
 		  WHERE	opt_id = #{opt_id}
 		 OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
 	</select>
-    
-    
 </mapper>	

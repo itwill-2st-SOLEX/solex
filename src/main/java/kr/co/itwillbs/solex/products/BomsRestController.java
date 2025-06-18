@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.boms;
+package kr.co.itwillbs.solex.products;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;

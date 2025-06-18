@@ -34,13 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			initialRequest: false
 		},
 		columns: [
-			{ header: 'BOM번호', name: 'bom_id', align : 'center' },
-			{ header: '제품', name: 'opt_id',align : 'center', sortable: 'true' },
-			{ header: '원자재', name: 'mat_id',align : 'center', sortable: 'true' },
-			{ header: '소모량', name: 'bom_cnt', sortable: 'true',align : 'center' },
-			{ header: '단위', name: 'bom_unit', sortable: 'true',align : 'center' },
-			{ header: '설명', name: 'bom_comm', sortable: 'true',align : 'center' },
-			{ header: '등록일', name: 'bom_reg_date', sortable: 'true',align : 'center' }
+//			{ header: 'BOM번호', name: 'BOM_ID', align : 'center' },
+//			{ header: '제품', name: 'OPT_ID',align : 'center', sortable: 'true' },
+			{ header: '원자재', name: 'MAT_NM',align : 'center', sortable: 'true' },
+			{ header: '소모량', name: 'BOM_CNT', sortable: 'true',align : 'center' , width: 70 },
+			{ header: '단위', name: 'BOM_UNIT', sortable: 'true',align : 'center' , width: 80 },
+//			{ header: '설명', name: 'BOM_COMM', sortable: 'true',align : 'center' },
+			{ header: '등록일', name: 'BOM_REG_DATE', sortable: 'true',align : 'center', formatter: ({ value }) => window.formatDateTime(value) }
 		]
 	});
 	window.loadBomList = function(opt_id) {

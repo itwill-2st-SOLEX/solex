@@ -10,7 +10,8 @@
 	<select id="selectPagedProductList" resultType="map">
 	    SELECT
 	    	   p.prd_cd,
-			   p.prd_nm, 
+			   p.prd_nm,
+			   o.opt_id, 
 			   cd_type.det_nm PRD_TYPE, -- 유형
 			   cd_unit.det_nm PRD_UNIT, -- 단위
 			   cd_col.det_nm PRD_COLOR, -- 색상

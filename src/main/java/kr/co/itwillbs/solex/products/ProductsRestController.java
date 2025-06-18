@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.co.itwillbs.solex.boms.BomsService;
-
 @RestController
 @RequestMapping("/products/api")
 public class ProductsRestController {
