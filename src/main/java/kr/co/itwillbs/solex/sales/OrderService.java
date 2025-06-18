@@ -79,49 +79,48 @@ public class OrderService {
 		return orderMapper.getSearchProductList(searchKeyword);
 	}
 
-	public List<Map<String,Object>> getColors(String prd_cd) {
-		return orderMapper.getColorsByProduct(prd_cd);
-	}
-
-	public List<Map<String, Object>> getSizesByProductAndColor(String prd_cd, String color) {
-		return orderMapper.getSizesByProductAndColor(prd_cd,color);
-	}
-
-
-	public List<Map<String, Object>> getHeightsByProductColorSize(String prd_cd, String color, String size) {
-		return orderMapper.getHeightsByProductColorSize(prd_cd,color,size);
-	}
-	public int getStockCount(String productCode, String color, String size, String height) {
-		return orderMapper.getStockCount(productCode,color,size,height);
+	
+	public List<Map<String, Object>> getOptionsByProduct(String prd_cd) {
+		return orderMapper.getOptionsByProduct(prd_cd);
 	}
 	
-	@Transactional
-	public List<Map<String, Object>> checkLackingMaterials(Map<String, Object> orderData) {
-		String opt_id = orderMapper.getOptionIdByCombination(orderData);
-		log.info(opt_id);
-		 if (opt_id == null) {
-			throw new RuntimeException("해당 옵션 조합의 상품이 존재하지 않습니다.");
-		}
+	
+	
+	// @Transactional // 부족한 자재 보여주는 쿼리
+	// public List<Map<String, Object>> checkLackingMaterials(Map<String, Object> orderData) {
+	// 	String opt_id = orderMapper.getOptionIdByCombination(orderData);
+	// 	log.info(opt_id);
+	// 	 if (opt_id == null) {
+	// 		throw new RuntimeException("해당 옵션 조합의 상품이 존재하지 않습니다.");
+	// 	}
 		 
-		// 2. 주문 수량 추출
-        int orderCount = Integer.parseInt(orderData.get("ord_cnt").toString());
+	// 	// 2. 주문 수량 추출
+    //     int orderCount = Integer.parseInt(orderData.get("ord_cnt").toString());
         
-		// 3. 자재 부족 계산
-        return orderMapper.getLackingMaterialsWithMine(opt_id, orderCount);
+	// 	// 3. 자재 부족 계산
+    //     return orderMapper.getLackingMaterialsWithMine(opt_id, orderCount);
 
-	}
+	// }
 	
 	
 	
 	@Transactional
 	public int createOrderProcess(Map<String, Object> orderData) {
-		String opt_id = orderMapper.getOptionIdByCombination(orderData);
+		// 1. 주문 테이블에 INSERT
+		orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
+		log.info("여기 실행됨?");
+
+		List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
 		
 		// 나중에 여기서 바로 출고라는 결과값이 넘어오묜 그걸 비교해서 sts_00을 나타내는게 어떤가 sts_07로
-		orderData.put("ord_sts", "ord_sts_00"); // 상태값을 '00'로 설정 상태 : 수주등록(검토 느낌s)
-		orderData.put("opt_id", opt_id);
-		// 1. 주문 마스터 테이블에 INSERT
-		return orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
+		for (Map<String, Object> item : items) {
+			item.put("ord_sts", "ord_sts_00");
+			item.put("ord_id", orderData.get("ord_id"));
+		}
+		log.info("items = {}", items);
+		
+		// 3. 주문 상세 테이블에 INSERT
+		return orderMapper.createSujuOrderDetail(items);
 		
 		// 수주 상세 등록
 		
@@ -162,5 +161,8 @@ public class OrderService {
 		// 업데이트 수주 디테일
 	    
 	}
+
+
+	
 
 }

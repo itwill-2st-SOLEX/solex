@@ -1,983 +1,866 @@
-// order.js
+/**
+ * ===================================================================
+ * order.js - 수주 관리 페이지 스크립트 (A to Z 최종본 - 병렬 로드 방식)
+ * -------------------------------------------------------------------
+ * 주요 기능:
+ * - 상품 선택 시, 관련된 모든 옵션(색상, 사이즈, 굽높이)을 한 번에 로드
+ * - 종속적인(Waterfall) API 호출을 제거하여 사용자 경험 및 성능 개선
+ * - ToastUI 그리드, VirtualSelect, 재사용 가능한 커스텀 셀렉트 기능 포함
+ * ===================================================================
+ */
 
 // 1. 전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
-const gridHeight = 700;
-
-let searchKeyword = ''; // 단일 통합 검색 키워드를 저장할 전역 변수
-let isLoading = false; // 데이터 로딩 중인지 여부 (중복 요청 방지)
-let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 스크롤 종료 조건)
-
-
-let VirtualSelectClientInput = "";
-let VirtualSelectProductInput = "";
-
+const gridHeight = 600;
+let searchKeyword = '';
+let isLoading = false;
+let hasMoreData = true;
 let isSelectClient = false;
 let isSelectProduct = false;
-
 let selectProductCd = "";
 let selectClientCd = "";
+let TUI_GRID_INSTANCE; // 전역 그리드 인스턴스
+let INNER_TUI_GRID_INSTANCE;
+let uniqueColors,uniqueSizes,uniqueHeights;
+let selectProductNm = "";
+let productVirtualSelect;
+
+// 2. 스크립트 시작점
+document.addEventListener('DOMContentLoaded', init);
+
+/**
+ * 페이지의 모든 초기화를 담당하는 메인 함수
+ */
+function init() {
+    initializeGrid();
+    bindGlobalEventListeners();
+    initializeOrderModal();
+    fetchGridData();
+}
 
 
-// 2. ToastUI Grid 생성 (변경 없음)
-const grid = new tui.Grid({
-    el: document.getElementById('grid'),
-    bodyHeight: gridHeight,
-    scrollY: true,
-    scrollX: false,
-    data: [], // 초기 데이터는 비어있음
-    columns: [
-        { header: '수주 번호', name: 'ORD_ID', width: 100,align: 'center', sortable: true },
-        { header: '상품명', name: 'PRD_NM', width: 200, sortable: true },
-        { header: '거래처 명', name: 'CLI_NM', align: 'center', sortable: true },
-        { header: '주문 수량', name: 'ORD_CNT', align: 'center', sortable: true },
-        { header: '배송지', name: 'ORD_ADDRESS',width: 300, align: 'center', sortable: true },
-        { header: '진행 상태', name: 'DET_NM', align: 'center', sortable: true },
-        { header: '상태 변경일', name: 'ORD_MOD_DATE', align: 'center', sortable: true }
-    ],
-});
+// ===================================================================
+// 초기화 함수 섹션
+// ===================================================================
 
-// 3. DOM 로드 후 실행될 코드
-document.addEventListener('DOMContentLoaded', async function() { // async 키워드 추가
-	const endDateEl = document.getElementById('odd_end_date');
-  const payDateEl = document.getElementById('odd_pay_date');
-  if (endDateEl) endDateEl.addEventListener('change', onEndDateChange);
-  if (payDateEl) payDateEl.addEventListener('change', onPayDateChange);
-	
-	// DOM 로드 후 검색 입력 필드와 버튼 요소를 가져옴
-	const searchInput = document.getElementById('searchInput'); // 검색 입력 필드 (이미지에 보이는 큰 검색창)
-	// 검색 입력 필드에서 Enter 키 눌렀을 때 검색 트리거
-  if (searchInput) {
-    searchInput.addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') {
-        searchButton.click(); // Enter 키 누르면 검색 버튼 클릭 효과
-      }
+/**
+ * ToastUI 그리드를 생성하고 무한 스크롤 이벤트를 설정하는 함수
+ */
+function initializeGrid() {
+    TUI_GRID_INSTANCE = new tui.Grid({
+        el: document.getElementById('grid'),
+        bodyHeight: gridHeight,
+        scrollY: true, scrollX: false, data: [],
+        columns: [
+            { header: '수주 번호', name: 'ORD_ID', width: 100, align: 'center', sortable: true },
+            { header: '상품명', name: 'PRD_NM', width: 200, sortable: true },
+            { header: '거래처 명', name: 'CLI_NM', align: 'center', sortable: true },
+            { header: '주문 수량', name: 'ORD_CNT', align: 'center', sortable: true },
+            { header: '배송지', name: 'ORD_ADDRESS', width: 300, align: 'center', sortable: true },
+            { header: '진행 상태', name: 'DET_NM', align: 'center', sortable: true },
+            { header: '상태 변경일', name: 'ORD_MOD_DATE', align: 'center', sortable: true }
+        ],
     });
-  }
-	
-	// 초기 그리드 데이터 로드 (페이지 로드 시)
-	fetchGridData(currentPage, searchKeyword); // 초기 페이지와 (비어있는) 검색어 전달
-	
-	// 무한 스크롤 이벤트 리스너 추가
-	grid.on('scrollEnd', async ({ horz, vert }) => {
-    if (vert.isReachedBottom) { // 스크롤이 그리드 바닥에 도달했을 때
-      if (hasMoreData && !isLoading) { // 더 불러올 데이터가 있고, 현재 로딩 중이 아닐 때
-        currentPage++; // 다음 페이지 번호로 업데이트
-        await fetchGridData(currentPage, searchKeyword); // 다음 페이지 데이터 로드
-      }
-    }
-	});
-
-	attachNumericFormatter('odd_cnt');
-	attachNumericFormatter('odd_pay');
-	
-	// --- 주문 등록 모달 관련 요소 및 이벤트 리스너 ---
-  const openOrderModalBtn = document.getElementById('openOrderModalBtn'); // '주문 등록' 버튼
-  const myModalElement = document.getElementById('myModal'); // Bootstrap 모달 컨테이너 ID
-
-	// Bootstrap 모달 인스턴스 초기화
-  let orderRegisterModalInstance = null; // 전역 변수로 선언하여 다른 함수에서도 사용 가능하게 함
-  if (myModalElement) {
-    orderRegisterModalInstance = new bootstrap.Modal(myModalElement);  
-    // ← 여기 추가: shown.bs.modal 이벤트 바인딩
-    myModalElement.addEventListener('shown.bs.modal', () => {
-      initDate();     // 오늘 날짜 세팅 + min 속성 세팅 + change 콘솔 로그
-      // 선택 플래그 초기화
-      isSelectClient  = false;
-      isSelectProduct = false;
-      updateInputState();   // odd_* 필드 비활성화
-    });
-  }
-	// 모달이 닫힐 때: 폼 전체 초기화 (선택값, 입력값, 플래그, 재고표시 등)
-  myModalElement.addEventListener('hidden.bs.modal', () => {
-    // 플래그 & 입력 상태 리셋
-    isSelectClient  = false;
-    isSelectProduct = false;
-    updateInputState();
-
-    document
-      .querySelectorAll('#cli_nm_virtual_select .vscomp-clear-button.toggle-button-child')
-      .forEach(btn => btn.click());
-    // 상품 clear 버튼
-    document
-      .querySelectorAll('#prd_nm_virtual_select .vscomp-clear-button.toggle-button-child')
-      .forEach(btn => btn.click());
-
-    // 일반 input 비우기
-    [
-      'cli_phone','cli_mgr_name','cli_mgr_phone',
-      'odd_cnt','odd_end_date','odd_pay','odd_pay_date',
-      'opt_color','opt_size','opt_height','stockCount','cli_pc','cli_add','cli_da'
-    ].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        if (el.tagName === 'SELECT') {
-          el.selectedIndex = 0; // 기본 옵션으로
-        } else {
-          el.value = '';
+    TUI_GRID_INSTANCE.on('scrollEnd', async () => {
+        if (hasMoreData && !isLoading) {
+            currentPage++;
+            await fetchGridData(currentPage, searchKeyword);
         }
-        if(el.id === 'cli_pc' || el.id === 'cli_add' || el.id === 'cli_da') {
-          el.disabled = false;
-        } else {
-          el.disabled = true;
-        }
-      }
     });
+}
+function initializeInnerGrid() {
+  // 이미 그리드가 생성되었다면, 데이터만 비우고 함수를 종료 (중복 생성 방지)
+  if (INNER_TUI_GRID_INSTANCE) {
+      INNER_TUI_GRID_INSTANCE.clear();
+      return;
+  }
 
-    // 날짜 피커 다시 오늘 날짜로 초기화
-    initDate();
+  INNER_TUI_GRID_INSTANCE = new tui.Grid({
+      el: document.getElementById('innerGrid'),
+      rowHeaders: ['checkbox'], // 그리드 맨 왼쪽에 체크박스 행을 추가합니다.
+      scrollX: false,
+      scrollY: true,
+      bodyHeight: 200, // 모달 내 그리드이므로 높이를 적절히 조절
+      columns: [
+          { header: '상품명', name: 'productName', width: 150, align: 'center' },
+          { header: '색상', name: 'colorName', align: 'center' },
+          { header: '사이즈', name: 'sizeName', align: 'center' },
+          { header: '굽높이', name: 'heightName', align: 'center' },
+          { header: '수량', name: 'quantity', align: 'right',  editor: 'text'},
+          // 필요하다면 여기에 숨겨진 코드 값을 위한 컬럼도 추가할 수 있습니다.
+          // { header: '상품코드', name: 'productCode', hidden: true },
+      ],
+      data: []
   });
 
-    if (openOrderModalBtn) {
-      openOrderModalBtn.addEventListener('click', async function() {
-        if (orderRegisterModalInstance) {
-          orderRegisterModalInstance.show(); // Bootstrap 모달 열기
+  // ▼▼▼ 체크/언체크 이벤트 감지하여 '선택 항목 삭제' 버튼 활성화/비활성화 ▼▼▼
+  const deleteBtn = document.getElementById('deleteSelectedRowsBtn');
+  if (deleteBtn) {
+      INNER_TUI_GRID_INSTANCE.on('check', () => {
+          deleteBtn.disabled = false;
+      });
+      INNER_TUI_GRID_INSTANCE.on('uncheck', () => {
+          // 체크된 행이 하나도 없으면 다시 비활성화
+          if (INNER_TUI_GRID_INSTANCE.getCheckedRows().length === 0) {
+              deleteBtn.disabled = true;
+          }
+      });
+      // 전체선택/해제 시에도 동일하게 적용
+      INNER_TUI_GRID_INSTANCE.on('checkAll', () => { deleteBtn.disabled = false; });
+      INNER_TUI_GRID_INSTANCE.on('uncheckAll', () => { deleteBtn.disabled = true; });
+  }
+}
+
+/**
+ * '주문 등록' 모달의 기본 설정 및 이벤트 리스너를 담당하는 함수
+ */
+function initializeOrderModal() {
+  const myModalElement = document.getElementById('myModal');
+  if (!myModalElement) return;
+  const orderRegisterModalInstance = new bootstrap.Modal(myModalElement);
+
+  // ▼▼▼ 이벤트 위임 로직 (핵심 수정사항) ▼▼▼
+  // 모달 전체에 클릭 이벤트 리스너를 한 번만 등록
+  myModalElement.addEventListener('click', function(event) {
+    const selectBox = event.target.closest('.select-box');
+
+    if (selectBox) {
+
+        event.stopPropagation();
+        const wrapper = selectBox.closest('.custom-select-wrapper');
+
+        if (!wrapper) {
+            return;
         }
-        await loadClientDataForModal(); // 모달 데이터 로드
-        await loadProductDataForModal(); // 모달 데이터 로드
-    });
+
+        wrapper.classList.toggle('open');
+
+        document.querySelectorAll('.custom-select-wrapper.open').forEach(openWrapper => {
+            if (openWrapper !== wrapper) {
+                openWrapper.classList.remove('open');
+            }
+        });
+    }
+  });
+
+  myModalElement.addEventListener('shown.bs.modal', () => {
+      resetOrderForm();
+      setupModalSelectBoxes();
+      initializeInnerGrid();
+  });
+
+  myModalElement.addEventListener('hidden.bs.modal', () => {
+      const clientSelect = document.getElementById('cli_nm_virtual_select');
+      const productSelect = document.getElementById('prd_nm_virtual_select');
+      if (clientSelect?.virtualSelectInstance) clientSelect.virtualSelectInstance.destroy();
+      if (productSelect?.virtualSelectInstance) productSelect.virtualSelectInstance.destroy();
+  });
+
+  document.getElementById('openOrderModalBtn')?.addEventListener('click', () => orderRegisterModalInstance.show());
+  document.getElementById('submitOrderBtn')?.addEventListener('click', submitForm);
+}
+/**
+ * 모달 내의 모든 셀렉트 박스들을 초기화하는 함수
+ */
+function setupModalSelectBoxes() {
+    loadClientDataForModal();
+    loadProductDataForModal();
+}
+
+/**
+ * 페이지 전역의 UI 요소에 이벤트 리스너를 바인딩하는 함수
+ */
+function bindGlobalEventListeners() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        const triggerSearch = () => {
+            searchKeyword = searchInput.value;
+            resetAndFetchGridData();
+        };
+        document.getElementById('searchButton')?.addEventListener('click', triggerSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') triggerSearch();
+        });
     }
 
+    document.getElementById('findPostCodeBtn')?.addEventListener('click', findPostCode);
+    attachNumericFormatter('odd_cnt');
+    attachNumericFormatter('odd_pay');
 
-}); // DOMContentLoaded 끝
+    
+    // ▼▼▼ '선택 항목 삭제' 버튼에 대한 이벤트 리스너 추가 ▼▼▼
+    const deleteSelectedRowsBtn = document.getElementById('deleteSelectedRowsBtn');
+    if (deleteSelectedRowsBtn) {
+        deleteSelectedRowsBtn.addEventListener('click', function() {
+            // 1. 그리드에서 체크된 행들의 데이터를 모두 가져옵니다.
+            const checkedRows = INNER_TUI_GRID_INSTANCE.getCheckedRows();
+            
+            if (checkedRows.length === 0) {
+                alert('삭제할 항목을 먼저 선택해주세요.');
+                return;
+            }
 
-// 초기 grid 테이블에 들어갈 list
-async function fetchGridData(page = currentPage, currentSearchKw = searchKeyword) {
+            // 2. TUI Grid는 각 행을 식별하는 고유한 'rowKey'를 가지고 있습니다.
+            //    삭제할 행들의 rowKey 목록을 만듭니다.
+            const rowKeys = checkedRows.map(row => row.rowKey);
+
+            console.log(rowKeys);
+            console.log(INNER_TUI_GRID_INSTANCE);
+            // 3. removeRows() 메소드에 rowKey 목록을 전달하여 한 번에 여러 행을 삭제합니다.
+            INNER_TUI_GRID_INSTANCE.removeRow(rowKeys);
+            
+            console.log(rowKeys.length + '개의 항목이 삭제되었습니다.');
+
+        });
+    }
+
+    // '초기화' 버튼에 이벤트 추가
+    const resetItemsBtn = document.getElementById('resetItemsBtn');
+    if (resetItemsBtn) {
+      resetItemsBtn.addEventListener('click', function() {
+        if (INNER_TUI_GRID_INSTANCE) {
+            INNER_TUI_GRID_INSTANCE.clear(); // 그리드 데이터 비우기
+        }
+      });
+    }
+}
+
+function addRowToInnerGrid() {
+    console.log("조합 생성 및 그리드 추가 함수 실행");
+
+    // 1. 선택된 모든 옵션 값들을 배열로 가져옵니다.
+    const selectedColors = document.getElementById('opt_color')?.value.split(',').filter(Boolean);
+    const selectedSizes = document.getElementById('opt_size')?.value.split(',').filter(Boolean);
+    const selectedHeights = document.getElementById('opt_height')?.value.split(',').filter(Boolean);
+    
+    
+    // 공통으로 적용될 정보들을 미리 가져옵니다.
+    const productName = selectProductNm;
+    const productCode = selectProductCd;
+    
+    console.log(productName);
+    console.log(productCode);
+    
+    // 2. 유효성 검사: 수량 검사를 제거합니다.
+    if (selectedColors.length === 0 || selectedSizes.length === 0 || selectedHeights.length === 0) {
+        alert('색상, 사이즈, 굽높이를 각각 하나 이상 선택해주세요.');
+        return;
+    }
+    
+    // 3. 3중 forEach 루프를 사용하여 모든 조합을 만듭니다.
+    selectedColors.forEach(colorCode => {
+        selectedSizes.forEach(sizeCode => {
+            selectedHeights.forEach(heightCode => {
+                
+                // 각 조합에 대한 행(row) 데이터를 생성합니다.
+                const newRowData = {
+                    productName: productName,
+                    productCode: productCode,
+                    colorName: uniqueColors.get(colorCode),
+                    colorCode: colorCode,
+                    sizeName: uniqueSizes.get(sizeCode),
+                    sizeCode: sizeCode,
+                    heightName: uniqueHeights.get(heightCode),
+                    heightCode: heightCode,
+                    quantity: 0 // 기본 수량을 1로 설정합니다.
+                };
+                
+                // 생성된 행 데이터를 그리드에 추가합니다.
+                INNER_TUI_GRID_INSTANCE.appendRow(newRowData);
+            });
+        });
+    });
+    
+    // 4. 모든 조합을 추가한 후, 옵션 선택 폼을 초기화합니다.
+    resetOptionForms();
+}
+
+function resetOptionForms() {
+    
+    // 1. 색상, 사이즈, 굽높이 커스텀 셀렉트 박스 초기화
+    ['color', 'size', 'height'].forEach(type => {
+        const wrapper = document.getElementById(`${type}CustomSelectWrapper`);
+        if (wrapper) {
+            // 화면에 보이는 입력창 텍스트 비우기
+            const visibleInput = wrapper.querySelector('.select-box input');
+            if (visibleInput) {
+                visibleInput.value = '';
+            }
+            
+            // 실제 값을 저장하는 숨겨진 input 값 비우기
+            const hiddenInput = document.getElementById(`opt_${type}`);
+            if (hiddenInput) {
+                hiddenInput.value = '';
+            }
+            const optionsContainer = wrapper.querySelector('.options-container');
+            if (optionsContainer) {
+                optionsContainer.innerHTML = '';
+            }
+            
+            // 드롭다운 내부의 옵션들에서 'selected' 클래스 제거하여 시각적으로도 초기화
+            wrapper.querySelectorAll('.option.selected').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+        }
+    });
+    
+    // 2. 수량 입력 필드 초기화 (만약 사용하고 있다면)
+    // 저희가 마지막에 만든 로직에서는 이 필드를 그리드에서 직접 입력하도록 변경했습니다.
+    // 만약 상단에 수량 입력 필드(id="odd_cnt")를 여전히 사용 중이시라면, 이 코드가 해당 필드를 비워줍니다.
+    const quantityInput = document.getElementById('odd_cnt');
+    if (quantityInput) {
+        quantityInput.value = '';
+    }
+    
+    resetOrderForm();
+    console.log("옵션 선택 폼이 초기화되었습니다.");
+}
+
+// ===================================================================
+// 데이터 로딩 및 그리드 관리 함수 섹션
+// ===================================================================
+
+async function fetchGridData(page = 0, currentSearchKw = '') {
     if (isLoading) return;
-    isLoading = true; // 로딩 시작 플래그 설정 (전역 변수)
-
-
+    isLoading = true;
     try {
-        const params = new URLSearchParams();
-        params.append('page', currentPage);
-        params.append('pageSize', pageSize);
-
-        if (currentSearchKw) { // 검색어가 비어있지 않다면 (null, '', undefined, ' ') 포함
-            params.append('searchKeyword', currentSearchKw); 
-        }
-        
-        const url = `/SOLEX/orders/gridData?${params.toString()}`; 
-		
-        
-        const response = await fetch(url);
-
-        // 2. 응답 상태 확인
-        if (!response.ok) { // HTTP 상태 코드가 200-299 범위가 아니면 오류
-            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-        }
-        
-        // 3. 응답 데이터를 JSON으로 파싱
+        const params = new URLSearchParams({ page, pageSize });
+        if (currentSearchKw) params.append('searchKeyword', currentSearchKw);
+        const response = await fetch(`/SOLEX/orders/gridData?${params.toString()}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        
-        // 4. 그리드 데이터 업데이트
-        if (page === 0) { // 첫 페이지 요청 시 (새로운 검색 또는 초기 로드)
-            grid.resetData(data); // 기존 데이터를 모두 지우고 새 데이터로 채움
-        } else { // 다음 페이지 요청 시 (무한 스크롤)
-            grid.appendRows(data); // 기존 데이터에 새 데이터를 추가
-        }
-
-        // 5. 더 불러올 데이터가 있는지 판단 (무한 스크롤 종료 조건)
-        // 서버에서 받아온 데이터의 개수가 요청한 pageSize보다 적으면 더 이상 데이터가 없다고 판단
-        if (data.length < pageSize) {
-            hasMoreData = false; // 더 이상 불러올 데이터 없음 플래그 설정 (전역 변수)
-        } else {
-            hasMoreData = true; // 더 불러올 데이터가 있을 가능성 (전역 변수)
-        }
-
+        if (page === 0) TUI_GRID_INSTANCE.resetData(data);
+        else TUI_GRID_INSTANCE.appendRows(data);
+        hasMoreData = data.length === pageSize;
     } catch (error) {
         console.error('그리드 데이터 로딩 중 오류 발생:', error);
-        hasMoreData = false; // 오류 발생 시에는 더 이상 데이터를 로드하지 않음 (전역 변수)
+        hasMoreData = false;
     } finally {
-        isLoading = false; // 로딩 완료 플래그 해제 (전역 변수)
-        // 로딩 스피너 등을 여기서 숨길 수 있습니다.
+        isLoading = false;
     }
 }
 
 function resetAndFetchGridData() {
-    currentPage = 0; // 페이지 번호 초기화
-    hasMoreData = true; // 새로운 검색이므로 더 불러올 데이터 있다고 가정
-    grid.resetData([]); // 그리드 데이터 초기화 (화면 비우기)
-    // searchKeyword는 이미 검색 버튼 클릭 시 업데이트되었으므로 파라미터로 직접 전달
-    fetchGridData(currentPage, searchKeyword);
+    currentPage = 0;
+    hasMoreData = true;
+    TUI_GRID_INSTANCE.resetData([]);
+    fetchGridData(0, searchKeyword);
 }
 
 
+// ===================================================================
+// 모달 내부 데이터 로딩 (Virtual Select & Custom Select)
+// ===================================================================
 
+// --- VirtualSelect 관련 함수들 ---
 async function loadClientDataForModal() {
-  const el = document.getElementById('cli_nm_virtual_select');
-  if (!el || el.virtualSelectInstance) return;
-
-  const debounce = (fn, delay = 300) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
-    };
-  };
-
-  // 1) VirtualSelect 초기화 (서버 검색 콜백만 설정)
-  const vsInst = VirtualSelect.init({
-    ele: el,
-    placeholder: "거래처를 검색하세요...",
-    search: true,
-    clearButton: true,
-    autoSelectFirstOption: false,
-    value: "",
-    onServerSearch: debounce(async (searchValue, virtualSelectInstance) => {
-      await fetchAndSetClientOptions(searchValue, virtualSelectInstance);
-    }, 300)
-  });
-
-  vsInst.$ele.addEventListener('change',async  (e) => {
-	  const cliNm = vsInst.getValue();
-	  selectClientCd = cliNm;
-	
-	  if (cliNm && cliNm.trim()) {
-      isSelectClient = true;
-	    // 실제 코드가 있을 때만 재고 조회
-      getColor();
-	  } else {
-	    // clear(빈값)이면 false 세팅
-	    isSelectClient = false;
-      initOptions();
-	  }
-	  await getClientInfo(cliNm);  
-    updateInputState();
-  });
-  
-  
-
-  // 3) DOM에 인스턴스 저장
-  el.virtualSelectInstance = vsInst;
-  
-  // 4) input 이벤트 (전역 변수 갱신)
-  const inputEl = document.getElementById(vsInst.$searchInput.id);
-  inputEl.addEventListener('input', e => {
-    VirtualSelectClientInput = e.target.value;
-  });
-
-  // 5) ▶️ 초기 데이터 한 번 로드
-  await fetchAndSetClientOptions("", vsInst);
-
-
+    const el = document.getElementById('cli_nm_virtual_select');
+    if (!el || el.virtualSelectInstance) return;
+    const vsInst = VirtualSelect.init({
+        ele: el, placeholder: "거래처를 검색하세요...", search: true, clearButton: true,
+        onServerSearch: debounce(async (searchValue, virtualSelectInstance) => {
+            await fetchAndSetClientOptions(searchValue, virtualSelectInstance);
+        }, 300)
+    });
+    vsInst.$ele.addEventListener('change', async () => {
+        selectClientCd = vsInst.getValue();
+        isSelectClient = !!selectClientCd;
+        await getClientInfo(selectClientCd);
+    });
+    clientVirtualSelect = vsInst
+    el.virtualSelectInstance = vsInst;
+    await fetchAndSetClientOptions("", vsInst);
 }
 
-
-// 서버 호출 + 옵션 세팅을 분리한 헬퍼 함수
 async function fetchAndSetClientOptions(searchValue, virtualSelectInstance) {
-  const params = new URLSearchParams();
-  params.append('page', currentPage);
-  params.append('pageSize', pageSize);
-  if (searchValue && searchValue.trim()) {
-    params.append('searchKeyword', searchValue.trim());
-  }
-  
-  const url = `/SOLEX/orders/clients?${params.toString()}`;
-
-  try {
-    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const json = await resp.json();
-
-    // json이 배열이라 가정
-    const options = json.map(item => ({
-      label: item.CLI_NM,
-      value: item.CLI_ID
-    }));
-    // hasMore 정보가 들어있지 않다면, (json.length === pageSize) 등으로 대체하세요
-    const hasMore = Array.isArray(json) && json.length === pageSize;
-
-    virtualSelectInstance.setServerOptions(options, hasMore);
-  } catch (err) {
-    console.error('거래처 초기/검색 오류:', err);
-    virtualSelectInstance.setServerOptions([], false);
-  }
+    const params = new URLSearchParams({ page: 0, pageSize: 50 });
+    if (searchValue) params.append('searchKeyword', searchValue.trim());
+    try {
+        const resp = await fetch(`/SOLEX/orders/clients?${params.toString()}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json = await resp.json();
+        const options = json.map(item => ({ label: item.CLI_NM, value: item.CLI_ID }));
+        virtualSelectInstance.setServerOptions(options);
+    } catch (err) { console.error('거래처 검색 오류:', err); }
 }
-
 
 async function loadProductDataForModal() {
-  const el = document.getElementById('prd_nm_virtual_select');
-  if (!el || el.virtualSelectInstance) return;
-
-  const debounce = (fn, delay = 300) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
-    };
-  };
-
-  // 1) VirtualSelect 초기화 (서버 검색 콜백만 설정)
-  const vsInst = VirtualSelect.init({
-    ele: el,
-    placeholder: "제품명을 검색하세요...",
-    search: true,
-    clearButton: true,
-    autoSelectFirstOption: false,
-    value: "",
-    onServerSearch: debounce(async (searchValue, virtualSelectInstance) => {
-      await fetchAndSetProductOptions(searchValue, virtualSelectInstance);
-    }, 300)
-  });
-  vsInst.$ele.addEventListener('change', async (e) => {
-	  const prdCd = vsInst.getValue();
-	  selectProductCd = prdCd;
-
-    if (prdCd && prdCd.trim()) {
-      // 실제 코드가 있을 때만 재고 조회
-      isSelectProduct = true;
-      getColor();
-    } else {
-      // clear(빈값)이면 false 세팅
-      isSelectProduct = false;
-      initOptions();
-    }
-      updateInputState();
-  
-  });
-	
-	
-	
-  // 3) DOM에 인스턴스 저장
-  el.virtualSelectInstance = vsInst;
-
-  // 4) input 이벤트 (전역 변수 갱신)
-  const inputEl = document.getElementById(vsInst.$searchInput.id);
-  inputEl.addEventListener('input', e => {
-    VirtualSelectClientInput = e.target.value;
-    console.log('현재 입력값:', VirtualSelectClientInput);
-  });
-
-  // 5) ▶️ 초기 데이터 한 번 로드
-  await fetchAndSetProductOptions("", vsInst);
-
+    const el = document.getElementById('prd_nm_virtual_select');
+    if (!el || el.virtualSelectInstance) return;
+    const vsInst = VirtualSelect.init({
+        ele: el, placeholder: "제품명을 검색하세요...", search: true, clearButton: true,
+        onServerSearch: debounce(async (searchValue, virtualSelectInstance) => {
+            await fetchAndSetProductOptions(searchValue, virtualSelectInstance);
+        }, 300)
+    });
+    vsInst.$ele.addEventListener('change', async () => {
+        const selectedOption = vsInst.getSelectedOptions();
+        if (selectedOption) {
+            selectProductCd = selectedOption.value;
+            selectProductNm = selectedOption.label;
+            
+        } else {
+            selectProductCd = "";
+            selectProductNm = "";
+        }
+        isSelectProduct = !!selectProductCd;
+        resetOrderStep('color');
+        if (isSelectProduct) {
+            await loadAllProductOptions(selectProductCd);
+        }
+    });
+    productVirtualSelect = vsInst;
+    el.virtualSelectInstance = vsInst;
+    await fetchAndSetProductOptions("", vsInst);
 }
 
-
-// 서버 호출 + 옵션 세팅을 분리한 헬퍼 함수
 async function fetchAndSetProductOptions(searchValue, virtualSelectInstance) {
-  const params = new URLSearchParams();
-  if (searchValue && searchValue.trim()) {
-    params.append('searchKeyword', searchValue.trim());
-  }
-  
-  const url = `/SOLEX/orders/products?${params.toString()}`; // 상품 데이터를 가져오는 URL로 변경
-
-  try {
-    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const json = await resp.json();
-
-    // json이 배열이라 가정
-    const options = json.map(item => ({
-		label: item.PRD_NM, // 상품명으로 변경
-        value: item.PRD_CD // 상품 코드로 변경 (또는 상품명)
-    }));
-    // hasMore 정보가 들어있지 않다면, (json.length === pageSize) 등으로 대체하세요
-    const hasMore = Array.isArray(json) && json.length === pageSize;
-
-    virtualSelectInstance.setServerOptions(options, hasMore);
-  } catch (err) {
-    console.error('거래처 초기/검색 오류:', err);
-    virtualSelectInstance.setServerOptions([], false);
-  }
+    const params = new URLSearchParams();
+    if (searchValue) params.append('searchKeyword', searchValue.trim());
+    try {
+        const resp = await fetch(`/SOLEX/orders/products?${params.toString()}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json = await resp.json();
+        const options = json.map(item => ({ label: item.PRD_NM, value: item.PRD_CD }));
+        virtualSelectInstance.setServerOptions(options);
+    } catch (err) { console.error('상품 검색 오류:', err); }
 }
 
-// 서버 호출
+/**
+ * (신규 핵심 함수) 상품의 모든 옵션(색상, 사이즈, 굽높이)을 한번에 불러와서 채우는 함수
+ * @param {string} productCd - 선택된 상품 코드
+ */
+
+async function loadAllProductOptions(productCd) {
+    console.log(productCd);
+    if (!productCd) return;
+    try {
+        const response = await fetch(`/SOLEX/orders/product/${productCd}`);
+        if (!response.ok) throw new Error('상품 옵션 로딩 실패');
+        const optionsData = await response.json();
+        console.log(optionsData);
+        // 1. Map을 사용해 각 옵션의 고유한 값들을 추출합니다.
+         uniqueColors = new Map();
+         uniqueSizes = new Map();
+         uniqueHeights = new Map();
+
+        optionsData.forEach(option => {
+          // .set(key, value)를 사용합니다. key(실제 값)가 중복되면, value(표시될 이름)는 마지막 것으로 갱신됩니다.
+          if (option.OPT_COLOR && option.OPT_COLOR_NM) {
+              uniqueColors.set(option.OPT_COLOR, option.OPT_COLOR_NM);
+          }
+          if (option.OPT_SIZE && option.OPT_SIZE_NM) {
+              uniqueSizes.set(option.OPT_SIZE, option.OPT_SIZE_NM);
+          }
+          if (option.OPT_HEIGHT && option.OPT_HEIGHT_NM) {
+              uniqueHeights.set(option.OPT_HEIGHT, option.OPT_HEIGHT_NM);
+          }
+      });
+
+        // 2. Map을 배열로 변환 후, 화면에 표시될 이름(label) 기준으로 정렬합니다.
+        const colorOptions = Array.from(uniqueColors); // 색상은 이름순 정렬이 필요하면 .sort() 추가
+        const sizeOptions = Array.from(uniqueSizes).sort((a, b) => Number(a[1]) - Number(b[1])); // 사이즈는 숫자 오름차순 정렬
+        const heightOptions = Array.from(uniqueHeights).sort((a, b) => Number(a[1]) - Number(b[1])); // 굽높이도 숫자 오름차순 정렬
+
+        // 3. 추출된 고유한 값들로 드롭다운 메뉴를 생성합니다.
+        const optionConfigs = {
+            color: { data: colorOptions, multi: true },
+            size: { data: sizeOptions, multi: true }, // 사이즈는 단일 선택으로 변경
+            height: { data: heightOptions, multi: true }  // 굽높이도 단일 선택으로 변경
+        };
+
+        for (const [type, { data, multi }] of Object.entries(optionConfigs)) {
+          const container = document.querySelector(`#${type}CustomSelectWrapper .options-container`);
+          if (container) {
+              container.innerHTML = ''; // 기존 옵션 비우기
+              
+              // data는 이제 [실제값, 표시이름] 형태의 배열입니다.
+              data.forEach(([value, label]) => {
+                  container.innerHTML += `<div class="option" data-value="${value}">${label}</div>`;
+              });
+
+              initializeCustomSelect(`${type}CustomSelectWrapper`, multi);
+          }
+      }
+    } catch (error) { 
+        console.error("All product options loading failed:", error); 
+    }
+}
+
 async function getClientInfo(clientCode) {
-	if (!clientCode || !clientCode.trim()) {
-	  const elPhone     = document.getElementById('cli_phone');
-	  const elMgrName   = document.getElementById('cli_mgr_name');
-	  const elMgrPhone  = document.getElementById('cli_mgr_phone');
-
-	  if (elPhone)    elPhone.value     = '';
-	  if (elMgrName)  elMgrName.value   = '';
-	  if (elMgrPhone) elMgrPhone.value  = '';
-		
-		isSelectClient = false;
-	  return;
-	}
-	  
-    
-    const url = `/SOLEX/clients/${clientCode}`;
-
-	try {
-	   const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-	   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-	   const json = await resp.json();
-	   
-	   // 입력값 세팅
-       const elPhone     = document.getElementById('cli_phone');
-       const elMgrName   = document.getElementById('cli_mgr_name');
-       const elMgrPhone  = document.getElementById('cli_mgr_phone');
-
-       if (elPhone)    elPhone.value     = json.data.CLI_PHONE     || '';
-       if (elMgrName)  elMgrName.value   = json.data.CLI_MGR_NAME  || '';
-       if (elMgrPhone) elMgrPhone.value  = json.data.CLI_MGR_PHONE || '';
-	   
-	 } catch (err) {
-	   console.error('getStockCount 오류:', err);
-	   throw err;    // 상위 로직에서 처리하려면 다시 throw
-	 }
+    const fields = { cli_phone: '', cli_mgr_name: '', cli_mgr_phone: '' };
+    if (clientCode) {
+        try {
+            const resp = await fetch(`/SOLEX/clients/${clientCode}`);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const json = await resp.json();
+            fields.cli_phone = json.data.CLI_PHONE || '';
+            fields.cli_mgr_name = json.data.CLI_MGR_NAME || '';
+            fields.cli_mgr_phone = json.data.CLI_MGR_PHONE || '';
+        } catch (err) { console.error('거래처 정보 조회 오류:', err); }
+    }
+    Object.entries(fields).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    });
 }
 
-// 우편번호 찾기 (Daum Postcode API)
+
+// ===================================================================
+// 커스텀 셀렉트 박스 핵심 로직
+// ===================================================================
+function initializeCustomSelect(wrapperId, isMultiSelect = false) {
+    const wrapper = document.getElementById(wrapperId);
+    if (!wrapper) return;
+
+    const optionsContainer = wrapper.querySelector('.options-container');
+    const input = wrapper.querySelector('.select-box input');
+
+    // ▼▼▼ 핵심 수정 부분 ▼▼▼
+    // wrapperId에서 'CustomSelectWrapper'를 제거하여 'type'을 추출 (예: 'color')
+    const type = wrapperId.replace('CustomSelectWrapper', '');
+    // 올바른 hidden input의 ID를 조립합니다. (예: 'opt_color')
+    const hiddenInput = document.getElementById(`opt_${type}`);
+    // ▲▲▲ 핵심 수정 부분 ▲▲▲
+
+    const selectedValues = new Set();
+
+    // 새로 생성된 옵션들에 이벤트 리스너 등록
+    optionsContainer.querySelectorAll('.option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const value = option.getAttribute('data-value');
+
+            if (isMultiSelect) {
+                option.classList.toggle('selected');
+                if (selectedValues.has(value)) {
+                    selectedValues.delete(value);
+                } else {
+                    selectedValues.add(value);
+                }
+            } else { // 단일 선택
+                const currentSelected = optionsContainer.querySelector('.option.selected');
+                if (currentSelected) currentSelected.classList.remove('selected');
+                option.classList.add('selected');
+                selectedValues.clear();
+                if (value) selectedValues.add(value);
+                wrapper.classList.remove('open');
+            }
+            // 이제 올바른 hiddenInput을 넘겨주게 됩니다.
+            updateDisplayValue(optionsContainer, input, hiddenInput, selectedValues);
+        });
+    });
+    
+    // 초기 값 표시
+    updateDisplayValue(optionsContainer, input, hiddenInput, selectedValues);
+}
+
+// updateDisplayValue 함수를 initializeCustomSelect 밖으로 빼내어 재사용성을 높입니다.
+function updateDisplayValue(optionsContainer, input, hiddenInput, selectedValues) {
+  const labels = Array.from(selectedValues).map(val => {
+      const opt = optionsContainer.querySelector(`.option[data-value="${val}"]`);
+      return opt ? opt.textContent : '';
+  }).filter(Boolean);
+
+  // 2. ▼▼▼ 표시될 텍스트를 결정하는 로직 수정 ▼▼▼
+  let displayText = '';
+  if (labels.length === 1) {
+      // 선택된 항목이 1개일 경우, 해당 항목의 이름만 표시
+      displayText = labels[0];
+  } else if (labels.length > 1) {
+      // 선택된 항목이 2개 이상일 경우, '첫 항목 외 N개' 형식으로 표시
+      // Set은 입력 순서를 기억하므로 labels[0]은 가장 먼저 선택한 항목이 됩니다.
+      const otherCount = labels.length - 1;
+      displayText = `${labels[0]} 외 ${otherCount}개`;
+  }
+  // (선택된 항목이 0개일 경우, displayText는 초기값인 빈 문자열 ''이 됩니다)
+
+  input.value = displayText;
+
+  // 3. 숨겨진 input에 실제 값(value)을 저장하는 로직은 그대로 유지합니다.
+  // 이 부분 덕분에 화면 표시와 관계없이 모든 데이터는 정상적으로 처리됩니다.
+  if (hiddenInput) {
+      const newValue = Array.from(selectedValues).join(',');
+      if (hiddenInput.value !== newValue) {
+          hiddenInput.value = newValue;
+          hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+  }
+}
+
+window.addEventListener('click', (e) => {
+    document.querySelectorAll('.custom-select-wrapper.open').forEach(wrapper => {
+        if (!wrapper.contains(e.target)) wrapper.classList.remove('open');
+    });
+});
+
+
+// ===================================================================
+// 이벤트 핸들러 및 상태/폼 관리 함수 섹션
+// ===================================================================
+
+
+function resetOrderForm() {
+   
+    if (productVirtualSelect) {
+        productVirtualSelect.reset();
+    }
+
+    document.getElementById('orderRegisterForm')?.reset(); // form 태그가 있다면 reset 사용
+    // VirtualSelect 리셋
+    resetOrderStep('color');
+    isSelectClient = false;
+    isSelectProduct = false;
+    lastLoadedProductCd = null;
+    initDate();
+    
+}
+
+function resetOrderStep(step) {
+    const steps = ['color', 'size', 'height', 'stock'];
+    const startIndex = steps.indexOf(step);
+    for (let i = startIndex; i < steps.length; i++) {
+        const currentStep = steps[i];
+        if (currentStep !== 'stock') {
+            const wrapper = document.getElementById(`${currentStep}CustomSelectWrapper`);
+            if (wrapper) {
+                wrapper.querySelector('.options-container').innerHTML = '';
+                wrapper.querySelector('.select-box input').value = '';
+                const hiddenInput = document.getElementById(`opt_${currentStep}`);
+                if(hiddenInput) hiddenInput.value = '';
+            }
+        } else {
+            const stockEl = document.getElementById('stockCount');
+            if(stockEl) stockEl.value = '';
+            ['odd_cnt', 'odd_pay', 'odd_end_date', 'odd_pay_date'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) { el.value = '';}
+            });
+            initDate();
+        }
+    }
+}
+
+function initDate() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    ['odd_end_date', 'odd_pay_date'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) { el.min = todayStr; el.value = todayStr; }
+    });
+}
+
+
+
+
+// ===================================================================
+// 유틸리티 및 폼 제출/유효성 검사 함수 섹션
+// ===================================================================
+
 function findPostCode() {
-	new daum.Postcode({
+    new daum.Postcode({
         oncomplete: function(data) {
-        	// 우편번호
-            $("#cli_pc").val(data.zonecode);
-            // 도로명 및 지번주소
-            $("#cli_add").val(data.roadAddress);
+            document.getElementById("cli_pc").value = data.zonecode;
+            document.getElementById("cli_add").value = data.roadAddress;
         }
     }).open();
 }
 
-function updateInputState() {
-  const shouldEnable = isSelectProduct && isSelectClient;
-  ['opt_color'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el.tagName === 'SELECT') {
-      el.selectedIndex = 0; // 기본 옵션으로
-      el.disabled = !shouldEnable; // 상태에 따라 활성화/비활성화
-    } else {
-      el.value = '';
-    }
-  });
-}
-// ================== 데이터 초기화 함수들 ===================== //
-// 3) initDate: 오직 min/value 세팅만
-function initDate() {
-  const endDateEl = document.getElementById('odd_end_date');
-  const payDateEl = document.getElementById('odd_pay_date');
-  if (!endDateEl || !payDateEl) return;
+const debounce = (fn, delay = 300) => {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+};
 
-  const today    = new Date();
-  const yyyy     = today.getFullYear();
-  const mm       = String(today.getMonth()+1).padStart(2,'0');
-  const dd       = String(today.getDate()).padStart(2,'0');
-  const todayStr = `${yyyy}-${mm}-${dd}`;
+function formatWithComma(str) { return String(str).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
 
-  [endDateEl, payDateEl].forEach(el => {
-    el.min   = todayStr;
-    el.value = todayStr;
-
-    el.disabled = true;
-  });
-}
-
-function initOptions() {
-  ['opt_color','opt_size','opt_height'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el.tagName === 'SELECT') {
-      el.selectedIndex = 0; // 기본 옵션으로
-      el.disabled = true; // 상태에 따라 활성화/비활성화
-    }
-  });
-}
-
-function initOrderInputs () {
-  const inputPlaceholders = {
-    stockCount : '제품 재고량',
-    odd_cnt: '주문 수량을 입력하세요.',
-    odd_pay: '결제 금액을 입력하세요.'
-  };
-
-  Object.entries(inputPlaceholders).forEach(([id, placeholder]) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.value = '';
-      el.placeholder = placeholder;
-      el.disabled = true;
-    }
-  });
-  initDate();
-}
-
-function initSize(shouldEnable) {
-  const selectSize = document.getElementById('opt_size');
-  if(shouldEnable) {
-    selectSize.innerHTML = '<option value="">사이즈를 선택하세요</option>';
-    selectSize.value = '';
-    selectSize.disabled = true;
-  }else {
-    selectSize.disabled = false;   
-  }
-}
-
-
-function initHeight(shouldEnable) {
-  const selectHeight = document.getElementById('opt_height');
-  if(shouldEnable) {
-    selectHeight.innerHTML = '<option value="">굽 높이를 선택하세요</option>';
-    selectHeight.value = '';
-    selectHeight.disabled = true;   
-  } else {
-    selectHeight.disabled = false;   
-  }
-}
-
-
-// ================== 데이터 초기화 함수들 ===================== //
-
-
-function formatWithComma(str) {
-  return str.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-// 2) 숫자 전용 입력 + 0 이하 차단 + 콤마 포맷터
 function attachNumericFormatter(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-
-  el.addEventListener('focus', e => {
-    e.target.value = e.target.value.replace(/,/g, '');
-  });
-
-  el.addEventListener('input', e => {
-    let v = e.target.value.replace(/[^0-9]/g, '');
-    e.target.value = v;
-  });
-
-  el.addEventListener('blur', e => {
-    let v = e.target.value.replace(/,/g, '');
-    let n = parseInt(v, 10);
-    if (isNaN(n) || n < 0) n = 0;
-    e.target.value = formatWithComma(String(n));    // ← formatWithComma 호출
-  });
-}
-
-function onEndDateChange(e) {
-  console.log('선택한 납품 요청일:', e.target.value);
-}
-function onPayDateChange(e) {
-  console.log('선택한 결제 요청일:', e.target.value);
-}
-
-async function getColor() {
-  if(isSelectClient && isSelectProduct) {
-    try {
-      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}`, {
-        method: 'GET',        
-      });
-      if (!response.ok) {
-        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-      // 응답 본문을 JSON으로 파싱
-      const datas = await response.json();
-      console.log(datas);
-      
-      const el = document.getElementById('opt_color');
-      if (el) {
-        el.disabled = false;
-        el.options.length = 0;
-        el.options.add(new Option('색상을 선택하세요.', ''));
-      
-        datas.forEach(data => {
-          el.options.add(new Option(data.DET_NM,data.OPT_COLOR));
-        });
-      }
-    } catch (error) {
-      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
-      console.error('에러 발생:', error);
-      alert(`오류가 발생했습니다: ${error.message}`);
-    }
-  }
-}
-
-// 색상 선택시 함수 호출
-const ColeorEl = document.getElementById('opt_color');
-
-if (ColeorEl) {
-  ColeorEl.addEventListener('change', handleColorChange);
-}
-
- // 이벤트 핸들러 함수
-function handleColorChange(event) {
-  const selectedColor = event.target.value;
-  initOrderInputs();
-  initHeight(true);
-  if (!selectedColor) {
-    initSize(true);
-    return;
-  }
-  initSize(false);
-  getSize(selectedColor);
-}
-
-
-async function getSize(color) {
-  if(isSelectClient && isSelectProduct) {
-    try {
-      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}/color/${color}`, {
-        method: 'GET',        
-      });
-      if (!response.ok) {
-        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-      // 응답 본문을 JSON으로 파싱
-      const datas = await response.json();
-      console.log(datas);
-      
-      const el = document.getElementById('opt_size');
-      if (el) {
-        el.disabled = false;
-        el.options.length = 0;
-        el.options.add(new Option('사이즈를 선택하세요.', ''));
-      
-        datas.forEach(data => {
-          el.options.add(new Option(data.DET_NM,data.OPT_SIZE));
-        });
-      }
-    } catch (error) {
-      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
-      console.error('에러 발생:', error);
-      alert(`오류가 발생했습니다: ${error.message}`);
-    }
-  }
-}
-
-// 색상 선택시 함수 호출
-const siezEl = document.getElementById('opt_size');
-if (siezEl) {
-  siezEl.addEventListener('change', handleSizeChange);
-}
-
- // 이벤트 핸들러 함수
-function handleSizeChange(event) {
-  const selectedSize = event.target.value;
-  const selectedColor = document.getElementById('opt_color').value;
-  initOrderInputs();
-
-  if (!selectedSize) {
-    initHeight(true);
-    return;
-  }
-  initHeight(false);
-
-  getHeight(selectedSize,selectedColor);
-}
-
-async function getHeight(size,color) {
-  if(isSelectClient && isSelectProduct) {
-    try {
-      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}/color/${color}/size/${size}`, {
-        method: 'GET',        
-      });
-      if (!response.ok) {
-        // 서버가 에러 메시지를 JSON 형태로 보냈을 경우를 대비
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-      // 응답 본문을 JSON으로 파싱
-      const datas = await response.json();
-      console.log(datas);
-      
-      const el = document.getElementById('opt_height');
-      if (el) {
-        el.disabled = false;
-        el.options.length = 0;
-        el.options.add(new Option('굽 높이를 선택하세요.', ''));
-      
-        datas.forEach(data => {
-          el.options.add(new Option(data.DET_NM,data.OPT_HEIGHT));
-        });
-      }
-    } catch (error) {
-      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
-      console.error('에러 발생:', error);
-      alert(`오류가 발생했습니다: ${error.message}`);
-    }
-  }
-}
-
-const heightEl = document.getElementById('opt_height');
-if (heightEl) {
-  heightEl.addEventListener('change', handleHeightChange);
-}
-
-function handleHeightChange(event) {
-  initOrderInputs();
-  // 선택된 값
-  const selectedHeight = event.target.value;
-
-  // 제품 재고량 수량 input 태그 가져오기
-  const stockCount = document.getElementById('stockCount');
-  
-  if (!selectedHeight) {
-    // 값 초기화
-    stockCount.value = '';
-    stockCount.placeholder  = '제품 재고량';
-    return;
-  }
-  // 제폼/bom , 자재발주, 수주요청, 작업지시, 로트, 창고관리, 현장사원  
-  //  태그 값 가져오기
-  const color = document.getElementById('opt_color').value;
-  const size = document.getElementById('opt_size').value;
-  // 여기서 제품 재고량 호출
-  getStockCount(color,size,selectedHeight);
-  
-  // odd_cnt,odd_end_date, odd_pay,odd_pay_date 값도 초기화 되면을 듯 한데. 
-  ['odd_cnt','odd_end_date','odd_pay','odd_pay_date'].forEach(id => {
     const el = document.getElementById(id);
-      el.disabled = false; // 상태에 따라 활성화/비활성화
-  });
-
+    if (!el) return;
+    el.addEventListener('focus', e => { e.target.value = e.target.value.replace(/,/g, ''); });
+    el.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); });
+    el.addEventListener('blur', e => {
+        const num = parseInt(e.target.value, 10);
+        e.target.value = isNaN(num) || num <= 0 ? '' : formatWithComma(num);
+    });
 }
 
-// 서버 호출
-async function getStockCount(color, size, height) {
-	if(isSelectClient && isSelectProduct) {
-    try {
-      const response = await fetch(`/SOLEX/orders/prd_cd/${selectProductCd}/color/${color}/size/${size}/height/${height}`, {
-        method: 'GET',        
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || `서버에 문제가 발생했습니다. (상태: ${response.status})`;
-        throw new Error(errorMessage);
-      }
-      // 응답 본문을 JSON으로 파싱
-      const datas = await response.json();
-      console.log(datas);
-      
-      const el = document.getElementById('stockCount');
-      el.value = datas;
-    } catch (error) {
-      // 네트워크 에러 또는 위에서 발생시킨 에러를 처리
-      console.error('에러 발생:', error);
-      alert(`오류가 발생했습니다: ${error.message}`);
-    }
-  }
-}
-
-
-
-function validateOrderForm() {
-  // 1) 거래처·상품
-  if (!isSelectClient) {
-    alert('거래처를 선택해주세요.');
-    return false;
-  }
-  if (!isSelectProduct) {
-    alert('상품을 선택해주세요.');
-    return false;
-  }
-  const selectedColor = document.getElementById('opt_color')?.value || '';
-  if (!selectedColor) {
-    alert('색상을 선택해주세요.');
-    return false;
-  }
-
-  const selectedSize = document.getElementById('opt_size')?.value || '';
-  if (!selectedSize) {
-    alert('사이즈를 선택해주세요.');
-    return false;
-  }
-
-  const selectedHeight = document.getElementById('opt_height')?.value || '';
-  if (!selectedHeight) {
-    alert('굽 높이를 선택해주세요.');
-    return false;
-  }
-
-  // 2) 주문 수량
-  const cntEl  = document.getElementById('odd_cnt');
-  const cntVal = cntEl?.value.replace(/,/g,'') || '';
-  const cntNum = parseInt(cntVal, 10);
-  if (!cntVal) {
-    alert('주문 수량을 입력해주세요.');
-    return false;
-  }
-  if (isNaN(cntNum) || cntNum <= 0) {
-    alert('주문 수량은 1 이상이어야 합니다.');
-    return false;
-  }
-
-  // 3) 결제 금액
-  const payEl   = document.getElementById('odd_pay');
-  const payVal  = payEl?.value.replace(/,/g,'') || '';
-  const payNum  = parseInt(payVal, 10);
-  if (!payVal) {
-    alert('결제 금액을 입력해주세요.');
-    return false;
-  }
-  if (isNaN(payNum) || payNum <= 0) {
-    alert('결제 금액은 1 이상이어야 합니다.');
-    return false;
-  }
-  // 4) 날짜 값 가져오기
-   const endDateStr = document.getElementById('odd_end_date')?.value || '';
-   const payDateStr = document.getElementById('odd_pay_date')?.value || '';
-  // 4) 납품 요청일
-  if (!endDateStr) {
-    alert('납품 요청일을 선택해주세요.');
-    return false;
-  }
-
-  // 5) 결제 요청일
-  if (!payDateStr) {
-    alert('결제 요청일을 선택해주세요.');
-    return false;
-  }
-
-  // 6) 날짜 순서 검증 (선택사항)
-  if (endDateStr < payDateStr) {
-    alert('납품 요청일은 결제 요청일 이후여야 합니다.');
-    return false;
-  }
-  
-  // 5) 오늘 날짜 체크용
-    const validateToday = new Date();
-    validateToday.setHours(0,0,0,0);
-
-    const endDate = new Date(endDateStr);
-    const payDate = new Date(payDateStr);
-
-    // 6) 과거일 입력 방지
-    if (endDate < validateToday) {
-      alert('납품 요청일은 오늘 날짜 이후로 선택해야 합니다.');
-      return false;
-    }
-    if (payDate < validateToday) {
-      alert('결제 요청일은 오늘 날짜 이후로 선택해야 합니다.');
-      return false;
+function validateFinalForm() {
+    // 1. 공통 정보 유효성 검사
+    if (!selectClientCd) {
+        alert('거래처를 선택해주세요.');
+        return false;
     }
     
-    // 2) 우편번호
-    const postCodeEl = document.getElementById('cli_pc');
-    const postCode   = postCodeEl?.value.trim() || '';
-    if (!postCode) {
-      alert('배송지를 입력해주세요.');
-      return false;
+    if (document.getElementById('pay_type')?.value === '') {
+        alert('결제 방식을 선택해주세요.');
+        document.getElementById('pay_type').focus();
+        return false;
     }
-    
-    const postDetailEl = document.getElementById("cli_da");
-    const postDetail   = postDetailEl?.value.trim() || '';
-    if (!postDetail) {
-      alert('배송지의 상세 주소를 입력해주세요.');
-      return false;
+    if (document.getElementById('odd_pay')?.value === '') {
+        alert('결제 금액을 입력해주세요.');
+        document.getElementById('odd_pay').focus();
+        return false;
     }
-  // 모든 검증 통과
-  return true;
+
+    if (document.getElementById('odd_end_date')?.value === '') {
+        alert('납품 요청일을 입력해주세요.');
+        document.getElementById('odd_end_date').focus();
+        return false;
+    }
+    if (document.getElementById('odd_end_date')?.value < new Date().toISOString().split('T')[0]) {
+        alert('납품 요청일은 오늘 이전일 수주할 수 없습니다.');
+        document.getElementById('odd_end_date').focus();
+        return false;
+    }
+
+    if (document.getElementById('odd_pay_date')?.value === '') {
+        alert('결제 예정일을 입력해주세요.');
+        document.getElementById('odd_pay_date').focus();
+        return false;
+    }
+    if (document.getElementById('odd_pay_date')?.value > document.getElementById('odd_end_date')?.value) {
+        alert('결제 예정일은 납품 요청일과 같거나 그 이전 날짜여야 합니다.');
+        document.getElementById('odd_pay_date').focus();
+        return false;
+    }
+    if (document.getElementById('cli_pc')?.value === '') {
+        alert('배송지 주소를 입력해주세요.');
+        document.getElementById('findPostCodeBtn').focus();
+        return false;
+    }
+    if (document.getElementById('cli_da')?.value === '') {
+        alert('상세 주소를 입력해주세요.');
+        document.getElementById('cli_da').focus();
+        return false;
+    }
+
+    // 3. 그리드 데이터 유효성 검사
+    const gridData = INNER_TUI_GRID_INSTANCE.getData();
+
+    if (gridData.length === 0) {
+        alert('등록할 수주 항목이 없습니다. 먼저 항목을 추가해주세요.');
+        return false;
+    }
+
+    // 그리드의 모든 행을 순회하며 수량 검사
+    for (const row of gridData) {
+        // TUI Grid에서 숫자는 콤마(,)가 포함된 문자열일 수 있으므로, 콤마를 제거하고 숫자로 변환
+        const quantity = parseInt(String(row.quantity).replace(/,/g, ''), 10);
+
+        // 숫자가 아니거나, 1보다 작으면 유효성 검사 실패
+        if (isNaN(quantity) || quantity < 1) {
+            alert(`'${row.productName}' 상품의 수량이 올바르지 않습니다. 1 이상의 숫자를 입력해주세요.`);
+            // (선택사항) 해당 행을 포커스하거나 편집 모드로 만들 수 있습니다.
+            // INNER_TUI_GRID_INSTANCE.startEditing(row.rowKey, 'quantity');
+            return false;
+        }
+    }
+
+    // 모든 유효성 검사를 통과했을 경우
+    return true;
 }
 
 
-// ✅ 자재 부족 목록 보여주는 함수 -> 좀 별로면 모달 만들어서 보여줘도 됨
-function showLackingMaterialsModal(lackingMaterials) {
-  const htmlContent = lackingMaterials.map(item => `
-    <div style="margin-bottom: 12px;">
-      <strong>자재코드 ${item.MAT_ID} : ${item.MAT_NM}</strong><br />
-      - 총 자재 소요량 : ${item.REQUIRED_QTY_TOTAL.toLocaleString()}개<br />
-      - 내 주문 필요량 : ${item.REQUIRED_QTY_MINE.toLocaleString()}개<br />
-      - 현재 재고 수량 : ${item.CURRENT_STOCK.toLocaleString()}개
-    </div>
-  `).join('');
+// async function checkStock(formData) {
+//     try {
+//         const response = await fetch('/SOLEX/orders/check-stock', {
+//             method: 'POST', headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify(formData)
+//         });
+//         if (!response.ok) throw new Error('재고 확인 서버 오류');
+//         return await response.json();
+//     } catch (error) { alert(`재고 확인 중 오류: ${error.message}`); return []; }
+// }
 
-  return Swal.fire({
-    title: '📦 자재 부족 경고',
-    html: `<div style="max-height:300px; overflow-y:auto; text-align:left;">${htmlContent}</div>`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: '수주 계속 진행',
-    cancelButtonText: '취소'
-  });
-}
+// function showLackingMaterialsModal(lackingMaterials) {
+//     const htmlContent = lackingMaterials.map(item => `...`).join(''); // 내용은 이전과 동일
+//     if (typeof Swal === 'undefined') {
+//         alert('자재가 부족합니다.');
+//         return Promise.resolve({ isConfirmed: true });
+//     }
+//     return Swal.fire({
+//         title: '📦 자재 부족 경고',
+//         html: `<div style="max-height:300px; overflow-y:auto;">${htmlContent}</div>`,
+//         icon: 'warning',
+//         showCancelButton: true,
+//         confirmButtonText: '계속 진행',
+//         cancelButtonText: '취소',
+//         confirmButtonColor: '#3085d6',
+//         cancelButtonColor: '#d33'
+//     }); 
+// }
 
 
+/**
+ * (수정) 최종 '등록' 버튼 클릭 시, 모달 내 그리드의 모든 데이터를 가져오는 함수
+ */
 async function submitForm() {
-  if (!validateOrderForm()) return;
-
-  const selectedColor = document.getElementById('opt_color')?.value || '';
-  const selectedSize = document.getElementById('opt_size')?.value || '';
-  const selectedHeight = document.getElementById('opt_height')?.value || '';
-  const cntRaw = document.getElementById('odd_cnt')?.value.replace(/,/g, '') || '0';
-  const orderCnt = parseInt(cntRaw, 10);
-  const payRaw = document.getElementById('odd_pay')?.value.replace(/,/g, '') || '0';
-  const payAmt = parseInt(payRaw, 10);
-  const deliverDate = document.getElementById('odd_end_date')?.value || '';
-  const payDate = document.getElementById('odd_pay_date')?.value || '';
-  const postCode = document.getElementById('cli_pc')?.value.trim() || '';
-  const postAdd = document.getElementById('cli_add')?.value.trim() || '';
-  const postDetail = document.getElementById('cli_da')?.value.trim() || '';
-
-  const formData = {
-    cli_id: selectClientCd,
-    prd_cd: selectProductCd,
-    opt_color: selectedColor,
-    opt_size: selectedSize,
-    opt_height: selectedHeight,
-    ord_cnt: orderCnt,
-    odd_pay: payAmt,
-    odd_end_date: deliverDate,
-    odd_pay_date: payDate,
-    odd_pc: postCode,
-    odd_add: postAdd,
-    odd_da: postDetail
-  };
-
-  // ✅ 1. 자재 부족 여부 확인
-  const lackingMaterials = await checkStock(formData);
-
-  if (lackingMaterials && lackingMaterials.length > 0) {
-    const result = await showLackingMaterialsModal(lackingMaterials);
-    if (!result.isConfirmed) {
-      return; // ❌ 취소 시 진행 중단
-    }
-  }
-  
-  
-
-  // ✅ 2. 수주 등록 요청
-  try {
-    const response = await fetch('/SOLEX/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || `서버 오류 (${response.status})`);
+    // 1. 모달 내 그리드 인스턴스가 있는지 확인
+    if (!validateFinalForm()) return;
+    if (!INNER_TUI_GRID_INSTANCE) {
+        alert('수주 항목 그리드가 초기화되지 않았습니다.');
+        return;
     }
 
-    const data = await response.json();
-    alert(data.message);
-    if (data.status === 'OK') location.reload();
-  } catch (error) {
-    console.error('⛔️ 등록 실패:', error);
-    alert(`오류: ${error.message}`);
-  }
+    // 2. 그리드의 모든 데이터를 배열로 가져옵니다. (가장 중요!)
+    const gridData = INNER_TUI_GRID_INSTANCE.getData();
+
+    // 3. 유효성 검사: 그리드에 항목이 하나 이상 있는지 확인
+    if (gridData.length === 0) {
+        alert('등록할 수주 항목이 없습니다. 먼저 항목을 추가해주세요.');
+        return;
+    }
+    
+    // 4. (선택사항) 배송지 등 다른 폼 필드의 유효성 검사
+    // 필요하다면 이전에 만든 validateOrderForm() 같은 함수를 여기서 호출할 수 있습니다.
+    // 예: if (!validateDeliveryAddress()) return;
+
+
+    // 5. 서버에 전송할 최종 데이터 객체(payload) 구성
+    const finalPayload = {
+        // 상단 폼에서 가져온 공통 정보
+        cli_id: selectClientCd,
+        pay_type: document.getElementById('pay_type')?.value,
+        paymentAmount: (document.getElementById('odd_pay')?.value || '0').replace(/,/g, ''),
+        ord_end_date: document.getElementById('odd_end_date')?.value,
+        ord_pay_date: document.getElementById('odd_pay_date')?.value,
+        ord_pc: document.getElementById('cli_pc')?.value,
+        ord_add: document.getElementById('cli_add')?.value,
+        ord_da: document.getElementById('cli_da')?.value,
+        // ... 기타 필요한 공통 정보 ...
+
+        // 그리드에서 가져온 항목 목록 (배열)
+        items: gridData
+    };
+
+
+    // 6. 콘솔에 최종 데이터 확인
+    console.log("--- 최종 등록을 위해 서버로 전송될 전체 데이터 ---");
+    console.log(finalPayload);
+
+    alert('F12 개발자 도구를 확인하여 최종 전송될 데이터를 보세요.');
+
+   
+    
+    try {
+        const response = await fetch('/SOLEX/orders', { // 실제 서버 API 주소
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(finalPayload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: '서버 오류' }));
+            throw new Error(errorData.message);
+        }
+
+        const result = await response.json();
+        alert(result.message);
+        if (result.status === 'OK') {
+            location.reload();
+        }
+
+    } catch (error) {
+        alert(`오류: ${error.message}`);
+    }
 }
-
-async function checkStock(formData) {
-  try {
-    const response = await fetch('/SOLEX/orders/check-stock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || `서버 오류 (${response.status})`);
-    }
-
-    const data = await response.json();
-	  console.log(data);
-    return data || []; // ← 자재 부족 리스트 반환
-  } catch (error) {
-    console.error('⛔️ 재고 확인 실패:', error);
-    alert(`재고 확인 오류: ${error.message}`);
-    return [];
-  }
-}
-

@@ -31,38 +31,27 @@ public interface OrderMapper {
 
 	int createSujuOrder(Map<String, Object> safe);
 
-	int createSujuOrderDetail(Map<String, Object> safe);
+	int createSujuOrderDetail(@Param("list") List<Map<String, Object>> items);
 
 	boolean checkMaterialStock(Map<String, Object> orderData);
 
-	List<Map<String, Object>> sgetLackingMaterials(Map<String, Object> orderData);
+	
 
 	void createPurchaseRequest(Map<String, Object> material);
 
 	void deductStock(Map<String, Object> orderData);
 
-	List<Map<String, Object>> getLackingMaterials(Map<String, Object> orderData);
 
-	List<Map<String, Object>> getColorsByProduct(String prd_cd);
 
-	List<Map<String, Object>> getSizesByProductAndColor(@Param("prd_cd")String prd_cd,@Param("opt_color") String color);
 	
 	
-	
+	// 옵션 조합으로 옵션 ID 가져오기
 	String getOptionIdByCombination(Map<String, Object> orderData);
 
 	List<Map<String, Object>> getLackingMaterialsWithMine(@Param("opt_id") String opt_id,@Param("ord_cnt") int orderCount);
 	
-	List<Map<String, Object>> getHeightsByProductColorSize(
-			@Param("prd_cd") String prd_cd,
-			@Param("opt_color") String color,
-			@Param("opt_size") String size);
-	
-	int getStockCount(
-			@Param("prd_cd") String productCode, 
-			@Param("opt_color") String color, 
-			@Param("opt_size") String size, 
-			@Param("opt_height") String height);
+	// 상품별 옵션 가져오기
+	List<Map<String, Object>> getOptionsByProduct(@Param("prd_cd")String prd_cd);
 
 
 	

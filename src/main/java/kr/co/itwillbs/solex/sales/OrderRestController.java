@@ -78,47 +78,23 @@ public class OrderRestController {
 	
 	
 	
-	@GetMapping("/prd_cd/{prd_cd}")
-	public List<Map<String, Object>> getColorsByProduct(@PathVariable(name = "prd_cd") String prd_cd) {
+	@GetMapping("/product/{prd_cd}")
+	public List<Map<String, Object>> getOptionsByProduct(@PathVariable(name = "prd_cd") String prd_cd) {
 		log.info("API - 옵션 조회 요청 파라미터: prd_cd={}", prd_cd);
-		return orderService.getColors(prd_cd);
+		return orderService.getOptionsByProduct(prd_cd);
 	}
-	@GetMapping("/prd_cd/{prd_cd}/color/{color}")
-	public List<Map<String, Object>> getSizesByProductColor(@PathVariable(name = "prd_cd") String prd_cd,@PathVariable(name = "color") String color) {
-		log.info("API - 옵션 조회 요청 파라미터 color : color={}", color);
-		return orderService.getSizesByProductAndColor(prd_cd,color);
-	}
-	
-	@GetMapping("/prd_cd/{prd_cd}/color/{color}/size/{size}")
-	public List<Map<String, Object>> getHeightsByProductColorSize(
-			@PathVariable(name = "prd_cd") String prd_cd,
-			@PathVariable(name = "color") String color,
-			@PathVariable(name = "size") String size
-			) {
-		log.info("API - 옵션 조회 요청 파라미터 size : size={}", size);
-		return orderService.getHeightsByProductColorSize(prd_cd,color,size);
-	}
-	@GetMapping("/prd_cd/{prd_cd}/color/{color}/size/{size}/height/{height}")
-	public int getStockCount(
-			@PathVariable(name = "prd_cd") String prd_cd,
-			@PathVariable(name = "color") String color,
-			@PathVariable(name = "size") String size,
-			@PathVariable(name = "height") String height
-			) {
-		int count = orderService.getStockCount(prd_cd,color,size,height);
-		log.info(count);
-		
-		return count;
-	}
-	
-	@PostMapping("/check-stock")
-    public List<Map<String, Object>> checkStock(@RequestBody Map<String, Object> orderData) {
-		log.info("param = {}", orderData);
-		List<Map<String ,Object>> result = orderService.checkLackingMaterials(orderData);
-		log.info("result = {}", result);
-		
-        return result;
-    }
+
+
+
+	/*
+	 * @PostMapping("/check-stock") public List<Map<String, Object>>
+	 * checkStock(@RequestBody Map<String, Object> orderData) {
+	 * log.info("param = {}", orderData); List<Map<String ,Object>> result =
+	 * orderService.checkLackingMaterials(orderData); log.info("result = {}",
+	 * result);
+	 * 
+	 * return result; }
+	 */
 	
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Map<String, Object> param, HttpSession session) {
@@ -129,24 +105,22 @@ public class OrderRestController {
 		
 		 // 화이트리스트 방식으로 안전한 Map 생성
 	    Map<String, Object> safe = new HashMap<>();
-	    safe.put("cli_id",       param.get("cli_id"));     // JS에서 보낸 키 이름에 맞춰 가져오기
-	    safe.put("prd_cd",       param.get("prd_cd"));
-	    safe.put("ord_cnt",      param.get("ord_cnt"));
-	    safe.put("ord_pay",      param.get("odd_pay"));
-	    safe.put("ord_end_date", param.get("odd_end_date"));
-	    safe.put("ord_pay_date", param.get("odd_pay_date"));
-	    safe.put("ord_pc",       param.get("odd_pc"));
-	    safe.put("ord_add",       param.get("odd_add"));
-	    safe.put("ord_da",       param.get("odd_da"));
-	    
-	    safe.put("opt_color",       param.get("opt_color"));
-	    safe.put("opt_size",       param.get("opt_size"));
-	    safe.put("opt_height",       param.get("opt_height"));
-		safe.put("stk_cn",       param.get("stk_cn"));
-	    
 	    safe.put("emp_id",       emp_id);
+	    safe.put("cli_id",       param.get("cli_id"));     // JS에서 보낸 키 이름에 맞춰 가져오기
+		safe.put("pay_type",       param.get("pay_type"));     // JS에서 보낸 키 이름에 맞춰 가져오기
+	    
+	    safe.put("ord_pay",      param.get("ord_pay"));
+	    safe.put("ord_end_date", param.get("ord_end_date"));
+	    safe.put("ord_pay_date", param.get("ord_pay_date"));
+		
+	    safe.put("ord_pc",       param.get("ord_pc"));
+	    safe.put("ord_add",       param.get("ord_add"));
+	    safe.put("ord_da",       param.get("ord_da"));
+	    safe.put("items",       param.get("items"));
+	    
 
-	    log.info("safe param = {}", safe);
+	    
+	    log.info("?????????????????????????????????? safe = {}", safe);
 	    
 	    
 	    

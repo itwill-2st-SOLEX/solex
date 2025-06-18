@@ -116,50 +116,23 @@
 	    ORDER BY prd_nm
 	</select>
 
-	<!-- 컬러 -->
-	<select id="getColorsByProduct" resultType="Map">
-		SELECT DISTINCT opt.opt_color, cd.det_nm
-		FROM product_option opt 
-		LEFT JOIN code_detail cd 
-		ON cd.det_id = opt.opt_color
-		WHERE prd_cd = #{prd_cd}
-	</select>
-
-	<!-- 사이즈 -->
-	<select id="getSizesByProductAndColor" resultType="Map">
-		SELECT DISTINCT opt.opt_size , cd.det_nm
+	<select id="getOptionsByProduct" resultType="Map">
+		SELECT
+			opt_id,
+			opt_color,
+			opt_size,
+			opt_height,
+			cd2.det_nm as OPT_COLOR_NM,
+			cd3.det_nm as OPT_SIZE_NM,
+			cd4.det_nm as OPT_HEIGHT_NM
 		FROM product_option opt
-		LEFT JOIN code_detail cd 
-		ON cd.det_id = opt.opt_size
+		left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+		left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+		left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
 		WHERE prd_cd = #{prd_cd}
-		AND opt.opt_color = #{opt_color}
 	</select>
 	
-	<!-- 사이즈 -->
-	<select id="getHeightsByProductColorSize" resultType="Map">
-		SELECT DISTINCT opt.opt_height , cd.det_nm
-		FROM product_option opt
-		LEFT JOIN code_detail cd 
-		ON cd.det_id = opt.opt_height
-		WHERE prd_cd = #{prd_cd}
-		AND opt.opt_color = #{opt_color}
-		AND opt.opt_size = #{opt_size}
-	</select>
-	
-	<select id="getStockCount" resultType="int">		
-		SELECT stk.stk_cnt
-		FROM  stock stk
-		LEFT JOIN product_option opt
-		ON opt.opt_id = stk.item_id
-		WHERE stk.stk_cat = 'stk_cat_01'
-		AND opt.prd_cd = #{prd_cd}
-		AND opt.opt_color = #{opt_color}
-		AND opt.opt_size = #{opt_size}
-		AND opt.opt_height = #{opt_height}
-	</select>
-	
-	
-	
+	<!-- 옵션 조합으로 옵션 ID 가져오기  부족한 자재 조회할때 쓰임 -->
 	<select id="getOptionIdByCombination" resultType="string">
 		SELECT opt_id
 		FROM product_option
@@ -168,6 +141,7 @@
 		AND opt_size = #{opt_size}
 		AND opt_height = #{opt_height}
 	</select>
+	<!-- 옵션 조합으로 옵션 ID 가져오기  부족한 자재 조회할때 쓰임 -->
 
 	<!-- 자재 부족 계산 -->
 	<select id="getLackingMaterialsWithMine" resultType="map">
@@ -208,9 +182,25 @@
 	
   	<!-- 주문 등록 트랜잭션 시작 -->
   	<!-- 1. 수주테이블 등록 -->
-  	<insert id="createSujuOrder" parameterType="map">
-		INSERT INTO suju_order(cli_id, emp_id, ord_reg_date, opt_id, ord_cnt, ord_end_date, ord_sts, ord_pc, ord_add, ord_da, ord_pay, ord_pay_date, ord_mod_date ,isapproval)
-		VALUES(#{cli_id},#{emp_id},SYSDATE,#{opt_id},#{ord_cnt},#{ord_end_date},#{ord_sts},#{ord_pc},#{ord_add},#{ord_da},#{ord_pay},#{ord_pay_date},SYSDATE,'n')
+  	<insert id="createSujuOrder" parameterType="map" keyProperty="ord_id" keyColumn="ord_id" useGeneratedKeys="true">
+		INSERT INTO suju_order(cli_id, emp_id,ord_pay,ord_pay_date,ord_reg_date,ord_end_date, ord_pc, ord_add, ord_da,ord_mod_date)
+		VALUES(#{cli_id},#{emp_id},#{ord_pay},#{ord_pay_date},#{ord_reg_date},#{ord_end_date},#{ord_pc},#{ord_add},#{ord_da},#{ord_mod_date})
+	</insert>	
+	<!-- 주문 등록 트랜잭션 끝 -->
+	
+	<!-- 2. 수주상세테이블 등록 -->
+	<insert id="createSujuOrderDetail" parameterType="map">
+		INSERT INTO suju_order_detail(ord_id, opt_id, ord_cnt,ord_sts,ord_mod_date,odd_isapproval)
+		VALUES
+		<foreach collection="list" item="item" separator=",">	
+		(#{item.ord_id},
+			(SELECT opt_id from product_option 
+			 WHERE prd_cd = #{item.prd_cd} 
+			 and opt_color = #{item.opt_color}
+			 and opt_size = #{item.opt_size}
+			 and opt_height = #{item.opt_height}),
+			#{item.ord_cnt},#{item.ord_sts},SYSDATE,'n')
+		</foreach>
 	</insert>	
 	<!-- 주문 등록 트랜잭션 끝 -->
 
