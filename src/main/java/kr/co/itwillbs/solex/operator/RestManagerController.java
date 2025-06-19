@@ -12,27 +12,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/operator/api")
-public class RestWorkProcessController {
+public class RestManagerController {
 
 	@Autowired
-	public WorkProcessService wpService;
+	public ManagerService managerService;
 	
 	//로그인 구현 필요
 	Long empId = 26L;
 
 	
 	//내 부서 정보
-	@GetMapping("/wpSummary")
-	public Map<String, Object> getWpSummary() {
+	@GetMapping("/managerSummary")
+	public Map<String, Object> getManagerSummary() {
 		
-	    Map<String, Object> result = wpService.getWpSummary(empId);
+	    Map<String, Object> result = managerService.getManagerSummary(empId);
 
 	    return result;
 	}
 
 	// 모든 작업 목록 가져오기
-	@GetMapping("/wpList")
-	public Map<String, Object> getWpList(@RequestParam(name = "page", required = false) Integer page,
+	@GetMapping("/managerList")
+	public Map<String, Object> getManagerList(@RequestParam(name = "page", required = false) Integer page,
 								         @RequestParam(name = "size", required = false) Integer size,
 								         @RequestParam("empId") Long empId) {
 
@@ -42,12 +42,12 @@ public class RestWorkProcessController {
 	    params.put("empId", empId);
 	    
 	    // 내 작업 전체 목록
-	    List<Map<String, Object>> wpList = wpService.getWpList(params);
-	    int vacationCount = wpService.getWpCount(empId);
+	    List<Map<String, Object>> managerList = managerService.getManagerList(params);
+	    int vacationCount = managerService.getManagerCount(empId);
 
 	    Map<String, Object> result = new HashMap<>();
-	    result.put("list", wpList);
-	    //result.put("vacationCount", vacationCount);
+	    result.put("list", managerList);
+	    
 	    System.out.println(result);
 	    return result;
 	}

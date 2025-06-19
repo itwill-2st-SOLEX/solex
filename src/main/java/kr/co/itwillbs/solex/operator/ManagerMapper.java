@@ -6,15 +6,15 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface WorkProcessMapper {
+public interface ManagerMapper {
 	
 	//로그인한 사람에 해당하는 공정 정보 가져오기
-	Map<String, Object> getWpSummary(Long empId);
+	Map<String, Object> getManagerSummary(Long empId);
 	
-	int getWpCount(Long empId);
+	int getManagerCount(Long empId);
 	
 	//작업 현황 모두 가져오기
-	List<Map<String, Object>> getWpList(Map params);
+	List<Map<String, Object>> getManagerList(Map params);
 	
 	
 	

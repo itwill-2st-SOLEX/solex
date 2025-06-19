@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/operator/operator.css}" />
+<style>
+</style>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body worker-dashboard container-xxl flex-grow-1 container-p-y">
+			<h2>작업현황</h2>
+		
+			<!-- 제품 정보 -->
+			<div class="info-section">
+				<div class="info-card">
+					<p class="info-label">제품코드</p>
+					<p class="info-value" id="prdCode">PRD001</p>
+				</div>
+				<div class="info-card">
+					<p class="info-label">제품명</p>
+					<p class="info-value" id="prdName">블랙 앵클부츠</p>
+				</div>
+				<div class="info-card">
+					<p class="info-label">옵션</p>
+					<p class="info-value" id="prdOption">블랙 / 240mm / 5cm</p>
+				</div>
+				<div class="work-card">
+					<p class="work-label">작업지시 수량</p>
+					<p class="work-value" id="workOrderQty">100</p>
+				</div>
+			</div>
+		
+			<!-- 작업 정보 및 입력 -->
+			<div class="work-section">
+				<div class="work-card">
+					<p class="work-label">현재 공정 완료수량</p>
+					<p class="work-value" id="workOrderQty">100</p>
+				</div>
+				<div class="work-card">
+					<p class="work-label">작업진행률</p>
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%;">0%</div>
+					</div>
+				</div>
+				<div class="work-card">
+					<p class="work-label">작업완료 수량</p>
+					<input type="number" id="completeQty" class="work-input" value="0" min="0">
+				</div>
+				<div class="work-card">
+					<p class="work-label">불량 수량</p>
+					<input type="number" id="defectQty" class="work-input" value="0" min="0">
+				</div>
+				
+						
+				<!-- 저장 버튼 -->
+			
+				<div class="save-btn-box">
+					<button class="btn btn-primary" id="saveBtn">저장</button>
+				</div>
+			</div>
+
+		<div id="grid"></div>
+		</div>
+		
+		<script th:src="@{/js/operator/worker.js}"></script>
+		
+	</th:block>
+	
+	
+</body>
+</html>

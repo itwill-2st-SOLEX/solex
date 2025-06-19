@@ -2,7 +2,7 @@
 //전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
-const gridHeight = 400;
+const gridHeight = 250;
 let empId = null;
 
 // ToastUI Grid 생성
@@ -13,31 +13,13 @@ const grid = new tui.Grid({
     scrollY: true,
     scrollX: false,
     data: [],
-	header: {
-	        height: 80,
-	        complexColumns: [
-				{
-	                header: '옵션',
-	                name: 'optionGroup',
-	                childNames: ['prdColor', 'prdSize', 'prdHeight']
-	            }
-	        ]
-	      },
+
     columns: [
-		{ header: '작업지시번호', name: 'wrkId', align: 'center' },
-		{ header: '제품코드', name: 'prdCd', align: 'center', filter: 'select' },
-		{ header: '제품명', name: 'prdNm', align: 'center', filter: 'select' , width: 200},
-		
-		{ header: '컬러', name: 'prdColor', align: 'center', filter: 'select' , width: 80},
-		{ header: '사이즈', name: 'prdSize', align: 'center', filter: 'select' , width: 80},
-		{ header: '굽높이', name: 'prdHeight', align: 'center', filter: 'select' , width: 80},
-		
-		{ header: '작업지시수량', name: 'wpoOcount', align: 'center', filter: 'select' },
-		{ header: '작업완료수량', name: 'wpoJcount', align: 'center', filter: 'select' },
-		{ header: '불량수량', name: 'wpoBcount', align: 'center', filter: 'select' },
-		{ header: '작업진행률', name: 'oddPer', align: 'center', filter: 'select' },
-		{ header: '진행상태', name: 'oddStatus', align: 'center', filter: 'select' },
-		{ header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: 'true' }
+		{ header: '실적등록ID', name: 'wrkId', align: 'center' },
+		{ header: '작업수량', name: 'prdCd', align: 'center', filter: 'select' },
+		{ header: '불량수량', name: 'prdNm', align: 'center', filter: 'select'},
+		{ header: '작업일', name: 'prdColor', align: 'center', filter: 'select' },
+		{ header: '보고시간', name: 'prdSize', align: 'center', filter: 'select'}
     ],
 	
 
@@ -45,7 +27,7 @@ const grid = new tui.Grid({
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
-	wpSummary();
+	managerSummary();
 
 });
 
@@ -57,7 +39,7 @@ function bindScrollEvent() {
 	//무한스크롤시 검색어 유지를 위해 재전달
     grid.on('scrollEnd', () => {
         //const keyword = document.getElementById('searchInput').value.trim();
-        wpDetail(currentPage);
+        managerDetail(currentPage);
     });
 }
 
@@ -102,9 +84,9 @@ function formatter(date, includeTime = false) {
 
 
 //공정 요약 정보
-async function wpSummary() {
+async function managerSummary() {
 	try {
-			let url = `/SOLEX/operator/api/wpSummary`;
+			let url = `/SOLEX/operator/api/managerSummary`;
 			
 	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
 	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
@@ -118,7 +100,7 @@ async function wpSummary() {
 			document.getElementById('empName').textContent = data.DEP_NM || '-';
 			document.getElementById('prcTest').textContent = data.QUA_NM || '-';
 		
-			wpList(currentPage);
+			managerList(currentPage);
 
 	    } catch (e) {
 	        console.error('fetch 에러 : ', e);
@@ -126,22 +108,22 @@ async function wpSummary() {
 }
 
 // 게시글 목록 불러오기
-async function wpList(page) {
+async function managerList(page) {
     try {
 		
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/operator/api/wpList?page=${page}&size=${pageSize}&empId=${empId}`;
+		let url = `/SOLEX/operator/api/managerList?page=${page}&size=${pageSize}&empId=${empId}`;
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 
 		const list = data.list;
-		const wpCount = data.wpCount;
+		const managerCount = data.managerCount;
 		
         const gridData = list.map((n, idx) => ({
-			rowNum: wpCount - (page * pageSize + idx), // 역순 번호 계산
-			wrkId: n.WRK_ID,
+/*			rowNum: wpCount - (page * pageSize + idx), // 역순 번호 계산
+*/			wrkId: n.WRK_ID,
 			prdCd: n.PRD_CD,
 			prdNm: n.PRD_NM,
 			prdColor: n.PRD_COLOR,
