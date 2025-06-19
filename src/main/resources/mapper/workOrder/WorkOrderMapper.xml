@@ -31,7 +31,7 @@
 	<select id="ProcessTeam" resultType="map">
 		SELECT DISTINCT
 		       tp.pcp_seq AS step_seq        -- 공정 순서
-		       , p.prd_cd					 -- 제품 코드
+		       , p.prd_code					 -- 제품 코드
 		       , pc.prc_id					 -- 공정 id
 		       , pc.prc_nm AS process_name     -- 공정명
 		       , e.emp_team_cd AS team_code    -- 팀 코드

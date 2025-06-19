@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/production")
 public class ProductionController {
 	@GetMapping("")
-	public String dashBoradMain() {
+	public String productionMain() {
 		return "dashBoard/production";
 	}
 	

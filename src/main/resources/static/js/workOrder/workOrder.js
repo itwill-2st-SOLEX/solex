@@ -82,11 +82,13 @@ $(function() {
 	});
 });
 
+// 진행현황 모달
 function openWorkModal(prd_code, odd_id, odd_cnt) {
 	$.ajax({
 		url: `/SOLEX/workOrders/${prd_code}`,
 		type: 'GET',
 		success: function(res) {
+			debugger;
 			// 1. 공정별 그룹화 (step_seq 기준)
 			const grouped = {};
 
@@ -96,7 +98,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 					grouped[seq] = {
 						name: item.PROCESS_NAME,
 						availableTeams: [],
-						prd_cd: item.PRD_CD,
+						prd_code: item.PRD_CODE,
 						prc_id: item.PRC_ID,
 						odd_cnt: odd_cnt
 					};
@@ -112,7 +114,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 				.map(seq => ({
 					name: grouped[seq].name,
 					availableTeams: grouped[seq].availableTeams,
-					prd_cd: grouped[seq].prd_cd,
+					prd_code: grouped[seq].prd_code,
 					prc_id: grouped[seq].prc_id,
 					odd_cnt: grouped[seq].odd_cnt,
 					odd_id: odd_id
@@ -132,7 +134,6 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 		let steps = document.querySelectorAll('.timeline-step');
 		let prdCd = document.getElementById('hidden-prd-cd').value;
 		let oddId = document.getElementById('hidden-odd-id').value;
-		let prcId = document.getElementById('hidden-prc-id').value;
 		let oddCnt = document.getElementById('hidden-odd-cnt').value;
 		let payload = [];
 
@@ -140,6 +141,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 
 		for (let i = 0; i < steps.length; i++) {
 			let select = steps[i].querySelector(`select[id="team-${i}"]`);
+			let prcId = document.getElementById(`hidden-prc-id-${i}`).value;
 			let teamCode = select.value;
 			
 			// 유효성
@@ -208,12 +210,13 @@ function renderProcessSteps(processList) {
 			`<option value="${team.id}">${team.name}</option>`).join('')}
 				</select>
 				
-				<input type="hidden" id="hidden-prd-cd" value="${process.prd_cd}" />
+				<input type="hidden" id="hidden-prd-cd" value="${process.prd_code}" />
 				<input type="hidden" id="hidden-odd-id" value="${process.odd_id}" />
-				<input type="hidden" id="hidden-prc-id" value="${process.prc_id}" />
+				<input type="hidden" id="hidden-prc-id-${index}" value="${process.prc_id}" />
 				<input type="hidden" id="hidden-odd-cnt" value="${process.odd_cnt}" />
 			</div>
 		`;
+		debugger;
 		container.appendChild(step);
 	});
 }

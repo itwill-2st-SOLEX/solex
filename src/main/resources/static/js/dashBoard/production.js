@@ -36,46 +36,78 @@ new Chart(productionCtx, {
 	}
 });
 const lineCtx = document.getElementById('lineChart').getContext('2d');
-new Chart(lineCtx, {
+
+// 초기 차트 생성
+const lineChart = new Chart(lineCtx, {
 	type: 'line',
-	data: {
-		labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
-		datasets: [{
-			label: '생산량 추이',
-			data: [100, 120, 90, 140, 130, 150],
-			fill: false,
-			borderColor: '#4e73df',
-			backgroundColor: '#4e73df',
-			pointRadius: 5,
-			pointBackgroundColor: '#fff',
-			pointBorderColor: '#4e73df'
-		}]
-	},
+	data: getLineChartData('monthly'),
 	options: {
 		responsive: true,
 		maintainAspectRatio: false,
 		plugins: {
-			legend: { position: 'top' },
-			tooltip: {
-				backgroundColor: '#f8f9fc',
-				titleColor: '#333',
-				bodyColor: '#333',
-				borderColor: '#ddd',
-				borderWidth: 1
-			}
+			legend: { position: 'top' }
 		},
 		scales: {
-			y: {
-				beginAtZero: true,
-				ticks: { stepSize: 20 }
-			}
+			y: { beginAtZero: true }
 		}
 	}
 });
 
+// 버튼 클릭 시 데이터 변경
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+	btn.addEventListener('click', () => {
+		// 버튼 스타일 변경
+		document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+		btn.classList.add('active');
+
+		const type = btn.dataset.type; // monthly, weekly, daily
+		const newData = getLineChartData(type);
+		lineChart.data = newData;
+		lineChart.update();
+	});
+});
+
+// 데이터셋 함수
+function getLineChartData(type) {
+	if (type === 'monthly') {
+		return {
+			labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
+			datasets: [{
+				label: '생산량',
+				data: [100, 120, 90, 140, 130, 150],
+				borderColor: '#4e73df',
+				backgroundColor: '#4e73df',
+				fill: false
+			}]
+		};
+	} else if (type === 'weekly') {
+		return {
+			labels: ['1주', '2주', '3주', '4주'],
+			datasets: [{
+				label: '생산량',
+				data: [320, 410, 380, 390],
+				borderColor: '#36b9cc',
+				backgroundColor: '#36b9cc',
+				fill: false
+			}]
+		};
+	} else if (type === 'daily') {
+		return {
+			labels: ['월', '화', '수', '목', '금', '토', '일'],
+			datasets: [{
+				label: '생산량',
+				data: [50, 60, 55, 70, 65, 40, 30],
+				borderColor: '#f6c23e',
+				backgroundColor: '#f6c23e',
+				fill: false
+			}]
+		};
+	}
+}
+
 const defectCtx = document.getElementById('defectChart').getContext('2d');
 new Chart(defectCtx, {
-	type: 'pie',
+	type: 'doughnut',
 	data: {
 		labels: ['불량A', '불량B', '불량C'],
 		datasets: [{
