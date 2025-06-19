@@ -85,4 +85,9 @@ public class ProcessService {
 		return processMapper.selectTotalPrdTypeCount();
 	}
 
+	// 유형별 공정순서 조회
+	public List<Map<String, Object>> getTypeProcessList(String prdType) {
+		return processMapper.getTypeProcessList(prdType);
+	}
+
 }

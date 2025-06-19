@@ -18,11 +18,19 @@
     width: 100%;
 }
 
-.type-list-area, .typeProcess-area {
+.type-list-area {
 	display: flex;
     flex-direction: column;
     gap: 15px;
-	width: 50%;
+	width: 30%;
+	height: auto;
+}
+
+.typeProcess-area {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+	width: 70%;
 	height: auto;
 }
 

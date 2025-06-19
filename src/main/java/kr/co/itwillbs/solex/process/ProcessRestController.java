@@ -113,6 +113,16 @@ public class ProcessRestController {
 		return result;
 	}
 	
+	// 유형별 공정순서 조회
+	@GetMapping("/typeProcess/list")
+	public List<Map<String, Object>> getTypeProcessList(@RequestParam Map<String, String> map) {
+		
+		String det_id = map.get("DET_ID");
+		
+		List<Map<String, Object>> list = processService.getTypeProcessList(det_id);
+		
+	    return list;
+	}
 	
 	
 	

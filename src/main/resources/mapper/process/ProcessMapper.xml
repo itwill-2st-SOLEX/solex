@@ -105,6 +105,25 @@
 		FROM	CODE_DETAIL
 		WHERE	COD_ID = 'prd_type'
 		AND		DET_YN = 'y'
-	</select>    
+	</select>
+	
+	<!-- 유형별 공정순서 조회 -->
+	<select id="getTypeProcessList" resultType="map">
+		SELECT
+            t.pcp_id,
+            t.prd_type,
+            t.prc_id,
+            t.pcp_seq,
+            p.prc_cd,
+            p.prc_nm,
+            p.prc_des
+        FROM
+            type_process t
+            JOIN process p ON t.prc_id = p.prc_id
+        WHERE
+            t.prd_type = #{prdType}
+        ORDER BY
+            t.pcp_seq
+	</select>
 
 </mapper>

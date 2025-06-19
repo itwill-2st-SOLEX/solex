@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 				perPage: 20
 			},
 			rowHeaders: [
-			  { type: 'checkbox', width: 40 },
-			  { type: 'rowNum', width: 40, header: 'No.' }
+				{ type: 'checkbox', width: 40 },
+				{ type: 'rowNum', width: 40, header: 'No.' }
 			],
 			data: {
 				api: {

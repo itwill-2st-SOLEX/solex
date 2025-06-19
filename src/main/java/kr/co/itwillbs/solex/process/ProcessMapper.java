@@ -30,5 +30,8 @@ public interface ProcessMapper {
 	List<Map<String, Object>> selectPagedPrdTypeList(@Param("perPage") int perPage, @Param("offset") int offset);
 
 	int selectTotalPrdTypeCount();
+
+	// 유형별 공정순서 조회
+	List<Map<String, Object>> getTypeProcessList(@Param("prdType") String prdType);
     
 }
