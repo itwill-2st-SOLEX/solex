@@ -4,9 +4,10 @@ $(function() {
 
 	const grid = new tui.Grid({
 		el: document.getElementById('grid'),
-		bodyHeight: 600,
+		bodyHeight: 580,
 		scrollY: true,
 		data: [],
+		rowHeaders: ['rowNum'],
 		header: {
 			height: 80,
 			complexColumns: [
@@ -26,7 +27,8 @@ $(function() {
 			{ header: '제품컬러', name: 'prd_color', align: 'center', filter: 'select' },
 			{ header: '제품 사이즈', name: 'prd_size', align: 'center', filter: 'select' },
 			{ header: '굽 높이', name: 'prd_height', align: 'center', filter: 'select' },
-			{ header: '납품 예정일', name: 'ord_end_date', align: 'center', sortable: 'true' }
+			{ header: '납품 예정일', name: 'ord_end_date', align: 'center', sortable: 'true' },
+			{ header: '창고 배정', name: 'warehouse_btn', align: 'center' }
 
 		]
 	});
@@ -43,7 +45,10 @@ $(function() {
 				prd_color: row.PRD_COLOR,
 				prd_size: row.PRD_SIZE,
 				prd_height: row.PRD_HEIGHT,
-				ord_end_date: row.ORD_END_DATE
+				ord_end_date: row.ORD_END_DATE,
+				warehouse_btn: row.PRD_STS === '작업 완료' 
+						? `<button class="btn btn-sm btn btn-warning assign-btn" data-ord-id="${row.ORD_ID}"> 창고배정</button>` 
+						: ''
 			}));
 			page === 0 ? grid.resetData(data) : grid.appendRows(data);
 			currentPage++;
@@ -68,6 +73,14 @@ $(function() {
 			} else {
 				alert('작업 대기 상태에서만 작업 지시를 할 수 있습니다.');
 			}
+		}
+	});
+	
+	// 창고배정 버튼 클릭시
+	document.getElementById('grid').addEventListener('click', function(e) {
+		if (e.target.classList.contains('assign-btn')) {
+			const ordId = e.target.dataset.ordId;
+			openAssignWarehouse(ordId);
 		}
 	});
 });
@@ -210,3 +223,9 @@ function renderProcessSteps(processList) {
 	});
 }
 
+// 창고배정 함수
+function openAssignWarehouse(ordId) {
+	
+	const modal = new bootstrap.Modal(document.getElementById('AssignWarehouseModal'));
+	modal.show();
+}

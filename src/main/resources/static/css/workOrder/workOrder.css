@@ -5,6 +5,14 @@
   text-decoration: underline;
 }
 
+.modal-title{
+	margin-bottom: 0;
+    line-height: var(--bs-modal-title-line-height) 1.375;
+}
+.big-box{
+	border-top: 1px solid black;
+}
+
 .timeline-container {
   position: relative;
   margin-left: 2rem;
