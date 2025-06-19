@@ -5,17 +5,17 @@
 <mapper namespace="kr.co.itwillbs.solex.workOrder.WorkOrderMapper">
 <!-- 	작업지시 조회 -->
 	<select id="getWorkList" resultType="map">
-		SELECT ord_id
-			   , prd_cd
+		SELECT odd_id
+			   , prd_code
 			   , prd_nm
-			   , ord_cnt
-			   , prd_sts
+			   , odd_cnt
+			   , odd_sts
 			   , prd_color
 			   , prd_size
 			   , prd_height
 			   , ord_end_date
 		  FROM vw_suju_summary -- 뷰테이블
-		 WHERE prd_sts IN (
+		 WHERE odd_sts IN (
 			 '작업 대기',
 			 '작업중',
 			 '작업 완료',
@@ -23,7 +23,7 @@
 			 '창고 대기',
 			 '출고 대기(창고 > 거래처)'
 		 )
-		 ORDER BY ord_id DESC
+		 ORDER BY odd_id DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
 	
@@ -47,7 +47,7 @@
 		    ON pc.det_id = e.emp_dep_cd
 		  LEFT JOIN code_detail ct 
 		    ON e.emp_team_cd = ct.det_id
-		 WHERE p.prd_cd = #{prdCd}
+		 WHERE p.prd_code = #{prdCd}
 		   AND ct.det_nm != '공통'
 		 ORDER BY tp.pcp_seq, ct.det_nm
 	</select>
@@ -59,12 +59,12 @@
     </selectKey>
 		INSERT INTO work_order (wrk_id,
 								prc_id,
-			    				ord_id,
+			    				odd_id,
 			    				prd_cd,
 			    				wrk_ord_date
 		) VALUES (#{wrk_id},
 				  #{prcId},         -- 공정id
-			      #{ordId},			-- 주문 id
+			      #{oddId},			-- 주문 id
 			      #{prdCd},         -- 주문 cd
 			      SYSDATE + 9/24  -- 작업 지시일
 		)
@@ -79,14 +79,14 @@
 		) VALUES (#{wrk_id},    
 				  #{teamCode},
 				  #{stepSeq},
-				  #{ordCnt},
+				  #{oddCnt},
 				  DEFAULT
 		)
 	</insert>
 	
 	<update id="updateSujuOrderSts">
-		UPDATE suju_order
-	       SET ord_sts = 'ord_sts_03'
-	     WHERE ord_id = #{ordId}
+		UPDATE suju_order_detail
+	       SET odd_sts = 'odd_sts_03'
+	     WHERE odd_id = #{oddId}
 	</update>
 </mapper>

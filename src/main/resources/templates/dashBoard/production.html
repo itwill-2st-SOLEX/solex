@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/dashBoard/production.css}" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<!-- 여기서 부터 작성하시면 됩니다  -->
+			<!-- 본문 영역-->
+			<div class="chart-card">
+				<h3>월별 생산량 추이</h3>
+				<div class="chart-container">
+					<canvas id="lineChart"></canvas>
+				</div>
+			</div>
+			<div class="chart-row">
+				<div class="chart-card half">
+					<h3>당월 생산량</h3>
+					<div class="chart-container">
+						<canvas id="productionChart"></canvas>
+					</div>
+				</div>
+				<div class="chart-card half">
+					<h3>당월 불량현황</h3>
+					<div class="chart-container">
+						<canvas id="defectChart"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</th:block>
+	<th:block layout:fragment="script">
+		<script th:src="@{/js/dashBoard/production.js}"></script>
+	</th:block>
+
+</body>
+</html>

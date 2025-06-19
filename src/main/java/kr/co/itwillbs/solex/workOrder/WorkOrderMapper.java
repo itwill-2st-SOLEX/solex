@@ -17,6 +17,6 @@ public interface WorkOrderMapper {
 	void workOrderInsert(Map<String, Object> prdInfo);
 	void workProcessInsert(Map<String, Object> prdInfo);
 	// 주문테이블 상태값 업테이트
-	void updateSujuOrderSts(String prdCd);
+	void updateSujuOrderSts(String oddId);
 
 }

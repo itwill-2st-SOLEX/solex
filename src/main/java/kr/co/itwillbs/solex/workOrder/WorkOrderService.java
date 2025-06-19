@@ -35,7 +35,7 @@ public class WorkOrderService {
 	        mapper.workProcessInsert(item);
 	    }
 		// 주문테이블 상태값 업테이트
-		 String ordId = (String) prdInfo.get(0).get("ordId");
-		mapper.updateSujuOrderSts(ordId);
+		 String oddId = (String) prdInfo.get(0).get("oddId");
+		mapper.updateSujuOrderSts(oddId);
 	}
 }
