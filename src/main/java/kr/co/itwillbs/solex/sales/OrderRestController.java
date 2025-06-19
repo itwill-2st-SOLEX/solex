@@ -81,7 +81,9 @@ public class OrderRestController {
 	@GetMapping("/product/{prd_id}")
 	public List<Map<String, Object>> getOptionsByProduct(@PathVariable(name = "prd_id") String prd_id) {
 		log.info("API - 옵션 조회 요청 파라미터: prd_id={}", prd_id);
-		return orderService.getOptionsByProduct(prd_id);
+		List<Map<String, Object>> list = orderService.getOptionsByProduct(prd_id);
+		log.info("API - 옵션 조회 요청 파라미터: prd_id={}", list);
+		return list;
 	}
 
 

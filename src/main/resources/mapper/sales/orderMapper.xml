@@ -24,7 +24,7 @@
     	cli_nm, cli_id
     FROM client
     <where>
-	  cli_type = 'BUYER'
+	  cli_type = 'client_cat_02'
       <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
       <if test="searchKeyword != null and searchKeyword != ''">
         AND LOWER(cli_nm) LIKE '%' || #{searchKeyword} || '%'
@@ -40,7 +40,7 @@
   <select id="countClientsByEmployeeId" resultType="int">
   	SELECT count(*)
   	FROM client
-  	WHERE emp_id = #{emp_id} and cli_type = 'BUYER' 
+  	WHERE emp_id = #{emp_id} and cli_type = 'client_cat_02'
   </select>
   
   <select id="getSelectClientsByEmployeeId" resultType="Map">
@@ -61,7 +61,7 @@
         FROM client cli 
         JOIN suju_order suju    
         ON cli.cli_id = suju.cli_id
-        WHERE cli.cli_type = 'BUYER'    
+        WHERE cli.cli_type = 'client_cat_02'   
         GROUP BY
             cli.cli_nm,cli.cli_id
         ORDER BY order_count DESC

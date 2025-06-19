@@ -1,325 +1,297 @@
 <!DOCTYPE html>
-<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layouts/layout}">
+
 <head>
-<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
-<!-- <meta charset="UTF-8"> -->
-<title>SOLEX</title>
-<!-- 개별페이지 전용 스타일시트 영역 -->
+	<title>SOLEX</title>
 	<th:block layout:fragment="style">
 		<link rel="stylesheet" th:href="@{/css/sales/order.css}" />
-		<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.css" rel="stylesheet">
-		<!-- sweetalert2 CSS -->
 		<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
-
 	</th:block>
-	
+
 	<style>
-		.custom-select-wrapper {
-		position: relative !important; /* 기준점 역할을 하도록 설정 */
-	}
-	input::placeholder {
-		color: #384551 !important; /* 원하는 색상 코드를 적용 */
-	}
-	.swal2-container {
-		z-index: 9999 !important;
-	}
-	/* 전체 컨테이너 */
-    .custom-multi-select {
-        position: relative;
-        
-        font-family: sans-serif;
-    }
+		/* ================================================= */
+		/* 커스텀 UI 컴포넌트 스타일 (최종 정리본) */
+		/* ================================================= */
+		.custom-search-select {
+			position: relative;
+		}
 
-    /* 선택된 값을 보여주는 입력창 부분 */
-    .select-box {
-        position: relative;
-        display: flex;
-        align-items: center;
-        width: 100%;
- 
-        border-radius: 5px;
-        background-color: #fff;
-        cursor: pointer;
-        box-sizing: border-box; /* 패딩과 보더가 너비에 포함되도록 설정 */
-    }
-
-    /* 실제 input 태그 - readonly로 직접 입력을 막음 */
-    .select-box input {
-        width: 100%;
-        outline: none;
-        font-size: 15px;
-        background-color: transparent;
-        cursor: pointer;
-    }
-
-    /* input 영역 뒤에 화살표 추가 (가상요소 ::after 사용) */
-    .select-box::after {
-        content: '▼'; /* 화살표 문자 */
-        position: absolute;
-        top: 50%;
-        right: 15px;
-        transform: translateY(-50%);
-        font-size: 12px;
-        color: #555;
-        pointer-events: none; /* 화살표가 클릭 이벤트를 가로채지 않도록 설정 */
-    }
-    
-    /* 드롭다운이 열렸을 때 화살표 방향 변경 */
-    .custom-multi-select.open .select-box::after {
-        content: '▲';
-    }
-
-
-    /* 옵션들을 담는 컨테이너 */
-    .options-container {
-        display: none; /* 평소에는 숨김 */
-        position: absolute;
+		.custom-search-select .options-container {
+			display: none; /* 평소에는 숨김 */
+        position: absolute; /* 다른 요소들 위로 겹쳐서 표시 */
         top: 100%;
         left: 0;
         right: 0;
-        margin-top: 5px;
-        border: 1px solid #ccc;
+        margin-top: 4px;
+        border: 1px solid #ddd;
         border-radius: 5px;
         background-color: #fff;
-        max-height: 200px;
+        max-height: 220px;
+        min-height: 100px; /* 최소 높이 보장 */
         overflow-y: auto;
-        z-index: 10; /* 다른 요소들 위에 보이도록 설정 */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    /* 드롭다운이 열렸을 때 옵션 컨테이너를 보여줌 */
-    .custom-select-wrapper.open .options-container {
-        display: block !important;
-    }
+        z-index: 9999;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+		}
 
-    /* 개별 옵션 */
-    .option {
-        padding: 10px 15px;
-        cursor: pointer;
+		.custom-search-select.open .options-container {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.custom-search-select .option-item {
+			padding: 10px 15px;
+			cursor: pointer;
+			font-size: 15px;
+		}
+
+		.custom-search-select .option-item:hover {
+			background-color: #f5f5f5;
+		}
+
+		.custom-search-select .option-item.hidden {
+			display: none;
+		}
+
+		.no-results {
+			flex-grow: 1;
         display: flex;
+        justify-content: center;
         align-items: center;
-    }
+        color: #888;
+		}
+		
+		.custom-select-wrapper {
+			position: relative !important;
+		}
 
-    .option:hover {
-        background-color: #f0f0f0;
-    }
-    
-    /* 선택된 옵션 스타일 */
-    .option.selected {
-        background-color: #e0e7ff;
-        font-weight: bold;
-    }
+		.custom-select-wrapper .select-box {
+			position: relative;
+			cursor: pointer;
+		}
 
-    /* 가짜 체크박스 스타일 */
-    .option::before {
-        content: '☐'; /* 빈 네모 문자 */
-        font-family: monospace;
-        margin-right: 10px;
-        font-size: 18px;
-        color: #777;
-    }
-    
-    /* 선택된 옵션의 가짜 체크박스 스타일 */
-    .option.selected::before {
-        content: '☑'; /* 체크된 네모 문자 */
-        color: #4f46e5;
-    }
+		.custom-select-wrapper .select-box input {
+			cursor: pointer;
+		}
+
+		.custom-select-wrapper .select-box::after {
+			content: '▼';
+			position: absolute;
+			top: 50%;
+			right: 15px;
+			transform: translateY(-50%);
+			font-size: 12px;
+			pointer-events: none;
+		}
+
+		.custom-select-wrapper.open .select-box::after {
+			content: '▲';
+		}
+
+		.custom-select-wrapper .options-container {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			margin-top: 5px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			background-color: #fff;
+			max-height: 200px;
+			overflow-y: auto;
+			z-index: 10;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		}
+
+		.custom-select-wrapper.open .options-container {
+			display: block !important;
+		}
+
+		.custom-select-wrapper .option {
+			padding: 10px 15px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+		}
+
+		.custom-select-wrapper .option:hover {
+			background-color: #f0f0f0;
+		}
+
+		.custom-select-wrapper .option.selected {
+			background-color: #e0e7ff;
+			font-weight: bold;
+		}
+
+		.custom-select-wrapper .option::before {
+			content: '☐';
+			font-family: monospace;
+			margin-right: 10px;
+			font-size: 18px;
+			color: #777;
+		}
+
+		.custom-select-wrapper .option.selected::before {
+			content: '☑';
+			color: #4f46e5;
+		}
 	</style>
 </head>
+
 <body>
-	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
-		<div class="container-xxl flex-grow-1 container-p-y" style="background-color: transparent; padding-left: 0; padding-right: 0;">
-			<div class="row">
-				<div class="col-xxl-12 mb-6">
-					<div class="card">
-						<div class="d-flex align-items-start row">
-							<div class="col-sm-12">
-								<div class="card-body">
-									<h5 class="card-title mb-3">수주 관리</h5>
-									<div class="d-flex justify-content-between align-items-center">
-										<div style="width : 100%;" class="d-flex align-items-center">
-											<span class="w-px-22 h-px-22">
-												<i class="icon-base bx bx-search icon-md"></i>
-											</span>
-											<input id="searchInput" name="searchInput" style="width: 25%;" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none" type="text" aria-label="검색" placeholder="검색">
-										</div>
-										<button type="button" class="btn custom-btn-blue mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openOrderModalBtn">수주 등록</button>
+		<div class="container-xxl flex-grow-1 container-p-y">
+					<h5 class="card-title mb-3">수주 관리</h5>
+					<div class="d-flex justify-content-between align-items-center">
+						<div style="width : 100%;" class="d-flex align-items-center">
+							<span class="w-px-22 h-px-22"><i class="icon-base bx bx-search icon-md"></i></span>
+							<input id="searchInput" style="width: 25%;"
+								class="form-control border-0 shadow-none ps-1 ps-sm-2" type="text" placeholder="검색">
+						</div>
+						<button type="button" class="btn custom-btn-blue mb-3 float-end"
+							style="width:10%;min-width:120px;" id="openOrderModalBtn">수주 등록</button>
+					</div>
+					<div id="grid"></div>
+		</div>
+
+		<div class="modal fade" id="myModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">수주 등록</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form id="orderRegisterForm">
+							<div class="row mb-2">
+								<div class="col">
+									<label for="client-search-input" class="form-label">거래처명 <span
+											class="text-danger">*</span></label>
+									<div id="client-select-box" class="custom-search-select">
+										<input type="text" id="client-search-input"
+											class="form-control select-search-input" placeholder="거래처를 선택하거나 검색하세요."
+											autocomplete="off">
+										<input type="hidden" id="selected_client_id" name="cli_id">
+										<div class="options-container"></div>
 									</div>
-									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
+								</div>
+								<div class="col">
+									<label for="product-search-input" class="form-label">제품명 <span
+											class="text-danger">*</span></label>
+									<div id="product-select-box" class="custom-search-select">
+										<input type="text" id="product-search-input"
+											class="form-control select-search-input" placeholder="제품명을 선택하거나 검색하세요."
+											autocomplete="off">
+										<input type="hidden" id="selected_product_id" name="prd_id">
+										<div class="options-container"></div>
+									</div>
 								</div>
 							</div>
-						</div>
+							<div class="row mb-2">
+								<div class="col">
+									<label for="pay_type" class="form-label">결제 방식 <span
+											class="text-danger">*</span></label>
+									<select id="pay_type" name="pay_type" class="form-select">
+										<option value="">결제 방식을 선택하세요.</option>
+										<option value="현금">현금</option>
+										<option value="카드">카드</option>
+									</select>
+								</div>
+								<div class="col">
+									<label for="odd_pay" class="form-label">결제 금액 <span
+											class="text-danger">*</span></label>
+									<input type="text" id="odd_pay" name="odd_pay" class="form-control"
+										placeholder="결제 금액 입력하세요.">
+								</div>
+								<div class="col">
+									<label for="odd_end_date" class="form-label">납품 요청일 <span
+											class="text-danger">*</span></label>
+									<input class="form-control" type="date" name="odd_end_date" id="odd_end_date">
+								</div>
+								<div class="col">
+									<label for="odd_pay_date" class="form-label">결제 예정일 <span
+											class="text-danger">*</span></label>
+									<input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date">
+								</div>
+							</div>
+							<div class="row mb-2">
+								<div class="col">
+									<label class="form-label">색상 <span class="text-danger">*</span></label>
+									<div class="custom-select-wrapper" id="colorCustomSelectWrapper">
+										<div class="select-box"><input type="text" class="form-control"
+												placeholder="색상을 선택하세요" readonly></div>
+										<div class="options-container"></div>
+									</div>
+									<input type="hidden" id="opt_color" name="opt_color">
+								</div>
+								<div class="col">
+									<label class="form-label">사이즈 <span class="text-danger">*</span></label>
+									<div class="custom-select-wrapper" id="sizeCustomSelectWrapper">
+										<div class="select-box"><input type="text" class="form-control"
+												placeholder="사이즈를 선택하세요" readonly></div>
+										<div class="options-container"></div>
+									</div>
+									<input type="hidden" id="opt_size" name="opt_size">
+								</div>
+								<div class="col">
+									<label class="form-label">굽 높이 <span class="text-danger">*</span></label>
+									<div class="custom-select-wrapper" id="heightCustomSelectWrapper">
+										<div class="select-box"><input type="text" class="form-control"
+												placeholder="굽 높이를 선택하세요" readonly></div>
+										<div class="options-container"></div>
+									</div>
+									<input type="hidden" id="opt_height" name="opt_height">
+								</div>
+								<div class="col">
+									<div class="d-flex align-items-center pt-2 mt-4 justify-content-around">
+										<button type="button" id="addRowBtn"
+											class="btn custom-btn-blue me-2">추가</button>
+										<button type="button" id="resetOptionFormsBtn"
+											class="btn btn-light">초기화</button>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-1">
+								<div class="col">
+									<label class="form-label">배송지 주소 <span class="text-danger">*</span></label>
+									<div class="input-group">
+										<input type="text" id="cli_pc" name="cli_pc" class="form-control" readonly
+											placeholder="우편번호">
+										<button type="button" class="btn btn-primary" id="findPostCodeBtn">우편번호
+											찾기</button>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-4">
+								<div class="col"><input type="text" id="cli_add" name="cli_add" class="form-control"
+										readonly placeholder="기본주소"></div>
+								<div class="col"><input type="text" id="cli_da" name="cli_da" class="form-control"
+										placeholder="상세주소"></div>
+							</div>
+							<div class="mb-3 d-flex justify-content-end">
+								<button type="button" class="btn btn-danger me-2" id="deleteSelectedRowsBtn">선택 항목
+									삭제</button>
+								<button type="button" class="btn btn-light" id="resetItemsBtn">주문 초기화</button>
+							</div>
+							<div id="innerGrid"></div>
+						</form>
 					</div>
-	            </div>
-			</div>
-        </div>
-		
-	<!-- 배경 + 스피너 컨테이너 -->
-	<div id="loadingOverlay" style="display:none;">
-	  <div class="spinner-border text-primary" role="status">
-	    <span class="visually-hidden">Loading...</span>
-	  </div>
-	</div>
-
-	
-	<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	    <div class="modal-dialog modal-dialog-scrollable modal-xl">
-	        <div class="modal-content" id="modalContentContainer">
-	        	<div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">수주 등록</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body big-box">
-            <div class="row mb-2">
-                 <div class="col">
-			        <label for="cli_nm_virtual_select" class="form-label">거래처명 <span style="color:red">*</span></label>
-			        <div class="input-group">
-			            <select id="cli_nm_virtual_select" name="cli_nm" placeholder="거래처명을 선택하거나 검색하세요.">
-			            </select>
-			        </div>
-			    </div>
-                <div class="col">
-			        <label for="prd_nm_virtual_select" class="form-label">제품명 <span style="color:red">*</span></label>
-			        <div class="input-group">
-			            <select id="prd_nm_virtual_select" name="prd_nm" placeholder="제품명을 선택하거나 검색하세요." ></select>
-			        </div>
-			    </div>
-            </div>
-			<div class="row mb-2">
-				<div class="col">
-		            <label for="pay_type" class="form-label">결제 방식 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <select type="text" id="pay_type" name="pay_type" class="form-control">
-						<option value="">결제 방식을 선택하세요.</option>
-						<option value="현금">현금</option>
-						<option value="카드">카드</option>
-						<option value="무통장">무통장</option>
-						<option value="기타">기타</option>
-		                </select>
-		            </div>
-				</div>
-				
-				<!-- <div class="col">
-		            <label for="odd_cnt" class="form-label">주문 수량 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <input type="text" id="odd_cnt" name="odd_cnt" min="0" class="form-control" placeholder="주문 수량 입력하세요." disabled="disabled">
-		            </div>
-				</div> -->
-				<div class="col">
-				<!-- 이거는 자동 계산 -->
-					<label for="odd_pay" class="form-label">결제 금액 <span style="color:red;">*</span></label>
-					<div class="d-flex align-items-center">
-						<input type="text" id="odd_pay" name="odd_pay" min="0" class="form-control" placeholder="결제 금액 입력하세요.">
-					</div>
-				</div>
-				<div class="col">
-		            <label for="odd_end_date" class="form-label">납품 요청일 <span style="color:red;">*</span></label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" value="" name="odd_end_date" id="odd_end_date">
-		            </div>
-				</div>
-				<div class="col">
-					<label for="odd_pay_date" class="form-label">결제 예정일 <span style="color:red;">*</span></label>
-					<div class="d-flex align-items-center">
-						<input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date" value="">
-					</div>
-				</div>
-	        </div>
-			<div class="row mb-2">
-				<div class="col">
-					<label class="form-label">색상 <span style="color:red;">*</span></label>
-					<div class="custom-select-wrapper" id="colorCustomSelectWrapper">
-						<div class="select-box">
-							<input type="text" class="form-control" placeholder="색상을 선택하세요">
-						</div>
-						<div class="options-container"></div>
-					</div>
-					<input type="hidden" id="opt_color" name="opt_color">
-				</div>
-			
-				<div class="col">
-					<label class="form-label">사이즈 <span style="color:red;">*</span></label>
-					<div class="custom-select-wrapper" id="sizeCustomSelectWrapper">
-						<div class="select-box">
-							<input type="text" class="form-control" placeholder="사이즈를 선택하세요">
-						</div>
-						<div class="options-container"></div>
-					</div>
-					<input type="hidden" id="opt_size" name="opt_size">
-				</div>
-			
-				<div class="col">
-					<label class="form-label">굽 높이 <span style="color:red;">*</span></label>
-					<div class="custom-select-wrapper" id="heightCustomSelectWrapper">
-						<div class="select-box">
-							<input type="text" class="form-control" placeholder="굽 높이를 선택하세요">
-						</div>
-						<div class="options-container"></div>
-					</div>
-					<input type="hidden" id="opt_height" name="opt_height">
-				</div>
-			
-				<div class="col">
-					<div class="d-flex align-items-center pt-2 mt-4 justify-content-around">
-						<button type="button" onclick="addRowToInnerGrid()" class="btn custom-btn-blue me-2 ">추가</button>
-						<button type="button" onclick="resetOptionForms()" class="btn btn-light ">초기화</button>
-					</div>
-				</div>
-			</div>   
-			
-            <div class="row mb-1">
-				<div class="col">
-					<div class="form-label">배송지 주소 <span style="color:red">*</span></div>
-					<div class="d-flex align-items-center mb-2">
-						<input type="text" id="cli_pc" name="cli_pc" class="form-control" readonly="readonly" placeholder="우편번호">
-					</div>
-				</div>
-				<div class="col">
-					<div class="form-label mb-5"></div>
-					<button type="button" class="btn btn-primary" onclick="findPostCode()">우편번호 찾기</button>
-				</div>
-			</div>
-			<div class="row mb-12">
-				<div class="col">
-					<div class="d-flex align-items-center">
-						<input type="text" id="cli_add" name="cli_add" class="form-control" readonly="readonly" placeholder="기본주소" >
-					</div>
-				</div>
-				<div class="col">
-					<div class="d-flex align-items-center">
-						<input type="text" id="cli_da" name="cli_da" class="form-control" placeholder="상세주소" >
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+						<button type="button" class="btn btn-primary" id="submitOrderBtn">등록</button>
 					</div>
 				</div>
 			</div>
-			<div class="mt-12 mb-5 d-flex justify-content-end">
-				<button type="button" class="btn btn-danger " id="deleteSelectedRowsBtn">선택 항목 삭제</button>
-				<button type="button" class="btn btn-light ms-4" id="resetItemsBtn">주문 초기화</button>
-			</div>
-			<div id="innerGrid" ></div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-            <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitForm()">등록</button>
-        </div>
-	        </div>
-	    </div>
-	</div>
-			
+		</div>
 	</th:block>
-	
+
 	<th:block layout:fragment="script">
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-		<!-- sweetalert2 JS -->
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-	    <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
-	    <script th:src="@{/js/sales/order.js}"></script>
-	    
+		<script th:src="@{/js/sales/order.js}"></script>
 	</th:block>
-	
 </body>
+
 </html>
