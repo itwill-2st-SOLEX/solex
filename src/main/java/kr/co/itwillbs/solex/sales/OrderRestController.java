@@ -78,10 +78,10 @@ public class OrderRestController {
 	
 	
 	
-	@GetMapping("/product/{prd_cd}")
-	public List<Map<String, Object>> getOptionsByProduct(@PathVariable(name = "prd_cd") String prd_cd) {
-		log.info("API - 옵션 조회 요청 파라미터: prd_cd={}", prd_cd);
-		return orderService.getOptionsByProduct(prd_cd);
+	@GetMapping("/product/{prd_id}")
+	public List<Map<String, Object>> getOptionsByProduct(@PathVariable(name = "prd_id") String prd_id) {
+		log.info("API - 옵션 조회 요청 파라미터: prd_id={}", prd_id);
+		return orderService.getOptionsByProduct(prd_id);
 	}
 
 
@@ -128,15 +128,24 @@ public class OrderRestController {
 		log.info("rows = {}", rows)	;
 		Map<String, Object> response = new HashMap<>();
 
-		if (rows == 1) { 
+		if (rows >= 1) { 
 		    response.put("status", "OK"); 
-		    response.put("message", "거래처 등록 완료");
+		    response.put("message", "수주 등록 완료");
 		    return ResponseEntity.ok(response); 
-		} else { 
+		} else { 	
 		    response.put("status", "ERROR"); 
-		    response.put("message", "거래처 생성 실패");
+		    response.put("message", "수주 등록 실패");
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
 	}
+
+	@GetMapping("/{ord_id}")
+	public Map<String, Object> getOrderDetail(@PathVariable("ord_id") int ord_id) {
+		log.info("API - 주문 ID {}의 상세 데이터 조회 요청", ord_id);
+		Map<String, Object> orderData = orderService.getOrderDetail(ord_id);
+		log.info("API - 주문 ID {}의 상세 데이터 조회 결과: {}", ord_id, orderData);
+		return orderData;
+	}
+
 	
 }

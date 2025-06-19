@@ -51,10 +51,24 @@ public interface OrderMapper {
 	List<Map<String, Object>> getLackingMaterialsWithMine(@Param("opt_id") String opt_id,@Param("ord_cnt") int orderCount);
 	
 	// 상품별 옵션 가져오기
-	List<Map<String, Object>> getOptionsByProduct(@Param("prd_cd")String prd_cd);
+	List<Map<String, Object>> getOptionsByProduct(@Param("prd_id")String prd_id);
 
 	List<Map<String, Object>> selectOptIdsForItems(List<Map<String, Object>> items);
 
+	 /**
+     * 1. 주문 기본 정보를 조회 (JOIN 포함)
+     */
+    Map<String, Object> selectOrderInfoById(long orderId);
+
+    /**
+     * 2. 특정 주문에 속한 모든 상세 항목 목록을 조회
+     */
+    List<Map<String, Object>> selectOrderItemsByOrderId(long orderId);
+    
+    /**
+     * 3. 특정 상품에 속한 선택 가능한 모든 옵션 목록을 조회
+     */
+    List<Map<String, Object>> selectAllOptionsByProductId(@Param("prd_id") Object prd_id);
 
 	
 }

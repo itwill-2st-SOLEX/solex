@@ -3,6 +3,7 @@ package kr.co.itwillbs.solex.sales;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,8 +82,8 @@ public class OrderService {
 	}
 
 	
-	public List<Map<String, Object>> getOptionsByProduct(String prd_cd) {
-		return orderMapper.getOptionsByProduct(prd_cd);
+	public List<Map<String, Object>> getOptionsByProduct(String prd_id) {
+		return orderMapper.getOptionsByProduct(prd_id);
 	}
 	
 	
@@ -162,6 +163,33 @@ public int createOrderProcess(Map<String, Object> orderData) {
 	}
 
 
-	
+	@Transactional(readOnly = true)
+	public Map<String, Object> getOrderDetail(int ord_id) {
+		// 1. 주문 기본 정보 조회 (첫 번째 DB 호출)
+        Map<String, Object> orderInfo = orderMapper.selectOrderInfoById(ord_id);
+        if (orderInfo == null) {
+            throw new RuntimeException("ID가 " + ord_id + "인 주문을 찾을 수 없습니다.");
+        }
+
+        // 2. 주문 상세 항목 목록 조회 (두 번째 DB 호출)
+        List<Map<String, Object>> orderItems = orderMapper.selectOrderItemsByOrderId(ord_id);
+
+        // 3. 선택 가능한 전체 옵션 목록 조회 (세 번째 DB 호출)
+        //    - 1번에서 조회한 상품 ID(PRODUCT_ID)를 파라미터로 사용합니다.
+        //    - DB에서 대문자로 반환될 수 있으므로 대문자 키로 조회합니다.
+        Object prd_id = orderInfo.get("PRODUCT_ID"); 
+        log.info(prd_id);
+        List<Map<String, Object>> availableOptions = orderMapper.selectAllOptionsByProductId(prd_id);
+        log.info("??????????????????????????????????");
+
+        // 4. 모든 결과를 하나의 최종 Map에 담아서 반환
+        Map<String, Object> finalResult = new HashMap<>();
+        finalResult.put("orderInfo", orderInfo);
+        finalResult.put("orderItems", orderItems);
+        finalResult.put("availableOptions", availableOptions);
+
+        return finalResult;
+	}
+
 
 }

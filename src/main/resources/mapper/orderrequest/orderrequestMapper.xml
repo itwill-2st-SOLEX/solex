@@ -77,10 +77,21 @@
 	WHERE ord.ord_id = #{ord_id}
 	</select>
 
-
-
+	<select id="getOrderDetail" parameterType="Map" resultType="Map">
+		SELECT 
+			odd_id,
+			odd_cnt,
+			odd_sts,
+			prd_color,
+			prd_size,
+			prd_height,
+			ord_end_date,
+		FROM vw_suju_summary
+		WHERE ord_id = #{ord_id}
+	</select>
   	
-  	
+
+	<!-- select odd_id , prd_code, prd_nm, odd_cnt,odd_sts, prd_color, prd_size,prd_height, ord_end_date from vw_suju_summary; -->
   
   
   
