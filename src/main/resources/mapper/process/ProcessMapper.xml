@@ -23,7 +23,7 @@
 	<select id="selectPagedProcessList" resultType="map">
 	    SELECT
 			p.prc_id,
-			p.prc_cd,
+			p.PRC_CODE,
 			p.prc_nm,
 			p.prc_des,
 			p.prc_yn,
@@ -47,14 +47,14 @@
     	INSERT ALL
     	<foreach collection="list" item="prc">
     		INTO PROCESS (
-    			PRC_CD,
+    			PRC_CODE,
     			DET_ID,
     			PRC_NM,
     			PRC_DES,
     			PRC_YN,
     			QUA_ID
     		) VALUES (
-    			#{prc.PRC_CD},
+    			#{prc.PRC_CODE},
     			#{prc.DET_NM},
     			#{prc.PRC_NM},
     			#{prc.PRC_DES},
@@ -71,7 +71,7 @@
 	    USING (
 	        <foreach collection="list" item="prc" separator="UNION ALL">
 	            SELECT
-	                #{prc.PRC_CD} AS PRC_CD,
+	                #{prc.PRC_CODE} AS PRC_CODE,
 	                #{prc.PRC_NM} AS PRC_NM,
 	                #{prc.PRC_DES} AS PRC_DES,
 	                #{prc.PRC_YN} AS PRC_YN,
@@ -80,7 +80,7 @@
 	            FROM DUAL
 	        </foreach>
 	    ) src
-	    ON (p.PRC_CD = src.PRC_CD)
+	    ON (p.PRC_CODE = src.PRC_CODE)
 	    WHEN MATCHED THEN
 	    UPDATE SET
 	        p.PRC_NM = src.PRC_NM,
@@ -114,7 +114,7 @@
             t.prd_type,
             t.prc_id,
             t.pcp_seq,
-            p.prc_cd,
+            p.PRC_CODE,
             p.prc_nm,
             p.prc_des
         FROM
@@ -124,6 +124,12 @@
             t.prd_type = #{prdType}
         ORDER BY
             t.pcp_seq
+	</select>
+	
+	<!-- 공정리스트 조회 -->
+	<select id="selectAllProcesses">
+		SELECT PRC_ID, PRC_CODE, PRC_NM, PRC_DES
+		FROM PROCESS
 	</select>
 
 </mapper>

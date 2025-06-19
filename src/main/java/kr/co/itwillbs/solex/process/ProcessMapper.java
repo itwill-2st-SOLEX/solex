@@ -33,5 +33,9 @@ public interface ProcessMapper {
 
 	// 유형별 공정순서 조회
 	List<Map<String, Object>> getTypeProcessList(@Param("prdType") String prdType);
+
+	// 공정리스트 조회
+	List<Map<String, Object>> selectAllProcesses();
+	
     
 }

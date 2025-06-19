@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 			
 			// 탭에 따라 해당 그리드 초기화 또는 레이아웃 리프레시
 			if (selected === 'type-tab') {
-				typeProcess.initProcessGrid();
+				window.loadProcessOptions(() => {
+					typeProcess.initProcessGrid();
+				});
 			} else if (selected === 'process-tab') {
 				window.process_grid.resetData([]);
 				window.process_grid.readData(1);
@@ -79,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 				}
 			},
 			columns : [
-				{ header: '공정코드', name: 'PRC_CD', editor: 'text', align: 'center', width: 200 },
+				{ header: '공정코드', name: 'PRC_CODE', editor: 'text', align: 'center', width: 200 },
 				{ header: '공정명', name: 'PRC_NM', editor: 'text', align: 'center', width: 150 },
 				{ header: '공정설명', name: 'PRC_DES', editor: 'text', align: 'center', width: 400 },
 				{
@@ -137,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	// ✅ 추가 버튼
 	document.querySelector('#prs-add').addEventListener('click', () => {
 		process_grid.prependRow({
-			PRC_CD: '',
+			PRC_CODE: '',
 			PRC_NM: '',
 			PRC_DES: '',
 			PRC_YN: '',
@@ -161,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	    }
 		
 		// 필드 검증
-		const requiredFields = ['PRC_CD', 'PRC_NM', 'PRC_DES', 'PRC_YN', 'DET_NM', 'QUA_NM'];
+		const requiredFields = ['PRC_CODE', 'PRC_NM', 'PRC_DES', 'PRC_YN', 'DET_NM', 'QUA_NM'];
 	    const invalidRows = [...createdRows, ...updatedRows].filter(row =>
 	        requiredFields.some(field => !row[field])
 	    );
@@ -173,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 		// 데이터 가공
 	    const payload = {
 	        createdRows: createdRows.map(row => ({
-	            PRC_CD: row.PRC_CD,
+	            PRC_CODE: row.PRC_CODE,
 	            PRC_NM: row.PRC_NM,
 	            PRC_DES: row.PRC_DES,
 				PRC_YN: row.PRC_YN,
@@ -186,7 +188,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 				const qua = window.qualityOptions.find(opt => opt.text === row.QUA_NM);
 
 				return {
-					PRC_CD: row.PRC_CD,
+					PRC_CODE: row.PRC_CODE,
 					PRC_NM: row.PRC_NM,
 					PRC_DES: row.PRC_DES,
 					PRC_YN: row.PRC_YN,

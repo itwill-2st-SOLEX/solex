@@ -124,6 +124,15 @@ public class ProcessRestController {
 	    return list;
 	}
 	
+	// 공정리스트 조회
+	@GetMapping("process/list")
+	public List<Map<String, Object>> getProcessList() {
+		
+		List<Map<String, Object>> list = processService.getAllProcessList();
+		
+	    return list;
+	}
+	
 	
 	
 }

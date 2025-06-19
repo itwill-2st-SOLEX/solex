@@ -89,5 +89,10 @@ public class ProcessService {
 	public List<Map<String, Object>> getTypeProcessList(String prdType) {
 		return processMapper.getTypeProcessList(prdType);
 	}
+	
+	// 공정리스트 조회
+	public List<Map<String, Object>> getAllProcessList() {
+	    return processMapper.selectAllProcesses();
+	}
 
 }
