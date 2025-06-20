@@ -61,7 +61,7 @@ $(function() {
 	loadDrafts(currentPage);
 
 	grid.on('scrollEnd', () => loadDrafts(currentPage));
-	
+
 	// 진행현황 클릭시 모달 띄움
 	grid.on('click', (ev) => {
 		if (ev.columnName === 'odd_sts') {
@@ -143,7 +143,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 			let select = steps[i].querySelector(`select[id="team-${i}"]`);
 			let prcId = document.getElementById(`hidden-prc-id-${i}`).value;
 			let teamCode = select.value;
-			
+
 			// 유효성
 			if (!teamCode) {
 				alert(`${i + 1}단계에서 팀을 선택해주세요.`);
@@ -162,7 +162,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 		};
 
 		if (!valid) return;
-		
+
 		$.ajax({
 			url: '/SOLEX/workOrders',
 			type: 'POST',
@@ -184,7 +184,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 function renderProcessSteps(processList) {
 	const container = document.getElementById('process-steps-container');
 	container.innerHTML = '';
-	
+
 	// 단계별 원 색상
 	const stepColors = [
 		'#d6e6ff', '#cce0ff', '#b3d1ff', '#99c2ff', '#80b3ff',
@@ -220,8 +220,88 @@ function renderProcessSteps(processList) {
 		container.appendChild(step);
 	});
 }
-// 창고배정 함수
+// 창고 전역변수 
+let warehouses = [];
+
+// 창고 목록 그리기 (필터 연동 포함)
+function fetchWarehouses() {
+	$.ajax({
+		url: '/api/warehouses', // 실제 스프링 컨트롤러 주소로 바꿔도 돼
+		method: 'GET',
+		dataType: 'json',
+		success: function(data) {
+			warehouses = data;
+			renderWarehouseList(); // 받아온 후 창고 목록 렌더링
+		},
+		error: function(xhr, status, error) {
+			console.error('🚨 창고 목록 로딩 실패:', error);
+			alert('창고 정보를 불러올 수 없습니다.');
+		}
+	});
+}
+
+function selectWarehouse(index) {
+	const warehouse = warehouses[index];
+
+	document.getElementById('warehouseName').textContent = warehouse.name;
+	document.getElementById('warehouseLocation').textContent = warehouse.location;
+
+	const teamSelect = document.getElementById('teamSelect');
+	teamSelect.innerHTML = '<option value="">팀을 선택하세요</option>';
+	warehouse.teams.forEach(team => {
+		const opt = document.createElement('option');
+		opt.value = team;
+		opt.textContent = team;
+		teamSelect.appendChild(opt);
+	});
+
+	document.getElementById('selectedWarehouseId').value = warehouse.id;
+}
+
+// 모달 열기 함수
 function openAssignWarehouse(oddId) {
+	document.getElementById('warehouseSearch').value = '';
+	fetchWarehouses();
+
+	document.getElementById('selectedWarehouseId').value = '';
+	document.getElementById('selectedOddId').value = oddId;
+
+	document.getElementById('warehouseName').textContent = '-';
+	document.getElementById('warehouseLocation').textContent = '-';
+	document.getElementById('warehouseZone').innerHTML = '<option value="">구역을 선택하세요</option>';
+
 	const modal = new bootstrap.Modal(document.getElementById('AssignWarehouseModal'));
 	modal.show();
 }
+
+// 검색 input 이벤트
+document.getElementById('warehouseSearch').addEventListener('input', (e) => {
+	renderWarehouseList(e.target.value.trim());
+});
+
+// 등록 버튼 이벤트
+document.getElementById('submitWarehouseAssign').addEventListener('click', () => {
+	const warehouseId = document.getElementById('selectedWarehouseId').value;
+	const team = document.getElementById('teamSelect').value;
+	const oddId = document.getElementById('selectedOddId').value;
+
+	if (!warehouseId) {
+		alert('창고를 선택해주세요.');
+		return;
+	}
+	if (!team) {
+		alert('팀을 선택해주세요.');
+		return;
+	}
+
+	// 여기에 ajax 호출 넣으면 됨
+	console.log('창고배정 등록 데이터', { oddId, warehouseId, team });
+	alert('창고배정 등록 완료! (테스트용)');
+
+	// 모달 닫기
+	const modalEl = document.getElementById('AssignWarehouseModal');
+	const modal = bootstrap.Modal.getInstance(modalEl);
+	modal.hide();
+
+	// 이후 추가 처리 (리로드 등) 필요 시 작성
+});
