@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		  }
 		},
 	    columns: [
-		  { header: '상품코드', name: 'PRD_CD', align: 'center', hidden: true }, 
+		  { header: '상품코드', name: 'PRD_ID', align: 'center', hidden: true }, 
 		  { header: '옵션코드', name: 'OPT_ID', align: 'center', hidden: true }, 
 	      { header: '상품명', name: 'PRD_NM', align: 'center', sortable: true , width: 200 },
 	//      { header: '가격', name: 'PRD_PRICE', align: 'center', sortable: true },

@@ -27,8 +27,8 @@ function showProductModal(mode, data = {}) {
 
     const title = isEditable ? 
 	
-		`<label for="cli_nm" class="form-label">제품명 <span style="color:red">*</span></label>
-		 <input type="text" id="noticeTitle" class="form-control" value="${data.NOT_TT || ''}" placeholder="제품명을 입력하세요">` : 
+		`<label for="prd_nm" class="form-label">제품명 <span style="color:red">*</span></label>
+		 <input type="text" id="prd_nm" name="prd_nm" class="form-control" value="${data.NOT_TT || ''}" placeholder="제품명을 입력하세요">` : 
 		`<span id="modalTitle">${data.NOT_TT || ''}</span>`;
 
     const content = isEditable ?
@@ -37,24 +37,28 @@ function showProductModal(mode, data = {}) {
 
     modalContainer.innerHTML = `
         <div class="custom-modal-detail">
-            <div class="custom-modal-header">
-                <h4 class="custom-modal-title" id="exampleModalLabel">${title}</h4>
-            </div>
             <div class="custom-modal-content" id="modalContent">
 				<div class="row mb-4">
 	                <div class="col">
-	                    <label for="cli_nm" class="form-label">유형<span style="color:red">*</span></label>
-						<br>
-						<select id="clientTypeSelect" class="form-select"></select>
+						${title}
 	                </div>
 	                <div class="col">
-	                    <label for="cli_ceo" class="form-label">단위<span style="color:red">*</span></label>
-	                    <input type="text" id="cli_ceo" name="cli_ceo" class="form-control" placeholder="단위" value="">
+	                    <label for="prd_price" class="form-label">제품 가격<span style="color:red">*</span></label>
+	                    <input type="text" id="prd_price" name="prd_price" class="form-control" placeholder="제품가격" value="">
 	                </div>
 	            </div>
-			</div>
-			<div class="modal-body big-box">
-	            
+				<div class="row mb-4">
+		        	<div class="col">
+		            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
+							<br>
+							<select id="prdUnitSelect" class="form-select"></select>
+		                </div>
+		                <div class="col">
+		                    <label for="prd_type" class="form-label">단위<span style="color:red">*</span></label>
+		                    <select id="prdTypeSelect" class="form-select"></select>
+		                </div>
+		            </div>
+				</div>
 			</div>
         </div>
     `;
@@ -108,4 +112,47 @@ function formatter(date, includeTime = false) {
 	}
 
 	return result;
+}
+
+
+// 제품 단위 셀렉트 박스 
+async function loadPrdUnitTypes(selectedValue = null) {
+    const select = document.getElementById('prdUnitSelect');
+    console.log("선택된 제품 단위 값:", selectedValue); // 디버깅용
+    if (!select) {
+        console.error("제품 단위 선택 요소를 찾을 수 없습니다.");
+        return; // 요소가 없으면 종료
+    }
+
+    try {
+        const response = await fetch('/SOLEX/products/api/prdUnitTypes');
+		console.log('단위 url 잘 불러오나???????? ');
+        if (!response.ok) {
+            throw new Error('단위값을 불러오지 못했습니다.');
+        }
+        const prdUnitTypes = await response.json();
+        select.innerHTML = ''; // 기존 옵션 비우기
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '선택하세요';
+        defaultOption.disabled = true;
+        if (!selectedValue) { // 수정 모드가 아닐 때 (또는 선택된 값이 없을 때) 기본값 선택
+            defaultOption.selected = true;
+        }
+        select.appendChild(defaultOption);
+
+        clientTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.code;
+            option.textContent = type.name;
+            if (selectedValue && type.code == selectedValue) { // 수정 모드일 때 해당 값 선택
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error("단위 로드 중 오류 발생:", error);
+        alert("단위값을 불러오는 데 실패했습니다.");
+    }
 }

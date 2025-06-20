@@ -1,9 +1,11 @@
 package kr.co.itwillbs.solex.products;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import kr.co.itwillbs.solex.sales.ClientType;
 
 
 @RestController
@@ -58,6 +62,18 @@ public class ProductsRestController {
 	    
 	    return result;
 	}
+	@GetMapping("/prdUnitTypes")
+	public List<Map<String, String>> getPrdUnitTypes() throws Exception {
+		System.out.println("getPrdUnitTypes() 메서드 잘 나옴??????");
+		return null;
+//		return Arrays.stream(ClientType.values())
+//		        .map(ct -> Map.of(
+//		            "code", ct.name(),
+//		            "name", ct.getLabel()
+//		        ))
+//		        .collect(Collectors.toList());
+	}
+
 	
 	
 	

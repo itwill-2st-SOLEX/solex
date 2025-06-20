@@ -9,7 +9,7 @@
 	<!-- product 무한스크롤 -->
 	<select id="selectPagedProductList" resultType="map">
 	    SELECT
-	    	   p.prd_cd,
+	    	   p.prd_id,
 			   p.prd_nm,
 			   o.opt_id, 
 			   cd_type.det_nm PRD_TYPE, -- 유형
@@ -20,7 +20,7 @@
 	      FROM product p
 	    
 	 LEFT JOIN product_option o 
-	        ON p.prd_cd = o.prd_cd
+	        ON p.prd_id = o.prd_id
 	 LEFT JOIN code_detail cd_col 
 	      	ON cd_col.det_id = o.opt_color
 	 LEFT JOIN code_detail cd_size 
@@ -44,7 +44,7 @@
 		SELECT COUNT(*) 
 		  FROM product p
 	 LEFT JOIN product_option o 
-     		ON p.prd_cd = o.prd_cd
+     		ON p.prd_id = o.prd_id
 		<where>
 			<if test="prdYn != null and prdYn != ''">
 			prd_yn = #{prdYn}
@@ -67,7 +67,7 @@
     	SELECT COUNT(*) 
     	  FROM product p
      LEFT JOIN product_option o 
-     		ON p.prd_cd = o.prd_cd
+     		ON p.prd_id = o.prd_id
 		 WHERE prd_yn = 'Y'
     </select> 
 </mapper>	
