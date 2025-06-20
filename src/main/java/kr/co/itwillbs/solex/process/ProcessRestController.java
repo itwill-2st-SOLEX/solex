@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,7 +63,7 @@ public class ProcessRestController {
 	}
 	
 	// 공정정보 신규 등록 및 수정
-	@PostMapping("process/save")
+	@PostMapping("/process/save")
 	public Map<String, Object> saveProcess(@RequestBody Map<String, List<Map<String, Object>>> map) {
 
 	    List<Map<String, Object>> insertList = map.get("createdRows");
@@ -86,7 +87,7 @@ public class ProcessRestController {
 	}
 	
 	// 제품유형 리스트 무한스크롤
-	@GetMapping("product/type/list")
+	@GetMapping("/product/type/list")
 	public Map<String, Object> getPagedPrdTypeList(@RequestParam Map<String, String> map) {
 		
 		int page = Integer.parseInt(map.getOrDefault("page", "1"));
@@ -125,7 +126,7 @@ public class ProcessRestController {
 	}
 	
 	// 공정리스트 조회
-	@GetMapping("process/list")
+	@GetMapping("/process/list")
 	public List<Map<String, Object>> getProcessList() {
 		
 		List<Map<String, Object>> list = processService.getAllProcessList();
@@ -133,6 +134,28 @@ public class ProcessRestController {
 	    return list;
 	}
 	
-	
+	// 공정순서 신규 등록 및 수정
+	@PostMapping("/typeProcess/save")
+	public Map<String, Object> saveTypeProcess(@RequestBody Map<String, List<Map<String, Object>>> map) {
+		
+	    List<Map<String, Object>> insertList = map.get("createdRows");
+	    List<Map<String, Object>> updateList = map.get("updatedRows");
+
+	    if ((insertList == null || insertList.isEmpty()) && (updateList == null || updateList.isEmpty())) {
+	        return Map.of("success", false, "message", "저장할 데이터가 없습니다.");
+	    }
+
+	    // 공정순서 신규 등록
+	    if (insertList != null && !insertList.isEmpty()) {
+	    	processService.insertTypeProcesses(insertList);
+	    }
+
+	    // 공정순서 기존 수정
+	    if (updateList != null && !updateList.isEmpty()) {
+	    	processService.updateTypeProcesses(updateList);
+	    }
+
+	    return Map.of("success", true);
+	}
 	
 }

@@ -96,5 +96,56 @@ public class ProcessService {
 	public List<Map<String, Object>> getAllProcessList() {
 	    return processMapper.selectAllProcesses();
 	}
+	
+	// 공정순서 신규 등록
+	public void insertTypeProcesses(List<Map<String, Object>> insertList) {
+		
+		for (Map<String, Object> row : insertList) {
+		    Object pcp_seq = row.get("PCP_SEQ");
+
+		    if (pcp_seq != null) {
+		        try {
+		            // 문자열이든 숫자든 상관없이 int로 변환 시도
+		            int pcpSeq = Integer.parseInt(pcp_seq.toString());
+		            row.put("PCP_SEQ", pcpSeq);  // DB insert 시 이걸 사용
+		        } catch (NumberFormatException e) {
+		            System.out.println("PCP_SEQ 변환 실패: " + pcp_seq);
+		            row.put("PCP_SEQ", null); // 또는 적절한 예외 처리
+		        }
+		    }
+		}
+		
+    	processMapper.insertTypeProcess(insertList);
+	}
+
+	// 공정순서 기존 수정
+	public void updateTypeProcesses(List<Map<String, Object>> updateList) {
+		
+		for (Map<String, Object> row : updateList) {
+			Object pcp_id = row.get("PCP_ID");
+			Object prc_id = row.get("PRC_ID");
+		    Object pcp_seq = row.get("PCP_SEQ");
+
+		    if (pcp_seq != null || pcp_id != null || prc_id != null) {
+		        try {
+		        	int pcpID = Integer.parseInt(pcp_id.toString());
+		        	int prcID = Integer.parseInt(prc_id.toString());
+		            int pcpSeq = Integer.parseInt(pcp_seq.toString());
+		            row.put("PCP_ID", pcpID);
+		            row.put("PRC_ID", prcID);
+		            row.put("PCP_SEQ", pcpSeq);
+		        } catch (NumberFormatException e) {
+		            System.out.println("PCP_ID 변환 실패: " + pcp_id);
+		            System.out.println("PRC_ID 변환 실패: " + prc_id);
+		            System.out.println("PCP_SEQ 변환 실패: " + pcp_seq);
+		            row.put("PCP_ID", null);
+		            row.put("PRC_ID", null);
+		            row.put("PCP_SEQ", null);
+		        }
+		    }
+		}
+		
+    	processMapper.updateTypeProcess(updateList);
+	}
 
 }

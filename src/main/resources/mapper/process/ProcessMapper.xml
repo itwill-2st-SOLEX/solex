@@ -132,5 +132,43 @@
 		FROM PROCESS
 		ORDER BY PRC_ID
 	</select>
+	
+	<!-- 공정순서 신규 등록 -->
+	<insert id="insertTypeProcess" parameterType="java.util.List">
+    	INSERT ALL
+    	<foreach collection="list" item="pcp">
+    		INTO TYPE_PROCESS (
+    			PRD_TYPE,
+    			PRC_ID,
+    			PCP_SEQ
+    		) VALUES (
+    			#{pcp.DET_ID},
+    			#{pcp.PRC_ID},	<!-- !@!@!@!@ 저장할 데이터에 null값이 들어가 있음 -->
+    			#{pcp.PCP_SEQ}
+    		)
+    	</foreach>
+    	SELECT	*	FROM DUAL
+    </insert>
+	
+	<!-- 공정순서 기존 수정 -->
+	<update id="updateTypeProcess" parameterType="java.util.List">
+	    MERGE INTO TYPE_PROCESS tp
+	    USING (
+	        <foreach collection="list" item="pcp" separator="UNION ALL">
+	            SELECT
+	                #{pcp.PCP_ID} AS PCP_ID,
+	                #{pcp.DET_ID} AS PRD_TYPE,
+	                #{pcp.PRC_ID} AS PRC_ID,
+	                #{pcp.PCP_SEQ} AS PCP_SEQ
+	            FROM DUAL
+	        </foreach>
+	    ) src
+	    ON (tp.PCP_ID = src.PCP_ID)
+	    WHEN MATCHED THEN
+	    UPDATE SET
+	    	tp.PRD_TYPE = src.PRD_TYPE,
+	    	tp.PRC_ID = src.PRC_ID,
+	        tp.PCP_SEQ = src.PCP_SEQ
+	</update>
 
 </mapper>

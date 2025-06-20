@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				// 공정명 매핑
 				const matched = window.processOptions.find(opt => String(opt.value) === String(modifiedRow.PRC_NM));
 				if (matched) {
+					modifiedRow.PRC_ID = matched.value;
 					modifiedRow.PRC_NM = matched.text;
 					modifiedRow.PRC_CODE = matched.PRC_CODE;
 					modifiedRow.PRC_DES = matched.PRC_DES;
@@ -190,8 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					return String(existingRow.PCP_SEQ).trim() === String(modifiedRow.PCP_SEQ).trim();
 				});
 
-				console.log("🟢 이름중복:", isNameDuplicate, "🔵 순서중복:", isSeqDuplicate);
-
 				// 중복 처리
 				if (isNameDuplicate || isSeqDuplicate) {
 					const rowKey = modifiedRow.rowKey; // 자기 자신에 표시
@@ -204,7 +203,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			if (hasDuplicate) {
 				alert('중복된 공정명 또는 작업순서가 있습니다. 확인해주세요.');
+				return;
+			}
+			
+			// 연속된 순번인지 검사
+			const seqList = allRows.map(r => Number(r.PCP_SEQ)).filter(n => !isNaN(n));
+			seqList.sort((a, b) => a - b);
 
+			let isGapMissing = false;
+			for (let i = 0; i < seqList.length; i++) {
+				if (seqList[i] !== i + 1) {
+					isGapMissing = true;
+					break;
+				}
+			}
+
+			if (isGapMissing) {
+				alert('공정 순서는 연속된 숫자로 입력되어야 합니다.');
+				
+				// 오류 표시를 위해 비연속 값만 테두리 표시
+				seqList.forEach((val, idx) => {
+					if (val !== idx + 1) {
+						const rowKey = allRows.find(r => Number(r.PCP_SEQ) === val)?.rowKey;
+						if (rowKey !== undefined) {
+							grid.addCellClassName(rowKey, 'PCP_SEQ', 'cell-error');
+						}
+					}
+				});
+				
 				return;
 			}
 
@@ -235,11 +261,49 @@ document.addEventListener('DOMContentLoaded', () => {
 					PRC_CODE: row.PRC_CODE,
 					PRC_NM: row.PRC_NM,
 					PRC_DES: row.PRC_DES,
-					PCP_SEQ: row.PCP_SEQ
+					PCP_SEQ: row.PCP_SEQ,
+					PCP_ID: row.PCP_ID
 				}))
 			};
-
+			
 			console.log("저장할 데이터 : ", payload);
+
+			// ✅ 서버로 데이터 전송
+			fetch('/SOLEX/typeProcess/save', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			})
+			.then(res => {
+				if (!res.ok) throw new Error('저장 실패');
+				return res.json();
+			})
+			.then(data => {
+				if (data.success) {
+					// 비동기 재조회
+					$.ajax({
+						url: '/SOLEX/typeProcess/list',
+						type: 'GET',
+						data: { DET_ID: selectedDetId },
+						success: function (res) {
+							window.type_process_grid.resetData(res);
+							window.type_process_grid.clearModifiedData();
+							alert('저장 완료!');
+						},
+						error: function () {
+							alert('저장 후 재조회 중 오류 발생');
+						}
+					});
+				} else {
+					alert(data.message || '저장 실패');
+				}
+			})
+			.catch(err => {
+				console.error(err);
+				alert('저장 중 오류 발생');
+			});
 		});
 
 		// ✅ 삭제 버튼

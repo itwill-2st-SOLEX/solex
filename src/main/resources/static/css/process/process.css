@@ -52,7 +52,7 @@
 }
 
 /* 선택된 셀 강조 스타일 */
-.tui-grid-cell.cell-error {
+.cell-error {
 	border: 2px solid red !important;
 	background-color: #ffe6e6;
 }

@@ -37,5 +37,10 @@ public interface ProcessMapper {
 	// 공정리스트 조회
 	List<Map<String, Object>> selectAllProcesses();
 	
-    
+	// 공정순서 신규 등록
+	void insertTypeProcess(List<Map<String, Object>> insertList);
+	
+	// 공정순서 기존 수정
+	void updateTypeProcess(List<Map<String, Object>> updateList);
+	
 }
