@@ -130,6 +130,7 @@
 	<select id="selectAllProcesses">
 		SELECT PRC_ID, PRC_CODE, PRC_NM, PRC_DES
 		FROM PROCESS
+		ORDER BY PRC_ID
 	</select>
 
 </mapper>
