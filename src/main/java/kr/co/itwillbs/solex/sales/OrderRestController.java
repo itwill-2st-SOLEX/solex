@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.sales;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +37,7 @@ public class OrderRestController {
         @RequestParam(name = "pageSize", defaultValue = "20") int pageSize, // <-- name 속성 추가
         @RequestParam(name = "searchKeyword", required = false) String searchKeyword // <-- name 속성 추가 (있다면)
     ) throws Exception {
-        log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}, searchKeyword={}", page, pageSize, searchKeyword);
         List<Map<String, Object>> list = orderService.getPagedGridDataAsMap(page, pageSize, searchKeyword);
-        log.info("API - 그리드 데이터 조회 결과: list={}",list);
         
         return list; 
     }
@@ -49,14 +48,11 @@ public class OrderRestController {
             @RequestParam(name = "pageSize", defaultValue = "20") int pageSize,
             @RequestParam(name = "searchKeyword", required = false) String searchKeyword
     ) throws Exception {
-        log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}, searchKeyword={}", page, pageSize, searchKeyword);
         
         // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
         int emp_id = 2000;
         List<Map<String, Object>> list = orderService.getSearchClientList(page, pageSize, searchKeyword, emp_id);
         
-        log.info("API - 그리드 데이터 조회 결과 건수: {}", list.size());
-        log.info("API - 그리드 데이터 조회 결과 건수: {}", list);
         return list;
     }
 	
@@ -64,15 +60,12 @@ public class OrderRestController {
 	@GetMapping("/products")
 	public List<Map<String, Object>> getSearchProductList(@RequestParam(name = "searchKeyword", required = false) String searchKeyword
     ) throws Exception {
-        log.info("API - 그리드 데이터 조회 요청 파라미터: searchKeyword={}", searchKeyword);
         
         // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
         int emp_id = 2000;
         
         List<Map<String, Object>> list = orderService.getSearchProductList(searchKeyword);
         
-        log.info("API - 그리드 데이터 조회 결과 건수: {}", list.size());
-        log.info("API - 그리드 데이터 조회 결과 건수: {}", list);
         return list;
     }
 	
@@ -80,12 +73,10 @@ public class OrderRestController {
 	
 	@GetMapping("/prd_cd/{prd_cd}")
 	public List<Map<String, Object>> getColorsByProduct(@PathVariable(name = "prd_cd") String prd_cd) {
-		log.info("API - 옵션 조회 요청 파라미터: prd_cd={}", prd_cd);
 		return orderService.getColors(prd_cd);
 	}
 	@GetMapping("/prd_cd/{prd_cd}/color/{color}")
 	public List<Map<String, Object>> getSizesByProductColor(@PathVariable(name = "prd_cd") String prd_cd,@PathVariable(name = "color") String color) {
-		log.info("API - 옵션 조회 요청 파라미터 color : color={}", color);
 		return orderService.getSizesByProductAndColor(prd_cd,color);
 	}
 	
@@ -95,7 +86,6 @@ public class OrderRestController {
 			@PathVariable(name = "color") String color,
 			@PathVariable(name = "size") String size
 			) {
-		log.info("API - 옵션 조회 요청 파라미터 size : size={}", size);
 		return orderService.getHeightsByProductColorSize(prd_cd,color,size);
 	}
 	@GetMapping("/prd_cd/{prd_cd}/color/{color}/size/{size}/height/{height}")
@@ -106,23 +96,19 @@ public class OrderRestController {
 			@PathVariable(name = "height") String height
 			) {
 		int count = orderService.getStockCount(prd_cd,color,size,height);
-		log.info(count);
 		
 		return count;
 	}
 	
 	@PostMapping("/check-stock")
     public List<Map<String, Object>> checkStock(@RequestBody Map<String, Object> orderData) {
-		log.info("param = {}", orderData);
 		List<Map<String ,Object>> result = orderService.checkLackingMaterials(orderData);
-		log.info("result = {}", result);
 		
         return result;
     }
 	
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Map<String, Object> param, HttpSession session) {
-		log.info("param = {}", param);
 		
 		session.setAttribute("emp_id", "201");
 		String emp_id = (String) session.getAttribute("emp_id");		
@@ -145,8 +131,6 @@ public class OrderRestController {
 		safe.put("stk_cn",       param.get("stk_cn"));
 	    
 	    safe.put("emp_id",       emp_id);
-
-	    log.info("safe param = {}", safe);
 	    
 	    
 	    

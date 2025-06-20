@@ -23,22 +23,20 @@ import lombok.extern.log4j.Log4j2;
 
 
 
-@Log4j2
 @Service
 public class ClientService {
 
     @Autowired
     private ClientMapper clientMapper;
 
-    @Value("${business.api.url}")
+//    @Value("${business.api.url}")
     private String apiUrl;
 
-    @Value("${business.api.secret}")
+//    @Value("${business.api.secret}")
     private String serviceKey;
 
 
     public List<Map<String,Object>> selectClients(Map<String, Object> params) {
-    	log.info(params);
         if (!params.containsKey("limit")) {
             params.put("limit", 30); // 기본값 설정
         }
@@ -64,9 +62,6 @@ public class ClientService {
                     .build(true)
                     .toUri();
 
-            // 요청 URL 로깅 (URI 객체를 직접 로깅)
-            log.info("요청 URI: {}", uri); // uri.toASCIIString() 대신 uri를 바로 사용해도 로그는 잘 찍힙니다.
-
             // 요청 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -75,7 +70,6 @@ public class ClientService {
 
             // 요청 바디 설정
             Map<String, Object> requestBody = Map.of("b_no", List.of(bsnsLcns));
-            log.info("요청 바디: {}", requestBody);
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
@@ -85,13 +79,9 @@ public class ClientService {
             ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.POST, entity, Map.class);
 
             result = response.getBody();
-            log.info("응답 결과: {}", result);
 
         } catch (HttpClientErrorException e) {
-            log.error("HTTP 오류 상태 코드: {}", e.getStatusCode());
-            log.error("HTTP 오류 응답 내용: {}", e.getResponseBodyAsString());
         } catch (Exception e) {
-            log.error("알 수 없는 오류 발생", e);
         }
 
         return result;
