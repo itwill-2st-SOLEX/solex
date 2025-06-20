@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.area.AreaMapper">
+  
+	<!-- 단건 INSERT -->
+    <insert id="insertArea" parameterType="map">
+        INSERT INTO area (
+            whs_id,
+            are_nm,
+            are_type,
+            item_id,
+            are_max
+        ) VALUES (
+            #{whs_id},
+            #{area_nm},
+            #{area_tp},
+            #{item_id},
+            #{max_cnt}
+        )
+    </insert>
+    
+    <select id="getWarehouseAreaHistory" resultType="map">
+		SELECT wh.whs_his_date AS action_time,
+				wh.whs_his_cnt AS quantity,
+				s.det_nm AS status,	
+		FROM warehouse_history wh
+		LEFT JOIN code_detail s 
+		ON wh.whs_his_sts = s.det_id
+		WHERE wh.are_id = #{areaId}
+	</select>
+
+</mapper>

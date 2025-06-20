@@ -6,7 +6,8 @@
 <title>SOLEX</title>
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" th:href="@{/css/approval/warehouseDrafts.css}" />
+<link rel="stylesheet" th:href="@{/css/warehouse/warehouseDrafts.css}" />
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
@@ -43,7 +44,15 @@
            									placeholder="예: 2100123" required>
 								</div>
 							</div>
-
+							<div class="col">
+								<label for="whsManager" class="form-label">주소찾기</label>
+								  <input type="text" id="sample6_postcode" name="whs_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
+								  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+								  <input type="text" id="sample6_address" name="whs_add" class="form-control" placeholder="주소" required>
+								  <input type="text" id="sample6_detailAddress" name="whs_da" class="form-control mt-1" placeholder="상세주소" required>
+								  <input type="text" id="sample6_extraAddress" placeholder="참고항목">
+							</div>
+								
 							<hr>
 
 							<!-- ② 구역 영역 -->
@@ -72,7 +81,7 @@
 				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h2 class="modal-title" id="detailModalLabel">창고 등록</h2>
+							<h2 class="modal-title" id="detailModalLabel">창고 상세조회</h2>
 						</div>
 						<div class="approval-line">
 							<table class="approval-table ms-auto">
@@ -89,16 +98,13 @@
 						<!-- 					상세조회 js에서 채움 -->
 						<div class="modal-body"></div>
 						<div class="modal-footer">
-							<button type="button" 
-									class="btn btn-secondary submit-btn"
-									data-action="apl_sts_02"
-									data-bs-dismiss="modal">
-								승인
-							</button>
+							<button type="button" class="btn btn-secondary"
+								data-bs-dismiss="modal">닫기</button>
 						</div>
 					</div>
 				</div>
 			</div>
+
 			<!-- 본문 영역-->
 			<div class="custom-content">
 				<div id="grid"></div>

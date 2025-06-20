@@ -11,9 +11,9 @@ public interface WarehouseMapper {
 
 	List<Map<String, Object>> selectWarehouseList(@Param("offset") int offset, @Param("size") int size);
 
-	Map<String, Object> selectWarehouseDetail(String whsId, Long loginEmpId);
+	List<Map<String,Object>> selectWarehouseDetail(String whsId);
 
-	void insertWarehouse(Map<String, Object> warehouseRequest, Long loginEmpId);
+	void insertWarehouse(Map<String, Object> warehouseRequest);
 
 	void upadteWarehouse(Map<String, Object> warehouseRequest, Long loginEmpId);
 

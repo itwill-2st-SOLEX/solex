@@ -51,8 +51,9 @@ public class EmpController {
 
 		
 		String empBirthRaw = (String) empMap.get("emp_birth");
-		String encryptedBirth = AESUtil.encrypt(empBirthRaw);
-		
+//		String encryptedBirth = AESUtil.encrypt(empBirthRaw);
+		String encryptedBirth = empBirthRaw;
+
 		// Map에 암호화된 값 넣기
 		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put("emp_birth", encryptedBirth);
