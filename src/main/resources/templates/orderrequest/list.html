@@ -51,24 +51,24 @@
 
 	
 	<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+	    <div class="modal-dialog modal-lg">
 	        <div class="modal-content" id="modalContentContainer">
 	        	<div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">수주 요청 상세</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body big-box">
+        <div class="modal-body">
             <div class="row mb-3">
                  <div class="col">
 			        <label for="CLI_NM" class="form-label">거래처명</label>
 			        <div>
-			            <input type="text" id="CLI_NM" name="CLI_NM" min="0" class="form-control" value="" readonly="readonly">
+			            <input type="text" id="CLI_NM" name="CLI_NM" min="0" class="form-control" value="" disabled>
 			        </div>
 			    </div>
                 <div class="col">
 			        <label for="PRD_NM" class="form-label">제품명</label>
 			        <div>
-			            <input type="text" id="PRD_NM" name="PRD_NM" min="0" class="form-control" value="" readonly="readonly">
+			            <input type="text" id="PRD_NM" name="PRD_NM" min="0" class="form-control" value="" disabled>
 			        </div>
 			    </div>
             </div>
@@ -76,13 +76,13 @@
 				<div class="col">
 		            <label for="OPT_COLOR" class="form-label">색상</label>
 		            <div class="d-flex align-items-center">
-		                <input type="text" id="OPT_COLOR"  class="form-control" value="" readonly="readonly">
+		                <input type="text" id="OPT_COLOR"  class="form-control" value="" disabled>
 		            </div>
 				</div>
 				<div class="col">
 		            <label for="OPT_SIZE" class="form-label">사이즈</label>
 		            <div class="d-flex align-items-center">
-		                <input type="text" id="OPT_SIZE"  class="form-control" value="" readonly="readonly">	
+		                <input type="text" id="OPT_SIZE"  class="form-control" value="" disabled>	
 		            </div>
 				</div>
 	        </div>
@@ -90,81 +90,39 @@
 				<div class="col">
 		            <label for="OPT_HEIGHT" class="form-label">굽 높이</label>
 		            <div class="d-flex align-items-center">
-		                <input type="text" id="OPT_HEIGHT" class="form-control" value="" readonly="readonly">
+		                <input type="text" id="OPT_HEIGHT" class="form-control" value="" disabled>
 		            </div>
 				</div>
 				<div class="col">
 		            <label for="STK_CNT" class="form-label">제품 재고량</label>
 		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="text" value="" id="STK_CNT" readonly="readonly">
+		                <input class="form-control" type="text" value="" id="STK_CNT" disabled>
 		            </div>
 				</div>
 	        </div>
             
 			<div class="row mb-3">
 				<div class="col">
-		            <label for="ORD_CNT" class="form-label">주문 수량</label>
+		            <label for="ODD_CNT" class="form-label">주문 수량</label>
 		            <div class="d-flex align-items-center">
-		                <input type="text" id="ORD_CNT" name="ORD_CNT" class="form-control" value="" readonly="readonly">
+		                <input type="text" id="ODD_CNT" name="ODD_CNT" class="form-control" value="" disabled>
 		            </div>
 				</div>
 				<div class="col">
 		            <label for="ORD_END_DATE" class="form-label">납품 요청일</label>
 		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" value="" name ="ORD_END_DATE" id="ORD_END_DATE" readonly="readonly">
+		                <input class="form-control" type="date" value="" name ="ORD_END_DATE" id="ORD_END_DATE"  disabled>
 		            </div>
 				</div>
 	        </div>
-            <div class="row mb-2">
-				<div class="col">
-				<!-- 이거는 자동 계산 -->
-		            <label for="ORD_PAY" class="form-label">결제 금액</label>
-		            <div class="d-flex align-items-center">
-		                <input type="text" id="ORD_PAY" name="ORD_PAY" class="form-control" value="" readonly="readonly">
-		            </div>
-				</div>
-                <div class="col">
-		            <label for="ORD_PAY_DATE" class="form-label">결제 예정일</label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" id="ORD_PAY_DATE" name="ORD_PAY_DATE" value="" readonly="readonly">
-		            </div>
-				</div>
-            </div>
-            
-            <div class="mb-2">
-                <label for="CLI_PHONE" class="form-label">거래처 연락처</label>
-                <br>
-                <input type="text" id="CLI_PHONE" name="CLI_PHONE" class="form-control" value="" readonly="readonly">
-            </div>
-
-            <div class="row mb-3">
-                <div class="col">
-                    <label for="CLI_MGR_NAME" class="form-label">담당자명</label>
-                    <input type="text" id="CLI_MGR_NAME" class="form-control" value="" readonly="readonly">
-                </div>
-                <div class="col">
-                    <label for="CLI_MGR_PHONE" class="form-label">담당자 연락처</label>
-                    <input type="text" id="CLI_MGR_PHONE" class="form-control"  readonly="readonly">
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <div class="form-label">배송지 주소</div>
-                <div class="d-flex align-items-center mb-2">
-                    <input type="text" id="ORD_PC" name="ORD_PC" class="form-control" style="width: 48.4%;" value="" readonly="readonly">
-                </div>
-                <div class="d-flex align-items-center mb-2">
-                    <input type="text" id="ORD_ADD" name="ORD_ADD" class="form-control" value="" readonly="readonly">
-                </div>
-                <div class="d-flex align-items-center">
-                    <input type="text" id="ORD_DA" name="ORD_DA" class="form-control" value="" readonly="readonly">
-                </div>
-            </div>
+            <div class="mb-3">	
+				<label class="form-label">원자재 재고량</label>
+				<div id="MATERIAL_CNT" class="form-control" style="height: 150px; overflow-y: auto; background-color: #e9ecef;"></div>
+			</div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-            <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitForm()">승인</button>
-            <button type="button" class="btn btn-primary" id="rejectBtn" onclick="rejectForm()">반려</button>
+			<button type="button" class="btn btn-secondary" id="rejectBtn">반려</button>
+            <button type="button" class="btn btn-primary" id="submitBtn">승인</button>
         </div>
 	        </div>
 	    </div>
