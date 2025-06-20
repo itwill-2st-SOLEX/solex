@@ -51,7 +51,7 @@ public interface OrderMapper {
 	
 	String getOptionIdByCombination(Map<String, Object> orderData);
 
-	List<Map<String, Object>> getLackingMaterialsWithMine(@Param("opt_id") String opt_id,@Param("odd_cnt") int orderCount);
+	List<Map<String, Object>> getLackingMaterialsWithMine(@Param("opt_id") String opt_id,@Param("ord_cnt") int orderCount);
 	
 	List<Map<String, Object>> getHeightsByProductColorSize(
 			@Param("prd_cd") String prd_cd,

@@ -3,6 +3,7 @@ package kr.co.itwillbs.solex.approval;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/approval")
 public class ApprovalRestController {
 	
-	private final ApprovalService approvalService;
+	@Autowired
+	private ApprovalService approvalService;
 	
 	// 결재할 기안서 리스트 
     @GetMapping("")

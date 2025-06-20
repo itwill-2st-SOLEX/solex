@@ -38,8 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		// 3. 필드 검증 (detail-specific)
 		const requiredFields = ['DET_ID', 'DET_NM', 'DET_YN', 'DET_SORT'];
 	    const invalidRows = [...createdRows, ...updatedRows].filter(row =>
-	        requiredFields.some(field => !row[field])
+	        requiredFields.some(field => row[field] === '')
 	    );
+		
 	    if (invalidRows.length > 0) {
 	        alert("필수 항목이 입력되지 않은 행이 있습니다.");
 	        return;
