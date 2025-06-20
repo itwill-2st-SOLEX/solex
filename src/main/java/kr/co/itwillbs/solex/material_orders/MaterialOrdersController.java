@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.material;
+package kr.co.itwillbs.solex.material_orders;
 
 import java.io.Serial;
 import java.util.List;
@@ -14,16 +14,16 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Controller
-@RequestMapping("/material")
-public class MaterialController {
+@RequestMapping("/material_orders")
+public class MaterialOrdersController {
 	@Autowired
-	private MaterialService materialService;
+	private MaterialOrdersService materialOrdersService;
 	
 	//자재 메인페이지
 	@GetMapping("")
 	public String getMethodName() {
-		List<Map<String, Object>> materialList = materialService.getMaterial();
-		return "material/material_main";
+		List<Map<String, Object>> materialList = materialOrdersService.getMaterialOrders();
+		return "material_orders/material_orders_main";
 	}
 	
 }

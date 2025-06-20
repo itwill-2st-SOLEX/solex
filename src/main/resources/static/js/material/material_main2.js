@@ -10,100 +10,25 @@ document.addEventListener('DOMContentLoaded', function(){
 	    height: 600,
 	    bodyHeight: 500,
 	    autoWidth: true,
+		
 	    columns: [
-	        { header: '자재ID', name: 'matId', align : 'center', sortable: true, width:90}, 
-	        { header: '거래처ID', name: 'cliId', align : 'center', sortable: true, width:90}, 
-	        { header: '자재코드', name: 'matCd', align : 'center', sortable: true}, 
+	        { header: '자재ID', name: 'matId', align : 'center', sortable: true, width:90}, // 백엔드 DTO 필드명 (camelCase)
+	        { header: '거래처ID', name: 'cliId', align : 'center', sortable: true, width:90}, // 백엔드 DTO 필드명 (camelCase)
+	        { header: '자재코드', name: 'matCd', align : 'center', sortable: true}, // 백엔드 DTO 필드명 (camelCase)
 	        { header: '자재명', name: 'matNm', align : 'center', filter: 'select'},
 	        { header: '단위', name: 'matUnit', align : 'center', filter: 'select' , width:85},
-	        { header: '가격', name: 'mat_price', align : 'center', filter: 'select', width:90, editor: 'text',
-				onBeforeChange: (ev) => {  // 그리드 셀의 값이 변경되기 직전에 특정 로직 수행 
-				      const newValue = ev.value; // 변경될 새로운 값 가져오기
-					  
-				      if (isNaN(newValue) || parseFloat(newValue) < 0) {
-				          alert('가격은 유효한 숫자여야 합니다.');
-				          return false; // Prevent the change 아래에 안 바뀌도록 코드 추가함
-				      }
-				      return true; // Allow the change
-				  },
-			},
-	        { header: '설명', name: 'mat_comm', align : 'center', width:300, editor: 'text'},
+	        { header: '가격', name: 'matPrice', align : 'center', filter: 'select', width:90},
+	        { header: '설명', name: 'matComm', align : 'center', width:300},
 	        { header: '등록일', name: 'matRegDate', align : 'center',filter: 'select'},
-	        { header: '사용여부', name: 'mat_is_active', align : 'center' , sortable: true, width:75,
-				editor: {
-				    type: 'select',
-				    options: {
-				        listItems: [ //드롭다운 박스에 표시될 항목의 목록들
-				            { text: '사용', value: 'Y' },
-				            { text: '미사용', value: 'N' }
-				        ]
-				    }
-				}, formatter: (ev) => { // 셀에 표시될 값을 화면에 맞게 변환
-				    return ev.value === 'Y' ? '사용' : '미사용'; 
-				}
-			}
+	        { header: '사용여부', name: 'matIsActive', align : 'center' , sortable: true, width:75}
 	    ]
-	}); //tui 그리드 가져오기 끝
-	
-	//테이블에서 바로 수정할 수 있는 코드 
-	grid.on('afterChange', async (ev) => { // 그리드에서 셀이 편집될때 afterchange 이벤트가 발생
-	    for (const change of ev.changes) {
-	        const { rowKey, columnName, value, oldValue } = change;
-			
-			if (columnName === 'matPrice' || columnName === '다른_가격_컬럼_이름') { // 'matPrice'는 예시, 실제 가격 컬럼 이름으로 변경
-	            const parsedValue = parseFloat(value);
-	            if (isNaN(parsedValue) || parsedValue < 0) {
-	                alert('가격은 유효한 숫자이며 0보다 작을 수 없습니다. 원래 값으로 되돌립니다.');
-	                // 유효하지 않은 경우, 강제로 원래 값으로 되돌립니다.
-	                grid.setValue(rowKey, columnName, oldValue, false);
-	                continue; // 다음 변경으로 넘어갑니다. (백엔드 전송 방지)
-	            }
-	        }
-			
-	        const rowData = grid.getRow(rowKey);
-	        const matId = rowData.matId;
-
-	        // 여기서 백엔드로 변경된 값을 담아 전송함 
-	        const updatePayload = {
-	            matId: matId,
-				n: columnName,
-	            v: value
-			}
-
-	        try {
-	            const response = await fetch('/SOLEX/material/updateGridCell', { // Your backend API endpoint
-	                method: 'PUT', 
-	                headers: {
-	                    'Content-Type': 'application/json',
-	                },
-	                body: JSON.stringify(updatePayload)
-	            });
-
-	            const result = await response.json();
-				
-				if (response.ok && result.status === 'success') {
-				       console.log('Material update successful:', result);
-				       alert('자재 정보가 성공적으로 업데이트되었습니다.');
-				   } else {
-				       // 백엔드에서 에러 응답을 보낸 경우 (result.status === 'error')
-				       console.error('Material update failed from server:', result.message);
-				       alert(`자재 정보 업데이트 실패: ${result.message}`);
-				       grid.setValue(rowKey, columnName, oldValue, false);
-				   }
-				
-	        } catch (error) {
-	            console.error('Error updating material:', error);
-	            alert(`자재 정보 업데이트 실패: ${error.message}`);
-	            grid.setValue(rowKey, columnName, oldValue, false); // false means don't trigger afterChange again
-	        }
-	    }
-	}); //테이블 수정코드 fin
+	});
 	
 	// 1) 거래처 목록을 받아와 <select> 에 채워 주는 공통 함수
 	async function fetchAndPopulateClients(selectElement) {
 	  try {
 	    // 실제 거래처 목록을 반환하는 API 엔드포인트로 바꿔 주세요
-	    const response = await fetch('/SOLEX/clients/name');
+	    const response = await fetch('/SOLEX/client/list');
 	    if (!response.ok) {
 	      throw new Error('서버에서 거래처 목록을 가져오지 못했습니다.');
 	    }
@@ -132,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function(){
 	    console.error('거래처 목록 로딩 실패:', error);
 	  }
 	}
-	
 	// 자재 목록 조회 
 	async function loadDrafts(page) { //page번호를 인자로 받아 자재목록을 불러옴 (30개당 한페이지)
 		try {
@@ -146,13 +70,14 @@ document.addEventListener('DOMContentLoaded', function(){
 	        matCd: row.matCd,
 	        matNm: row.matNm,
 	        matUnit: row.matUnit,
-			mat_price: row.matPrice,
-			mat_comm: row.matComm,
+			matPrice: row.matPrice,
+			matComm: row.matComm,
 			matRegDate: row.matRegDate,
-			mat_is_active: row.matIsActive
+			matIsActive: row.matIsActive
       	}));
 
 		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
+
 		page === 0 ? grid.resetData(data) : grid.appendRows(data);
 
 		//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
@@ -168,9 +93,10 @@ document.addEventListener('DOMContentLoaded', function(){
 		  	loadDrafts(currentPage); //최조 1페이지 로딩
 			grid.on('scrollEnd', () =>  loadDrafts(currentPage)); // 스크롤 끝나면 다음 페이지 로딩
 
-//			// 등록 버튼 (모달 열기) 
+			// 등록 모달 열기 
 			document.getElementById('RegisterModalBtn').addEventListener('click', function() {
 				  openModal(); 
+
 			});
 			
 			async function fetchAndPopulateMaterialUnits(selectElement) {
@@ -198,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			
 			// 등록 모달 내부 
 			async function openModal(){
+				console.log("open Modal inside");
 				const modalElement = document.getElementById('exampleModal');
 				const modal = new bootstrap.Modal(modalElement);
 				const modalBody = modalElement.querySelector('.modal-body');
@@ -219,6 +146,20 @@ document.addEventListener('DOMContentLoaded', function(){
 				`;
 				form.appendChild(div1);
 				
+				// ===== 거래처ID =====
+				let div2 = document.createElement('div');
+				div2.className = 'mb-3';
+				div2.innerHTML = `
+					<label>거래처</label>   
+					<select name="cli_id" id="cliId" class="form-select d-inline-block w-25">     
+				  		<option value="">-- 거래처를 선택하세요 --</option>   
+					</select>
+				`;
+				form.appendChild(div2);
+				
+				const cliSelect = form.querySelector('#cliId');
+				await fetchAndPopulateClients(cliSelect);
+				
 				// ===== 자재코드 =====
 				let div3 = document.createElement('div');
 				div3.className = 'mb-3';
@@ -228,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function(){
 				`;
 				form.appendChild(div3);
 			
+				
 				// ===== 자재명 =====
 				let div4 = document.createElement('div');
 				div4.className = 'mb-3';
@@ -237,28 +179,13 @@ document.addEventListener('DOMContentLoaded', function(){
 				`;
 				form.appendChild(div4);
 				
-				// ===== 거래처ID =====
-				let div2 = document.createElement('div');
-				div2.className = 'mb-3';
-				div2.innerHTML = `
-					<label>거래처</label>   
-					<select name="cli_id" id="cliId" class="form-select d-inline-block w-40">     
-				  		<option value="">-- 거래처를 선택하세요 --</option>   
-					</select>
-				`;
-				form.appendChild(div2);
-				
-				const cliSelect = form.querySelector('#cliId');
-				await fetchAndPopulateClients(cliSelect);
-				
-				
 				let inlineDiv = document.createElement('div');
 				inlineDiv.className = 'inline-container';
 				inlineDiv.innerHTML = `
 					<span>단위</span>
 						<select name="matUnit" id="matUnit" class="form-select">
 							<option value="">-- 단위를 선택하세요 --</option>
-						</select><br>
+						</select>
 				`;
 				form.appendChild(inlineDiv);	
 				
@@ -268,16 +195,6 @@ document.addEventListener('DOMContentLoaded', function(){
 				// 서버에서 단위 목록을 가져와 select box를 채움
 				await fetchAndPopulateMaterialUnits(matUnitSelect);
 
-				// ===== 설명 =====
-				let div6 = document.createElement('div');
-				div6.className = 'mb-3';
-				div6.innerHTML = `
-				  <label>설명</label>
-				  <input type="text" class="form-control d-inline-block w-100" name="mat_comm" required><br>
-				`;
-				form.appendChild(div6);
-
-								
 				// ===== 가격 =====
 				let div5 = document.createElement('div');
 				div5.className = 'mb-3';
@@ -286,6 +203,16 @@ document.addEventListener('DOMContentLoaded', function(){
 				  <input type="text" class="form-control d-inline-block w-25" name="mat_price" required><br>
 				`;
 				form.appendChild(div5);
+				
+				
+				// ===== 설명 =====
+				let div6 = document.createElement('div');
+				div6.className = 'mb-3';
+				div6.innerHTML = `
+				  <label>설명</label>
+				  <input type="text" class="form-control d-inline-block w-25" name="mat_comm" required><br>
+				`;
+				form.appendChild(div6);
 				
 				
 				// ===== 등록일 =====
@@ -298,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function(){
 				form.appendChild(div7);
 				
 				// ===== 버튼 =====
+
 				let footerDiv = document.createElement('div');
 				footerDiv.className = 'modal-footer';
 				footerDiv.innerHTML = `
@@ -315,6 +243,7 @@ document.addEventListener('DOMContentLoaded', function(){
 				// 폼 데이터 전송 및 공통 후처리 함수
 				async function sendData(url, method, payload, isModifyMode) {
 				    try {
+						
 				        const response = await fetch(url, {
 				            method: method,
 				            headers: { 'Content-Type': 'application/json' },
@@ -355,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function(){
 					            matUnit: formData.get('matUnit'),
 					            mat_comm: formData.get('mat_comm'),
 					            mat_reg_date: formData.get('mat_reg_date').replace(/\./g, '-'),
-					            mat_is_active: formData.get('mat_is_active')
+					            mat_is_active: formData.get('matIsActive')
 					        };
 
 					        console.log('서버로 보낼 등록 데이터 (payload):', payload);
@@ -372,11 +301,11 @@ document.addEventListener('DOMContentLoaded', function(){
 						           if (response.ok) {
 						               // 등록 성공 → 모달 닫기
 						               const modalEl = document.getElementById('exampleModal');
-						               const modal = bootstrap.Modal.getInstance(modalEl).hide();
-//									   alert(modal); // [object, object]로 나와 
+						               const modal = bootstrap.Modal.getInstance(modalEl);
+						               modal.hide();
 
-						               // 필요 시 목록 새로고침 
-//						                await loadMaterialList(); 임마때매 오류발생 근데 지우면 ,,,,,걍 창이 안 닫힘
+						               // 필요 시 목록 새로고침
+						               // await loadMaterialList();
 						           } else {
 						               alert('등록 실패: 서버 오류 발생');
 						           }
@@ -388,5 +317,156 @@ document.addEventListener('DOMContentLoaded', function(){
 							
 					    });
 					}// if문 끝
+					
+					const grid = new YourGridLibrary({ // Replace 'YourGridLibrary' with your actual grid library initialization
+					    el: document.getElementById('grid'), // Or whatever your grid element is
+					    columns: [
+					        { header: '자재ID', name: 'matId', align : 'center', sortable: true, width:90},
+					        { header: '거래처ID', name: 'cliId', align : 'center', sortable: true, width:90},
+					        { header: '자재코드', name: 'matCd', align : 'center', sortable: true},
+					        { header: '자재명', name: 'matNm', align : 'center', filter: 'select'},
+					        { header: '단위', name: 'matUnit', align : 'center', filter: 'select' , width:85},
+					        {
+					            header: '가격',
+					            name: 'matPrice',
+					            align : 'center',
+					            filter: 'select',
+					            width:90,
+					            // --- Make '가격' column editable ---
+					            editor: 'text', // Or 'number' depending on your grid library and desired input type
+					            onAfterChange: handleCellEdit // Custom function to handle changes
+					        },
+					        {
+					            header: '설명',
+					            name: 'matComm',
+					            align : 'center',
+					            width:300,
+					            // --- Make '설명' column editable ---
+					            editor: 'text',
+					            onAfterChange: handleCellEdit // Custom function to handle changes
+					        },
+					        { header: '등록일', name: 'matRegDate', align : 'center',filter: 'select'},
+					        {
+					            header: '사용여부',
+					            name: 'matIsActive',
+					            align : 'center',
+					            sortable: true,
+					            width:75,
+					            // --- Make '사용여부' column editable ---
+					            // For boolean, a checkbox or select box is usually better.
+					            // Assuming '사용여부' is a boolean or string like 'Y'/'N'
+					            editor: {
+					                type: 'select', // Or 'checkbox' if your grid supports it directly
+					                options: {
+					                    listItems: [
+					                        { text: '사용', value: 'Y' }, // Or true
+					                        { text: '미사용', value: 'N' } // Or false
+					                    ]
+					                }
+					            },
+					            onAfterChange: handleCellEdit // Custom function to handle changes
+					        }
+					    ],
+					    // ... other grid options like data, etc.
+					});
+
+					// 자재 목록 조회
+					async function loadDrafts(page) {
+					    try {
+					        const response = await fetch(`/SOLEX/material/materialList?page=${page}&size=${pageSize}`);
+					        if (!response.ok) {
+					            throw new Error('서버에서 자재 목록을 가져오지 못했습니다.');
+					        }
+					        const rawData = await response.json();
+					        const data = rawData.map(row => ({
+					            matId: row.matId,
+					            cliId: row.cliId,
+					            matCd: row.matCd,
+					            matNm: row.matNm,
+					            matUnit: row.matUnit,
+					            matPrice: row.matPrice,
+					            matComm: row.matComm,
+					            matRegDate: row.matRegDate,
+					            // Ensure matIsActive is in a format your editor expects (e.g., 'Y'/'N' or true/false)
+					            matIsActive: row.matIsActive === true ? 'Y' : 'N' // Example: if backend sends boolean, convert to 'Y'/'N'
+					        }));
+
+					        grid.resetData(data); // Assuming your grid has a method to set data
+					        console.log("자재 목록 로드 완료:", data);
+					    } catch (error) {
+					        console.error('자재 목록 로딩 실패:', error);
+					    }
+					}
+
+					// --- Function to handle cell edits and send updates to the backend ---
+					async function handleCellEdit(ev) {
+					    // This event object structure depends heavily on your grid library.
+					    // Common properties are: rowKey, columnName, value (new value), oldValue
+					    const { rowKey, columnName, value, instance } = ev; // 'instance' might be the grid itself
+
+					    // Get the full row data for the edited row to extract matId
+					    // Your grid library should provide a way to get row data by rowKey.
+					    // Example for TOAST UI Grid:
+					    const rowData = instance.getRow(rowKey);
+					    const matId = rowData.matId;
+
+					    if (!matId) {
+					        console.error('업데이트할 자재 ID를 찾을 수 없습니다.');
+					        return;
+					    }
+
+					    console.log(`Row ${rowKey} - Column '${columnName}' changed to: ${value}`);
+
+					    // Prepare the data to send to the backend
+					    const updatePayload = {
+					        matId: matId,
+					        [columnName]: value // Dynamically set the updated field
+					    };
+
+					    // Special handling for matIsActive if it needs conversion back to boolean or specific string for backend
+					    if (columnName === 'matIsActive') {
+					        updatePayload.matIsActive = (value === 'Y'); // Convert 'Y'/'N' back to boolean for backend if needed
+					        // Or keep as 'Y'/'N' if your backend expects that string
+					    }
+
+					    try {
+					        const response = await fetch('/SOLEX/material/update', { // Replace with your actual update API endpoint
+					            method: 'PUT', // Or 'POST', depending on your backend API design for updates
+					            headers: {
+					                'Content-Type': 'application/json',
+					                // 'X-CSRF-TOKEN': 'your-csrf-token' // If you're using CSRF protection
+					            },
+					            body: JSON.stringify(updatePayload)
+					        });
+
+					        if (!response.ok) {
+					            const errorText = await response.text();
+					            throw new Error(`자재 정보 업데이트 실패: ${response.status} - ${errorText}`);
+					        }
+
+					        const result = await response.json();
+					        console.log('자재 정보 업데이트 성공:', result);
+
+					        // Optional: Show a success message to the user
+					        alert('자재 정보가 성공적으로 업데이트되었습니다.');
+
+					    } catch (error) {
+					        console.error('자재 정보 업데이트 중 오류 발생:', error);
+					        // Optional: Revert the cell's value in the grid if the update failed
+					        // This depends on your grid library's API.
+					        // For example: instance.setValue(rowKey, columnName, oldValue);
+					        alert(`자재 정보 업데이트 실패: ${error.message}`);
+					    }
+					}
+
+					// Initial load of data when the page loads
+					document.addEventListener('DOMContentLoaded', () => {
+					    loadDrafts(1); // Load the first page of data
+					});
+					
+					
+					
+					
+					
 	}//
 });

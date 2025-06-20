@@ -10,7 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -22,18 +27,12 @@ public class MaterialRestController {
 	@Autowired
 	private MaterialService materialService;
 	
-	// 자재목록 JSON으로 리턴
+	//자재목록 JSON으로 리턴
 	@GetMapping("/materialList")
     public List<Map<String, Object>> getMeterialList(@RequestParam("page") int page, @RequestParam("size") int size) {
 		int offset = page * size;
         return materialService.getMaterialList(offset, size);
     }
-
-	//자재 등록 - 공통코드 가져오기
-	@GetMapping("/codes")
-	public List<Map<String, Object>> getCommonCodes() {
-		return materialService.getCommonCodes();
-	}
 	
 	
 	//자재 등록 - 단위 및 사용여부 공통코드 가져오기
@@ -45,5 +44,36 @@ public class MaterialRestController {
 		System.out.println("code list mat =" + response);
 		return response;
 	}
+	
+	//자재 등록 - 단위 및 사용여부 공통코드 가져오기
+	@GetMapping("/code")
+	public List<Map<String, Object>> getMatUnits() {
+		return materialService.getMatUnits();
+	}
+	
+	//자재등록 - post 
+	@PostMapping("/registration")
+	public String registrationPost(@RequestBody Map<String, Object> matMap) throws Exception {
+		try {
+			materialService.registerMat(matMap); // 인스턴스를 통한 호출
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
+	    return "redirect:/material";
+	}
+	
+	// toast_ui grid 수정
+	@PutMapping("/updateGridCell")
+	public ResponseEntity<Map<String, String>> updateGridCell(@RequestBody Map<String, Object> payload) {
+		
+		Map<String, String> response = new HashMap<>();
+		materialService.updateGridCell(payload);
+		
+        response.put("status", "success");
+        response.put("message", "자재 정보가 성공적으로 업데이트되었습니다.");
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+
 	
 }

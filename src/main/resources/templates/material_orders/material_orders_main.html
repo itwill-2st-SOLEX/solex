@@ -5,14 +5,13 @@
 
 <head>
 	<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
-	<title>자재 관리</title>
+	<title>자재 발주관리</title>
 	<link rel="stylesheet" th:href="@{/css/material/material_main.css}">
 	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script th:src="@{/js/material/material_main.js}"></script>
-	<script th:src="@{/js/material/material_registration.js}"></script>
+	<script th:src="@{/js/material_orders/material_orders_main.js}"></script>
 	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-	</head>
+</head>
 
 <body>
 	
@@ -20,9 +19,9 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			
-			<h2>자재 목록</h2>
+			<h2>자재 발주 목록</h2>
 			<div id="global-checkbox-container">
-			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">자재등록</button>
+			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">자재발주등록</button>
 			 </div>
 			 <div id="grid"></div>
 			 <div class="custom-content">
@@ -37,8 +36,8 @@
 			        <h5 class="modal-title" id="exampleModalLabel"></h5>
 			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			      </div>
-			      <div class="modal-body">
-			      	<h5>자재 등록</h5>
+			      <div class="modal-body">	
+			      	
 					        <!-- 여기에 JS가 form을 생성하여 삽입할 예정 -->
 					</div>
 				</div>

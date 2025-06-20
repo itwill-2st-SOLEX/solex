@@ -14,10 +14,18 @@ public interface MaterialMapper {
 	List<Map<String, Object>> getMaterialList(int offset, int size);
 
 	//자재등록 공통코드 가져오기
-	List<Map<String, Object>> getCommonCodes();
 	
 	//자재등록 공통코드 세부사항 가져오기 
 	List<Map<String, Object>> getCommonCodeDetails();
+	
+	//자재 단위 공코 가져오기
+	List<Map<String, Object>> getMatUnits();
+
+	//자재 등록이요 
+	int registMat(Map<String, Object> matMap);
+	
+	// 자재 수정이요
+	void updateGridCell(Map<String, Object> payload);
 	
 	
 }

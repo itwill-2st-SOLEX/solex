@@ -39,26 +39,6 @@ public class EmpController {
 		return "emp/emp_main";
 	}
 
-	// 등록 모달
-	@ResponseBody
-	@PostMapping("/registration")
-	public String register_post(@RequestBody Map<String, Object> empMap) throws Exception{
-
-		
-		String empBirthRaw = (String) empMap.get("emp_birth");
-		String encryptedBirth = AESUtil.encrypt(empBirthRaw);
-		
-		// Map에 암호화된 값 넣기
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("emp_birth", encryptedBirth);
-		try {
-			int  insertCount = empService.registerEmp(empMap); // 인스턴스를 통한 호출
-		} catch(Exception e) {
-		    e.printStackTrace();
-		}
-
-		return "redirect:/emp";
-	}
 
 	
 

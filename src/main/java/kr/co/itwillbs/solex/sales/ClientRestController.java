@@ -34,6 +34,11 @@ public class ClientRestController {
 	@Autowired
 	ClientService clientService;
 	
+	@GetMapping("/name")
+    public List<Map<String, Object>> getClientNameList() {
+        return clientService.getClientNameList();
+    }
+	
     @GetMapping("/data") // 예: /clients/data?limit=20&offset=0&search_term=김미
     public ResponseEntity<Map<String, Object>> getClientsData(@RequestParam Map<String, Object> params) {
         log.info("API - 거래처 목록 조회 요청 파라미터: {}", params);
