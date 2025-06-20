@@ -23,7 +23,6 @@ public class OrderService {
     public List<Map<String, Object>> getPagedGridDataAsMap(int page, int pageSize, String searchKeyword) { // 파라미터 변경
         int offset = page * pageSize;
         List<Map<String, Object>> resultList = orderMapper.selectPagedOrderDataAsMap(offset, pageSize, searchKeyword);
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> resultList={}" ,resultList);
         // Map의 각 항목을 순회하며 날짜 필드 포맷팅
         // 메서드 내에서 생성
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd"); 

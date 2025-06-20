@@ -14,7 +14,6 @@ import lombok.extern.log4j.Log4j2;
 
 
 
-@Log4j2
 @RestController
 @RequestMapping("/order-request")
 public class OrderRequestsRestController {
@@ -27,18 +26,14 @@ public class OrderRequestsRestController {
         @RequestParam(name = "page", defaultValue = "0") int page, // 
         @RequestParam(name = "pageSize", defaultValue = "20") int pageSize
     ) throws Exception {
-        log.info("API - 그리드 데이터 조회 요청 파라미터: page={}, pageSize={}", page, pageSize);
         List<Map<String, Object>> list = orderRequestsService.getPagedGridDataAsMap(page, pageSize);
-        log.info("API - 그리드 데이터 조회 결과: list={}",list);
         
         return list; 
     }
 	
 	@GetMapping("{prd_id}") // 
 	public List<Map<String, Object>> getOrderDetail(@PathVariable int prd_id) throws Exception {
-		log.info("API - 주문 상세 조회 요청 파라미터: prd_id={}", prd_id);
 		List<Map<String, Object>> list = orderRequestsService.getOrderDetail(prd_id);
-		log.info("API - 주문 상세 조회 결과: list={}",list);
 		
 		return list; 
 	}
