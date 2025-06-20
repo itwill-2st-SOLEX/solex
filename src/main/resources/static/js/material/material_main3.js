@@ -173,7 +173,6 @@ document.addEventListener('DOMContentLoaded', function(){
 				  openModal(); 
 			});
 			
-			
 			async function fetchAndPopulateMaterialUnits(selectElement) {
 				try {
 					// ※ 중요: '/SOLEX/material/units'는 실제 자재 단위 목록을 반환하는 API 엔드포인트로 변경해야 합니다.
@@ -211,104 +210,84 @@ document.addEventListener('DOMContentLoaded', function(){
 				form.setAttribute('id','materialForm'); // 폼요소에 id 속성을 부여하고 materialForm이라는 값을 넣음 
 				form.setAttribute('method','post');
 				
-					// ===== 자재ID =====
-					let div1 = document.createElement('div');
-					div1.className = 'mb-3'; 
-					div1.innerHTML = `
-					  <label>자재ID</label>
-					  <input type="text" class="form-control d-inline-block w-25" name="mat_id" required><br>
-					`;
-					form.appendChild(div1);
-					
-					// ===== 자재코드 =====
-					let div3 = document.createElement('div');
-					div3.className = 'mb-3';
-					div3.innerHTML = `
-					  <label>자재코드</label>
-					  <input type="text" class="form-control d-inline-block w-25" name="mat_cd" required><br>
-					`;
-					form.appendChild(div3);
-				
-					// ===== 자재명 =====
-					let div4 = document.createElement('div');
-					div4.className = 'mb-3';
-					div4.innerHTML = `
-					  <label>자재명</label>
-					  <input type="text" class="form-control d-inline-block w-25" name="mat_nm" required><br>
-					`;
-					form.appendChild(div4);
-					
-					// ===== 거래처ID =====
-					let div2 = document.createElement('div');
-					div2.className = 'mb-3';
-					div2.innerHTML = `
-						<label>거래처</label>   
-						<select name="cli_id" id="cliId" class="form-select d-inline-block w-40">     
-					  		<option value="">-- 거래처를 선택하세요 --</option>   
-						</select>
-					`;
-					form.appendChild(div2);
-					
-					const cliSelect = form.querySelector('#cliId');
-					await fetchAndPopulateClients(cliSelect);
-					
-					
-					let inlineDiv = document.createElement('div');
-					inlineDiv.className = 'inline-container';
-					inlineDiv.innerHTML = `
-						<span>단위</span>
-							<select name="matUnit" id="matUnit" class="form-select">
-								<option value="">-- 단위를 선택하세요 --</option>
-							</select><br>
-					`;
-					form.appendChild(inlineDiv);	
-					
-					// 방금 생성한 form 내부의 자재 단위 select 요소를 찾음
-					const matUnitSelect = form.querySelector('#matUnit');
-					
-					// 서버에서 단위 목록을 가져와 select box를 채움 
-					await fetchAndPopulateMaterialUnits(matUnitSelect);
-	
-					// ===== 설명 =====
-					let div6 = document.createElement('div');
-					div6.className = 'mb-3';
-					div6.innerHTML = `
-					  <label>설명</label>
-					  <input type="text" class="form-control d-inline-block w-100" name="mat_comm" required><br>
-					`;
-					form.appendChild(div6);
-	
-									
-					// ===== 가격 =====
-					let div5 = document.createElement('div');
-					div5.className = 'mb-3';
-					div5.innerHTML = `
-					  <label>가격</label>
-					  <input type="text" class="form-control d-inline-block w-25" name="mat_price" required><br>
-					`;
-					form.appendChild(div5);
-					
-					
-					// ===== 등록일 =====
-					let div7 = document.createElement('div');
-					div7.className = 'mb-3';
-					div7.innerHTML = `
-					  <label>등록일</label>
-					  <input type="date" class="form-control d-inline-block w-25" name="mat_reg_date" required><br>
-					`;
-					form.appendChild(div7);
-					
-					// ===== 버튼 =====
-					let footerDiv = document.createElement('div');
-					footerDiv.className = 'modal-footer';
-					footerDiv.innerHTML = `
-					  <button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
-					  <button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
-					  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-					`;
+				modalBody.innerHTML = `
+				    <form id="materialForm" method="post">
+				      <!-- 자재ID -->
+				      <div class="mb-3">
+				        <label class="form-label">자재ID</label>
+				        <input type="text" class="form-control w-25 d-inline-block" name="mat_id" required>
+				      </div>
 
-					form.appendChild(footerDiv);
-					modalBody.appendChild(form); // 최종 폼 삽입
+				      <!-- 거래처ID -->
+				      <div class="mb-3">
+				        <label class="form-label">거래처ID</label>
+				        <input type="text" class="form-control w-25 d-inline-block" name="cli_id" required>
+				      </div>
+
+				      <!-- 자재코드 -->
+				      <div class="mb-3">
+				        <label class="form-label">자재코드</label>
+				        <input type="text" class="form-control w-25 d-inline-block" name="mat_cd" required>
+				      </div>
+
+				      <!-- 자재명 -->
+				      <div class="mb-3">
+				        <label class="form-label">자재명</label>
+				        <input type="text" class="form-control w-25 d-inline-block" name="mat_nm" required>
+				      </div>
+
+				      <!-- 단위 · 사용여부 -->
+				      <div class="mb-3 d-flex align-items-center gap-3">
+				        <div>
+				          <span class="me-2">단위</span>
+				          <select name="matUnit" id="matUnit" class="form-select w-auto d-inline-block">
+				            <option value="">-- 단위를 선택하세요 --</option>
+				          </select>
+				        </div>
+
+				        <div>
+				          <span class="me-2">사용여부</span>
+				          <select name="matIsActive" id="matIsActive" class="form-select w-auto d-inline-block">
+				            <option value="">-- 사용여부를 선택하세요 --</option>
+				          </select>
+				        </div>
+				      </div>
+
+				      <!-- 가격 -->
+				      <div class="mb-3">
+				        <label class="form-label">가격</label>
+				        <input type="text" class="form-control w-25 d-inline-block" name="mat_price" required>
+				      </div>
+
+				      <!-- 설명 -->
+				      <div class="mb-3">
+				        <label class="form-label">설명</label>
+				        <input type="text" class="form-control w-75" name="mat_comm" required>
+				      </div>
+
+				      <!-- 등록일 -->
+				      <div class="mb-3">
+				        <label class="form-label">등록일</label>
+				        <input type="text" class="form-control w-25 d-inline-block" name="mat_reg_date" required>
+				      </div>
+
+				      <!-- 수정일 -->
+				      <div class="mb-3">
+				        <label class="form-label">수정일</label>
+				        <input type="text" class="form-control w-25 d-inline-block" name="mat_mod_date" required>
+				      </div>
+
+				      <!-- 버튼 -->
+					  <div class="modal-footer">
+	  					<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+	  					<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
+	  					<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
+	  				  </div>
+				    </form>
+				  `;
+				
+				
+				modalBody.appendChild(form); // 최종 폼 삽입
 				
 				// 폼이 DOM에 추가된 후, 버튼 요소를 다시 가져옵니다.
 				const registerBtn = document.getElementById('registerBtn');
