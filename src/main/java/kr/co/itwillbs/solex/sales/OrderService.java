@@ -13,7 +13,6 @@ import lombok.extern.log4j.Log4j2;
 
 
 
-@Log4j2
 @Service
 public class OrderService {
 
@@ -53,17 +52,14 @@ public class OrderService {
         if (searchKeyword == null) {
             if (count < 1) {
                 // 예: 검색어가 없는경우 + 사원이 거래처 등록을 한적이 없는 경우. 
-            	log.info("▶ 검색어가 없는경우 + 사원이 거래처 등록을 한적이 없는 경우. ");
                 return orderMapper.getSelectTop5PopularClients();
             } else {
                 // 예: 검색어가 없고 + 사원이 거래처 등록을 한번이라도 한 경우
-            	log.info("▶ 검색어가 없고 + 사원이 거래처 등록을 한번이라도 한 경우");
                 return orderMapper.getSelectClientsByEmployeeId(emp_id);
             }
         }
 
         // 2) 검색어가 있는 경우
-        log.info("▶ searchKeyword='{}' → 검색 매퍼 호출", searchKeyword);
         return orderMapper.getSearchClientList(offset, pageSize, searchKeyword);
 	}
 
@@ -98,7 +94,6 @@ public class OrderService {
 	@Transactional
 	public List<Map<String, Object>> checkLackingMaterials(Map<String, Object> orderData) {
 		String opt_id = orderMapper.getOptionIdByCombination(orderData);
-		log.info(opt_id);
 		 if (opt_id == null) {
 			throw new RuntimeException("해당 옵션 조합의 상품이 존재하지 않습니다.");
 		}

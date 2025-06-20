@@ -1,0 +1,65 @@
+.dashboard-wrapper {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.chart-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 40px;
+}
+
+.chart-card h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #333;
+}
+
+.chart-container {
+  position: relative;
+   height: 460px;
+  width: 100%;
+}
+
+.chart-row {
+  display: flex;
+  gap: 20px;
+  margin-top: 40px;
+  flex-wrap: wrap; /* 작은 화면에서도 반응형 대응 */
+}
+
+.chart-card.half {
+  flex: 1 1 0;
+  width: 100%;              /* 기본 fallback */
+  max-width: calc(50% - 10px);  /* 정확히 반 나눔 (gap 고려) */
+}
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-toggle .toggle-btn {
+  background-color: #f1f3f5;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.chart-toggle .toggle-btn.active {
+  background-color: #4e73df;
+  color: white;
+}
+/* 모바일에서 한 줄에 하나로 변경 */
+@media (max-width: 768px) {
+  .chart-card.half {
+      max-width: 100%;
+  }
+}
