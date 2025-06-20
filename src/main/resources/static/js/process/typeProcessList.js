@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
       method: 'GET',
       success: function (res) {
         window.processOptions = res.map(p => ({
-          value: String(p.PRC_ID),
+          value: p.PRC_ID,
           text: p.PRC_NM,
-          ...p
+		  ...p
         }));
 		console.log("✅ 공정 목록 세팅됨:", window.processOptions);
         if (typeof callback === 'function') callback();
@@ -63,20 +63,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 공정순서 조회 함수
-    function loadTypeProcessList(DET_ID) {
-      $.ajax({
-        url: '/SOLEX/typeProcess/list',
-        type: 'GET',
-        data: { DET_ID: DET_ID },
-        success: function (res) {
-		  window.loadProcessOptions();
-          window.type_process_grid.resetData(res);
-        },
-        error: function () {
-          alert('공정순서 조회에 실패했습니다.');
-        }
-      });
-    }
+	function loadTypeProcessList(DET_ID) {
+	  // 콜백으로 processOptions 로드 완료 보장
+	  window.loadProcessOptions(() => {
+	    $.ajax({
+	      url: '/SOLEX/typeProcess/list',
+	      type: 'GET',
+	      data: { DET_ID: DET_ID },
+	      success: function (res) {
+	        window.type_process_grid.resetData(res);
+	      },
+	      error: function () {
+	        alert('공정순서 조회에 실패했습니다.');
+	      }
+	    });
+	  });
+	}
 
     // 공정순서 그리드
     window.type_process_grid = new tui.Grid({
@@ -100,18 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           header: '공정명',
           name: 'PRC_NM',
-          editor: {
-            type: 'select',
-			options: () => {
-				console.log("🧐 editor.options 실행 시점의 processOptions:", window.processOptions);
-				const listItems = (window.processOptions || []).map(p => ({
-					value: String(p.value),
-					text: String(p.text)
-				}));
-				console.log("📌 listItems 최종 결과:", listItems);
-				return { listItems };
-			}
-          },
+		  editor: {
+				type: 'select',
+				options: {
+					listItems: processOptions
+				}
+		  },
 		  formatter: ({ value }) => {
 		  	console.log("🧾 formatter value:", value);
 		  	const item = window.processOptions.find(p => String(p.value) === String(value));
