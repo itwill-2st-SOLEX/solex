@@ -24,4 +24,12 @@ public class ManagerService {
 	public List<Map<String, Object>> getManagerList(Map params){
 		return managerMapper.getManagerList(params);
 	}
+	
+	public int updateStatus(Map map) {
+		return managerMapper.updateStatus(map);
+	}
 }
+
+
+
+

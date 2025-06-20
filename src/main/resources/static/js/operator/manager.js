@@ -37,43 +37,9 @@ const grid = new tui.Grid({
 		{ header: '불량수량', name: 'wpoBcount', align: 'center', filter: 'select' },
 		{ header: '작업진행률', name: 'oddPer', align: 'center', filter: 'select' },
 		{ header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: 'true' },
-		{ header: '진행상태', name: 'wpoStatus', align: 'center', filter: 'select' },
-/*		{
-		  header: '작업지시',
-		  name: 'wpoBtn',
-		  align: 'center',
-		  renderer: {
-		    type: 'html', // HTML 렌더링 타입 지정
-		    options: {
-		      escapeHtml: false // HTML escape 하지 않도록 설정
-		    }
-		  }
-		}*/
-		{ header: '작업지시', name: 'wpoBtn', align: 'center', sortable: 'true'},
-		/*{
-		      header: '작업지시',
-		      name: 'wrkAction',
-		      align: 'center',
-		      formatter: (cellValue, rowData) => {
-				console.log(rowData)
-		        const status = rowData.oddStatus;  // 작업상태 컬럼명에 맞게 수정하세요
-
-		        if (status === '공정대기') {
-		          return `<button class="start-btn" data-id="${rowData.wrkId}">작업시작</button>`;
-
-		        } else if (status === '공정진행중') {
-		          return '';  // 버튼 없음
-		        } else if (status === '공정완료') {
-		          return `<button class="quality-btn" data-id="${rowData.wrkId}">공정검사</button>`;
-		        } else if (status === '공정검사중') {
-		          return `<button class="transfer-btn" data-id="${rowData.wrkId}">공정검사완료</button>`;
-		        } else if (status === '공정검사완료') {
-  		          return `<button class="transfer-btn" data-id="${rowData.wrkId}">공정이관</button>`;
-  		        }
-
-		        return '';
-		      }
-		    }*/
+		{ header: '진행상태', name: 'wpoStatusName', align: 'center', filter: 'select', className: 'bold-text' },
+		{ header: '작업지시', name: 'wpoBtn', align: 'center', sortable: 'true', editable: false, width: 120},
+		
     ],
 });
 
@@ -93,6 +59,7 @@ function bindScrollEvent() {
         //const keyword = document.getElementById('searchInput').value.trim();
         managerDetail(currentPage);
     });
+
 }
 
 //페이지 로딩시 무한스크롤 기능이 동작하도록 이벤트 등록
@@ -134,22 +101,6 @@ function dateFormatter(date, includeTime = false) {
 	return result;
 }
 
-//각 행마다 버튼 추가 함수
-function makeButton(status, wrkId) {
-	
-  if (status === '공정대기') {
-    return `<button class="start-btn" data-id="${wrkId}">작업시작</button>`;
-  } else if (status === '공정완료') {
-    return `<button class="quality-btn" data-id="${wrkId}">공정검사</button>`;
-  } else if (status === '공정검사중') {
-    return `<button class="transfer-btn" data-id="${wrkId}">공정검사완료</button>`;
-  } else if (status === '공정검사완료') {
-    return `<button class="transfer-btn" data-id="${wrkId}">공정이관</button>`;
-  }
-  return '';
-}
-
-
 // 버튼 클릭 이벤트 위임
 document.getElementById('grid').addEventListener('click', async (e) => {
   const target = e.target;
@@ -159,29 +110,29 @@ document.getElementById('grid').addEventListener('click', async (e) => {
     if (!wrkId) return;
 
     // 버튼 종류 구분 (클래스명 또는 버튼 텍스트 등)
-    if (target.classList.contains('start-btn')) {
-      await updateStatus(wrkId, '공정진행중'); // 작업 시작 → 공정진행중
-    } else if (target.classList.contains('quality-btn')) {
-      await updateStatus(wrkId, '공정검사중'); // 공정완료 → 공정검사중
-    } else if (target.classList.contains('transfer-btn')) {
-      // 공정검사중 → 공정검사완료 → 공정이관
-      const currentStatus = getCurrentStatus(wrkId);
-      if (currentStatus === '공정검사중') {
-        await updateStatus(wrkId, '공정검사완료');
-      } else if (currentStatus === '공정검사완료') {
-        await updateStatus(wrkId, '공정이관');
-      }
-    }
+    if (target.classList.contains('start-btn')) { // 작업시작 버튼 클릭
+      await updateStatus(wrkId, 'wpo_sts_02'); 		// 공정진행중
+    } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼 클릭
+      await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사 중
+	} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 클릭
+      await updateStatus(wrkId, 'wpo_sts_05'); // 품질검사완료
+    }else if (target.classList.contains('transfer-btn')) {
+	  
+	  //await updateStatus(wrkId, 'wpo_sts_05'); 다음 공정으로 이관
+     
+    } else if (target.classList.contains('success-btn')) {
+		// 공정 이관 처리
+  	}
   }
 });
 
-// 현재 상태 가져오기 - 그리드 데이터에서 wrkId 행 찾기
+/*// 현재 상태 가져오기 - 그리드 데이터에서 wrkId 행 찾기
 function getCurrentStatus(wrkId) {
   const allData = grid.getData();
   const row = allData.find(r => r.wrkId === wrkId);
   return row ? row.oddStatus : null;
 }
-
+*/
 
 //공정 요약 정보
 async function managerSummary() {
@@ -225,28 +176,43 @@ async function managerList(page) {
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 
 		const list = data.list;
-		const managerCount = data.managerCount;
+		const managerCount = data.managerCount;	//전체 개수(무한스크롤)
+		const hasInProgress = list.some(n => n.WPO_STATUS === 'wpo_sts_02');
+		
 		
 		console.log(data)
 		
-        const gridData = list.map((n, idx) => ({
-/*			rowNum: wpCount - (page * pageSize + idx), // 역순 번호 계산
-*/			wrkId: n.WRK_ID,
-			prdCd: n.PRD_CODE,
-			prdNm: n.PRD_NM,
-			prdColor: n.PRD_COLOR,
-            prdSize: n.PRD_SIZE,
-            prdHeight: n.PRD_HEIGHT,
-            wpoOcount: n.WPO_OCOUNT,
-            wpoJcount: n.WPO_JCOUNT,
-			wpoBcount: n.WPO_BCOUNT,
-			oddPer: n.ODD_PER,
-			wpoStatus: n.WPO_STATUS,
-			ordEndDate: dateFormatter(new Date(n.ORD_END_DATE))  || '-',
-			wpoBtn: n.WPO_STATUS === '공정대기'
-							? `<button class="btn btn-sm btn btn-warning assign-btn" data-ord-id="${n.WRK_ID}"> 창고배정</button>`
-							: ''
-        }));
+		const gridData = list.map((n, idx) => {
+		    let btn = '';
+		    const wpoStatus = n.WPO_STATUS;
+			    if (!hasInProgress && wpoStatus === 'wpo_sts_01') {
+			        btn = `<button class="btn start-btn btn-sm btn-primary " data-id="${n.WRK_ID}">작업시작</button>`;
+			    } else if (wpoStatus === 'wpo_sts_02') {
+			        btn = '';  // 버튼 없음
+			    } else if (wpoStatus === 'wpo_sts_03') {
+			        btn = `<button class="btn quality-btn btn-sm btn-info" data-id="${n.WRK_ID}">품질검사</button>`;
+			    } else if (wpoStatus === 'wpo_sts_04') {
+			        btn = `<button class="btn transfer-btn btn-sm btn-warning" data-id="${n.WRK_ID}">검사완료</button>`;
+			    } else if (wpoStatus === 'wpo_sts_05') {
+			        btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WRK_ID}">공정이관</button>`;
+			    }
+			
+		    return {
+		        wrkId: n.WRK_ID,
+		        prdCd: n.PRD_CODE,
+		        prdNm: n.PRD_NM,
+		        prdColor: n.PRD_COLOR,
+		        prdSize: n.PRD_SIZE,
+		        prdHeight: n.PRD_HEIGHT,
+		        wpoOcount: n.WPO_OCOUNT,
+		        wpoJcount: n.WPO_JCOUNT,
+		        wpoBcount: n.WPO_BCOUNT,
+		        oddPer: n.ODD_PER,
+		        wpoStatusName: n.WPO_STATUS_NAME,
+		        ordEndDate: dateFormatter(new Date(n.ORD_END_DATE)) || '-',
+		        wpoBtn: btn
+		    };
+		});
 		
 		//첫 페이지면 초기화 후 새로 보여줌
 		//내용이 있으면 아래에 행추가
@@ -269,41 +235,22 @@ async function managerList(page) {
 
 
 
-
-
-
-
-
-
-
-
-
 // 상태 업데이트 함수 (서버 호출, 그리드 갱신 포함)
 async function updateStatus(wrkId, newStatus) {
   try {
     // 1. 서버에 상태 변경 요청
     const res = await fetch(`/SOLEX/operator/api/updateStatus`, {
-      method: 'POST',
+      method: 'PATCH',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({wrkId, status: newStatus})
+      body: JSON.stringify({wrkId, wpoStatus: newStatus})
     });
 
     if (!res.ok) throw new Error('상태 업데이트 실패');
 
-    // 2. 성공 시 그리드 데이터 갱신 (로컬)
-    const allData = grid.getData();
-    const rowIndex = allData.findIndex(r => r.wrkId === wrkId);
-    if (rowIndex !== -1) {
-      allData[rowIndex].oddStatus = newStatus;
+    //성공시 페이지 재호출	
+	currentPage = 0;  // 페이지 초기화
+	await managerList(currentPage);
 
-      // 예: 상태 변경에 따라 작업진행률이나 기타 필드도 변경 필요시 같이 처리 가능
-      // allData[rowIndex].oddPer = ...;
-
-      grid.setValue(rowIndex, 'oddStatus', newStatus);
-      // 강제로 버튼 칼럼 재렌더링
-      grid.setValue(rowIndex, 'wrkAction', null);
-      grid.setValue(rowIndex, 'wrkAction', '');  // 값 바꿔서 formatter 재호출 유도
-    }
   } catch (e) {
     alert('상태 업데이트 중 오류가 발생했습니다.');
     console.error(e);

@@ -37,8 +37,9 @@
 		    wp.wpo_ocount,		<!-- 작업지시수량 -->
             wp.wpo_jcount,		<!-- 작업완료수량 -->
             wp.wpo_bcount,		<!-- 불량수량 -->
-		
-		    cd.det_nm AS wpo_status,	<!-- 생산상태 -->
+			
+			wp.wpo_status,
+		    cd.det_nm AS wpo_status_Name,	<!-- 생산상태 -->
 			vs.ord_end_date,		<!-- 납품기일 -->
 		    wp.wpo_team,		<!-- 팀 -->
 		    wp.wpo_step			<!-- 작업순서 -->
@@ -81,5 +82,13 @@
 	    ) my_emp ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
 		             AND p.det_id = my_emp.emp_dep_cd
 	</select>
+	
+	<!-- 작업 상태 업데이트 -->
+	<update id="updateStatus">
+		UPDATE work_process
+		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
+		WHERE wrk_id=#{wrkId}
+	</update>
+	
   </mapper>
 	

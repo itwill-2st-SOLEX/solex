@@ -16,6 +16,7 @@ public interface ManagerMapper {
 	//작업 현황 모두 가져오기
 	List<Map<String, Object>> getManagerList(Map params);
 	
-	
+	//진행 상태 업데이트
+	int updateStatus(Map map);
 	
 }

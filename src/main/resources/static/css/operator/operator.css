@@ -96,7 +96,7 @@
 	align-items: center;
 }
 
-.btn-primary {
+.btn-worker {
   background-color: #4169E1;
   border: none;
   color: white;
@@ -106,10 +106,14 @@
   transition: background-color 0.2s ease;
 }
 
-.btn-primary:hover {
+.btn-worker:hover {
   background-color: #365ac4;
 }
 
 #grid{
 	margin-top: 40px;
+}
+
+.bold-text {
+	font-weight: bold;
 }
