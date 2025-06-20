@@ -8,6 +8,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface LoginMapper {
 
-	Map<String, String> loginEmp(@Param("emp_num") String emp_num, @Param("emp_pw") String emp_pw);
+	Map<String, String> loginEmp(Map<String, String> empInfo);
 
 }

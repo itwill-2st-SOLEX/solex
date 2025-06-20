@@ -1,0 +1,146 @@
+/* === 요약 카드 영역 === */
+.dashboard-summary {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1 1 30%;
+  background-color: #f8f9fc;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+}
+
+.summary-card .label {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.summary-card .value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #343a40;
+  margin: 8px 0;
+}
+
+.summary-card .rate {
+  font-size: 14px;
+}
+
+.rate.up {
+  color: #28a745;
+}
+
+.rate.down {
+  color: #dc3545;
+}
+
+/* 카드별 컬러 배경 강조 */
+.summary-card.pink {
+  background-color: #ffe5e9;
+}
+.summary-card.green {
+  background-color: #e1f4e9;
+}
+.summary-card.blue {
+  background-color: #e1f0fc;
+}
+
+/* === 그래프 공통 === */
+.chart-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 40px;
+  box-sizing: border-box;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-toggle .toggle-btn {
+  background-color: #f1f3f5;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.chart-toggle .toggle-btn.active {
+  background-color: #4e73df;
+  color: white;
+}
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+.chart-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* 반응형 너비 조정 */
+.chart-card.half {
+  width: 48%;
+}
+
+.chart-container {
+  position: relative;
+  height: 320px;  /* 도넛 차트 크기 줄임 */
+  width: 100%;
+}
+
+/* 테이블 추가 스타일 */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.data-table th, .data-table td {
+  padding: 12px 14px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.data-table th {
+  background-color: #f8f9fc;
+  color: #333;
+  font-weight: 600;
+}
+
+.data-table td {
+  background-color: #fff;
+}
+
+.data-table tr:hover {
+  background-color: #f1f3f5;
+}
+
+/* 반응형 처리 유지 */
+@media (max-width: 768px) {
+  .chart-card.half {
+    width: 100%;
+  }
+}
+
