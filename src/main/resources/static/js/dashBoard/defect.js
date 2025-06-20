@@ -140,3 +140,20 @@ orders.forEach(order => {
   `;
 	orderTable.insertAdjacentHTML('beforeend', row);
 });
+
+const recentFinishedList = [
+  { name: '릴 케이스 13', time: '2025-06-19 13:00' },
+  { name: '패킹 지지대', time: '2025-06-19 10:20' },
+  { name: '기어 커버 A', time: '2025-06-18 16:50' }
+];
+
+const recentUl = document.querySelector('.recent-finished-list');
+recentFinishedList.forEach(item => {
+  const li = `
+    <li>
+      <strong>${item.name}</strong>
+      <span class="time">${item.time} 생산 완료</span>
+    </li>
+  `;
+  recentUl.insertAdjacentHTML('beforeend', li);
+});
