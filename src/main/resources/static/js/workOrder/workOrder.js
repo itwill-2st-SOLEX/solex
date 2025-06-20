@@ -88,7 +88,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 		url: `/SOLEX/workOrders/${prd_code}`,
 		type: 'GET',
 		success: function(res) {
-			debugger;
+			//debugger;
 			// 1. 공정별 그룹화 (step_seq 기준)
 			const grouped = {};
 
@@ -216,7 +216,7 @@ function renderProcessSteps(processList) {
 				<input type="hidden" id="hidden-odd-cnt" value="${process.odd_cnt}" />
 			</div>
 		`;
-		debugger;
+		//debugger;
 		container.appendChild(step);
 	});
 }

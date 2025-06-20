@@ -17,6 +17,14 @@ public interface ManagerMapper {
 	List<Map<String, Object>> getManagerList(Map params);
 	
 	//진행 상태 업데이트
-	int updateStatus(Map map);
+	int updateWpoSts01(Map map);
+	
+	int updateWpoSts02(Map map);
+	
+	int updateWpoSts03(Map map);
+	
+	int updateWpoSts04(Map map);
+	
+	int updateWpoSts05(Map map);
 	
 }

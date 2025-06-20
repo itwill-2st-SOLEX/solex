@@ -26,7 +26,7 @@
   	<select id="getManagerList">
 		SELECT
 		    wo.wrk_id, 			<!-- 작업지시ID  -->
-		    vs.prd_code,			<!-- 공정ID -->
+		    vs.prd_code,		<!-- 공정ID -->
 		    vs.prd_nm,			<!-- 제품명 -->
 		    
 		    vs.prd_color,		<!-- 제품유형(색상) -->
@@ -58,9 +58,9 @@
 	        WHERE e.emp_id = #{empId}
 	    ) my_emp ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
 		             AND p.det_id = my_emp.emp_dep_cd
-
+		WHERE wp.wpo_status != 'wpo_sts_00' <!-- 작업대기상태 -->
 		ORDER BY
-		    wo.wrk_id DESC
+		    wo.wrk_id
   		
   	</select>
   	
@@ -81,13 +81,44 @@
 	        WHERE e.emp_id = #{empId}
 	    ) my_emp ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
 		             AND p.det_id = my_emp.emp_dep_cd
+		WHERE wp.wpo_status != 'wpo_sts_00' <!-- 작업대기상태 -->
 	</select>
 	
 	<!-- 작업 상태 업데이트 -->
-	<update id="updateStatus">
+	<!-- 상태 : wpo_sts_01 >> 작업대기 -> '작업시작' 상태로 변경 -->
+	<update id="updateWpoSts01">
 		UPDATE work_process
 		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
 		WHERE wrk_id=#{wrkId}
+	</update>
+	
+	<!-- 작업 상태 업데이트 -->
+	<!-- 상태 : wpo_sts_02 >> 작업중 -> 사원입력값 확인하여 생산완료되는지 확인  -->
+	<update id="updateWpoSts02">
+<!-- 		UPDATE work_process
+		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
+		WHERE wrk_id=#{wrkId} -->
+	</update>
+	
+	<!-- 상태 : wpo_sts_03 >> 공정 완료 -> 품질검사이력 insert  -->
+	<update id="updateWpoSts03">
+ 		UPDATE work_process
+		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
+		WHERE wrk_id=#{wrkId}
+	</update>
+	
+	<!-- 상태 : wpo_sts_04 >> 품질검사중 -> ???  -->
+	<update id="updateWpoSts04">
+<!-- 		UPDATE work_process
+		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
+		WHERE wrk_id=#{wrkId} -->
+	</update>
+	
+	<!-- 상태 : wpo_sts_05 >> 품질검사완료 -> 공정이관, work_process의 작업종료일 변경, 다음공정의 작업상태를 01로 변경   -->
+	<update id="updateWpoSts05">
+<!-- 		UPDATE work_process
+		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
+		WHERE wrk_id=#{wrkId} -->
 	</update>
 	
   </mapper>

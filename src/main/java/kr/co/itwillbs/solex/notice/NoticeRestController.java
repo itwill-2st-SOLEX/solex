@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/notice/api")
-public class RestNoticeController {
+public class NoticeRestController {
 	
 	@Autowired
 	private NoticeService noticeService;

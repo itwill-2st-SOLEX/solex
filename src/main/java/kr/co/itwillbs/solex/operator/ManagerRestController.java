@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/operator/api")
-public class RestManagerController {
+public class ManagerRestController {
 
 	@Autowired
 	public ManagerService managerService;
@@ -59,9 +59,10 @@ public class RestManagerController {
 	// 작업 순서 업데이트
 	@PatchMapping("/updateStatus")
 	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map) {
+		
 		System.out.println(map);
 
-		managerService.updateStatus(map);
+		managerService.updateWpoSts(map);
 		
 		return ResponseEntity.ok().build();
 	}

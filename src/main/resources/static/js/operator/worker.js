@@ -17,9 +17,9 @@ const grid = new tui.Grid({
     columns: [
 		{ header: '실적등록ID', name: 'wrkId', align: 'center' },
 		{ header: '작업수량', name: 'prdCd', align: 'center', filter: 'select' },
-		{ header: '불량수량', name: 'prdNm', align: 'center', filter: 'select'},
 		{ header: '작업일', name: 'prdColor', align: 'center', filter: 'select' },
-		{ header: '보고시간', name: 'prdSize', align: 'center', filter: 'select'}
+		{ header: '보고시간', name: 'prdSize', align: 'center', filter: 'select'},
+		{ header: '작업자', name: 'prdSize', align: 'center', filter: 'select'}
     ],
 	
 
@@ -27,7 +27,7 @@ const grid = new tui.Grid({
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
-	managerSummary();
+	workerSummary();
 
 });
 
@@ -39,7 +39,7 @@ function bindScrollEvent() {
 	//무한스크롤시 검색어 유지를 위해 재전달
     grid.on('scrollEnd', () => {
         //const keyword = document.getElementById('searchInput').value.trim();
-        managerDetail(currentPage);
+        workerDetail(currentPage);
     });
 }
 
@@ -84,9 +84,9 @@ function formatter(date, includeTime = false) {
 
 
 //공정 요약 정보
-async function managerSummary() {
+async function workerSummary() {
 	try {
-			let url = `/SOLEX/operator/api/managerSummary`;
+			let url = `/SOLEX/operator/api/workerSummary`;
 			
 	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
 	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
@@ -95,12 +95,16 @@ async function managerSummary() {
 			
 			empId = data.EMP_ID;
 			
-			document.getElementById('prcCode').textContent = data.PRC_CD || '-';
-			document.getElementById('prcName').textContent = data.PRC_NM  || '-';
-			document.getElementById('empName').textContent = data.DEP_NM || '-';
-			document.getElementById('prcTest').textContent = data.QUA_NM || '-';
+			document.getElementById('depNm').textContent = data.DEP_NM || '-';
+			document.getElementById('prdCode').textContent = data.PRD_CODE || '-';
+			document.getElementById('prdName').textContent = data.PRD_NM  || '-';
+			document.getElementById('prdOption').textContent =  data.PRD_OPTION|| '-';
+			
+			document.getElementById('wpoOcount').textContent = data.WPO_OCOUNT || '-';
+			document.getElementById('wpoJcount').textContent = data.WPO_JCOUNT || '-';
+			document.getElementById('wpRate').textContent = data.WPO_RATE || '-';
 		
-			managerList(currentPage);
+			workerList(currentPage);
 
 	    } catch (e) {
 	        console.error('fetch 에러 : ', e);
@@ -108,18 +112,18 @@ async function managerSummary() {
 }
 
 // 게시글 목록 불러오기
-async function managerList(page) {
+async function workerList(page) {
     try {
 		
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/operator/api/managerList?page=${page}&size=${pageSize}&empId=${empId}`;
+		let url = `/SOLEX/operator/api/workerList?page=${page}&size=${pageSize}&empId=${empId}`;
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 
 		const list = data.list;
-		const managerCount = data.managerCount;
+		const workerCount = data.workerCount;
 		
         const gridData = list.map((n, idx) => ({
 /*			rowNum: wpCount - (page * pageSize + idx), // 역순 번호 계산

@@ -19,6 +19,10 @@
 		
 			<!-- 제품 정보 -->
 			<div class="info-section">
+				<div class="work-card">
+					<p class="work-label">담당부서</p>
+					<p class="work-value" id="depNm"></p>
+				</div>
 				<div class="info-card">
 					<p class="info-label">제품코드</p>
 					<p class="info-value" id="prdCode">PRD001</p>
@@ -31,33 +35,28 @@
 					<p class="info-label">옵션</p>
 					<p class="info-value" id="prdOption">블랙 / 240mm / 5cm</p>
 				</div>
-				<div class="work-card">
-					<p class="work-label">작업지시 수량</p>
-					<p class="work-value" id="workOrderQty">100</p>
-				</div>
 			</div>
 		
 			<!-- 작업 정보 및 입력 -->
 			<div class="work-section">
 				<div class="work-card">
+					<p class="work-label">작업지시 수량</p>
+					<p class="work-value" id="wpoOcount">100</p>
+				</div>
+				<div class="work-card">
 					<p class="work-label">현재 공정 완료수량</p>
-					<p class="work-value" id="workOrderQty">100</p>
+					<p class="work-value" id="wpoJcount">100</p>
 				</div>
 				<div class="work-card">
 					<p class="work-label">작업진행률</p>
 					<div class="progress">
-						<div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%;">0%</div>
+						<div class="progress-bar" role="progressbar" id="wpRate" style="width: 0%;">0%</div>
 					</div>
 				</div>
-				<div class="work-card">
+				<div class="work-card colorbox">
 					<p class="work-label">작업완료 수량</p>
 					<input type="number" id="completeQty" class="work-input" value="0" min="0">
 				</div>
-				<div class="work-card">
-					<p class="work-label">불량 수량</p>
-					<input type="number" id="defectQty" class="work-input" value="0" min="0">
-				</div>
-				
 						
 				<!-- 저장 버튼 -->
 			

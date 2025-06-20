@@ -91,7 +91,7 @@
 }
 
 .save-btn-box {
-	width: 80px;
+	width: 100px;
 	display: flex;
 	align-items: center;
 }
@@ -115,5 +115,15 @@
 }
 
 .bold-text {
+	font-weight: bold;
+}
+
+.colorbox {
+	background-color: #eee;
+}
+
+
+.colorbox .work-label{
+	color: #222 !important;
 	font-weight: bold;
 }

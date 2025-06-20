@@ -111,17 +111,18 @@ document.getElementById('grid').addEventListener('click', async (e) => {
 
     // 버튼 종류 구분 (클래스명 또는 버튼 텍스트 등)
     if (target.classList.contains('start-btn')) { // 작업시작 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_02'); 		// 공정진행중
+      await updateStatus(wrkId, 'wpo_sts_01'); 		// 공정진행중
     } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사 중
+      await updateStatus(wrkId, 'wpo_sts_03'); // 품질검사 중
 	} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_05'); // 품질검사완료
-    }else if (target.classList.contains('transfer-btn')) {
+      await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사완료
+/*    }else if (target.classList.contains('transfer-btn')) {	
 	  
-	  //await updateStatus(wrkId, 'wpo_sts_05'); 다음 공정으로 이관
-     
+	  await updateStatus(wrkId, 'wpo_sts_05'); //다음 공정으로 이관
+     */
     } else if (target.classList.contains('success-btn')) {
 		// 공정 이관 처리
+		//??????????????????????????????????????????????
   	}
   }
 });

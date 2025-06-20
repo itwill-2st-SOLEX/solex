@@ -80,7 +80,14 @@
 				  #{teamCode},
 				  #{stepSeq},
 				  #{oddCnt},
-				  DEFAULT
+				  <choose>
+		            <when test="stepSeq == 1">
+		                'wpo_sts_01'
+		            </when>
+		            <otherwise>
+		                'wpo_sts_00'
+		            </otherwise>
+		        </choose>
 		)
 	</insert>
 	
