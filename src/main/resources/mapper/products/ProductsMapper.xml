@@ -4,13 +4,12 @@
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.products.ProductsMapper">
-
-
 	<!-- product 무한스크롤 -->
 	<select id="selectPagedProductList" resultType="map">
 	    SELECT
 	    	   p.prd_id,
 			   p.prd_nm,
+			   p.prd_price,
 			   o.opt_id, 
 			   cd_type.det_nm PRD_TYPE, -- 유형
 			   cd_unit.det_nm PRD_UNIT, -- 단위
@@ -39,7 +38,6 @@
 	    </where>
 	    OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
 	</select>
-	
 	<select id="selectTotalProductCount" resultType="int">
 		SELECT COUNT(*) 
 		  FROM product p
@@ -51,18 +49,6 @@
 			</if>
 		</where>
 	</select>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
     <select id="selectProductsLists" resultType="java.util.Map">
     	SELECT COUNT(*) 
     	  FROM product p

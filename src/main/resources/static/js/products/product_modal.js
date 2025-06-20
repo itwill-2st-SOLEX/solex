@@ -9,7 +9,8 @@ async function onWriteProduct() {
 	try {
         // 모달 띄우기 (빈 제목, 내용과 사용자 정보 포함)
         showProductModal('new');
-
+		// 단위 셀렉트 박스
+		loadPrdUnitTypes();
     } catch (e) {
         console.error('제품 등록 모달창 표시 실패', e);
         // 사용자 정보 없을 때 기본값 처리 가능
@@ -20,16 +21,19 @@ async function onWriteProduct() {
 // 모달 표시 함수
 function showProductModal(mode, data = {}) {
 	console.log('data ??? '  + JSON.stringify(data));
+	console.log('mode ??? '  + mode);
     const modalContainer = document.getElementById('showProductModal');
     const modalFooter = document.getElementById('productModalFooter');
     const isEditable = (mode == 'new' || mode == 'edit');
     const now = new Date();
+	
+	
+	const modalTitleText = isEditable ? '제품 수정' : '제품 등록';
 
     const title = isEditable ? 
-	
 		`<label for="prd_nm" class="form-label">제품명 <span style="color:red">*</span></label>
-		 <input type="text" id="prd_nm" name="prd_nm" class="form-control" value="${data.NOT_TT || ''}" placeholder="제품명을 입력하세요">` : 
-		`<span id="modalTitle">${data.NOT_TT || ''}</span>`;
+		 <input type="text" id="prd_nm" name="prd_nm" class="form-control" value="${data.PRD_NM || ''}" placeholder="제품명을 입력하세요">` : 
+		`<span id="modalTitle">${data.PRD_NM || ''}</span>`;
 
     const content = isEditable ?
         `<div id="editor"></div>` :
@@ -44,19 +48,22 @@ function showProductModal(mode, data = {}) {
 	                </div>
 	                <div class="col">
 	                    <label for="prd_price" class="form-label">제품 가격<span style="color:red">*</span></label>
-	                    <input type="text" id="prd_price" name="prd_price" class="form-control" placeholder="제품가격" value="">
+	                    <input type="text" id="prd_price" name="prd_price" class="form-control" placeholder="제품가격" value="${data.PRD_PRICE}">
 	                </div>
 	            </div>
 				<div class="row mb-4">
 		        	<div class="col">
 		            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
-							<br>
-							<select id="prdUnitSelect" class="form-select"></select>
-		                </div>
-		                <div class="col">
-		                    <label for="prd_type" class="form-label">단위<span style="color:red">*</span></label>
-		                    <select id="prdTypeSelect" class="form-select"></select>
-		                </div>
+						<br>
+						<select id="prdUnitSelect" class="form-select"></select>
+						${data.PRD_UNIT}
+						
+		            </div>
+	                <div class="col">
+	                    <label for="prd_type" class="form-label">제품 유형<span style="color:red">*</span></label>
+						<br>
+						${data.PRD_TYPE}
+	                </div>
 		            </div>
 				</div>
 			</div>

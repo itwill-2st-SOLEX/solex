@@ -29,7 +29,7 @@
 							<div class="modal-dialog modal-dialog-scrollable modal-lg">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h5 class="modal-title">제품 등록</h5>
+										<h5 class="modal-title" th:text="${modalTitleText}"></h5>
 		        						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 									</div>
 									<!-- 모달 내용 표시 -->
@@ -72,13 +72,6 @@
 									<div class="modal-header">
 										<h5 class="modal-title">BOM 등록</h5>
 		        						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-<!-- 										<select id="docTypeSelect"	class="form-select form-select-sm mb-3" aria-label="카테고리 선택"> -->
-<!-- 											<th:block th:each="type : ${docTypes}"> -->
-<!-- 												<option th:value="${type['DET_ID']}" -->
-<!-- 													th:text="${type['DET_NM']}" -->
-<!-- 													th:selected="${type['DET_NM'] == '반/연차신청서'}"></option> -->
-<!-- 											</th:block> -->
-<!-- 										</select> -->
 									</div>
 									<!-- 모달 내용 표시 -->
 									<div class="modal-body big-box" id="showProductModal"></div>

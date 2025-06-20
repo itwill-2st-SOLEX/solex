@@ -27,4 +27,8 @@ public class ProductsService {
 		return productsMapper.selectTotalProductCount(prdYn);
 	}
 
+	public List<Map<String, String>> getPrdUnitTypeList() {
+		return productsMapper.selectPrdUnitTypeList();
+	}
+
 }

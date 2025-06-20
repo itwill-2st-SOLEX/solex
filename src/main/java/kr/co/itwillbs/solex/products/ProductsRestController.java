@@ -62,8 +62,15 @@ public class ProductsRestController {
 	    
 	    return result;
 	}
+	
 	@GetMapping("/prdUnitTypes")
 	public List<Map<String, String>> getPrdUnitTypes() throws Exception {
+		
+		// prd 정보 가져오기
+//		Map<String, String> getProductInfo = productsService.getProductInfo()
+		
+		
+		
 		System.out.println("getPrdUnitTypes() 메서드 잘 나옴??????");
 		return null;
 //		return Arrays.stream(ClientType.values())

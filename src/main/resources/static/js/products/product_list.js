@@ -46,10 +46,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		  }
 		},
 	    columns: [
-		  { header: '상품코드', name: 'PRD_ID', align: 'center', hidden: true }, 
-		  { header: '옵션코드', name: 'OPT_ID', align: 'center', hidden: true }, 
+		  { header: '상품코드', name: 'PRD_ID', hidden: true }, 
+		  { header: '옵션코드', name: 'OPT_ID', hidden: true }, 
+	      { header: '가격', name: 'PRD_PRICE', hidden: true },
 	      { header: '상품명', name: 'PRD_NM', align: 'center', sortable: true , width: 200 },
-	//      { header: '가격', name: 'PRD_PRICE', align: 'center', sortable: true },
 	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true , width: 100 },
 	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true , width: 70 },
 		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true , width: 70 },
@@ -67,12 +67,19 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (rowData && window.loadBomList) {
 			selectedOptId = rowData.OPT_ID;
 			window.loadBomList(rowData.OPT_ID);
-//			const prdCd = rowData.PRD_CD;
-//	        const optColor = rowData.opt_color_id;   // 실제 옵션 ID (예: 'opt_color_01')
-//	        const optSize = rowData.opt_size_id;     // 실제 옵션 ID (예: 'opt_size_11')
-//	        const optHeight = rowData.opt_height_id; // 실제 옵션 ID (예: 'opt_height_03')
-//
-//			window.loadBomList(prdCd, optColor, optSize, optHeight);
 		}
 	});
+	
+	// --- 더블클릭 이벤트 핸들링 (수정 모달) 추가 ---
+	prod_grid.on('dblclick', ev => {
+    	// 더블클릭된 행의 데이터를 가져옵니다.
+       	const rowKey = ev.rowKey;
+       	const rowData = prod_grid.getRow(rowKey);
+
+       	if (rowData) {
+           	console.log('행 더블클릭됨:', rowData);
+           	// 여기에 제품 수정 모달을 띄우는 함수를 호출하고, rowData를 넘겨줍니다.
+           	showProductModal('edit', rowData); // 예시 함수
+       	}
+  	});
 });

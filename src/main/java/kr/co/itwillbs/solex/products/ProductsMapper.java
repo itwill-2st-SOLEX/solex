@@ -17,4 +17,7 @@ public interface ProductsMapper {
 
 	int selectTotalProductCount(String prdYn);
 
+	List<Map<String, String>> selectPrdUnitTypeList();
+
+
 }
