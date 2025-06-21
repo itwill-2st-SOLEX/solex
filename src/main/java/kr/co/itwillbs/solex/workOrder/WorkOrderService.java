@@ -38,4 +38,9 @@ public class WorkOrderService {
 		 String oddId = (String) prdInfo.get(0).get("oddId");
 		mapper.updateSujuOrderSts(oddId);
 	}
+	
+	// 창고 조회
+	public List<Map<String, Object>> getWarehouses() {
+		return mapper.getWarehouses();
+	}
 }

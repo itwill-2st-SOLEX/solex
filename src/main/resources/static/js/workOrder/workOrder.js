@@ -220,23 +220,69 @@ function renderProcessSteps(processList) {
 		container.appendChild(step);
 	});
 }
-// 창고 전역변수 
+// 창고 전역변수
 let warehouses = [];
 
-// 창고 목록 그리기 (필터 연동 포함)
-function fetchWarehouses() {
+function fetchWarehouses(callback) {
 	$.ajax({
-		url: '/api/warehouses', // 실제 스프링 컨트롤러 주소로 바꿔도 돼
+		url: '/SOLEX/workOrders/warehouses',
 		method: 'GET',
-		dataType: 'json',
 		success: function(data) {
-			warehouses = data;
-			renderWarehouseList(); // 받아온 후 창고 목록 렌더링
+			warehouses = groupWarehouses(data);
+			if (callback) callback();
 		},
 		error: function(xhr, status, error) {
-			console.error('🚨 창고 목록 로딩 실패:', error);
+			console.error('🚨 창고 데이터 로딩 실패:', error);
 			alert('창고 정보를 불러올 수 없습니다.');
 		}
+	});
+}
+
+// 서버에서 받아온 평탄화된 데이터를 창고별로 그룹핑하는 함수
+function groupWarehouses(data) {
+	const grouped = {};
+
+	data.forEach(item => {
+		const whsNm = item.WHS_NM;
+		if (!grouped[whsNm]) {
+			grouped[whsNm] = {
+				id: whsNm, // 실제로는 DB에서 창고 ID 받아서 여기에 넣는게 좋음
+				name: whsNm,
+				pc: item.WHS_PC,
+				add: item.WHS_ADD,
+				da: item.WHS_DA,
+				teams: []
+			};
+		}
+		grouped[whsNm].teams.push({
+			name: item.ARE_NM,
+			max: item.ARE_MAX,
+			currentCount: item.WHS_HIS_CNT || 0
+		});
+	});
+
+	return Object.values(grouped);
+}
+// 검색어를 기준으로 창고 목록 필터링 및 렌더링
+function renderWarehouseList(filterText = '') {
+	const listEl = document.getElementById('warehouseList');
+	listEl.innerHTML = '';
+
+	const filtered = warehouses.filter(w =>
+		w.name.includes(filterText) || w.pc.toString().includes(filterText)
+	);
+
+	if (filtered.length === 0) {
+		listEl.innerHTML = '<p class="text-center text-muted">검색 결과가 없습니다.</p>';
+		return;
+	}
+
+	filtered.forEach((w, i) => {
+		const btn = document.createElement('button');
+		btn.className = 'list-group-item list-group-item-action';
+		btn.textContent = `${w.name} (${w.pc})`;
+		btn.onclick = () => selectWarehouse(i);
+		listEl.appendChild(btn);
 	});
 }
 
@@ -244,14 +290,15 @@ function selectWarehouse(index) {
 	const warehouse = warehouses[index];
 
 	document.getElementById('warehouseName').textContent = warehouse.name;
-	document.getElementById('warehouseLocation').textContent = warehouse.location;
+	document.getElementById('warehouseLocation').textContent = warehouse.add + ' ' + warehouse.da;
 
-	const teamSelect = document.getElementById('teamSelect');
-	teamSelect.innerHTML = '<option value="">팀을 선택하세요</option>';
+	const teamSelect = document.getElementById('warehouseZone');
+	teamSelect.innerHTML = '<option value="">창고구역을 선택하세요</option>';
+
 	warehouse.teams.forEach(team => {
 		const opt = document.createElement('option');
-		opt.value = team;
-		opt.textContent = team;
+		opt.value = team.name;
+		opt.textContent = `${team.name} (최대: ${team.max}, 현재: ${team.currentCount})`;
 		teamSelect.appendChild(opt);
 	});
 
@@ -261,14 +308,18 @@ function selectWarehouse(index) {
 // 모달 열기 함수
 function openAssignWarehouse(oddId) {
 	document.getElementById('warehouseSearch').value = '';
-	fetchWarehouses();
 
 	document.getElementById('selectedWarehouseId').value = '';
 	document.getElementById('selectedOddId').value = oddId;
 
 	document.getElementById('warehouseName').textContent = '-';
 	document.getElementById('warehouseLocation').textContent = '-';
-	document.getElementById('warehouseZone').innerHTML = '<option value="">구역을 선택하세요</option>';
+	document.getElementById('warehouseZone').innerHTML = '<option value="">창고구역을 선택하세요</option>';
+
+	// AJAX로 창고 데이터를 불러온 후 렌더링
+	fetchWarehouses(() => {
+		renderWarehouseList();
+	});
 
 	const modal = new bootstrap.Modal(document.getElementById('AssignWarehouseModal'));
 	modal.show();
@@ -276,13 +327,14 @@ function openAssignWarehouse(oddId) {
 
 // 검색 input 이벤트
 document.getElementById('warehouseSearch').addEventListener('input', (e) => {
-	renderWarehouseList(e.target.value.trim());
+	const keyword = e.target.value.trim();
+	renderWarehouseList(keyword);
 });
 
 // 등록 버튼 이벤트
 document.getElementById('submitWarehouseAssign').addEventListener('click', () => {
 	const warehouseId = document.getElementById('selectedWarehouseId').value;
-	const team = document.getElementById('teamSelect').value;
+	const team = document.getElementById('warehouseZone').value;
 	const oddId = document.getElementById('selectedOddId').value;
 
 	if (!warehouseId) {
@@ -290,7 +342,7 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 		return;
 	}
 	if (!team) {
-		alert('팀을 선택해주세요.');
+		alert('구역을 선택해주세요.');
 		return;
 	}
 

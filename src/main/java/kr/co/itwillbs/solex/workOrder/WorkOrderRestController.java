@@ -38,4 +38,10 @@ public class WorkOrderRestController {
 		service.workOrderInsert(prdInfo);
 	}
 	
+	// 창고 조회
+	@GetMapping("/warehouses")
+	public List<Map<String, Object>> getWarehouses() {
+		System.out.println(service.getWarehouses());
+		return service.getWarehouses();
+	}
 }
