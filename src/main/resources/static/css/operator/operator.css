@@ -40,6 +40,21 @@
 }
 
 /* ===== 현장사원 페이지 ===== */
+.employee-info {
+  display: flex;
+  gap: 30px;
+  margin: 10px 0 20px 0;
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+.employee-info span{
+	display: inline-block;
+	margin-right: 30px;
+}
 
 .info-section,
 .work-section {
@@ -126,4 +141,16 @@
 .colorbox .work-label{
 	color: #222 !important;
 	font-weight: bold;
+}
+
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    white-space: nowrap;
+    color: black; /* 겹치지 않을 때는 검정 */
+    pointer-events: none; /* 클릭 방해 방지 */
 }

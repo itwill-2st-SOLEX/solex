@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,6 +72,14 @@ public class NoticeRestController {
         map.put("notId", notId);
     	map.put("notTt", "[수정] " + map.get("notTt"));
         noticeService.updateNotice(map);
+        return ResponseEntity.ok().build();
+    }
+    
+    // 글 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteNotice(@PathVariable("id") int notId) {
+
+        noticeService.deleteNotice(notId);
         return ResponseEntity.ok().build();
     }
     

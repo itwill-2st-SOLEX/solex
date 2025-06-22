@@ -16,10 +16,13 @@ public interface ManagerMapper {
 	//작업 현황 모두 가져오기
 	List<Map<String, Object>> getManagerList(Map params);
 	
+	int updateJcount(Long wpoId);
+	
 	//진행 상태 업데이트
 	int updateWpoSts01(Map map);
 	
-	int updateWpoSts02(Map map);
+	//
+	Map<String, Object> selectWpoSts02(Long wrkId);
 	
 	int updateWpoSts03(Map map);
 	

@@ -61,7 +61,8 @@
 		WHERE wp.wpo_status != 'wpo_sts_00' <!-- 작업대기상태 -->
 		ORDER BY
 		    wo.wrk_id
-  		
+  		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+
   	</select>
   	
   	<!-- 작업지시 전체 개수 가져오기(무한스크롤) -->
@@ -84,6 +85,17 @@
 		WHERE wp.wpo_status != 'wpo_sts_00' <!-- 작업대기상태 -->
 	</select>
 	
+	<!-- 사원이 작업수량 업데이트 하면, work_process 작업 수량도 업데이트 되도록 설정-->
+	<update id="updateJcount">
+		UPDATE work_process wp
+		SET wp.wpo_jcount = (
+			    SELECT NVL(SUM(wr.wre_jcount), 0)
+			    FROM work_report wr
+			    WHERE wr.wpo_id = wp.wpo_id
+		)
+		WHERE wp.wpo_id = #{wpoId}
+	</update>
+	
 	<!-- 작업 상태 업데이트 -->
 	<!-- 상태 : wpo_sts_01 >> 작업대기 -> '작업시작' 상태로 변경 -->
 	<update id="updateWpoSts01">
@@ -94,17 +106,17 @@
 	
 	<!-- 작업 상태 업데이트 -->
 	<!-- 상태 : wpo_sts_02 >> 작업중 -> 사원입력값 확인하여 생산완료되는지 확인  -->
-	<update id="updateWpoSts02">
-<!-- 		UPDATE work_process
-		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
-		WHERE wrk_id=#{wrkId} -->
-	</update>
+	<select id="selectWpoSts02">
+		SELECT wpo_ocount, wpo_jcount
+		FROM work_process
+		WHERE wpo_id = #{wpoId}
+	</select>
 	
 	<!-- 상태 : wpo_sts_03 >> 공정 완료 -> 품질검사이력 insert  -->
 	<update id="updateWpoSts03">
  		UPDATE work_process
-		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
-		WHERE wrk_id=#{wrkId}
+		SET wpo_status=#{wpoStatus}, wpo_end_date=#{wpoEndDate}
+		WHERE wpo_id=#{wpoId}
 	</update>
 	
 	<!-- 상태 : wpo_sts_04 >> 품질검사중 -> ???  -->

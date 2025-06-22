@@ -26,6 +26,10 @@ public class ManagerService {
 		return managerMapper.getManagerList(params);
 	}
 	
+	public int updateJcount(Long wpoId) {
+		return managerMapper.updateJcount(wpoId);
+	}
+	
 	public void updateWpoSts(Map<String, Object> map) {
 		
 		//String wrkId = (String) map.get("wrkId");
@@ -42,7 +46,6 @@ public class ManagerService {
 				break;
 			
 			case "wpo_sts_02":
-				//상태 : wpo_sts_02 >> 작업중 -> 사원입력값 확인하여 생산완료되는지 확인
 				
 				break;
 				

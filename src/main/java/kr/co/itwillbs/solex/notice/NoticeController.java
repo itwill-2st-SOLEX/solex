@@ -34,12 +34,4 @@ public class NoticeController {
     }
     
 
-    
-    // 글 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteNotice(@PathVariable("id") int notId) {
-
-        noticeService.deleteNotice(notId);
-        return ResponseEntity.ok().build();
-    }
 }

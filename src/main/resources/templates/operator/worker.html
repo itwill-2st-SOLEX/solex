@@ -16,50 +16,63 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body worker-dashboard container-xxl flex-grow-1 container-p-y">
 			<h2>작업현황</h2>
-		
+			<!-- 사원 정보 -->
+			<div class="employee-info">
+			  <span><strong>소속팀 : </strong> <span id="depNm">-</span></span>
+			  <span><strong>사번 : </strong> <span id="empNum">-</span></span>
+			  <span><strong>사원명 : </strong> <span id="empNm">-</span></span>
+			</div>
+			
 			<!-- 제품 정보 -->
 			<div class="info-section">
 				<div class="work-card">
-					<p class="work-label">담당부서</p>
-					<p class="work-value" id="depNm"></p>
+					<p class="work-label">작업지시번호</p>
+					<p class="work-value" id="wpoId">-</p>
 				</div>
 				<div class="info-card">
 					<p class="info-label">제품코드</p>
-					<p class="info-value" id="prdCode">PRD001</p>
+					<p class="info-value" id="prdCode">-</p>
 				</div>
 				<div class="info-card">
 					<p class="info-label">제품명</p>
-					<p class="info-value" id="prdName">블랙 앵클부츠</p>
+					<p class="info-value" id="prdName">-</p>
 				</div>
 				<div class="info-card">
 					<p class="info-label">옵션</p>
-					<p class="info-value" id="prdOption">블랙 / 240mm / 5cm</p>
+					<p class="info-value" id="prdOption">-</p>
 				</div>
+				<div class="work-card">
+					<p class="work-label">작업진행률</p>
+						<div class="progress" style="height: 20px; position: relative;">
+						    <div id="progressBar" class="progress-bar bg-success" role="progressbar"
+						         style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+						    <span id="progressText" class="progress-text">0%</span>
+						</div>
+				</div>
+				
 			</div>
 		
 			<!-- 작업 정보 및 입력 -->
 			<div class="work-section">
 				<div class="work-card">
 					<p class="work-label">작업지시 수량</p>
-					<p class="work-value" id="wpoOcount">100</p>
+					<p class="work-value" id="wpoOcount">-</p>
 				</div>
 				<div class="work-card">
 					<p class="work-label">현재 공정 완료수량</p>
-					<p class="work-value" id="wpoJcount">100</p>
+					<p class="work-value" id="wpoJcount">-</p>
 				</div>
-				<div class="work-card">
-					<p class="work-label">작업진행률</p>
-					<div class="progress">
-						<div class="progress-bar" role="progressbar" id="wpRate" style="width: 0%;">0%</div>
-					</div>
-				</div>
+
 				<div class="work-card colorbox">
 					<p class="work-label">작업완료 수량</p>
 					<input type="number" id="completeQty" class="work-input" value="0" min="0">
 				</div>
+				<div class="work-card colorbox">
+					<p class="work-label">비고</p>
+					<input type="text" id="wreMemo" class="work-input">
+				</div>
 						
 				<!-- 저장 버튼 -->
-			
 				<div class="save-btn-box">
 					<button class="btn btn-worker" id="saveBtn">저장</button>
 				</div>

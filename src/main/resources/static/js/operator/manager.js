@@ -35,7 +35,27 @@ const grid = new tui.Grid({
 		{ header: '작업지시수량', name: 'wpoOcount', align: 'center', filter: 'select', width: 110 },
 		{ header: '작업완료수량', name: 'wpoJcount', align: 'center', filter: 'select', width: 110},
 		{ header: '불량수량', name: 'wpoBcount', align: 'center', filter: 'select' },
-		{ header: '작업진행률', name: 'oddPer', align: 'center', filter: 'select' },
+		{ 		header: '진행률',
+		        name: 'wpoProRate',
+		        align: 'center',
+				// 작업률 표시
+				formatter: ({ value }) => {
+				    const rate = parseFloat(value) || 0;
+
+				    return `
+				        <div class="progress" style="height: 20px; position: relative;">
+				            <div class="progress-bar bg-success" 
+				                 role="progressbar" 
+				                 style="width: ${rate}%;" 
+				                 aria-valuenow="${rate}" 
+				                 aria-valuemin="0" 
+				                 aria-valuemax="100">
+				            </div>
+				            <span class="progress-text">${rate}%</span>
+				        </div>
+				    `;
+				}
+			},
 		{ header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: 'true' },
 		{ header: '진행상태', name: 'wpoStatusName', align: 'center', filter: 'select', className: 'bold-text' },
 		{ header: '작업지시', name: 'wpoBtn', align: 'center', sortable: 'true', editable: false, width: 120},
@@ -168,7 +188,7 @@ async function managerSummary() {
 // 게시글 목록 불러오기
 async function managerList(page) {
     try {
-		
+		let wpoProRate = 0;
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
 		let url = `/SOLEX/operator/api/managerList?page=${page}&size=${pageSize}&empId=${empId}`;
@@ -184,7 +204,14 @@ async function managerList(page) {
 		console.log(data)
 		
 		const gridData = list.map((n, idx) => {
-		    let btn = '';
+		    
+			let btn = '';
+			
+			// ✅ 진행률은 여기서 개별적으로 계산
+		    const wpoProRate = n.WPO_OCOUNT > 0
+		        ? Math.round((n.WPO_JCOUNT / n.WPO_OCOUNT) * 1000) / 10  // 소수점 1자리
+		        : 0;
+			
 		    const wpoStatus = n.WPO_STATUS;
 			    if (!hasInProgress && wpoStatus === 'wpo_sts_01') {
 			        btn = `<button class="btn start-btn btn-sm btn-primary " data-id="${n.WRK_ID}">작업시작</button>`;
@@ -197,7 +224,7 @@ async function managerList(page) {
 			    } else if (wpoStatus === 'wpo_sts_05') {
 			        btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WRK_ID}">공정이관</button>`;
 			    }
-			
+				console.log(wpoProRate)
 		    return {
 		        wrkId: n.WRK_ID,
 		        prdCd: n.PRD_CODE,
@@ -208,7 +235,7 @@ async function managerList(page) {
 		        wpoOcount: n.WPO_OCOUNT,
 		        wpoJcount: n.WPO_JCOUNT,
 		        wpoBcount: n.WPO_BCOUNT,
-		        oddPer: n.ODD_PER,
+		        wpoProRate: wpoProRate,
 		        wpoStatusName: n.WPO_STATUS_NAME,
 		        ordEndDate: dateFormatter(new Date(n.ORD_END_DATE)) || '-',
 		        wpoBtn: btn
