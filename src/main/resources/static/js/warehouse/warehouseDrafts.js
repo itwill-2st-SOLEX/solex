@@ -60,14 +60,11 @@ $(function() {
 
 	/* ───────────────── 구역 히스토리를 그리드에 표시 ───────────────── */
 	async function renderAreaHistory(areaId) {
-		if (!historyGrid) return;              // 그리드가 아직 없으면 패스
-		historyGrid.showLoading();
 
 		try {
 			const list = await fetchJson(`/SOLEX/warehouse/area/${areaId}/history`);
 	
 		    const data = list.map((h, idx) => ({
-				no         : idx + 1,
 		   		actionTime : h.ACTION_TIME,
 		 		inOut      : h.STATUS,
 				qty        : h.QUANTITY
@@ -76,8 +73,6 @@ $(function() {
 		    historyGrid.resetData(data);
 		} catch (e) {
 			console.error(e);
-		} finally {
-		    historyGrid.hideLoading();
 		}
 	}
 			
@@ -119,7 +114,6 @@ $(function() {
 	        { header: '변동일시', name: 'actionTime', sortable: true, width: 160 },
 	        { header: '구분',     name: 'inOut',       width: 70, align: 'center' },
 	        { header: '수량',     name: 'qty',         align: 'right', width: 80 },
-	        { header: '비고',     name: 'remark',      editor: false }
 	      ]
 	    });
 	  }

@@ -24,7 +24,7 @@
     <select id="getWarehouseAreaHistory" resultType="map">
 		SELECT wh.whs_his_date AS action_time,
 				wh.whs_his_cnt AS quantity,
-				s.det_nm AS status,	
+				s.det_nm AS status
 		FROM warehouse_history wh
 		LEFT JOIN code_detail s 
 		ON wh.whs_his_sts = s.det_id
