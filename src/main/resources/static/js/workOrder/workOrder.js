@@ -76,8 +76,10 @@ $(function() {
 	// 창고배정 버튼 클릭시
 	document.getElementById('grid').addEventListener('click', function(e) {
 		if (e.target.classList.contains('assign-btn')) {
-			const oddId = e.target.dataset.oddId;
-			openAssignWarehouse(oddId);
+			const rowKey = e.target.closest('tr').dataset.rowKey;
+			// Grid에서 해당 row 데이터 가져옴
+			const rowData = grid.getRow(Number(rowKey));
+			openAssignWarehouse(rowData.odd_id, rowData.odd_cnt);
 		}
 	});
 });
@@ -180,7 +182,7 @@ function openWorkModal(prd_code, odd_id, odd_cnt) {
 		});
 	});
 }
-// 모달 렌더링 함수
+// 공정단계 모달 렌더링 함수
 function renderProcessSteps(processList) {
 	const container = document.getElementById('process-steps-container');
 	container.innerHTML = '';
@@ -216,7 +218,6 @@ function renderProcessSteps(processList) {
 				<input type="hidden" id="hidden-odd-cnt" value="${process.odd_cnt}" />
 			</div>
 		`;
-		debugger;
 		container.appendChild(step);
 	});
 }
@@ -246,7 +247,6 @@ function groupWarehouses(data) {
 		const whsNm = item.WHS_NM;
 		if (!grouped[whsNm]) {
 			grouped[whsNm] = {
-				id: whsNm, // 실제로는 DB에서 창고 ID 받아서 여기에 넣는게 좋음
 				name: whsNm,
 				pc: item.WHS_PC,
 				add: item.WHS_ADD,
@@ -260,7 +260,7 @@ function groupWarehouses(data) {
 			currentCount: item.WHS_HIS_CNT || 0
 		});
 	});
-
+	debugger;
 	return Object.values(grouped);
 }
 // 검색어를 기준으로 창고 목록 필터링 및 렌더링
@@ -285,7 +285,7 @@ function renderWarehouseList(filterText = '') {
 		listEl.appendChild(btn);
 	});
 }
-
+// 창고 선택후 오른쪽 렌더링
 function selectWarehouse(index) {
 	const warehouse = warehouses[index];
 
@@ -306,20 +306,25 @@ function selectWarehouse(index) {
 }
 
 // 모달 열기 함수
-function openAssignWarehouse(oddId) {
+function openAssignWarehouse(oddId, oddCnt) {
 	document.getElementById('warehouseSearch').value = '';
-
 	document.getElementById('selectedWarehouseId').value = '';
 	document.getElementById('selectedOddId').value = oddId;
 
+	// odd_cnt hidden으로 저장
+	document.getElementById('hiddenAssignQty')?.remove(); // 중복 제거
+	const qtyInput = document.createElement('input');
+	qtyInput.type = 'hidden';
+	qtyInput.id = 'hiddenAssignQty';
+	qtyInput.value = oddCnt;
+	document.body.appendChild(qtyInput);
+
+	// 초기화
 	document.getElementById('warehouseName').textContent = '-';
 	document.getElementById('warehouseLocation').textContent = '-';
 	document.getElementById('warehouseZone').innerHTML = '<option value="">창고구역을 선택하세요</option>';
 
-	// AJAX로 창고 데이터를 불러온 후 렌더링
-	fetchWarehouses(() => {
-		renderWarehouseList();
-	});
+	fetchWarehouses(() => renderWarehouseList());
 
 	const modal = new bootstrap.Modal(document.getElementById('AssignWarehouseModal'));
 	modal.show();
@@ -336,24 +341,46 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 	const warehouseId = document.getElementById('selectedWarehouseId').value;
 	const team = document.getElementById('warehouseZone').value;
 	const oddId = document.getElementById('selectedOddId').value;
+	const assignQty = parseInt(document.getElementById('hiddenAssignQty')?.value, 10);
 
-	if (!warehouseId) {
-		alert('창고를 선택해주세요.');
+	if (!warehouseId) return alert('창고를 선택해주세요.');
+	if (!team) return alert('구역을 선택해주세요.');
+	if (!assignQty || assignQty <= 0) return alert('수량이 유효하지 않습니다.');
+
+	// 선택한 창고와 구역 찾기
+	const selectedWarehouse = warehouses.find(w => w.name === document.getElementById('warehouseName').textContent);
+	if (!selectedWarehouse) return alert('창고 정보가 올바르지 않습니다.');
+
+	const selectedTeam = selectedWarehouse.teams.find(t => t.name === team);
+	if (!selectedTeam) return alert('구역 정보가 올바르지 않습니다.');
+
+	const maxQty = selectedTeam.max;
+	const currentQty = selectedTeam.currentCount || 0;
+
+	if (assignQty + currentQty > maxQty) {
+		alert(`❌ 현재 수량(${currentQty})에 ${assignQty} 추가 시 최대 수량(${maxQty})를 초과합니다.`);
 		return;
 	}
-	if (!team) {
-		alert('구역을 선택해주세요.');
-		return;
-	}
 
-	// 여기에 ajax 호출 넣으면 됨
-	console.log('창고배정 등록 데이터', { oddId, warehouseId, team });
-	alert('창고배정 등록 완료! (테스트용)');
-
-	// 모달 닫기
-	const modalEl = document.getElementById('AssignWarehouseModal');
-	const modal = bootstrap.Modal.getInstance(modalEl);
-	modal.hide();
-
-	// 이후 추가 처리 (리로드 등) 필요 시 작성
+	// 등록 요청
+	$.ajax({
+		url: '/SOLEX/workOrders/warehouses',
+		method: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify({
+			oddId: oddId,
+			warehouseId: warehouseId,
+			areaName: team
+		}),
+		success: function(data) {
+			alert('창고배정 등록 완료!');
+			const modalEl = document.getElementById('AssignWarehouseModal');
+			const modal = bootstrap.Modal.getInstance(modalEl);
+			modal.hide();
+		},
+		error: function(xhr, status, error) {
+			console.error('🚨 창고 데이터 로딩 실패:', error);
+			alert('창고 배정 등록 실패!');
+		}
+	});
 });

@@ -44,4 +44,5 @@ public class WorkOrderRestController {
 		System.out.println(service.getWarehouses());
 		return service.getWarehouses();
 	}
+	
 }
