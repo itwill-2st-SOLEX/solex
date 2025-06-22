@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -63,26 +66,29 @@ public class ProductsRestController {
 	    return result;
 	}
 	
+	// 단위 셀렉트바 옵션들
 	@GetMapping("/prdUnitTypes")
-	public List<Map<String, String>> getPrdUnitTypes() throws Exception {
+	public Map<String, Object> getPrdUnitTypes(@RequestParam("groupCode") String groupCode) throws Exception {
 		
-		// prd 정보 가져오기
-//		Map<String, String> getProductInfo = productsService.getProductInfo()
+		System.out.println("getCommonCodes API called with groupCode: " + groupCode);
+ 		List<Map<String, String>> prdUnitList = productsService.getPrdUnitTypesAsMap(groupCode);
+		Map<String, Object> result = new HashMap<>();
+		result.put("data", prdUnitList);
 		
-		
-		
-		System.out.println("getPrdUnitTypes() 메서드 잘 나옴??????");
-		return null;
-//		return Arrays.stream(ClientType.values())
-//		        .map(ct -> Map.of(
-//		            "code", ct.name(),
-//		            "name", ct.getLabel()
-//		        ))
-//		        .collect(Collectors.toList());
+		return result;
 	}
+	
+	
+	// 제품 insert
+	@PostMapping("/productRegist")
+	public ResponseEntity<Map<String, String>> registerProduct(@RequestBody Map<String, Object> requestMap) {
+        System.out.println("registerProduct 메서드 안에 requestMap: " + requestMap);
 
-	
-	
-	
-	
+        // 서비스 호출, Map을 그대로 넘김
+        productsService.registerProduct(requestMap);
+
+        Map<String, String> response = new java.util.HashMap<>();
+        response.put("message", "제품 등록 성공!");
+        return ResponseEntity.ok(response);
+    }
 }

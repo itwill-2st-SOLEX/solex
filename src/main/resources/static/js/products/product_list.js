@@ -49,7 +49,14 @@ document.addEventListener('DOMContentLoaded', function() {
 		  { header: '상품코드', name: 'PRD_ID', hidden: true }, 
 		  { header: '옵션코드', name: 'OPT_ID', hidden: true }, 
 	      { header: '가격', name: 'PRD_PRICE', hidden: true },
-	      { header: '상품명', name: 'PRD_NM', align: 'center', sortable: true , width: 200 },
+	      { header: '선택된단위', name: 'PRD_SELECTED_UNIT', hidden: true },
+	      { header: '선택된유형', name: 'PRD_SELECTED_TYPE', hidden: true },
+	      
+		  { header: '선택된색상', name: 'OPT_COLOR', hidden: true },
+		  { header: '선택된굽', name: 'OPT_HEIGHT', hidden: true },
+		  { header: '선택된사이즈', name: 'OPT_SIZE', hidden: true },
+		  
+	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 200 },
 	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true , width: 100 },
 	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true , width: 70 },
 		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true , width: 70 },

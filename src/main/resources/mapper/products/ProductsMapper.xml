@@ -10,7 +10,18 @@
 	    	   p.prd_id,
 			   p.prd_nm,
 			   p.prd_price,
+			   p.prd_unit PRD_SELECTED_UNIT,
+			   p.prd_type PRD_SELECTED_TYPE,
+			   p.prd_code,
+			   p.prd_comm,
+			   p.prd_reg_date,
+			   p.prd_up_date,
+			   
 			   o.opt_id, 
+			   o.opt_color, 
+			   o.opt_height, 
+			   o.opt_size,
+			   
 			   cd_type.det_nm PRD_TYPE, -- 유형
 			   cd_unit.det_nm PRD_UNIT, -- 단위
 			   cd_col.det_nm PRD_COLOR, -- 색상
@@ -36,7 +47,9 @@
 	           prd_yn = #{prdYn}
 	        </if>
 	    </where>
+	    ORDER BY PRD_ID
 	    OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
+	    
 	</select>
 	<select id="selectTotalProductCount" resultType="int">
 		SELECT COUNT(*) 
@@ -55,5 +68,81 @@
      LEFT JOIN product_option o 
      		ON p.prd_id = o.prd_id
 		 WHERE prd_yn = 'Y'
-    </select> 
+    </select>
+    <select id="selectPrdUnitTypesAsMap" resultType="java.util.Map">
+    	SELECT
+			   cd.cod_id,
+			   cd.det_id,
+			   cd.det_nm
+		  FROM CODE c
+		  JOIN code_detail cd
+		    ON c.cod_id = cd.cod_id
+		 WHERE cod_yn = 'y' and det_yn = 'y'
+		   AND cd.cod_id = #{groupCode}
+	  ORDER BY det_sort
+<!--         SELECT prd_id, prd_nm, prd_unit, prd_type, det_nm -->
+<!--           FROM product p -->
+<!-- 		  JOIN code_detail cd  -->
+<!-- 		    ON p.prd_unit = cd.det_id -->
+<!--        	 WHERE prd_yn='Y' -->
+<!-- 		  AND prd_id=21 -->
+
+    </select>
+    <insert id="insertProduct" parameterType="map">
+       <selectKey keyProperty="prd_id" resultType="long" order="BEFORE">
+           SELECT "C##C4D2505T2"."ISEQ$$_167644".nextval FROM DUAL
+       </selectKey>
+       INSERT INTO PRODUCT (
+           PRD_NM,
+           PRD_PRICE,
+           PRD_CODE,
+           PRD_UNIT,
+           PRD_TYPE,
+           PRD_COMM,
+           PRD_REG_DATE,
+           PRD_UP_DATE
+       ) VALUES (
+           #{prd_nm},
+           #{prd_price},
+           #{prd_code},
+           #{prd_unit},
+           #{prd_type},
+           #{prd_comm},
+           #{prd_reg_date},
+           #{prd_reg_date}
+       )
+   </insert>
+	<insert id="insertProductOption" parameterType="map">
+        INSERT INTO PRODUCT_OPTION (
+            PRD_ID,
+            OPT_COLOR,
+            OPT_SIZE,
+            OPT_HEIGHT
+        ) VALUES (
+            #{prd_id},
+            #{opt_color},
+            #{opt_size},
+            #{opt_height}
+        )
+    </insert>
+    
+<!--    <insert id="insertProductOption" parameterType="java.util.List"> -->
+<!--         INSERT ALL -->
+<!--         <foreach collection="list" item="option"> -->
+<!--         INTO PRODUCT_OPTION ( -->
+<!--             OPT_ID,       PRD_ID, -->
+<!--             OPT_COLOR, -->
+<!--             OPT_SIZE, -->
+<!--             OPT_HEIGHT -->
+<!--         ) VALUES ( -->
+<!--             PRODUCT_OPTION_SEQ.NEXTVAL,  -->
+<!--             #{option.prd_id}, -->
+<!--             #{option.opt_color}, -->
+<!--             #{option.opt_size}, -->
+<!--             #{option.opt_height} -->
+<!--         ) -->
+<!--         </foreach> -->
+<!--         SELECT * FROM DUAL -->
+<!--     </insert> -->
+
 </mapper>	

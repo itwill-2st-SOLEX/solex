@@ -60,3 +60,8 @@
     background-color: #f0f8ff; /* 마우스 오버 시 배경색 변경 (예시) */
     outline: 1px solid #cceeff; /* 테두리 추가 (예시) */
 }
+
+.form-control[readonly] {
+    background-color: #e9ecef; /* Bootstrap의 form-control 클래스에 적용 */
+    opacity: 1; /* Bootstrap의 기본값을 유지하거나 오버라이드 */
+}
