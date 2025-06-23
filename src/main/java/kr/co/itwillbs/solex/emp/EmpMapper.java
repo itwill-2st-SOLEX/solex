@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
 public interface EmpMapper {
 
 	//인사등록
-	int insertEmp(Map<String, Object> empMap);
+	void insertEmp(Map<String, Object> empMap);
 
 	//인사목록 (재직중)
 	List<Map<String, Object>> getEmpListFiltered(@Param("searchType")String searchType, @Param("searchKeyword")String searchKeyword, @Param("includeEmpSts")String includeEmpSts);
