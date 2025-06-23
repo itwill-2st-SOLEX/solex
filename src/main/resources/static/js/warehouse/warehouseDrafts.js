@@ -48,32 +48,44 @@ $(function() {
 			openDetailModal(rowData);       
 		}
 	});
+	
+	let historyGrid = null;
 
-	/* ───────────────── 상세 모달용 전역 ───────────────── */
-	let historyGrid = null;   
+	/**  공통: JSON 응답(fetch) ― 바디가 없으면 기본값 반환 */
+	async function fetchJson(url, defaultValue = null) {
+	  const res = await fetch(url);
 
-	async function fetchJson(url) {
-		const res = await fetch(url);
-		if (!res.ok) throw new Error(`${url} 오류`);
-		return res.json();
+	  // 204 No Content 같이 바디가 없는 성공 응답
+	  if (res.status === 204) return defaultValue;
+
+	  if (!res.ok) throw new Error(`${url} 오류`);
+
+	  const text = await res.text();       // 바로 json() 하지 말고 text() 로 읽음
+	  if (!text) return defaultValue;      // Content-Length: 0 인 경우
+
+	  return JSON.parse(text);
 	}
 
 	/* ───────────────── 구역 히스토리를 그리드에 표시 ───────────────── */
 	async function renderAreaHistory(areaId) {
+	  try {
+	    // 히스토리가 없으면 [] 가 넘어오도록 기본값을 줌
+	    const list = await fetchJson(`/SOLEX/warehouse/area/${areaId}/history`, []);
 
-		try {
-			const list = await fetchJson(`/SOLEX/warehouse/area/${areaId}/history`);
-	
-		    const data = list.map((h, idx) => ({
-		   		actionTime : h.ACTION_TIME,
-		 		inOut      : h.STATUS,
-				qty        : h.QUANTITY
-		  	}));
-	
-		    historyGrid.resetData(data);
-		} catch (e) {
-			console.error(e);
-		}
+	    // list 가 null/undefined 면 그냥 빈 배열로
+	    const safeList = Array.isArray(list) ? list : [];
+		
+	    const data = safeList.map((h) => ({
+	      actionTime : h.ACTION_TIME,
+	      inOut      : h.STATUS,
+	      qty        : h.QUANTITY
+	    }));
+
+	    historyGrid.resetData(data);       // data 가 [] 여도 에러 X
+	  } catch (e) {
+	    console.error(e);
+	    historyGrid.resetData([]);         // 혹시 예외가 나도 그리드 초기화
+	  }
 	}
 			
 	async function openDetailModal(row) {
@@ -103,20 +115,17 @@ $(function() {
 	    <div id="historyGrid" class="border"></div>
 	  `);
 
-	  /* 2) 히스토리용 tui.Grid 최초 1회 생성 */
-	  if (!historyGrid) {
-	    historyGrid = new tui.Grid({
-	      el         : document.getElementById('historyGrid'),
-	      bodyHeight : 300,
-	      scrollY    : true,
-	      rowHeaders : ['rowNum'],
-	      columns: [
-	        { header: '변동일시', name: 'actionTime', sortable: true, width: 160 },
-	        { header: '구분',     name: 'inOut',       width: 70, align: 'center' },
-	        { header: '수량',     name: 'qty',         align: 'right', width: 80 },
-	      ]
-	    });
-	  }
+	  historyGrid = new tui.Grid({
+	  	el: document.getElementById('historyGrid'),
+	  	bodyHeight: 300,
+	  	scrollY: true,
+	      	data: [],
+	      	columns: [
+	  	        { header: '변동일시', name: 'actionTime', sortable: true, width: 160 },
+	  	        { header: '구분',     name: 'inOut',       width: 70, align: 'center' },
+	  	        { header: '수량',     name: 'qty',         align: 'right', width: 80 }
+	      	]
+	  });
 
 	  try {
 	    /* 3) 창고 정보 + 구역 목록 가져오기 */
@@ -144,8 +153,16 @@ $(function() {
 	    });
 
 	    /* 6) 모달 오픈 */
-	    document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
-	    new bootstrap.Modal('#detailModal').show();
+		const modalEl = document.getElementById('detailModal'); 
+		const modal   = new bootstrap.Modal(modalEl);
+		
+		function handleShown() {
+		  historyGrid.refreshLayout();        // ← 핵심!
+		  modalEl.removeEventListener('shown.bs.modal', handleShown); // 이벤트 1회용
+		}
+		modalEl.addEventListener('shown.bs.modal', handleShown);
+
+		modal.show();   
 
 	  } catch (err) {
 	    console.error('상세 조회 실패', err);

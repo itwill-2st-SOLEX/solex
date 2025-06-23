@@ -47,7 +47,7 @@ public class WarehouseRestController {
     
     // 창고 구역의 히스토리
     @GetMapping("/area/{areaId}/history")
-    public Map<String, Object> getWarehouseAreaHistory(@PathVariable("areaId") Long areaId) {
+    public List<Map<String,Object>> getWarehouseAreaHistory(@PathVariable("areaId") Long areaId) {
     	System.out.println();
     	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
     	Long loginEmpId = 2L;

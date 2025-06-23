@@ -81,10 +81,8 @@ public class WarehouseService {
 		
 	}
 
-	public Map<String, Object> getWarehouseAreaHistory(Long areaId, Long loginEmpId) {
-		areaMapper.getWarehouseAreaHistory(areaId);
-		return null;
+	public List<Map<String,Object>> getWarehouseAreaHistory(Long areaId, Long loginEmpId) {
+		return areaMapper.getWarehouseAreaHistory(areaId);
 	}
 	
-
 }

@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.area;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -9,6 +10,6 @@ public interface AreaMapper {
 
 	void insertArea(Map<String, Object> area);
 
-	void getWarehouseAreaHistory(Long areaId);
+	List<Map<String,Object>> getWarehouseAreaHistory(Long areaId);
 
 }
