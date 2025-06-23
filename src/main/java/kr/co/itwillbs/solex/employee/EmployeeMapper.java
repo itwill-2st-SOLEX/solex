@@ -17,6 +17,8 @@ public interface EmployeeMapper {
 				int docEmployeePosSort
 			);
 
+	Map<String, Object> findByEmpNum(long empNum);
+
 }
 
 	

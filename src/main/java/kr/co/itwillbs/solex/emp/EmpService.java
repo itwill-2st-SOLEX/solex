@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.log4j.Log4j2;
@@ -13,14 +14,21 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Service
 public class EmpService {
+	
+	@Autowired
+    private PasswordEncoder passwordEncoder;
 
 	@Autowired
 	private EmpMapper mapper;
 
 	//인사등록
-	public int registerEmp(Map<String, Object> empMap) {
+	public void registerEmployee(Map<String, Object> empMap) {
 		System.out.println("##################################empMap = " + empMap);
-		return mapper.insertEmp(empMap);
+		
+        String encodedPassword = passwordEncoder.encode((String) empMap.get("emp_birth"));
+		empMap.put("emp_pwd", encodedPassword);
+		
+		mapper.insertEmp(empMap);
 	}
 
 	//인사목록 (재직중)
