@@ -3,11 +3,17 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.login.LoginMapper">
-	<select id="loginEmp" resultType="map">
-		select *
-		  from employee
-		 where emp_num = #{emp_num}
-		   and emp_pw = #{emp_pw}
+<!--사용자가 입력한 사번 찾기-->
+<!--		[TODO] role추가시 쓸 쿼리 -->
+<!--	<select id="findByEmpNum" parameterType="string" resultType="map">-->
+<!--		SELECT emp_num, emp_pw, role-->
+<!--		FROM employee-->
+<!--		WHERE emp_num = #{empNum}-->
+<!--	</select>-->
+	<select id="findByEmpNum" parameterType="string" resultType="map">
+		SELECT emp_num, emp_pw
+		FROM employee
+		WHERE emp_num = #{empNum}
 	</select>
 
 </mapper>

@@ -10,9 +10,9 @@ public class LoginService {
 	@Autowired
 	LoginMapper mapper;
 
-	public Map<String, String> loginEmp(Map<String, String> empInfo) {
-		return mapper.loginEmp(empInfo);
-	}
+//	public Map<String, String> findByEmpNum(Map<String, String> empInfo) {
+//		return mapper.findByEmpNum(empInfo);
+//	}
 	
 //	@Override
 //	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

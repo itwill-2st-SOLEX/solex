@@ -10,7 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
     
-	@Bean
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -20,9 +20,17 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())               // CSRF 비활성화
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()               // 모든 요청 허용
+                .requestMatchers("/login","/auth/login", "/css/**", "/js/**", "/assets/**").permitAll()
+                .anyRequest().authenticated()           // 로그인 필수
             )
-            .formLogin(login -> login.disable())        // 폼 로그인 비활성화
+            .formLogin(form -> form
+                .loginPage("/auth/login")
+                .loginProcessingUrl("/login")
+                .usernameParameter("emp_num")
+                .passwordParameter("emp_pw")
+                .defaultSuccessUrl("/", true)            // 로그인 성공 시 이동할 페이지
+                .permitAll()
+            )
             .httpBasic(basic -> basic.disable());       // HTTP Basic 인증 비활성화
 
         return http.build();

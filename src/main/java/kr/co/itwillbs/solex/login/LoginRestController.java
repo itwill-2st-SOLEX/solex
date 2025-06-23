@@ -16,11 +16,10 @@ public class LoginRestController {
 	@Autowired
 	LoginService service;
 	
-	@PostMapping("/login")
-	public Map<String, String> login(@RequestBody Map<String, String> empInfo) {
-		
-		System.out.println(empInfo);
-		return service.loginEmp(empInfo);
-	}
+//	@PostMapping("/login")
+//	public Map<String, String> login(@RequestBody Map<String, String> loginInfo) {
+//		
+//		return service.findByEmpNum(loginInfo);
+//	}
 	
 }

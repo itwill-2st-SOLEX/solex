@@ -8,6 +8,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface LoginMapper {
 
-	Map<String, String> loginEmp(Map<String, String> empInfo);
+	Map<String, Object> findByEmpNum(String empNum);
 
 }
