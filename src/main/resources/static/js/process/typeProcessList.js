@@ -322,7 +322,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 			
 			const deleteList = checkedRows.map(row => ({
-		        PCP_ID: row.PCP_ID
+		        PCP_ID: row.PCP_ID,
+				DET_ID: selectedDetId,
+				PCP_SEQ: row.PCP_SEQ
 		    }));
 			
 			fetch('/SOLEX/typeProcess/delete', {

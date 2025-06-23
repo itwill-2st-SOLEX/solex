@@ -46,4 +46,7 @@ public interface ProcessMapper {
 	// 공정순서 삭제
 	void deleteTypeProcess(Map<String, Object> pcp);
 	
+	// 공정순서 재정렬
+	void shiftUpSequence(Map<String, Object> param);
+	
 }

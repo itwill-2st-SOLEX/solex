@@ -138,24 +138,29 @@ public class ProcessService {
 	
 	// 공정순서 삭제
 	@Transactional
-    public void deleteTypeProcesses(List<Map<String, Object>> deleteList) {
+	public void deleteTypeProcesses(List<Map<String, Object>> deleteList) {
+        
         for (int i = deleteList.size() - 1; i >= 0; i--) {
             Map<String, Object> row = deleteList.get(i);
+            
+                int pcpId = Integer.parseInt(row.get("PCP_ID").toString());
+                int pcpSeq = Integer.parseInt(row.get("PCP_SEQ").toString());
+                String detId = row.get("DET_ID").toString();
 
-            Object pcpIdObj = row.get("PCP_ID");
-            if (pcpIdObj != null) {
-                try {
-                    int pcpId = Integer.parseInt(pcpIdObj.toString());
-                    row.put("PCP_ID", pcpId);
-                    
-                    System.out.println("서비스row : " + row);
+                // 1. 실제 삭제
+                Map<String, Object> deleteParam = new HashMap<>();
+                deleteParam.put("PCP_ID", pcpId);
+                
+                processMapper.deleteTypeProcess(deleteParam);
 
-                    processMapper.deleteTypeProcess(row);
-                } catch (NumberFormatException e) {
-                    System.out.println("PCP_ID 변환 실패: " + pcpIdObj);
-                }
-            }
+                // 2. 이후 순서 줄이기
+                Map<String, Object> updateParam = new HashMap<>();
+                updateParam.put("DET_ID", detId);
+                updateParam.put("PCP_SEQ", pcpSeq);
+                
+                processMapper.shiftUpSequence(updateParam);
         }
+        
     }
 
 }

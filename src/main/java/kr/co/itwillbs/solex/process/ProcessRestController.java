@@ -161,10 +161,7 @@ public class ProcessRestController {
 	
 	// 공정순서 삭제
 	@PostMapping("/typeProcess/delete")
-    public ResponseEntity<?> deleteTypeProcesses(@RequestBody List<Map<String, Object>> deleteList) {
-		
-		System.out.println("컨트롤러 deleteList : " + deleteList);
-		
+	public ResponseEntity<?> deleteTypeProcesses(@RequestBody List<Map<String, Object>> deleteList) {
         try {
         	processService.deleteTypeProcesses(deleteList);
             return ResponseEntity.ok(Map.of("result", "success"));

@@ -145,5 +145,13 @@
 	<delete id="deleteTypeProcess" parameterType="map">
 	    DELETE FROM TYPE_PROCESS WHERE PCP_ID = #{PCP_ID}
 	</delete>
+	
+	<!-- 공정순서 재정렬 -->
+	<update id="shiftUpSequence" parameterType="map">
+	    UPDATE TYPE_PROCESS
+	    SET PCP_SEQ = PCP_SEQ - 1
+	    WHERE PRD_TYPE = #{DET_ID}
+	      AND PCP_SEQ > #{PCP_SEQ}
+	</update>
 
 </mapper>
