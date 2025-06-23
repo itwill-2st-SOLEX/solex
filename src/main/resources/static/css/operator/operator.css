@@ -154,3 +154,15 @@
     color: black; /* 겹치지 않을 때는 검정 */
     pointer-events: none; /* 클릭 방해 방지 */
 }
+
+.save-bcount-btn{
+	text-align: right;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.save-bcount-btn i{
+	text-align: right;
+	margin: 0 !important;
+	padding: 0 !important;
+}

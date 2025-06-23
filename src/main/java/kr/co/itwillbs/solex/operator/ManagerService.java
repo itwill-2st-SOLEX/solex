@@ -36,27 +36,22 @@ public class ManagerService {
 		String wpoStatus = (String) map.get("wpoStatus");
 		
 		switch (wpoStatus) {
-			case "wpo_sts_01":
-				// 상태 : wpo_sts_01 >> 작업대기 -> '작업시작' 상태로 변경
+			case "wpo_sts_02":
+				// 상태 : wpo_sts_01 대기 >> wpo_sts_02 작업중 -> 버튼 클릭으로 상태변경  -->
 				// 상태코드 변경, 작업시작일 저장
 				map.put("wpoStartDate", LocalDateTime.now());
-				map.put("wpoStatus", "wpo_sts_02");
 				
-				managerMapper.updateWpoSts01(map);
-				break;
-			
-			case "wpo_sts_02":
-				
+				managerMapper.updateWpoSts02(map);
 				break;
 				
 			case "wpo_sts_03":
-				//상태 : wpo_sts_03 >> 공정 완료 -> 품질검사이력 insert
-				
+				//(상태 : wpo_sts_02 작업중 >> wpo_sts_03 공정완료 -> 사원입력값 확인하여 생산 완료 확인 -->
+				//WorkerService에서 처리하므로 할 거 없음
 				break;
 				
 			case "wpo_sts_04":
-				//상태 : wpo_sts_04 >> 품질검사중 -> ??? 
-				
+				//(상태 : wpo_sts_03 공정완료 >> wpo_sts_04 품질검사중 -> 사원입력값 확인하여 생산 완료 확인 -->	
+				managerMapper.updateWpoSts04(map);
 				break;
 				
 			case "wpo_sts_05":

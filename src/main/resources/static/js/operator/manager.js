@@ -34,28 +34,43 @@ const grid = new tui.Grid({
 		
 		{ header: '작업지시수량', name: 'wpoOcount', align: 'center', filter: 'select', width: 110 },
 		{ header: '작업완료수량', name: 'wpoJcount', align: 'center', filter: 'select', width: 110},
-		{ header: '불량수량', name: 'wpoBcount', align: 'center', filter: 'select' },
-		{ 		header: '진행률',
-		        name: 'wpoProRate',
-		        align: 'center',
-				// 작업률 표시
-				formatter: ({ value }) => {
-				    const rate = parseFloat(value) || 0;
+		{ header: '불량수량', name: 'wpoBcount', align: 'center', filter: 'select',
+			formatter: ({ value, row }) => {
+			    if (row.wpoStatus !== 'wpo_sts_04') {
+			      return value ?? '-'; // 기본값 또는 빈 문자열
+			    }
 
-				    return `
-				        <div class="progress" style="height: 20px; position: relative;">
-				            <div class="progress-bar bg-success" 
-				                 role="progressbar" 
-				                 style="width: ${rate}%;" 
-				                 aria-valuenow="${rate}" 
-				                 aria-valuemin="0" 
-				                 aria-valuemax="100">
-				            </div>
-				            <span class="progress-text">${rate}%</span>
-				        </div>
-				    `;
-				}
-			},
+			    return `
+			      <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+			        <input type="text" value="${value ?? ''}" class="bcount-input" data-id="${row.wrkId}" style="width: 50px;" />
+			        <button class="save-bcount-btn" data-id="${row.wrkId}" style="border: none; background: transparent; cursor: pointer;">
+						<i class="menu-icon tf-icons bx bx-check"></i>
+			        </button>
+			      </div>
+			    `;
+			  }
+		}, 
+		{header: '진행률',
+         name: 'wpoProRate',
+         align: 'center',
+		 // 작업률 표시
+		 formatter: ({ value }) => {
+		    const rate = parseFloat(value) || 0;
+
+		    return `
+		        <div class="progress" style="height: 20px; position: relative;">
+		            <div class="progress-bar bg-success" 
+		                 role="progressbar" 
+		                 style="width: ${rate}%;" 
+		                 aria-valuenow="${rate}" 
+		                 aria-valuemin="0" 
+		                 aria-valuemax="100">
+		            </div>
+		            <span class="progress-text">${rate}%</span>
+		        </div>
+		    `;
+		 }
+		},
 		{ header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: 'true' },
 		{ header: '진행상태', name: 'wpoStatusName', align: 'center', filter: 'select', className: 'bold-text' },
 		{ header: '작업지시', name: 'wpoBtn', align: 'center', sortable: 'true', editable: false, width: 120},
@@ -125,17 +140,25 @@ function dateFormatter(date, includeTime = false) {
 document.getElementById('grid').addEventListener('click', async (e) => {
   const target = e.target;
   
+  // input 클릭 시 포커스 강제 부여
+  if (target.classList.contains('bcount-input')) {
+      e.stopPropagation();
+      target.focus();
+      return;
+  }
+  
   if (target.tagName === 'BUTTON') {
     const wrkId = target.getAttribute('data-id');
     if (!wrkId) return;
 
     // 버튼 종류 구분 (클래스명 또는 버튼 텍스트 등)
+	// updateStatus(작업id, 변경될 상태값)
     if (target.classList.contains('start-btn')) { // 작업시작 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_01'); 		// 공정진행중
+      await updateStatus(wrkId, 'wpo_sts_02'); 		// 공정진행중
     } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_03'); // 품질검사 중
-	} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사완료
+      await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사 중
+	//} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 클릭
+    //  await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사완료
 /*    }else if (target.classList.contains('transfer-btn')) {	
 	  
 	  await updateStatus(wrkId, 'wpo_sts_05'); //다음 공정으로 이관
@@ -147,13 +170,14 @@ document.getElementById('grid').addEventListener('click', async (e) => {
   }
 });
 
-/*// 현재 상태 가져오기 - 그리드 데이터에서 wrkId 행 찾기
-function getCurrentStatus(wrkId) {
-  const allData = grid.getData();
-  const row = allData.find(r => r.wrkId === wrkId);
-  return row ? row.oddStatus : null;
-}
-*/
+//품질검사 중일 때만 불량수량 입력할 수 있도록 설정
+/*grid.on('editingStart', ev => {
+  const row = grid.getRow(ev.rowKey);
+  if (ev.columnName === 'wpoBcount' && row.wpoStatus !== 'wpo_sts_04') {
+    ev.stop(); // 편집 막기
+    alert('품질검사 후 등록해주세요');
+  }
+});*/
 
 //공정 요약 정보
 async function managerSummary() {
@@ -173,12 +197,6 @@ async function managerSummary() {
 			document.getElementById('prcTest').textContent = data.QUA_NM || '-';
 		
 			managerList(currentPage);
-			
-			console.log(empId);
-			console.log(data.PRC_ID);
-			console.log(data.PRC_NM);
-			console.log(data.DEP_NM);
-			console.log(data.QUA_NM);
 
 	    } catch (e) {
 	        console.error('fetch 에러 : ', e);
@@ -204,27 +222,28 @@ async function managerList(page) {
 		console.log(data)
 		
 		const gridData = list.map((n, idx) => {
-		    
 			let btn = '';
 			
-			// ✅ 진행률은 여기서 개별적으로 계산
+			// 진행률 계산
 		    const wpoProRate = n.WPO_OCOUNT > 0
 		        ? Math.round((n.WPO_JCOUNT / n.WPO_OCOUNT) * 1000) / 10  // 소수점 1자리
 		        : 0;
 			
 		    const wpoStatus = n.WPO_STATUS;
-			    if (!hasInProgress && wpoStatus === 'wpo_sts_01') {
-			        btn = `<button class="btn start-btn btn-sm btn-primary " data-id="${n.WRK_ID}">작업시작</button>`;
-			    } else if (wpoStatus === 'wpo_sts_02') {
-			        btn = '';  // 버튼 없음
-			    } else if (wpoStatus === 'wpo_sts_03') {
-			        btn = `<button class="btn quality-btn btn-sm btn-info" data-id="${n.WRK_ID}">품질검사</button>`;
-			    } else if (wpoStatus === 'wpo_sts_04') {
-			        btn = `<button class="btn transfer-btn btn-sm btn-warning" data-id="${n.WRK_ID}">검사완료</button>`;
-			    } else if (wpoStatus === 'wpo_sts_05') {
-			        btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WRK_ID}">공정이관</button>`;
-			    }
-				console.log(wpoProRate)
+			
+		    if (!hasInProgress && wpoStatus === 'wpo_sts_01') {
+		        btn = `<button class="btn start-btn btn-sm btn-primary " data-id="${n.WRK_ID}">작업시작</button>`;
+		    } else if (wpoStatus === 'wpo_sts_02') {
+		        btn = '';  // 버튼 없음
+		    } else if (wpoStatus === 'wpo_sts_03') {
+		        btn = `<button class="btn quality-btn btn-sm btn-info" data-id="${n.WRK_ID}">품질검사</button>`;
+		    } else if (wpoStatus === 'wpo_sts_04') {
+		        btn = `<button class="btn transfer-btn btn-sm btn-warning" data-id="${n.WRK_ID}">검사완료</button>`;
+		    } else if (wpoStatus === 'wpo_sts_05') {
+		        btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WRK_ID}">공정이관</button>`;
+		    }
+			console.log(wpoProRate)
+			
 		    return {
 		        wrkId: n.WRK_ID,
 		        prdCd: n.PRD_CODE,
@@ -237,6 +256,7 @@ async function managerList(page) {
 		        wpoBcount: n.WPO_BCOUNT,
 		        wpoProRate: wpoProRate,
 		        wpoStatusName: n.WPO_STATUS_NAME,
+				wpoStatus: n.WPO_STATUS,
 		        ordEndDate: dateFormatter(new Date(n.ORD_END_DATE)) || '-',
 		        wpoBtn: btn
 		    };

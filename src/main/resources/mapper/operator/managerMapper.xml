@@ -98,7 +98,7 @@
 	
 	<!-- 작업 상태 업데이트 -->
 	<!-- 상태 : wpo_sts_01 >> 작업대기 -> '작업시작' 상태로 변경 -->
-	<update id="updateWpoSts01">
+	<update id="updateWpoSts02">
 		UPDATE work_process
 		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
 		WHERE wrk_id=#{wrkId}
@@ -106,32 +106,33 @@
 	
 	<!-- 작업 상태 업데이트 -->
 	<!-- 상태 : wpo_sts_02 >> 작업중 -> 사원입력값 확인하여 생산완료되는지 확인  -->
-	<select id="selectWpoSts02">
+	<select id="selectWpoSts03">
 		SELECT wpo_ocount, wpo_jcount
 		FROM work_process
 		WHERE wpo_id = #{wpoId}
 	</select>
 	
-	<!-- 상태 : wpo_sts_03 >> 공정 완료 -> 품질검사이력 insert  -->
+	<!-- 상태 : wpo_sts_02 >> 작업중 -> 작업완료(wpo_sts_03)로 변경 -->
 	<update id="updateWpoSts03">
  		UPDATE work_process
-		SET wpo_status=#{wpoStatus}, wpo_end_date=#{wpoEndDate}
+		SET wpo_status=#{wpoStatus}
 		WHERE wpo_id=#{wpoId}
 	</update>
 	
-	<!-- 상태 : wpo_sts_04 >> 품질검사중 -> ???  -->
+	<!-- 상태 : wpo_sts_03 >> 공정완료 -> 품질검사중으로 변경  -->
 	<update id="updateWpoSts04">
-<!-- 		UPDATE work_process
-		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
-		WHERE wrk_id=#{wrkId} -->
+ 		UPDATE work_process
+		SET wpo_status=#{wpoStatus}
+		WHERE wrk_id=#{wrkId}
 	</update>
 	
-	<!-- 상태 : wpo_sts_05 >> 품질검사완료 -> 공정이관, work_process의 작업종료일 변경, 다음공정의 작업상태를 01로 변경   -->
+		<!-- 상태 : wpo_sts_04 >> 품질검사중 -> ???  -->
 	<update id="updateWpoSts05">
 <!-- 		UPDATE work_process
 		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
 		WHERE wrk_id=#{wrkId} -->
 	</update>
+
 	
   </mapper>
 	
