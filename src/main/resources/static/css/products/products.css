@@ -51,17 +51,99 @@
 }
 
 
-/* prod-grid 내의 PRD_NM 컬럼 셀에만 적용 */
-#prod-grid .tui-grid-cell-content[data-column-name="PRD_NM"] {
-    cursor: pointer; /* 마우스 오버 시 손가락 모양으로 변경 */
-}
-
-#prod-grid .tui-grid-cell-content[data-column-name="PRD_NM"]:hover {
-    background-color: #f0f8ff; /* 마우스 오버 시 배경색 변경 (예시) */
-    outline: 1px solid #cceeff; /* 테두리 추가 (예시) */
-}
-
+/* ------------ prod-grid 내의 PRD_NM 컬럼 셀에만 적용 ------------ */
 .form-control[readonly] {
     background-color: #e9ecef; /* Bootstrap의 form-control 클래스에 적용 */
     opacity: 1; /* Bootstrap의 기본값을 유지하거나 오버라이드 */
+}
+
+/* ------------ 제품등록 모달 화면에서  옵션 값 버튼을 눌렀을 때 적용되는 css ------------ */
+/* 옵션 그룹 스타일 */
+.option-group {
+    margin-bottom: 30px; /* 각 색상 그룹 간의 간격 */
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    background-color: #fcfcfc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* 약간의 그림자 */
+}
+
+.option-group h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.25em;
+    color: #34495e;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* 옵션 테이블 스타일 (기존 table.table-bordered에 추가) */
+.option-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: #fff;
+}
+
+.option-table th, .option-table td {
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.9em;
+}
+
+.option-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #555;
+}
+
+.option-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.option-table tbody tr:hover {
+    background-color: #f0f8ff;
+}
+
+/* 버튼 스타일 (기존 btn, btn-info 등 부트스트랩 클래스와 병행) */
+.add-single-option-btn {
+    /* 부트스트랩 btn btn-primary btn-sm 에 추가 */
+    /* background-color: #007bff; */ /* 부트스트랩 primary 색상 사용 */
+    /* color: white; */
+    /* padding: 8px 15px; */
+    /* border: none; */
+    /* border-radius: 4px; */
+    /* cursor: pointer; */
+    margin-top: 15px; /* 테이블과 버튼 사이 간격 */
+    font-size: 0.9em;
+}
+
+/* 관리 버튼 그룹 (수정/삭제) */
+.action-btns {
+    white-space: nowrap; /* 버튼들이 한 줄에 유지되도록 */
+}
+.btn-edit, .btn-delete {
+    /* 부트스트랩 btn btn-sm 에 추가 */
+    padding: 6px 10px;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+.btn-edit { background-color: #17a2b8; color: white; border: none; } /* info */
+.btn-delete { background-color: #dc3545; color: white; border: none; } /* danger */
+.btn-edit:hover { background-color: #138496; }
+.btn-delete:hover { background-color: #c82333; }
+
+
+
+/*----- 체크박스 체크되면 색깔 다르게 -----*/
+/* 체크박스가 선택된 행의 배경색 */
+.option-table tbody tr.selected-row {
+    background-color: #e0f2f7; /* 은은한 하늘색 계열 */
+    transition: background-color 0.2s ease; /* 색상 변경 시 부드러운 전환 효과 */
+}
+
+/* 호버 시 배경색 (선택된 행에도 적용될 수 있도록) */
+.option-table tbody tr:hover:not(.selected-row) {
+    background-color: #f0f8ff; /* 선택되지 않은 행에만 호버 효과 적용 */
 }

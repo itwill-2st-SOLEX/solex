@@ -5,6 +5,7 @@ let allHeightOptions = [];
 
 
 window.addEventListener('DOMContentLoaded', () => {
+	
 	document.getElementById('writeProductBtn').addEventListener('click', onWriteProduct);	
 });	
 
@@ -96,21 +97,14 @@ function showProductModal(mode, data = {}) {
 		        	<div class="col">
 		            	<label for="prd_reg_date" class="form-label">제품 등록일<span style="color:red">*</span></label>
 						<br>
-						<!-- 사용자에게 보여줄 날짜 -->
-						<input type="text" id="prd_reg_date" class="form-control" placeholder="제품 등록일"
-							value="${data.PRD_REG_DATE ? formatter(data.PRD_REG_DATE, true) : formatter(now, true)}" readonly>
-							
-						<!-- 서버로 전송할 실제 값 (hidden) -->
-						<input type="hidden"
-						       name="prd_reg_date"
-						       id="prd_reg_date"
-						       value="${data.PRD_REG_DATE}">
+						<input type="text" id="prd_reg_date" name="prd_reg_date" class="form-control" placeholder="제품 등록일" 
+							value="${data.PRD_REG_DATE ? formatter(data.PRD_REG_DATE, true) : formatter(now)}" readonly>
 		            </div>
 	                <div class="col">
 	                    <label for="prd_up_date" class="form-label">제품 수정일<span style="color:red">*</span></label>
 						<br>
 						<input type="text" id="prd_up_date" name="prd_up_date" class="form-control" placeholder="제품 수정일" 
-							value="${data.PRD_UP_DATE ? formatter(data.PRD_UP_DATE, true) : ''}" readonly>
+							value="${data.PRD_UP_DATE ? formatter(data.PRD_UP_DATE, true) : (data.PRD_REG_DATE ? formatter(now) : '')}" readonly>
 	                </div>
 		        </div>
 				
@@ -134,21 +128,33 @@ function showProductModal(mode, data = {}) {
 		        </div>
 				
 				
-				<!-- 제품등록 시에 옵션 그룹핑한 테이블 예시 -->	
-				<button type="button" class="btn btn-primary btn-sm mt-2 add-single-option-btn" data-color-code="opt_color_01" id="generateCombinationsBtn">
-					옵션 추가
-				</button>
-				<br><br>
-				<div id="optionGroupsContainer" class="mb-3"></div>
-				<!-- 옵션 그룹핑한 테이블 예시 끝 -->
+				<button type="button" class="btn btn-info btn-sm mb-3" id="generateCombinationsBtn">옵션 조합 생성</button>
+				        
+		        <div id="optionCombinationsContainer" class="mb-3">
+		            <table class="table table-bordered" id="optionCombinationsTable">
+		                <thead>
+		                    <tr>
+		                        <th><input type="checkbox" id="selectAllOptions"></th>
+		                        <th>색상</th>
+		                        <th>사이즈</th>
+		                        <th>높이</th>
+		                    </tr>
+		                </thead>
+		                <tbody>
+		                    </tbody>
+		            </table>
+		        </div>		
 			</div><!-- custom-modal-content -->
         </div>
     `;
 
 	modalFooter.innerHTML = `	
-			${mode === 'edit' ? `<button class="btn custom-btn-blue mt-3" onclick="noticeEditMode(${data.PRD_ID})">수정</button>` : ''}
+	        
+			
+			${mode === 'view' ? `<button class="btn custom-btn-blue mt-3" onclick="noticeEditMode(${data.PRD_ID})">수정</button>` : ''}
 						         <button type="button" class="btn custom-btn-blue mt-3" id="saveProductBtn">${saveButtonText}</button>
 						         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+			  
 	    `;
 		
 	loadCommonCodesToSelect('prdColorSelect', 'opt_color', data.OPT_COLOR);
@@ -179,6 +185,7 @@ function showProductModal(mode, data = {}) {
 	        combinationsContainer.style.display = 'none';
 	    }
 		
+
 		// '모두 선택' 체크박스 이벤트 리스너
 		const selectAllOptions = document.getElementById('selectAllOptions');
 		if (selectAllOptions) {
@@ -190,11 +197,15 @@ function showProductModal(mode, data = {}) {
 		    };
 		}
 	}
+		
+
 			
 	// 단위 셀렉트 박스
 	//	loadPrdUnitTypes(data.PRD_SELECTED);
 	loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT); // 단위
 	loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE); // 유형-카테고리
+	   
+	
 	
 	const saveProductBtn = document.getElementById('saveProductBtn');
 	if (saveProductBtn) {
@@ -207,7 +218,7 @@ function showProductModal(mode, data = {}) {
 	             updateProduct(data.PRD_ID); // 제품 수정 함수 호출
 	        }
 	        // 저장 후 모달 닫기
-	         const productEditModalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+	         const productEditModalInstance = bootstrap.Modal.getInstance(document.getElementById('productEditModal'));
 	         if (productEditModalInstance) productEditModalInstance.hide();
 	    };
 	}
@@ -216,19 +227,6 @@ function showProductModal(mode, data = {}) {
     const modalEl = document.getElementById('exampleModal');
     const bsModal = new bootstrap.Modal(modalEl);
     bsModal.show();
-}
-
-function getNowForOracle() {
-    const now = new Date();
-
-    const yyyy = now.getFullYear();
-    const MM = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mi = String(now.getMinutes()).padStart(2, '0');
-
-    return `${yyyy}-${MM}-${dd} ${hh}:${mi}`;
 }
 
 //날짜 형식 함수
@@ -335,21 +333,23 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
     }
 }
 
-// 옵션 조합 생성 및 테이블에 표시 (그룹핑 포함)
+
+
+// 옵션 조합 생성 및 테이블에 표시
 async function generateAndDisplayCombinations() {
-    // 1. 현재 선택된 드롭다운 값 가져오기 (선택된 조합을 기본 체크하기 위함)
+	// 1. 현재 선택된 드롭다운 값 가져오기 (선택된 조합을 기본 체크하기 위함)
     const selectedColorCode = document.getElementById('prdColorSelect').value;
     const selectedSizeCode = document.getElementById('prdSizeSelect').value;
     const selectedHeightCode = document.getElementById('prdHeightSelect').value;
 
-    // 2. 서버에서 각 옵션 그룹의 모든 공통 코드를 다시 가져오기 (비동기 병렬 처리)
+
+	// 2. 서버에서 각 옵션 그룹의 모든 공통 코드를 다시 가져오기 (비동기 병렬 처리)
     const [allColorsResponse, allSizesResponse, allHeightsResponse] = await Promise.all([
         fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_color`),
         fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_size`),
         fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_height`)
     ]);
 
-    // 응답 에러 처리
     if (!allColorsResponse.ok || !allSizesResponse.ok || !allHeightsResponse.ok) {
         alert("옵션 데이터를 불러오는 데 실패했습니다. 서버 상태를 확인해주세요.");
         console.error("옵션 데이터 로드 실패:", allColorsResponse.status, allSizesResponse.status, allHeightsResponse.status);
@@ -364,194 +364,137 @@ async function generateAndDisplayCombinations() {
     const allSizes = allSizesData.data;
     const allHeights = allHeightsData.data;
 
-    // 데이터 형식 유효성 검사
     if (!Array.isArray(allColors) || !Array.isArray(allSizes) || !Array.isArray(allHeights)) {
         alert("서버에서 받은 옵션 데이터 형식이 올바르지 않습니다.");
         console.error("잘못된 옵션 데이터 형식:", allColors, allSizes, allHeights);
         return;
     }
 
-    // ⭐⭐ 메인 컨테이너 가져오기: 이 ID가 HTML에 정확히 있어야 합니다! ⭐⭐
-    const optionGroupsContainer = document.getElementById('optionGroupsContainer');
-    if (!optionGroupsContainer) {
-        console.error("Error: '#optionGroupsContainer' element not found in the DOM.");
-        // 사용자에게 오류 메시지를 표시하거나 다른 처리를 할 수 있습니다.
-        alert("옵션 그룹을 표시할 공간을 찾을 수 없습니다. 개발자에게 문의하세요.");
+    const tbody = document.querySelector('#optionCombinationsTable tbody');
+    tbody.innerHTML = ''; // 기존 조합 초기화
+
+    allColors.forEach(color => {
+        allSizes.forEach(size => {
+            allHeights.forEach(height => {
+                const row = tbody.insertRow();
+                row.dataset.colorCode = color.code || color.DET_ID;
+                row.dataset.sizeCode = size.code || size.DET_ID;
+                row.dataset.heightCode = height.code || height.DET_ID;
+
+                const checkboxCell = row.insertCell();
+                
+                // ⭐⭐ 여기 로직은 그대로 유지합니다.
+                // 드롭다운에서 '선택하세요' (즉, value가 "")인 경우에도 isSelectedCombination은 false가 되므로,
+                // 체크박스는 기본적으로 체크되지 않은 상태로 생성됩니다.
+                const isSelectedCombination = 
+                    (row.dataset.colorCode === selectedColorCode) &&
+                    (row.dataset.sizeCode === selectedSizeCode) &&
+                    (row.dataset.heightCode === selectedHeightCode) &&
+                    // ⭐ 드롭다운에서 실제 유효한 값을 선택했을 때만 true가 되도록 조건 추가 ⭐
+                    selectedColorCode !== "" && selectedSizeCode !== "" && selectedHeightCode !== "";
+                
+                checkboxCell.innerHTML = `<input type="checkbox" class="option-checkbox" ${isSelectedCombination ? 'checked' : ''}>`;
+                
+                row.insertCell().textContent = color.name || color.DET_NM;
+                row.insertCell().textContent = size.name || size.DET_NM;
+                row.insertCell().textContent = height.name || height.DET_NM;
+            });
+        });
+    });
+
+    // 모든 조합이 생성된 후, '모두 선택' 체크박스도 초기화
+    const selectAllOptions = document.getElementById('selectAllOptions');
+    if (selectAllOptions) {
+        // 모든 조합이 체크되었다면 '모두 선택'도 체크, 아니면 해제
+        // (드롭다운이 비어있으면 처음엔 아무것도 체크 안될 테니, 이 시점엔 selectAllOptions는 unchecked일 겁니다)
+        const allCheckboxes = document.querySelectorAll('#optionCombinationsTable tbody input[type="checkbox"]');
+        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+        selectAllOptions.checked = allChecked; 
+    }
+}
+
+// insertProduct 함수 (새로 구현할 부분)
+async function insertProduct() {
+    // 1. 제품 기본 정보 수집
+    const prdNm = document.getElementById('prd_nm').value;
+    const prdPrice = document.getElementById('prd_price').value;
+    const prdRegDate = document.getElementById('PRD_REG_DATE').value;
+
+    if (!prdNm || !prdPrice || !prdRegDate) {
+        alert("제품명, 제품 가격, 등록일은 필수 입력 항목입니다.");
         return;
     }
-    optionGroupsContainer.innerHTML = ''; // 기존 옵션 그룹 초기화
-
-    // 색상별로 옵션 조합을 그룹핑할 Map 생성
-    // Map<String, List<{color, size, height}>> 형태
-    const groupedCombinations = new Map();
-
-    // 모든 가능한 조합 생성 및 색상별로 그룹핑
-    allColors.forEach(color => {
-        const colorCode = color.code || color.DET_ID; // 실제 DB 코드
-        const colorName = color.name || color.DET_NM; // 사용자에게 보여줄 이름 (예: White)
-
-        allSizes.forEach(size => {
-            const sizeCode = size.code || size.DET_ID;
-            const sizeName = size.name || size.DET_NM;
-
-            allHeights.forEach(height => {
-                const heightCode = height.code || height.DET_ID;
-                const heightName = height.name || height.DET_NM;
-
-                // 해당 색상 그룹이 없으면 새로 생성
-                if (!groupedCombinations.has(colorCode)) {
-                    groupedCombinations.set(colorCode, {
-                        name: colorName, // 색상 이름 저장
-                        combinations: []
-                    });
-                }
-                // 현재 조합 추가
-                groupedCombinations.get(colorCode).combinations.push({
-                    colorCode, colorName, sizeCode, sizeName, heightCode, heightName
-                });
-            });
-        });
-    });
-
-    // 그룹핑된 조합을 기반으로 HTML 생성 및 DOM에 추가
-    groupedCombinations.forEach((colorGroup, colorCode) => {
-        const optionGroupDiv = document.createElement('div');
-        optionGroupDiv.classList.add('option-group'); // CSS 클래스 추가
-
-        // 그룹 헤더 (예: 색상: opt_color_01 (White))
-        const groupHeader = document.createElement('h4');
-        groupHeader.textContent = `색상: ${colorGroup.name} (${colorCode})`;
-        optionGroupDiv.appendChild(groupHeader);
-
-        // 옵션 조합을 표시할 테이블
-        const table = document.createElement('table');
-        table.classList.add('table', 'table-bordered', 'option-table'); // 부트스트랩 및 커스텀 CSS 클래스 유지
-
-        // 테이블 헤더 (thead)
-        const thead = table.createTHead();
-        const headerRow = thead.insertRow();
-        headerRow.innerHTML = `
-            <th><input type="checkbox" class="selectAllColorOptions" data-color-code="${colorCode}"</th>
-            <th>색상</th>
-            <th>사이즈</th>
-            <th>높이</th>
-            `;
-
-        // 테이블 바디 (tbody)
-        const tbody = table.createTBody();
-        colorGroup.combinations.forEach(combo => {
-            const row = tbody.insertRow();
-            // 데이터 속성 (dataset)에 코드 값 저장
-            row.dataset.colorCode = combo.colorCode;
-            row.dataset.sizeCode = combo.sizeCode;
-            row.dataset.heightCode = combo.heightCode;
-            // row.dataset.optionId = ''; // 등록 모드이므로 OPT_ID는 비워둠.
-
-            // 체크박스 셀
-            const checkboxCell = row.insertCell();
-            const isSelectedCombination = 
-                (combo.colorCode === selectedColorCode) &&
-                (combo.sizeCode === selectedSizeCode) &&
-                (combo.heightCode === selectedHeightCode) &&
-                selectedColorCode !== "" && selectedSizeCode !== "" && selectedHeightCode !== ""; // 드롭다운에 유효값이 선택되었을 때만
-
-            checkboxCell.innerHTML = `<input type="checkbox" class="option-checkbox" ${isSelectedCombination ? 'checked' : ''}>`;
-            
-            // 색상 셀 (이름 또는 코드 표시)
-            row.insertCell().textContent = combo.colorName || combo.colorName;
-            // 사이즈 셀 (이름 또는 코드 표시)
-            row.insertCell().textContent = combo.sizeName || combo.sizeCode;
-            // 높이 셀 (이름 또는 코드 표시)
-            row.insertCell().textContent = combo.heightName || combo.heightCode;
-
-            // '관리' 버튼 셀 (등록 시 비워두거나 숨김. 수정 화면에서 버튼 추가)
-//            const manageCell = row.insertCell();
-//            manageCell.classList.add('action-btns');
-            // 등록 화면에서는 수정/삭제 버튼을 넣지 않습니다.
-            // 만약 등록 화면에서도 옵션 조합 생성 후 바로 수정/삭제 기능을 넣고 싶다면 여기에 버튼 HTML을 추가하세요.
-            // 예시: manageCell.innerHTML = `<button class="btn btn-edit">수정</button> <button class="btn btn-delete">삭제</button>`;
-        });
-
-        optionGroupDiv.appendChild(table); // 테이블을 옵션 그룹 div에 추가
-        optionGroupsContainer.appendChild(optionGroupDiv); // 완성된 옵션 그룹 div를 메인 컨테이너에 추가
-    });
-
-    // ⭐⭐ '모두 선택' 체크박스들의 상태 동기화 로직 ⭐⭐
-    // 최상위 '모두 선택' 체크박스 (#selectAllOptions)
-    const overallSelectAllOptions = document.getElementById('selectAllOptions');
-    if (overallSelectAllOptions) {
-        // 모든 색상 그룹의 '모두 선택' 체크박스들의 상태를 기반으로 전체 체크박스 상태 업데이트
-        const allColorSelectAlls = document.querySelectorAll('.selectAllColorOptions');
-        const allGroupSelectAllsChecked = Array.from(allColorSelectAlls).every(cb => cb.checked);
-        overallSelectAllOptions.checked = allGroupSelectAllsChecked;
-
-        // 최상위 '모두 선택' 체크박스 클릭 이벤트 리스너
-        overallSelectAllOptions.addEventListener('change', (event) => {
-            const isChecked = event.target.checked;
-            document.querySelectorAll('.selectAllColorOptions').forEach(colorSelectAllCb => {
-                colorSelectAllCb.checked = isChecked; // 각 색상 그룹의 '모두 선택' 체크박스 토글
-                // 각 색상 그룹 내의 모든 옵션 체크박스도 토글
-                const table = colorSelectAllCb.closest('table');
-                table.querySelectorAll('tbody input[type="checkbox"]').forEach(optionCb => {
-                    optionCb.checked = isChecked;
-                });
-            });
-        });
+    if (isNaN(prdPrice) || Number(prdPrice) <= 0) {
+        alert("제품 가격은 유효한 숫자여야 합니다.");
+        return;
     }
 
-    // 각 색상 그룹 내의 '모두 선택' 체크박스 이벤트 리스너
-    document.querySelectorAll('.selectAllColorOptions').forEach(selectAllCb => {
-        selectAllCb.addEventListener('change', (event) => {
-            const isChecked = event.target.checked;
-            const table = event.target.closest('table'); // 현재 체크박스가 속한 테이블 찾기
-            table.querySelectorAll('tbody input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = isChecked; // 해당 그룹 내의 모든 옵션 체크박스 토글
-            });
+    // 2. 선택된 옵션 조합 수집
+    const selectedOptions = [];
+    document.querySelectorAll('#optionCombinationsTable tbody input.option-checkbox:checked').forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        selectedOptions.push({
+            opt_color: row.dataset.colorCode,
+            opt_size: row.dataset.sizeCode,
+            opt_height: row.dataset.heightCode
+        });
+    });
+
+    if (selectedOptions.length === 0) {
+        alert("하나 이상의 제품 옵션 조합을 선택해주세요.");
+        return;
+    }
+
+    // 3. 서버로 보낼 전체 데이터 객체 생성
+    const productRegistrationData = {
+        product: { // 제품 기본 정보
+            prdNm: prdNm,
+            prdPrice: Number(prdPrice),
+            prdRegDate: prdRegDate
+        },
+        options: selectedOptions // 선택된 옵션 조합 배열
+    };
+
+    console.log("등록할 제품 데이터:", JSON.stringify(productRegistrationData));
+
+    // 4. Fetch API를 이용한 서버 전송
+    try {
+        const response = await fetch(`/SOLEX/products/api/products`, { // 새 제품 등록 API 엔드포인트
+            method: 'POST', // 등록은 POST 메서드 사용
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productRegistrationData),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert("제품이 성공적으로 등록되었습니다: " + (result.message || ''));
             
-            // 그룹별 체크박스 상태 변경 시, 최상위 '모두 선택' 체크박스도 업데이트
-            if (overallSelectAllOptions) {
-                const allColorSelectAlls = document.querySelectorAll('.selectAllColorOptions');
-                const overallAllChecked = Array.from(allColorSelectAlls).every(cb => cb.checked);
-                overallSelectAllOptions.checked = overallAllChecked;
+            const productEditModal = bootstrap.Modal.getInstance(document.getElementById('productEditModal'));
+            if (productEditModal) {
+                productEditModal.hide(); // 모달 닫기
             }
-        });
-    });
-
-    // 각 개별 옵션 체크박스 클릭 시, 상위 '모두 선택' 체크박스 상태 업데이트
-    document.querySelectorAll('.option-checkbox').forEach(optionCb => {
-        optionCb.addEventListener('change', () => {
-			const row = optionCb.closest('tr'); // 현재 체크박스가 속한 행 (<tr>)을 가져옴
-
-	        // ⭐⭐ 행의 CSS 클래스 토글 ⭐⭐
-	        if (optionCb.checked) {
-	            row.classList.add('selected-row'); // 체크되면 클래스 추가
-	        } else {
-	            row.classList.remove('selected-row'); // 체크 해제되면 클래스 제거
-	        }
-			
-            const table = optionCb.closest('table');
-            const selectAllColorOptionsCb = table.querySelector('.selectAllColorOptions');
-            const allCheckboxesInGroup = table.querySelectorAll('tbody input[type="checkbox"]');
-            const allCheckedInGroup = Array.from(allCheckboxesInGroup).every(cb => cb.checked);
-            selectAllColorOptionsCb.checked = allCheckedInGroup; // 그룹의 '모두 선택' 상태 업데이트
-
-            // 전체 '모두 선택' 체크박스도 업데이트
-            if (overallSelectAllOptions) {
-                const allColorSelectAlls = document.querySelectorAll('.selectAllColorOptions');
-                const overallAllChecked = Array.from(allColorSelectAlls).every(cb => cb.checked);
-                overallSelectAllOptions.checked = overallAllChecked;
+            if (grid) {
+                grid.readData(); // 그리드 데이터 새로고침
             }
-        });
-    });
+
+        } else {
+            const errorText = await response.text();
+            alert("제품 등록에 실패했습니다: " + response.status + " " + errorText);
+            console.error("제품 등록 실패:", errorText);
+        }
+    } catch (error) {
+        console.error("제품 등록 중 네트워크 오류 또는 예외 발생:", error);
+        alert("제품 등록 중 예상치 못한 오류가 발생했습니다.");
+    }
 }
+/*
 async function insertProduct() {
     // 1. 제품 기본 정보 수집 (HTML ID 및 추가 필드 반영)
     const prdNm = document.getElementById('prd_nm').value;
     const prdPrice = document.getElementById('prd_price').value;
-    const prdRegDate = ''; // ⭐ ID 수정: PRD_REG_DATE -> prd_reg_date
-	document.getElementById('prd_reg_date').value = getNowForOracle();
-	                   
-
+    const prdRegDate = document.getElementById('prd_reg_date').value; // ⭐ ID 수정: PRD_REG_DATE -> prd_reg_date
 
     // 추가된 필드들 (필요에 따라 추가)
     const prdCode = document.getElementById('prd_code').value;
@@ -576,14 +519,12 @@ async function insertProduct() {
 
     // 3. 선택된 옵션 조합 수집
     const selectedOptions = [];
-	document.querySelectorAll('#optionGroupsContainer .option-group .option-table tbody input.option-checkbox:checked').forEach(checkbox => {
-        const row = checkbox.closest('tr'); // 현재 체크박스가 속한 행 (<tr>)을 찾음
+    document.querySelectorAll('#optionCombinationsTable tbody input.option-checkbox:checked').forEach(checkbox => {
+        const row = checkbox.closest('tr');
         selectedOptions.push({
-            opt_color: row.dataset.colorCode, // data-color-code 속성에서 값 가져옴
-            opt_size: row.dataset.sizeCode,   // data-size-code 속성에서 값 가져옴
-            opt_height: row.dataset.heightCode // data-height-code 속성에서 값 가져옴
-            // 필요한 경우 재고(OPT_STOCK) 필드도 여기서 수집할 수 있습니다.
-            // opt_stock: row.dataset.stockValue, // 예시: 재고를 별도의 input에서 입력받는다면
+            opt_color: row.dataset.colorCode,
+            opt_size: row.dataset.sizeCode,
+            opt_height: row.dataset.heightCode
         });
     });
 
@@ -602,7 +543,8 @@ async function insertProduct() {
         prd_unit: prdUnit,
         prd_type: prdType,
         prd_comm: prdComm,
-        prd_reg_date: getNowForOracle(),
+        prd_reg_date: prdRegDate,
+        
         options: selectedOptions
     };
 
@@ -647,16 +589,4 @@ async function insertProduct() {
         alert("제품 등록 중 예상치 못한 오류가 발생했습니다. 네트워크 연결을 확인해주세요.");
     }
 }
-
-
-
-
-
-
-// ⭐ 중요: 초기 로드 시 이미 체크되어 있는 체크박스에 대한 색상 적용 ⭐
-// 이 부분은 generateAndDisplayCombinations 함수 끝에 추가하거나,
-// 체크박스를 생성하는 루프 내에서 isSelectedCombination이 true일 때 바로 클래스를 추가해도 됩니다.
-// 아래 코드를 generateAndDisplayCombinations 함수 가장 마지막에 추가하는 것을 권장합니다.
-document.querySelectorAll('.option-checkbox:checked').forEach(checkedCb => {
-    checkedCb.closest('tr').classList.add('selected-row');
-});
+*/

@@ -37,32 +37,12 @@ public class ProductsService {
 
 	@Transactional
 	public void registerProduct(Map<String, Object> productData) {
-		// 1. 제품 기본 정보 삽입
+		// 1. 제품 기본 정보 삽입(PRD_ID 없음)
 		productsMapper.insertProduct(productData);
 		
-		// 2. 방금 삽입된 제품의 ID (자동 생성된 키) 획득
-        Object prdIdObject = productData.get("prd_id");
-        System.out.println("DEBUG: `insertProduct` 후 requestMap.get(\"prd_id\")의 원본 객체: " + prdIdObject);
-        System.out.println("DEBUG: `insertProduct` 후 requestMap.get(\"prd_id\")의 타입: " + (prdIdObject != null ? prdIdObject.getClass().getName() : "null"));
-
-        Long prdId = null;
-        if (prdIdObject instanceof Number) {
-            prdId = ((Number) prdIdObject).longValue();
-        } else if (prdIdObject instanceof String) { // 만약 String으로 넘어온다면 파싱
-            try {
-                prdId = Long.parseLong((String) prdIdObject);
-            } catch (NumberFormatException e) {
-                System.err.println("ERROR: PRD_ID를 Long으로 파싱하는데 실패했습니다: " + prdIdObject);
-            }
-        }
-        
-        // ⭐⭐ 이 부분이 가장 중요합니다. PRD_ID가 NULL인지 확인 ⭐⭐
-        if (prdId == null) {
-            System.err.println("CRITICAL ERROR: 제품 ID (PRD_ID)가 NULL이거나 유효하지 않습니다. 옵션 삽입을 건너뜀.");
-            throw new IllegalStateException("제품 등록 후 PRD_ID를 가져올 수 없습니다."); // 오류 발생시켜 트랜잭션 롤백
-        }
-        System.out.println("DEBUG: 최종적으로 추출된 PRD_ID (Long): " + prdId);
-
+		// 2. 방금 삽입된 제품의 PRD_ID (자동 생성된 키) 획득
+		Long prdId  = productsMapper.selectLatestProductId();
+		System.out.println("prdId????????   : " + prdId);
      
         
 	     // 3. 옵션 목록 추출 및 각 옵션에 제품 ID 연결
@@ -87,15 +67,6 @@ public class ProductsService {
 	            productsMapper.insertProductOption(optionMap);
 	        }
 	    }
-	    
 	    System.out.println("서비스: 제품 등록 및 옵션 저장 완료. 최종 제품 ID: " + prdId);
-
-
-
-
-		
 	}
-	
-	
-
 }

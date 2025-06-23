@@ -89,60 +89,50 @@
 
     </select>
     <insert id="insertProduct" parameterType="map">
-       <selectKey keyProperty="prd_id" resultType="long" order="BEFORE">
-           SELECT "C##C4D2505T2"."ISEQ$$_167644".nextval FROM DUAL
-       </selectKey>
-       INSERT INTO PRODUCT (
-           PRD_NM,
-           PRD_PRICE,
-           PRD_CODE,
-           PRD_UNIT,
-           PRD_TYPE,
-           PRD_COMM,
-           PRD_REG_DATE,
-           PRD_UP_DATE
-       ) VALUES (
-           #{prd_nm},
-           #{prd_price},
-           #{prd_code},
-           #{prd_unit},
-           #{prd_type},
-           #{prd_comm},
-           #{prd_reg_date},
-           #{prd_reg_date}
-       )
-   </insert>
+	    INSERT INTO PRODUCT (
+			        PRD_NM,
+			        PRD_PRICE,
+			        PRD_CODE,
+			        PRD_UNIT,
+			        PRD_TYPE,
+			        PRD_COMM,
+			        PRD_REG_DATE,
+			        PRD_UP_DATE
+	    ) VALUES (
+			        #{prd_nm},
+			        #{prd_price},
+			        #{prd_code},
+			        #{prd_unit},
+			        #{prd_type},
+			        #{prd_comm},
+			        TO_DATE(#{prd_reg_date}, 'YYYY-MM-DD HH24:MI'),
+			        null
+	    )
+	</insert>
+	<!-- 마지막으로 생성된 prd_id 조회 (Oracle IDENTITY 시퀀스 currval) -->
+	<select id="selectLatestProductId" resultType="long">
+	  	SELECT ISEQ$$_167644.CURRVAL FROM dual
+	</select>
+	<!-- 제품 OPTION 삽입 -->
 	<insert id="insertProductOption" parameterType="map">
-        INSERT INTO PRODUCT_OPTION (
-            PRD_ID,
-            OPT_COLOR,
-            OPT_SIZE,
-            OPT_HEIGHT
-        ) VALUES (
-            #{prd_id},
-            #{opt_color},
-            #{opt_size},
-            #{opt_height}
-        )
-    </insert>
-    
-<!--    <insert id="insertProductOption" parameterType="java.util.List"> -->
-<!--         INSERT ALL -->
-<!--         <foreach collection="list" item="option"> -->
-<!--         INTO PRODUCT_OPTION ( -->
-<!--             OPT_ID,       PRD_ID, -->
-<!--             OPT_COLOR, -->
-<!--             OPT_SIZE, -->
-<!--             OPT_HEIGHT -->
-<!--         ) VALUES ( -->
-<!--             PRODUCT_OPTION_SEQ.NEXTVAL,  -->
-<!--             #{option.prd_id}, -->
-<!--             #{option.opt_color}, -->
-<!--             #{option.opt_size}, -->
-<!--             #{option.opt_height} -->
-<!--         ) -->
-<!--         </foreach> -->
-<!--         SELECT * FROM DUAL -->
-<!--     </insert> -->
+	    <selectKey keyProperty="opt_id" order="BEFORE" resultType="long">
+	      	SELECT PRODUCT_OPTION_SEQ.NEXTVAL FROM dual
+	    </selectKey>
+	    INSERT INTO PRODUCT_OPTION (
+	        OPT_ID,
+	        PRD_ID,
+	        OPT_COLOR,
+	        OPT_SIZE,
+	        OPT_HEIGHT
+	    ) VALUES (
+	        #{opt_id},
+	        #{prd_id},
+	        #{opt_color},
+	        #{opt_size},
+	        #{opt_height}
+	    )
+  	</insert>
+		
+
 
 </mapper>	

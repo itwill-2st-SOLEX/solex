@@ -33,4 +33,6 @@ public interface ProductsMapper {
 //    int insertProductOption(List<Map<String, String>> options);
 //    void insertProductOption(@Param("optionMap") Map<String, String> optionMap);
     void insertProductOption(Map<String, String> optionMap);
+
+	Long selectLatestProductId();
 }
