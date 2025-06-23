@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequiredArgsConstructor
 @RequestMapping("/warehouse")
 public class WarehouseController {
 	

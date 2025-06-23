@@ -15,7 +15,6 @@ import kr.co.itwillbs.solex.employee.EmployeeMapper;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class WarehouseService {
 	
 	@Autowired
