@@ -19,6 +19,10 @@ public interface WorkOrderMapper {
 	// 주문테이블 상태값 업테이트
 	void updateSujuOrderSts(String oddId);
 	// 창고 조회
-	List<Map<String, Object>> getWarehouses();
-
+	List<Map<String, Object>> getWarehouses(String prdId);
+	//창고 자재 등록
+	void warehousesInsert(Map<String, Object> prdInfo);
+	void stockUpdate(Map<String, Object> prdInfo);
+	void areaUpdate(Map<String, Object> prdInfo);
+	void ledgerInsert(Map<String, Object> prdInfo);
 }

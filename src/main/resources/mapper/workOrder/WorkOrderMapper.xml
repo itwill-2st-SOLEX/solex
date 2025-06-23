@@ -6,8 +6,10 @@
 <!-- 	작업지시 조회 -->
 	<select id="getWorkList" resultType="map">
 		SELECT odd_id
+			   , prd_id
 			   , prd_code
 			   , prd_nm
+			   , opt_id -- 옵션 id
 			   , odd_cnt
 			   , odd_sts
 			   , prd_color
@@ -91,20 +93,53 @@
 	</update>
 	
 	<select id="getWarehouses" resultType="map">
-		SELECT w.whs_nm  -- 창고명
+		SELECT w.whs_id  -- 창고 ID
+			   , w.whs_nm  -- 창고명
 		       , w.whs_pc  -- 우편번호
 		       , w.whs_add  -- 기본주소
 		       , w.whs_da  -- 상세주소
+		       , a.are_id  -- 구역 ID
 		       , a.are_nm  -- 구역명
 		       , a.are_max  -- 최대수량
-		       , SUM(NVL(wh.whs_his_cnt, 0)) AS whs_his_cnt -- 현재수량
+		       , SUM(NVL(a.are_cnt, 0)) AS are_cnt -- 현재수량
 		  FROM warehouse w
 		  JOIN area a 
 		    ON w.whs_id = a.whs_id
 		  LEFT JOIN warehouse_history wh 
-		    ON a.are_id = wh.are_id 
+		    ON a.are_id = wh.are_id
+<!-- 		    [TODO] -->
+<!-- 		  LEFT JOIN product p -->
+<!-- 		    ON  -->
 		 WHERE w.whs_sts = 'whs_sts_01'  -- 가동중
-		 GROUP BY w.whs_nm, w.whs_pc, w.whs_add, w.whs_da,
-			      a.are_nm, a.are_max
+		   AND a.are_type = 'area_type_02'
+		   AND 
+		 GROUP BY w.whs_id, w.whs_nm, w.whs_pc, w.whs_add, w.whs_da,
+			      a.are_id, a.are_nm, a.are_max
 	</select>
+	
+<!-- 	창고 자재 등록 -->
+	<insert id="warehousesInsert">
+		INSERT INTO warehouse_history (are_id,
+				    				   whs_his_sts,
+				    				   whs_his_cnt,
+				    				   whs_his_date
+		) VALUES (#{areaId},    
+				  'whs_his_sts_01',
+				  #{assignQty},
+				  #{whs_his_date}
+		)
+	</insert>
+<!-- 	재고 테이블 업데이트-->
+	<update id="stockUpdate">
+		UPDATE stock
+		   SET stk_cnt = stk_cnt + #{assignQty}
+		 WHERE item_id = #{optId}
+		   AND stk_cat = 'stk_cat_01'
+	</update>
+<!-- 	구역 테이블 -->
+	<update id="areaUpdate">
+		UPDATE area
+		   SET are_cnt  = are_cnt + #{assignQty}
+		 WHERE are_id = #{areaId}
+	</update>
 </mapper>
