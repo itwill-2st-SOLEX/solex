@@ -99,7 +99,7 @@
         where odd.odd_id = #{odd_id}
 	]]>
 	</select>
-	<!-- 재고 차감 -->
+	<!-- 총재고 차감 -->
 	<update id="updateStock" parameterType="Map">
 		<![CDATA[
 			MERGE INTO stock s          
@@ -119,6 +119,10 @@
 				UPDATE SET s.stk_cnt = s.stk_cnt - source.total_cnt
 		]]>
 	</update>
+	<!-- 어떤 구역에 선입 선출이 되게 빼야 됨 -->
+	
+	
+	
 	<!-- 주문 상세 상태 변경 -->
 	<update id="updateOrderStatus" parameterType="Map">
 		update suju_order_detail
@@ -130,6 +134,7 @@
 
 
 
+	
 	
 	
 	<!-- select odd_id , prd_code, prd_nm, odd_cnt,odd_sts, prd_color, prd_size,prd_height, ord_end_date from vw_suju_summary; -->
