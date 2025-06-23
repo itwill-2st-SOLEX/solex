@@ -1,20 +1,22 @@
 package kr.co.itwillbs.solex.approval;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.itwillbs.solex.document.DocumentMapper;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class ApprovalService {
 	
-	private final ApprovalMapper approvalMapper;
-	private final DocumentMapper documentMapper;
+	@Autowired
+	private ApprovalMapper approvalMapper;
+	@Autowired
+	private DocumentMapper documentMapper;
+	
 	// 결재 해야될 기안서 리스트
 	public List<Map<String, Object>> getTodoDocumentList(int offset, int size, long loginEmpId) {
         return approvalMapper.selectTodoDocumentList(offset, size, loginEmpId);

@@ -23,7 +23,6 @@ public class DocumentRestController {
 	
 
 	// 무한스크롤
-	@ResponseBody
 	@GetMapping("/api/drafts")
     public List<Map<String, Object>> getDraftList(@RequestParam("page") int page, @RequestParam("size") int size) {
 		int offset = page * size;
@@ -31,14 +30,12 @@ public class DocumentRestController {
     }
 	
 	// 직급 공통코드 불러오기 
-	@ResponseBody
 	@GetMapping("/api/codes")
 	public List<Map<String, String>> getPosition(@RequestParam("group") String group) {
 		return service.getPosition(group);
 	}
 	
 	// 로그인한 사원정보 들고오기
-	@ResponseBody
 	@GetMapping("/employee/info")
 	public Map<String, Object> empInfo(HttpSession session) {
 //		[TODO] 로그인 만들어지면 넘겨주기
@@ -48,7 +45,6 @@ public class DocumentRestController {
 	}
 	
 	// 기안서 등록
-	@ResponseBody
 	@PostMapping("register/drafts")
 	public void registerDarafts(@RequestBody Map<String, Object> map) {
 //		[TODO] 로그인 만들어지면 넘겨주기
@@ -60,10 +56,8 @@ public class DocumentRestController {
 	}
 	
 	// 기안서 상세조회 
-	@ResponseBody
 	@GetMapping("/select/detail/{doc_id}")
 	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
-		System.out.println(service.selectDetailDoc(doc_id, docTypeCode));
 		return service.selectDetailDoc(doc_id, docTypeCode);
 	}
 	

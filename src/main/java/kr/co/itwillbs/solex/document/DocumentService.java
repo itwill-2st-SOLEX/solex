@@ -1,6 +1,7 @@
 package kr.co.itwillbs.solex.document;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +46,8 @@ public class DocumentService {
 	@Transactional
 	public void registerDarafts(Map<String, Object> map, long loginEmpId) {
 		map.put("emp_id", loginEmpId);
+		map.put("doc_reg_time", LocalDateTime.now());
+		
 		documentMapper.registerDocument(map);
 		
 		long docId = ((Integer) map.get("doc_id")).longValue();
