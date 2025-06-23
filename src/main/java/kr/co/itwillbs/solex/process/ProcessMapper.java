@@ -21,10 +21,10 @@ public interface ProcessMapper {
 	int selectTotalProcessCount();
 
 	// 공정 신규 등록
-	void insertProcesses(List<Map<String, Object>> insertList);
+	void insertProcess(Map<String, Object> prc);
 
 	// 공정 기존 수정
-	void updateprocesses(List<Map<String, Object>> updateList);
+	void updateProcess(Map<String, Object> prc);
 	
 	// 제품유형 리스트 무한스크롤
 	List<Map<String, Object>> selectPagedPrdTypeList(@Param("perPage") int perPage, @Param("offset") int offset);
@@ -38,9 +38,12 @@ public interface ProcessMapper {
 	List<Map<String, Object>> selectAllProcesses();
 	
 	// 공정순서 신규 등록
-	void insertTypeProcess(List<Map<String, Object>> insertList);
+	void insertTypeProcess(Map<String, Object> pcp);
 	
 	// 공정순서 기존 수정
-	void updateTypeProcess(List<Map<String, Object>> updateList);
+	void updateTypeProcess(Map<String, Object> pcp);
+	
+	// 공정순서 삭제
+	void deleteTypeProcess(Map<String, Object> pcp);
 	
 }

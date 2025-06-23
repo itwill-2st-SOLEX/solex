@@ -43,52 +43,36 @@
     </select>
     
     <!-- 공정 신규 등록 -->
-    <insert id="insertProcesses" parameterType="java.util.List">
-    	INSERT ALL
-    	<foreach collection="list" item="prc">
-    		INTO PROCESS (
-    			PRC_CODE,
-    			DET_ID,
-    			PRC_NM,
-    			PRC_DES,
-    			PRC_YN,
-    			QUA_ID
-    		) VALUES (
-    			#{prc.PRC_CODE},
-    			#{prc.DET_NM},
-    			#{prc.PRC_NM},
-    			#{prc.PRC_DES},
-    			#{prc.PRC_YN},
-    			#{prc.QUA_ID}
-    		)
-    	</foreach>
-    	SELECT	*	FROM DUAL
-    </insert>
+    <insert id="insertProcess" parameterType="map">
+	    INSERT INTO PROCESS (
+	        PRC_CODE,
+	        DET_ID,
+	        PRC_NM,
+	        PRC_DES,
+	        PRC_YN,
+	        QUA_ID
+	    ) VALUES (
+	        #{PRC_CODE},
+	        #{DET_NM},
+	        #{PRC_NM},
+	        #{PRC_DES},
+	        #{PRC_YN},
+	        #{QUA_ID}
+	    )
+	</insert>
     
     <!-- 공정 기존 수정 -->
-    <update id="updateprocesses" parameterType="java.util.List">
-    	MERGE INTO PROCESS p
-	    USING (
-	        <foreach collection="list" item="prc" separator="UNION ALL">
-	            SELECT
-	                #{prc.PRC_CODE} AS PRC_CODE,
-	                #{prc.PRC_NM} AS PRC_NM,
-	                #{prc.PRC_DES} AS PRC_DES,
-	                #{prc.PRC_YN} AS PRC_YN,
-	                #{prc.DET_NM} AS DET_ID,     <!-- 가공된 코드값 -->
-	                #{prc.QUA_NM} AS QUA_ID      <!-- 가공된 코드값 -->
-	            FROM DUAL
-	        </foreach>
-	    ) src
-	    ON (p.PRC_CODE = src.PRC_CODE)
-	    WHEN MATCHED THEN
-	    UPDATE SET
-	        p.PRC_NM = src.PRC_NM,
-	        p.PRC_DES = src.PRC_DES,
-	        p.PRC_YN = src.PRC_YN,
-	        p.DET_ID = src.DET_ID,
-	        p.QUA_ID = src.QUA_ID
-    </update>
+    <update id="updateProcess" parameterType="map">
+	    UPDATE PROCESS
+	    SET
+	        PRC_NM = #{PRC_NM},
+	        PRC_DES = #{PRC_DES},
+	        PRC_YN = #{PRC_YN},
+	        DET_ID = #{DET_NM},  <!-- DET_NM을 가공해서 DET_ID로 썼다면 여기에도 반영 -->
+	        QUA_ID = #{QUA_ID}
+	    WHERE
+	        PRC_CODE = #{PRC_CODE}
+	</update>
     
     <!-- 제품유형 리스트 무한스크롤 -->
     <select id="selectPagedPrdTypeList" resultType="map">
@@ -134,41 +118,32 @@
 	</select>
 	
 	<!-- 공정순서 신규 등록 -->
-	<insert id="insertTypeProcess" parameterType="java.util.List">
-    	INSERT ALL
-    	<foreach collection="list" item="pcp">
-    		INTO TYPE_PROCESS (
-    			PRD_TYPE,
-    			PRC_ID,
-    			PCP_SEQ
-    		) VALUES (
-    			#{pcp.DET_ID},
-    			#{pcp.PRC_ID},	<!-- !@!@!@!@ 저장할 데이터에 null값이 들어가 있음 -->
-    			#{pcp.PCP_SEQ}
-    		)
-    	</foreach>
-    	SELECT	*	FROM DUAL
-    </insert>
+	<insert id="insertTypeProcess" parameterType="map">
+	    INSERT INTO TYPE_PROCESS (
+	        PRD_TYPE,
+	        PRC_ID,
+	        PCP_SEQ
+	    ) VALUES (
+	        #{DET_ID},
+	        #{PRC_ID},
+	        #{PCP_SEQ}
+	    )
+	</insert>
 	
 	<!-- 공정순서 기존 수정 -->
-	<update id="updateTypeProcess" parameterType="java.util.List">
-	    MERGE INTO TYPE_PROCESS tp
-	    USING (
-	        <foreach collection="list" item="pcp" separator="UNION ALL">
-	            SELECT
-	                #{pcp.PCP_ID} AS PCP_ID,
-	                #{pcp.DET_ID} AS PRD_TYPE,
-	                #{pcp.PRC_ID} AS PRC_ID,
-	                #{pcp.PCP_SEQ} AS PCP_SEQ
-	            FROM DUAL
-	        </foreach>
-	    ) src
-	    ON (tp.PCP_ID = src.PCP_ID)
-	    WHEN MATCHED THEN
-	    UPDATE SET
-	    	tp.PRD_TYPE = src.PRD_TYPE,
-	    	tp.PRC_ID = src.PRC_ID,
-	        tp.PCP_SEQ = src.PCP_SEQ
+	<update id="updateTypeProcess" parameterType="map">
+	    UPDATE TYPE_PROCESS
+	    SET
+	        PRD_TYPE = #{DET_ID},
+	        PRC_ID = #{PRC_ID},
+	        PCP_SEQ = #{PCP_SEQ}
+	    WHERE
+	        PCP_ID = #{PCP_ID}
 	</update>
+	
+	<!-- 공정순서 삭제 -->
+	<delete id="deleteTypeProcess" parameterType="map">
+	    DELETE FROM TYPE_PROCESS WHERE PCP_ID = #{PCP_ID}
+	</delete>
 
 </mapper>

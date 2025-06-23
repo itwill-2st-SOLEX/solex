@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcessService {
@@ -37,45 +38,43 @@ public class ProcessService {
 	}
 
 	// 공정 신규 등록
+	@Transactional
 	public void insertProcesses(List<Map<String, Object>> insertList) {
-		
-		for (Map<String, Object> row : insertList) {
-		    Object quaNm = row.get("QUA_NM");
+	    for (Map<String, Object> row : insertList) {
+	        Object quaNm = row.get("QUA_NM");
 
-		    if (quaNm != null) {
-		        try {
-		            // 문자열이든 숫자든 상관없이 int로 변환 시도
-		            int quaId = Integer.parseInt(quaNm.toString());
-		            row.put("QUA_ID", quaId);  // DB insert 시 이걸 사용
-		        } catch (NumberFormatException e) {
-		            System.out.println("QUA_ID 변환 실패: " + quaNm);
-		            row.put("QUA_ID", null); // 또는 적절한 예외 처리
-		        }
-		    }
-		}
-
-		processMapper.insertProcesses(insertList);
+	        if (quaNm != null) {
+	            try {
+	                int quaId = Integer.parseInt(quaNm.toString());
+	                row.put("QUA_ID", quaId);
+	            } catch (NumberFormatException e) {
+	                System.out.println("QUA_ID 변환 실패: " + quaNm);
+	                row.put("QUA_ID", null);
+	            }
+	        }
+	        
+	        processMapper.insertProcess(row); // 여기서 단일 insert 호출
+	    }
 	}
 
 	// 공정 기존 수정
-	public void updateprocesses(List<Map<String, Object>> updateList) {
-		
-		for (Map<String, Object> row : updateList) {
-		    Object quaNm = row.get("QUA_NM");
+	@Transactional
+	public void updateProcesses(List<Map<String, Object>> updateList) {
+	    for (Map<String, Object> row : updateList) {
+	        Object quaNm = row.get("QUA_NM");
 
-		    if (quaNm != null) {
-		        try {
-		            // 문자열이든 숫자든 상관없이 int로 변환 시도
-		            int quaId = Integer.parseInt(quaNm.toString());
-		            row.put("QUA_ID", quaId);  // DB insert 시 이걸 사용
-		        } catch (NumberFormatException e) {
-		            System.out.println("QUA_ID 변환 실패: " + quaNm);
-		            row.put("QUA_ID", null); // 또는 적절한 예외 처리
-		        }
-		    }
-		}
-		
-		processMapper.updateprocesses(updateList);
+	        if (quaNm != null) {
+	            try {
+	                int quaId = Integer.parseInt(quaNm.toString());
+	                row.put("QUA_ID", quaId);
+	            } catch (NumberFormatException e) {
+	                System.out.println("QUA_ID 변환 실패: " + quaNm);
+	                row.put("QUA_ID", null);
+	            }
+	        }
+
+	        processMapper.updateProcess(row); // 단건 update로 변경
+	    }
 	}
 
 	// 제품유형 리스트 무한스크롤
@@ -98,54 +97,65 @@ public class ProcessService {
 	}
 	
 	// 공정순서 신규 등록
+	@Transactional
 	public void insertTypeProcesses(List<Map<String, Object>> insertList) {
-		
-		for (Map<String, Object> row : insertList) {
-		    Object pcp_seq = row.get("PCP_SEQ");
+	    for (Map<String, Object> row : insertList) {
+	        Object pcp_seq = row.get("PCP_SEQ");
 
-		    if (pcp_seq != null) {
-		        try {
-		            // 문자열이든 숫자든 상관없이 int로 변환 시도
-		            int pcpSeq = Integer.parseInt(pcp_seq.toString());
-		            row.put("PCP_SEQ", pcpSeq);  // DB insert 시 이걸 사용
-		        } catch (NumberFormatException e) {
-		            System.out.println("PCP_SEQ 변환 실패: " + pcp_seq);
-		            row.put("PCP_SEQ", null); // 또는 적절한 예외 처리
-		        }
-		    }
-		}
-		
-    	processMapper.insertTypeProcess(insertList);
+	        if (pcp_seq != null) {
+	            try {
+	                int pcpSeq = Integer.parseInt(pcp_seq.toString());
+	                row.put("PCP_SEQ", pcpSeq);
+	            } catch (NumberFormatException e) {
+	                System.out.println("PCP_SEQ 변환 실패: " + pcp_seq);
+	                row.put("PCP_SEQ", null);
+	            }
+	        }
+
+	        processMapper.insertTypeProcess(row);  // 👈 단건 호출로 변경 필요
+	    }
 	}
 
 	// 공정순서 기존 수정
+	@Transactional
 	public void updateTypeProcesses(List<Map<String, Object>> updateList) {
-		
-		for (Map<String, Object> row : updateList) {
-			Object pcp_id = row.get("PCP_ID");
-			Object prc_id = row.get("PRC_ID");
-		    Object pcp_seq = row.get("PCP_SEQ");
+	    for (Map<String, Object> row : updateList) {
+	        try {
+	            int pcpID = Integer.parseInt(row.get("PCP_ID").toString());
+	            int prcID = Integer.parseInt(row.get("PRC_ID").toString());
+	            int pcpSeq = Integer.parseInt(row.get("PCP_SEQ").toString());
 
-		    if (pcp_seq != null || pcp_id != null || prc_id != null) {
-		        try {
-		        	int pcpID = Integer.parseInt(pcp_id.toString());
-		        	int prcID = Integer.parseInt(prc_id.toString());
-		            int pcpSeq = Integer.parseInt(pcp_seq.toString());
-		            row.put("PCP_ID", pcpID);
-		            row.put("PRC_ID", prcID);
-		            row.put("PCP_SEQ", pcpSeq);
-		        } catch (NumberFormatException e) {
-		            System.out.println("PCP_ID 변환 실패: " + pcp_id);
-		            System.out.println("PRC_ID 변환 실패: " + prc_id);
-		            System.out.println("PCP_SEQ 변환 실패: " + pcp_seq);
-		            row.put("PCP_ID", null);
-		            row.put("PRC_ID", null);
-		            row.put("PCP_SEQ", null);
-		        }
-		    }
-		}
-		
-    	processMapper.updateTypeProcess(updateList);
+	            row.put("PCP_ID", pcpID);
+	            row.put("PRC_ID", prcID);
+	            row.put("PCP_SEQ", pcpSeq);
+
+	            processMapper.updateTypeProcess(row);  // 👈 단건 호출
+	        } catch (NumberFormatException e) {
+	            System.out.println("공정순서 수정 중 변환 실패: " + row);
+	        }
+	    }
 	}
+	
+	// 공정순서 삭제
+	@Transactional
+    public void deleteTypeProcesses(List<Map<String, Object>> deleteList) {
+        for (int i = deleteList.size() - 1; i >= 0; i--) {
+            Map<String, Object> row = deleteList.get(i);
+
+            Object pcpIdObj = row.get("PCP_ID");
+            if (pcpIdObj != null) {
+                try {
+                    int pcpId = Integer.parseInt(pcpIdObj.toString());
+                    row.put("PCP_ID", pcpId);
+                    
+                    System.out.println("서비스row : " + row);
+
+                    processMapper.deleteTypeProcess(row);
+                } catch (NumberFormatException e) {
+                    System.out.println("PCP_ID 변환 실패: " + pcpIdObj);
+                }
+            }
+        }
+    }
 
 }

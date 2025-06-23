@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,7 +81,7 @@ public class ProcessRestController {
 
 	    // 공정 기존 수정
 	    if (updateList != null && !updateList.isEmpty()) {
-	    	processService.updateprocesses(updateList);
+	    	processService.updateProcesses(updateList);
 	    }
 
 	    return Map.of("success", true);
@@ -157,5 +158,21 @@ public class ProcessRestController {
 
 	    return Map.of("success", true);
 	}
+	
+	// 공정순서 삭제
+	@PostMapping("/typeProcess/delete")
+    public ResponseEntity<?> deleteTypeProcesses(@RequestBody List<Map<String, Object>> deleteList) {
+		
+		System.out.println("컨트롤러 deleteList : " + deleteList);
+		
+        try {
+        	processService.deleteTypeProcesses(deleteList);
+            return ResponseEntity.ok(Map.of("result", "success"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("result", "fail", "message", e.getMessage()));
+        }
+    }
 	
 }

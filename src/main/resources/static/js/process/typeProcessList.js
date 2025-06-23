@@ -266,8 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				}))
 			};
 			
-			console.log("저장할 데이터 : ", payload);
-
 			// ✅ 서버로 데이터 전송
 			fetch('/SOLEX/typeProcess/save', {
 				method: 'POST',
@@ -319,15 +317,34 @@ document.addEventListener('DOMContentLoaded', () => {
 				return;
 			}
 
-			const onlyNewRowKeys = checkedRows.filter(row => row.__isNew).map(row => row.rowKey);
-			if (onlyNewRowKeys.length === 0) {
-				alert('추가된 행만 삭제할 수 있습니다.');
+			if (!confirm('선택한 행을 삭제하시겠습니까?')) {
 				return;
 			}
-
-			onlyNewRowKeys.sort((a, b) => b - a).forEach(rowKey => {
-				window.type_process_grid.removeRow(rowKey);
-			});
+			
+			const deleteList = checkedRows.map(row => ({
+		        PCP_ID: row.PCP_ID
+		    }));
+			
+			fetch('/SOLEX/typeProcess/delete', {
+		        method: 'POST',
+		        headers: {
+		            'Content-Type': 'application/json'
+		        },
+		        body: JSON.stringify(deleteList)
+		    })
+		    .then(res => {
+		        if (!res.ok) throw new Error("삭제 실패");
+		        return res.json();
+		    })
+		    .then(data => {
+		        alert("삭제 성공");
+		        loadTypeProcessList(selectedDetId);
+		    })
+		    .catch(err => {
+		        console.error(err);
+		        alert("삭제 중 오류가 발생했습니다.");
+		    });
+			
 		});
 	}
 
