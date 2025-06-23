@@ -82,7 +82,7 @@
 	    	) VALUES (#{doc_id},
 	  				  #{doc_type},
 			          #{emp_id},
-			          SYSDATE
+			          #{doc_reg_time}
 	    	)
 	</insert>
 	

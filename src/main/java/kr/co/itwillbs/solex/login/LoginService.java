@@ -10,8 +10,8 @@ public class LoginService {
 	@Autowired
 	LoginMapper mapper;
 
-	public Map<String, String> loginEmp(String emp_num, String emp_pw) {
-		return mapper.loginEmp(emp_num, emp_pw);
+	public Map<String, String> loginEmp(Map<String, String> empInfo) {
+		return mapper.loginEmp(empInfo);
 	}
 	
 //	@Override

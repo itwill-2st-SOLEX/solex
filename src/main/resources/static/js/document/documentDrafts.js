@@ -342,7 +342,6 @@ $(function() {
 			const nameList = (data.APL_EMP_POS_NM || "").split(",");
 			const statusList = (data.APL_STS || "").split(",");
 			const timeList = (data.APL_ACTION_TIME || "").split(",");
-			debugger;
 			// thead 구성
 			const theadRow = document.querySelector(".approval-line thead tr");
 			theadRow.innerHTML = "";
@@ -379,8 +378,6 @@ $(function() {
 					`;
 
 					form.appendChild(returnDiv);
-					debugger;
-				
 				}
 			}
 			for (let i = 0; i < nameList.length; i++) {
