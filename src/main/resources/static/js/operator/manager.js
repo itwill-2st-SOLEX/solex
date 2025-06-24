@@ -5,39 +5,6 @@ const pageSize = 20;
 const gridHeight = 390;
 let empId = null;
 
-// 불량수량 입력할 때 숫자만 가능하도록 설정
-function customTextEditor(props) {
-  const el = document.createElement('input');	//요소 생성
-
-  el.type = 'text';
-  el.value = String(props.value ?? '');	//그리드 값을 문자열로 변경하여 저장(없으면 빈문자열)
-
-  // 숫자만 입력 가능하도록 이벤트 추가
-  el.addEventListener('beforeinput', (e) => {
-    // e.data가 null이면 삭제(Backspace 등) 이벤트
-    if (e.data && !/^[0-9]+$/.test(e.data)) {
-      e.preventDefault();
-    }
-  });
-
-  el.addEventListener('input', () => {
-    el.value = el.value.replace(/[^0-9]/g, '');
-  });
-
-  return {
- 	getElement() {	//그리드에 요소 반환
-    	return el;
-    },
-    getValue() {	//사용자가 입력한 값 반환
-    	return el.value;
-    },
-    mounted() {		//입력창에 포커스, 기존 값 전체 선택 상태
-		el.focus();
-      	el.select();
-    }
-  };
-}
-
 // ToastUI Grid 생성
 const grid = new tui.Grid({
     el: document.getElementById('grid'),
@@ -77,9 +44,14 @@ const grid = new tui.Grid({
 		  align: 'center', 
 		  filter: 'select', 
 		  editor: customTextEditor,		//숫자만 입력하도록 설정
-		  //입력이 불가능할때는 '-' 표시하기
+		  //입력이 불가능할때는 '생산중' 표시하기
+		  // 생산중만 회색으로 표시
 		  formatter: ({ row, value }) => {
-			    return row.wpoStatus === 'wpo_sts_04' ? value : '-';
+			if (row.wpoStatus === 'wpo_sts_04') {
+		      return value; 
+		    } else {
+		      return `<span style="color: #aaa;">생산중</span>`; 
+		    }
 		  }
 		}, 
 		{ header: '진행률',
@@ -116,8 +88,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 });
 
-
-
 //품질검사 중일 때만 불량수량 입력할 수 있도록 설정
 grid.on('editingStart', ev => {
   const row = grid.getRow(ev.rowKey);
@@ -126,6 +96,21 @@ grid.on('editingStart', ev => {
   if (ev.columnName === 'wpoBcount' && row?.wpoStatus !== 'wpo_sts_04') {
     ev.stop();
     alert('품질검사 후 등록해주세요');
+  }
+});
+
+//불량 수량이 입력되면 화면에 남아있도록 설정
+grid.on('editingFinish', ev => {
+  const { rowKey, columnName, value } = ev;
+  // 편집이 완료된 셀의 rowKey, 컬럼명, 입력값을 가져옴
+
+  // 수정한 컬럼이 wpoBcount인 경우에만 데이터 갱신
+  if (columnName === 'wpoBcount') {
+    // 그리드 내부 데이터 갱신
+    grid.setValue(rowKey, columnName, value);
+
+    // 또는 필요하면 여기서 서버 전송하는 코드 추가 가능
+    console.log(`불량수량 수정됨: 행키 ${rowKey}, 값 ${value}`);
   }
 });
 
@@ -147,14 +132,37 @@ document.getElementById('grid').addEventListener('click', async (e) => {
 
     // 버튼 종류 구분 (클래스명 또는 버튼 텍스트 등)
 	// updateStatus(작업id, 변경될 상태값)
-    if (target.classList.contains('start-btn')) { // 작업시작 버튼 클릭
+    if (target.classList.contains('start-btn')) { // 작업시작 버튼
       await updateStatus(wrkId, 'wpo_sts_02'); 		// 공정진행중
-    } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼 클릭
+	  
+    } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼
       await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사 중
 	  
-	} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 클릭
-      //await updateStatus(wrkId, 'wpo_sts_05'); // 품질검사완료
-/*    }else if (target.classList.contains('transfer-btn')) {	
+	} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 
+		
+		// 편집 중이면 편집 종료 → grid 데이터 반영
+		await grid.finishEditing();
+		
+		const wrkId = target.getAttribute('data-id');
+		  if (!wrkId) {
+		    alert('작업 ID를 찾을 수 없습니다.');
+		    return;
+		  }
+
+		  // wrkId에 해당하는 행 key 찾기
+		  //const wrkIdTyped = isNaN(Number(wrkId)) ? wrkId : Number(wrkId);
+		  const data = grid.getData();
+		  const rowKey = data.findIndex(row => row.wrkId == wrkId);
+
+		  const bcount = grid.getValue(rowKey, 'wpoBcount');
+		  if (!bcount || Number(bcount) === 0) {
+		    alert('불량 수량을 입력해주세요.');
+		    return;
+		  }
+			  
+      	await updateStatus(wrkId, 'wpo_sts_05'); // 품질검사완료
+	  
+/*  }else if (target.classList.contains('transfer-btn')) {	
 	  
 	  await updateStatus(wrkId, 'wpo_sts_05'); //다음 공정으로 이관
      */
@@ -165,7 +173,38 @@ document.getElementById('grid').addEventListener('click', async (e) => {
   }
 });
 
+// 불량수량 입력할 때 숫자만 가능하도록 설정
+function customTextEditor(props) {
+  const el = document.createElement('input');	//요소 생성
 
+  el.type = 'text';
+  el.value = String(props.value ?? '');	//그리드 값을 문자열로 변경하여 저장(없으면 빈문자열)
+
+  // 숫자만 입력 가능하도록 이벤트 추가
+  el.addEventListener('beforeinput', (e) => {
+    // e.data가 null이면 삭제(Backspace 등) 이벤트
+    if (e.data && !/^[0-9]+$/.test(e.data)) {
+      e.preventDefault();
+    }
+  });
+
+  el.addEventListener('input', () => {
+    el.value = el.value.replace(/[^0-9]/g, '');
+  });
+
+  return {
+ 	getElement() {	//그리드에 요소 반환
+    	return el;
+    },
+    getValue() {	//사용자가 입력한 값 반환
+    	return el.value;
+    },
+    mounted() {		//입력창에 포커스, 기존 값 전체 선택 상태
+		el.focus();
+      	el.select();
+    }
+  };
+}
 
 //무한 스크롤 이벤트
 function bindScrollEvent() {

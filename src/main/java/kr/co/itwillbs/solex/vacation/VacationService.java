@@ -26,8 +26,6 @@ public class VacationService {
 	public int getVacationCount(Long empId) {
 		return vacationMapper.getVacationCount(empId);
 	}
-
-	
 	
 	//내가 사용한 휴가 내역 확인
 	public List<Map<String, Object>> getVacationDetail(Map params) {
