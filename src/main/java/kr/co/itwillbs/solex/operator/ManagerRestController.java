@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.operator;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,8 +28,8 @@ public class ManagerRestController {
 	//내 부서 정보
 	@GetMapping("/managerSummary")
 	public Map<String, Object> getManagerSummary() {
-		
 	    Map<String, Object> result = managerService.getManagerSummary(empId);
+	    System.out.println(result);
 
 	    return result;
 	}
@@ -51,8 +51,8 @@ public class ManagerRestController {
 
 	    Map<String, Object> result = new HashMap<>();
 	    result.put("list", managerList);
-	    
 	    System.out.println(result);
+	    
 	    return result;
 	}
 	
@@ -60,8 +60,7 @@ public class ManagerRestController {
 	@PatchMapping("/updateStatus")
 	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map) {
 		
-		System.out.println(map);
-
+		map.put("empId", empId);
 		managerService.updateWpoSts(map);
 		
 		return ResponseEntity.ok().build();

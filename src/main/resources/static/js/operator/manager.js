@@ -5,6 +5,39 @@ const pageSize = 20;
 const gridHeight = 390;
 let empId = null;
 
+// 불량수량 입력할 때 숫자만 가능하도록 설정
+function customTextEditor(props) {
+  const el = document.createElement('input');	//요소 생성
+
+  el.type = 'text';
+  el.value = String(props.value ?? '');	//그리드 값을 문자열로 변경하여 저장(없으면 빈문자열)
+
+  // 숫자만 입력 가능하도록 이벤트 추가
+  el.addEventListener('beforeinput', (e) => {
+    // e.data가 null이면 삭제(Backspace 등) 이벤트
+    if (e.data && !/^[0-9]+$/.test(e.data)) {
+      e.preventDefault();
+    }
+  });
+
+  el.addEventListener('input', () => {
+    el.value = el.value.replace(/[^0-9]/g, '');
+  });
+
+  return {
+ 	getElement() {	//그리드에 요소 반환
+    	return el;
+    },
+    getValue() {	//사용자가 입력한 값 반환
+    	return el.value;
+    },
+    mounted() {		//입력창에 포커스, 기존 값 전체 선택 상태
+		el.focus();
+      	el.select();
+    }
+  };
+}
+
 // ToastUI Grid 생성
 const grid = new tui.Grid({
     el: document.getElementById('grid'),
@@ -18,43 +51,42 @@ const grid = new tui.Grid({
 	        complexColumns: [
 				{
 	                header: '옵션',
-	                name: 'optionGroup',
+	                name: 'optionGroup1',
 	                childNames: ['prdColor', 'prdSize', 'prdHeight']
+	            },
+				{
+	                header: '작업수량',
+	                name: 'optionGroup2',
+	                childNames: ['wpoOcount', 'wpoJcount', 'wpoBcount']
 	            }
 	        ]
 	      },
     columns: [
-		{ header: '작업지시번호', name: 'wrkId', align: 'center' },
+		{ header: '지시번호', name: 'wrkId', align: 'center', width: 70 },
 		{ header: '제품코드', name: 'prdCd', align: 'center', filter: 'select' },
-		{ header: '제품명', name: 'prdNm', align: 'center', filter: 'select', width: 170},
+		{ header: '제품명', name: 'prdNm', align: 'center', filter: 'select', width: 190},
 		
-		{ header: '컬러', name: 'prdColor', align: 'center', filter: 'select' , width: 70},
-		{ header: '사이즈', name: 'prdSize', align: 'center', filter: 'select' , width: 70},
-		{ header: '굽높이', name: 'prdHeight', align: 'center', filter: 'select' , width: 70},
+		{ header: '컬러', name: 'prdColor', align: 'center', filter: 'select' , width: 80},
+		{ header: '사이즈', name: 'prdSize', align: 'center', filter: 'select' , width: 80},
+		{ header: '굽높이', name: 'prdHeight', align: 'center', filter: 'select' , width: 80},
 		
-		{ header: '작업지시수량', name: 'wpoOcount', align: 'center', filter: 'select', width: 110 },
-		{ header: '작업완료수량', name: 'wpoJcount', align: 'center', filter: 'select', width: 110},
-		{ header: '불량수량', name: 'wpoBcount', align: 'center', filter: 'select',
-			formatter: ({ value, row }) => {
-			    if (row.wpoStatus !== 'wpo_sts_04') {
-			      return value ?? '-'; // 기본값 또는 빈 문자열
-			    }
-
-			    return `
-			      <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
-			        <input type="text" value="${value ?? ''}" class="bcount-input" data-id="${row.wrkId}" style="width: 50px;" />
-			        <button class="save-bcount-btn" data-id="${row.wrkId}" style="border: none; background: transparent; cursor: pointer;">
-						<i class="menu-icon tf-icons bx bx-check"></i>
-			        </button>
-			      </div>
-			    `;
-			  }
+		{ header: '지시', name: 'wpoOcount', align: 'center', filter: 'select'},
+		{ header: '완료', name: 'wpoJcount', align: 'center', filter: 'select'},
+		{ header: '불량', 
+		  name: 'wpoBcount', 
+		  align: 'center', 
+		  filter: 'select', 
+		  editor: customTextEditor,		//숫자만 입력하도록 설정
+		  //입력이 불가능할때는 '-' 표시하기
+		  formatter: ({ row, value }) => {
+			    return row.wpoStatus === 'wpo_sts_04' ? value : '-';
+		  }
 		}, 
-		{header: '진행률',
-         name: 'wpoProRate',
-         align: 'center',
-		 // 작업률 표시
-		 formatter: ({ value }) => {
+		{ header: '진행률',
+          name: 'wpoProRate',
+          align: 'center',
+		  // 작업률 표시
+		  formatter: ({ value }) => {
 		    const rate = parseFloat(value) || 0;
 
 		    return `
@@ -73,7 +105,7 @@ const grid = new tui.Grid({
 		},
 		{ header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: 'true' },
 		{ header: '진행상태', name: 'wpoStatusName', align: 'center', filter: 'select', className: 'bold-text' },
-		{ header: '작업지시', name: 'wpoBtn', align: 'center', sortable: 'true', editable: false, width: 120},
+		{ header: '작업지시', name: 'wpoBtn', align: 'center', sortable: 'true', editable: false, width: 100},
 		
     ],
 });
@@ -83,6 +115,57 @@ window.addEventListener('DOMContentLoaded', () => {
 	managerSummary();
 
 });
+
+
+
+//품질검사 중일 때만 불량수량 입력할 수 있도록 설정
+grid.on('editingStart', ev => {
+  const row = grid.getRow(ev.rowKey);
+  console.log('editing row:', row); // 👈 상태 확인용 로그
+
+  if (ev.columnName === 'wpoBcount' && row?.wpoStatus !== 'wpo_sts_04') {
+    ev.stop();
+    alert('품질검사 후 등록해주세요');
+  }
+});
+
+
+// 버튼 클릭 이벤트 위임
+document.getElementById('grid').addEventListener('click', async (e) => {
+  const target = e.target;
+  
+  // input 클릭 시 포커스 강제 부여
+  if (target.classList.contains('bcount-input')) {
+      e.stopPropagation();
+      target.focus();
+      return;
+  }
+  
+  if (target.tagName === 'BUTTON') {
+    const wrkId = target.getAttribute('data-id');
+    if (!wrkId) return;
+
+    // 버튼 종류 구분 (클래스명 또는 버튼 텍스트 등)
+	// updateStatus(작업id, 변경될 상태값)
+    if (target.classList.contains('start-btn')) { // 작업시작 버튼 클릭
+      await updateStatus(wrkId, 'wpo_sts_02'); 		// 공정진행중
+    } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼 클릭
+      await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사 중
+	  
+	} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 클릭
+      //await updateStatus(wrkId, 'wpo_sts_05'); // 품질검사완료
+/*    }else if (target.classList.contains('transfer-btn')) {	
+	  
+	  await updateStatus(wrkId, 'wpo_sts_05'); //다음 공정으로 이관
+     */
+    } else if (target.classList.contains('success-btn')) {
+		// 공정 이관 처리
+		//??????????????????????????????????????????????
+  	}
+  }
+});
+
+
 
 //무한 스크롤 이벤트
 function bindScrollEvent() {
@@ -136,48 +219,6 @@ function dateFormatter(date, includeTime = false) {
 	return result;
 }
 
-// 버튼 클릭 이벤트 위임
-document.getElementById('grid').addEventListener('click', async (e) => {
-  const target = e.target;
-  
-  // input 클릭 시 포커스 강제 부여
-  if (target.classList.contains('bcount-input')) {
-      e.stopPropagation();
-      target.focus();
-      return;
-  }
-  
-  if (target.tagName === 'BUTTON') {
-    const wrkId = target.getAttribute('data-id');
-    if (!wrkId) return;
-
-    // 버튼 종류 구분 (클래스명 또는 버튼 텍스트 등)
-	// updateStatus(작업id, 변경될 상태값)
-    if (target.classList.contains('start-btn')) { // 작업시작 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_02'); 		// 공정진행중
-    } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼 클릭
-      await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사 중
-	//} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 클릭
-    //  await updateStatus(wrkId, 'wpo_sts_04'); // 품질검사완료
-/*    }else if (target.classList.contains('transfer-btn')) {	
-	  
-	  await updateStatus(wrkId, 'wpo_sts_05'); //다음 공정으로 이관
-     */
-    } else if (target.classList.contains('success-btn')) {
-		// 공정 이관 처리
-		//??????????????????????????????????????????????
-  	}
-  }
-});
-
-//품질검사 중일 때만 불량수량 입력할 수 있도록 설정
-/*grid.on('editingStart', ev => {
-  const row = grid.getRow(ev.rowKey);
-  if (ev.columnName === 'wpoBcount' && row.wpoStatus !== 'wpo_sts_04') {
-    ev.stop(); // 편집 막기
-    alert('품질검사 후 등록해주세요');
-  }
-});*/
 
 //공정 요약 정보
 async function managerSummary() {

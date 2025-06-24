@@ -48,10 +48,8 @@ public class WorkerService {
 		// 4. 작업수량이 지시수량을 넘으면 상태를 wpo_sts_03(공정완료)로 자동 변경
 	    Map<String, Object> summary = managerMapper.selectWpoSts03(wpoId);
 
-	    int order = (int) ((BigDecimal) summary.get("WPO_OCOUNT")).intValue();
-	    int job = (int) ((BigDecimal) summary.get("WPO_JCOUNT")).intValue();
-
-	    
+	    int order = ((BigDecimal) summary.get("WPO_OCOUNT")).intValue();
+	    int job = ((BigDecimal) summary.get("WPO_JCOUNT")).intValue();
 	    
 	    if (job >= order) {
 	    	Map<String, Object> statusMap = new HashMap<>();
