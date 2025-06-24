@@ -195,40 +195,6 @@ $(function() {
   		`
 	};
 
-	// 기안서 종류별로 제목 및 달력 시간표시 나타내기
-	$('#docTypeSelect').on('change', async function() {
-		const selected = $(this).val();
-		const selectedText = $(this).find('option:selected').text();
-		$('.approval-line h2').text(selectedText);
-
-		const formHtml = formTemplates[selected] || '<p>지원되지 않는 문서 유형입니다.</p>';
-		$('#dynamicFormArea').html(`
-	      <input type="hidden" name="doc_type" value="${selected}" />
-	      ${formHtml}
-	    `);
-		// 2. 사원 정보 채우기
-		fillEmployeeInfo();
-		attachDateRangeChange();
-
-		flatpickr("#dateRange", {
-			mode: selected === 'doc_type_01' || selected === 'doc_type_02' ? "range" : "single",
-			enableTime: selected !== 'doc_type_03' ? true : false,
-			time_24hr: true,
-			dateFormat: selected === 'doc_type_03' ? "Y-m-d" : "Y-m-d H:i",
-			minuteIncrement: 30
-		});
-
-		if (selected === 'doc_type_03') {
-			const positionOptions = await fetchCodeOptions('position');
-			$('#docPositionSelect').html(`<option value="">선택하세요</option>${positionOptions}`);
-
-			const deptOptions = await fetchCodeOptions('dept');
-			$('#docDeptSelect').html(`<option value="">선택하세요</option>${deptOptions}`);
-		}
-	});
-
-	$('#docTypeSelect').trigger('change');
-
 	// 결재 요청
 	document.querySelectorAll('.submit-btn').forEach(btn => {
 	    btn.addEventListener('click', async () => {
@@ -313,6 +279,19 @@ $(function() {
 				const el = form.querySelector(`[name="${key.toLowerCase()}"]`);
 				if (el) el.value = value;
 			}
+			
+			// 상세 모달 버튼에 필요값 주입
+			document
+				.querySelectorAll('#detailModal .submit-btn')
+				.forEach(btn => {
+					btn.dataset.docId = row.doc_id;
+					btn.dataset.aplStepNo  = row.apl_step_no;   
+					btn.dataset.aplId      = row.apl_id; 
+					btn.dataset.docType    = row.doc_type_code; 
+				});
+	
+					
+// 결재선 부분 시작		
 			const nameList = (data.APL_EMP_POS_NM || "").split(",");
 			const statusList = (data.APL_STS || "").split(",");
 			const timeList = (data.APL_ACTION_TIME || "").split(",");
@@ -370,19 +349,8 @@ $(function() {
 				`;
 				rowEl.appendChild(td);
 			}
-
-
 			tbody.appendChild(rowEl);
-
-			// 1️⃣ 상세 모달에 doc_id 주입
-			document
-				.querySelectorAll('#detailModal .submit-btn')
-				.forEach(btn => {
-					btn.dataset.docId = row.doc_id;
-					btn.dataset.aplStepNo  = row.apl_step_no;   
-					btn.dataset.aplId      = row.apl_id; 
-					btn.dataset.docType    = row.doc_type_code; 
-				});
+// 결재선 부분 끝	
 				
 			// 모달 오픈
 			document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
@@ -411,17 +379,4 @@ function fillEmployeeInfo() {
 			alert('사원 정보를 불러오지 못했습니다.');
 		}
 	});
-}
-// 날짜 추출하기
-function attachDateRangeChange() {
-	const input = document.getElementById('dateRange');
-	if (!input) return;
-	input.removeEventListener('change', onDateRangeChange);
-	input.addEventListener('change', onDateRangeChange);
-}
-
-function onDateRangeChange() {
-	const [startDate, endDate] = this.value.split(' to ');
-	document.getElementById('startDate').value = startDate || '';
-	document.getElementById('endDate').value = endDate || '';
 }
