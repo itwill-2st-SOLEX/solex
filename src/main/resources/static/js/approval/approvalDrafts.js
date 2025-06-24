@@ -49,17 +49,6 @@ $(function() {
 		}
 	});
 
-	async function fetchCodeOptions(groupId) {
-		try {
-			const response = await fetch(`/SOLEX/approval/api/codes?group=${groupId}`);
-			const data = await response.json();
-			return data.map(({ DET_ID, DET_NM }) => `<option value="${DET_ID}">${DET_NM}</option>`).join("");
-		} catch (error) {
-			console.error(`${groupId} 코드 불러오기 실패:`, error);
-			return "<option disabled>불러오기 실패</option>";
-		}
-	}
-
 	// 기안서 종류별 동적 화면 구성
 	const formTemplates = {
 		"doc_type_01": `
@@ -249,12 +238,32 @@ $(function() {
 			const aplId     = btn.dataset.aplId;      
 			const docType = btn.dataset.docType;
 			
-			const leaveType =
-			      docType === 'doc_type_01'
-			        ? document.querySelector('#detailModal input[name="lea_type"]:checked')?.value
-			        : null;   // 다른 문서 유형에서는 전송 안 함
+			// ───────── 휴가 전용 필드 ─────────
+		    let leaveType      = null;
+		    let leaveStartDate = null;
+		    let leaveEndDate   = null;
 
-			
+		    if (docType === 'doc_type_01') {
+		      leaveType      = document.querySelector('#detailModal input[name="lea_type"]:checked')?.value;
+		      leaveStartDate = document.querySelector('#detailModal #startDate')?.value; // ex) 2025-07-01 09:00
+		      leaveEndDate   = document.querySelector('#detailModal #endDate')?.value;   // ex) 2025-07-02 18:00
+		    }
+
+		    // 공통 + 선택 필드를 합쳐 payload 구성
+		    const payload = {
+		      status : action,
+		      aplId  : aplId,
+		      stepNo : stepNo,
+		      docType: docType
+		    };
+
+		    if (docType === 'doc_type_01') {
+		      Object.assign(payload, {
+		        leaveType      : leaveType,
+		        leaStartDate   : leaveStartDate,
+		        leaEndDate     : leaveEndDate   // ← key는 서버에서 편한 이름으로 맞춰도 OK
+		      });
+		    }
 
 	        try {
 	            const res = await fetch(`/SOLEX/approval/document/${docId}`, {
@@ -262,14 +271,7 @@ $(function() {
 	                headers: {
 	                    'Content-Type': 'application/json'
 	                },
-	                body: JSON.stringify({
-	                    // === 요청 바디 예시 ===
-	                    status   : action,      // 결재 결과
-	                    aplId  : aplId,
-						stepNo : stepNo,
-						docType : docType,
-						leaveType: leaveType
-	                })
+	                body: JSON.stringify(payload)
 	            });
 
 	            if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -314,7 +316,6 @@ $(function() {
 			const nameList = (data.APL_EMP_POS_NM || "").split(",");
 			const statusList = (data.APL_STS || "").split(",");
 			const timeList = (data.APL_ACTION_TIME || "").split(",");
-			debugger;
 			// thead 구성
 			const theadRow = document.querySelector(".approval-line thead tr");
 			theadRow.innerHTML = "";

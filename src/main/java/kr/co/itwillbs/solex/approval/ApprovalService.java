@@ -57,7 +57,9 @@ public class ApprovalService {
         	approvalRequest.replace("status", "doc_sts_02");
         	
         	if (docType.equals("doc_type_01")) {
+        		approvalRequest.get("dbdaterange");
         		if ("full".equals(leaveType)) {
+        			
         			
         		}
         		else if ("half".equals(leaveType)) {
