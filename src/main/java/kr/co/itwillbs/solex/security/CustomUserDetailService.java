@@ -27,18 +27,29 @@ public class CustomUserDetailService implements UserDetailsService {
         Map<String, Object> userMap = loginMapper.findByEmpNum(empNum);
         
         if (userMap == null) {
-            throw new UsernameNotFoundException("❌ 사용자를 찾을 수 없습니다: " + empNum);
+            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + empNum);
         }
 
         String empNumFromDb = (String) userMap.get("EMP_NUM");
         String password = (String) userMap.get("EMP_PW");
-        String role = userMap.get("role") != null ? (String) userMap.get("role") : "USER";
+        String role = (String) userMap.get("EMP_POS_CD");
 
         // DB에 role이 없으므로 하드코딩: 기본 USER 권한 부여
         return User.builder()
                 .username(empNumFromDb)
                 .password(password)
-                .roles("USER")  // 하드코딩 나중에는 .roles(role) 이렇게
+                .roles(convertToRole(role))
                 .build();
+    }
+    
+    private String convertToRole(String empPosCd) {
+        return switch (empPosCd) {
+            case "POS_01" -> "1";
+            case "POS_02" -> "2";
+            case "POS_03" -> "3";
+            case "POS_04" -> "4";
+            case "POS_05" -> "5";
+            default -> "";
+        };
     }
 }

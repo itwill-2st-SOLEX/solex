@@ -3,17 +3,10 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.login.LoginMapper">
-<!--사용자가 입력한 사번 찾기-->
-<!--		[TODO] role추가시 쓸 쿼리 -->
-<!--	<select id="findByEmpNum" parameterType="string" resultType="map">-->
-<!--		SELECT emp_num, emp_pw, role-->
-<!--		FROM employee-->
-<!--		WHERE emp_num = #{empNum}-->
-<!--	</select>-->
+<!-- 	사번에 맞는 암호화 비번 들고오기  -->
 	<select id="findByEmpNum" parameterType="string" resultType="map">
-		SELECT emp_num, emp_pw
+		SELECT emp_num, emp_pw, emp_pos_cd
 		FROM employee
 		WHERE emp_num = #{empNum}
 	</select>
-
 </mapper>

@@ -31,6 +31,12 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/", true)            // 로그인 성공 시 이동할 페이지
                 .permitAll()
             )
+            .logout(logout -> logout
+                    .logoutUrl("/logout")  
+                    .logoutSuccessUrl("/auth/login")
+                    .invalidateHttpSession(true)        // 세션 무효화
+                    .deleteCookies("JSESSIONID")        // 쿠키 삭제
+            )
             .httpBasic(basic -> basic.disable());       // HTTP Basic 인증 비활성화
 
         return http.build();

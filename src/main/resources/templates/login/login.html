@@ -29,13 +29,12 @@
 
 			<div class="login-tabs">
 				<button class="tab active">ID 로그인</button>
-				<button class="tab">QR 로그인</button>
 			</div>
 
 			<form th:action="@{/login}" class="login-form" method="post">
 				<input type="text"id= "empNo" name="emp_num" placeholder="사번" />
 				<input type="password" id="empPw" name="emp_pw" placeholder="비밀번호" />
-				<label><input type="checkbox" /> 사번 저장</label>
+				<label class="small-label"><input type="checkbox" id="saveEmpNum" /> 사번 저장</label>
 				<button type="submit" id="loginBtn" class="login-btn">로그인</button>
 			</form>
 
