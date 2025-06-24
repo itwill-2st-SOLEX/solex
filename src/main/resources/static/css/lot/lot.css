@@ -59,6 +59,12 @@
     padding: 10px;
 }
 
+#lotTree {
+  min-height: 200px;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
 .lotDetail-area {
 	width: 50%;
     height: 600px;

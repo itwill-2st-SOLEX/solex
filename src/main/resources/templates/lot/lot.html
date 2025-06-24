@@ -6,9 +6,11 @@
 <title>SOLEX</title>
 
 <link rel="stylesheet" th:href="@{/css/lot/lot.css}">
+<link rel="stylesheet" th:href="@{/jsTree/themes/default/style.min.css}" />
 
 </head>
 <body>
+
 	<th:block layout:fragment="content">
 		
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
@@ -43,7 +45,8 @@
 				
 				<div class="lotArea">
 					<div class="lotTree-area" id="lotListContainer">
-						<p>lot리스트</p>
+						<p>LOT 계층구조</p>
+						<div id="lotTree"></div>
 					</div>
 					
 					<div class="lotDetail-area" id="lotDetailContainer">
@@ -55,10 +58,12 @@
 			
 		</div>
 	
-		<th:block layout:fragment="script">
-			<script th:src="@{/js/lot/lot.js}"></script>
-		</th:block>
-	
 	</th:block>
+	
+	<th:block layout:fragment="script">
+		<script th:src="@{/jsTree/jstree.min.js}"></script>
+		<script th:src="@{/js/lot/lot.js}"></script>
+	</th:block>
+	
 </body>
 </html>
