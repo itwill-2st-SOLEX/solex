@@ -59,7 +59,7 @@
 	            #{code.COD_YN},
 	            sysdate)
 	    </foreach>
-	    SELECT * FROM dual
+	    SELECT * FROM DUAL
 	</insert>
 	
 	<!-- 공통코드 기존 행 수정 -->
