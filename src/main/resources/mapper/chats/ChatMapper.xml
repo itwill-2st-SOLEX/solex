@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.chats.ChatMapper">
+<!-- 	사원 목록 조회 -->
+	<select id="getEmpList" resultType="map">
+		SELECT emp_nm
+		       , pos.det_nm AS pos
+		       , dep.det_nm AS dep
+		  FROM employee e
+		  JOIN code_detail pos
+		    ON e.emp_pos_cd = pos.det_id
+		  JOIN code_detail dep
+		    ON e.emp_dep_cd = dep.det_id
+	</select>
+    
+</mapper>	

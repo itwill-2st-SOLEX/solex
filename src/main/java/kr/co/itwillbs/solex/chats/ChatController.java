@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.chat;
+package kr.co.itwillbs.solex.chats;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

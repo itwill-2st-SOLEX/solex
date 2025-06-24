@@ -1,5 +1,4 @@
 $(function() {
-
 	const tabUsers = document.getElementById('tab-users');
 	const tabChats = document.getElementById('tab-chats');
 
@@ -7,22 +6,13 @@ $(function() {
 	const viewChats = document.getElementById('view-chats');
 	const viewChatroom = document.getElementById('view-chatroom');
 
-	// 더미 사원 데이터
-	const users = [
-		{ name: '배지영', dept: '영업팀' },
-		{ name: '홍길동', dept: '기획팀' },
-		{ name: '김민수', dept: '개발팀' }
-	];
-
-	// 더미 대화 목록
+	// 대화 목록 더미 (필요하면 이 부분도 비동기로 변경 가능)
 	const chats = [
 		{ name: '홍길동', lastMessage: '결재했습니다!' },
 		{ name: '김민수', lastMessage: '수정해둘게요.' }
 	];
 
-
-
-	// 탭 전환
+	// 탭 전환 이벤트
 	tabUsers.addEventListener('click', () => {
 		toggleTab('users');
 	});
@@ -47,15 +37,6 @@ $(function() {
 		}
 	}
 
-	// 사원 목록 출력
-	const userList = document.getElementById('user-list');
-	users.forEach(user => {
-		const li = document.createElement('li');
-		li.textContent = `${user.dept} ${user.name}`;
-		li.addEventListener('click', () => openChatroom(user.name));
-		userList.appendChild(li);
-	});
-
 	// 대화 목록 출력
 	const chatList = document.getElementById('chat-list');
 	chats.forEach(chat => {
@@ -79,9 +60,8 @@ $(function() {
 	    `;
 	}
 
-
-	// 메시지 전송
-	function sendMessage() {
+	// 메시지 전송 (전역 함수)
+	window.sendMessage = function() {
 		const input = document.getElementById('chatInput');
 		const text = input.value.trim();
 		if (text) {
@@ -93,24 +73,51 @@ $(function() {
 		}
 	}
 
-	// 사원 목록 출력
-	function renderUsers() {
+	// 사원 목록 가져로기 렌더링
+	function fetchUsersAndRender(filter = '') {
+		$.ajax({
+			url: '/SOLEX/chats/emp',  // 실제 사원 목록 API 주소로 변경하세요
+			method: 'GET',
+			dataType: 'json',
+			success: function(users) {
+				debugger;
+				renderUsers(users, filter);
+			},
+			error: function() {
+				console.error('사원 목록을 불러오는데 실패했습니다.');
+			}
+		});
+	}
+
+	// 사원 목록 렌더링 함수
+	function renderUsers(users, filter = '') {
+		filter = filter.toLowerCase();
 		const userList = document.getElementById('user-list');
 		userList.innerHTML = '';
 
-		users.forEach(user => {
-			const li = document.createElement('li');
-			li.innerHTML = `
-		      <i class="bx bx-user" style="font-size: 30px; color: #3b82f6;"></i>
-		      <strong>${user.name} 님</strong> <small>(${user.dept})</small>
-		    `;
-			// 클릭 시 채팅방 열기
-			li.addEventListener('click', () => {
-				openChatroom(user.name);
+		users
+			.filter(user =>
+				user.EMP_NM.toLowerCase().includes(filter) || 
+				user.DEP.toLowerCase().includes(filter) || 
+				user.POS.toLowerCase().includes(filter)
+			)
+			.forEach(user => {
+				const li = document.createElement('li');
+				li.innerHTML = `
+					<i class="bx bx-user" style="margin-right: 10px; color: #3b82f6; font-size: 20px;"></i>
+					<strong>${user.EMP_NM}</strong> <small>${user.POS} (${user.DEP})</small>
+				`;
+				li.addEventListener('click', () => openChatroom(user.EMP_NM));
+				userList.appendChild(li);
 			});
-
-			userList.appendChild(li);
-		});
 	}
-	renderUsers();
+
+	// 초기 호출 (필터 없이 전체 사원 목록 로드)
+	fetchUsersAndRender();
+
+	// 검색 input 이벤트
+	document.getElementById('userSearchInput').addEventListener('input', function () {
+		const keyword = this.value.trim();
+		fetchUsersAndRender(keyword);
+	});
 });
