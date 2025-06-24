@@ -1,0 +1,68 @@
+@charset "UTF-8";
+
+.content-area {
+	padding: 20px;
+}
+
+.search-area {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+#searchInput{
+	padding: 5px;
+    width: 250px;
+    height: 35px;
+}
+
+.controll-area {
+	display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.select-area {
+	display: flex;
+    flex-direction: row;
+    gap: 10px;
+	height: 100%;
+}
+
+.selectBox {
+	border-radius: 10px;
+	text-align: center;
+	width: 150px;
+	height: 100%;
+}
+
+.btn-area {
+	display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.lotArea {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.lotTree-area {
+	width: 50%;
+    height: 600px;
+    border: 2px solid #f2f2f2;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.lotDetail-area {
+	width: 50%;
+    height: 600px;
+    border: 2px solid #f2f2f2;
+    border-radius: 15px;
+    padding: 10px;
+}
