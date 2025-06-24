@@ -36,7 +36,6 @@ function showProductModal(mode, data = null) {
     const prdTypeSelectElement = document.getElementById('prdTypeSelect');
     const prdCommElement = document.getElementById('prd_comm');
     const prdRegDateElement = document.getElementById('prd_reg_date');
-    const prdUpDateElement = document.getElementById('prd_up_date');
 
     // 모든 요소가 null이 아닌지 먼저 확인하고 값을 비워줍니다.
     // 이는 요소가 HTML에 없을 때 발생할 수 있는 'Cannot set properties of null' 오류를 방지합니다.
@@ -47,7 +46,6 @@ function showProductModal(mode, data = null) {
     if (prdTypeSelectElement) prdTypeSelectElement.value = '';
     if (prdCommElement) prdCommElement.value = '';
     if (prdRegDateElement) prdRegDateElement.value = '';
-    if (prdUpDateElement) prdUpDateElement.value = '';
     
     // hidden input 필드 초기화 (수정 시 PRD_ID 저장)
     if (prdIdHiddenInput) prdIdHiddenInput.value = '';
@@ -68,10 +66,7 @@ function showProductModal(mode, data = null) {
         saveProductBtn.onclick = () => processProductData('register'); 
 		generateCombinationsBtn.textContent = '옵션 등록';
         document.getElementById('prd_reg_date').value = getNowForOracle(); 
-		
-		loadCommonCodesToSelect('prdUnitSelect', 'prd_unit');
-		loadCommonCodesToSelect('prdTypeSelect', 'prd_type');
-		
+
     } else if (mode === 'edit' && data) {
         modalTitle.textContent = '제품 정보 수정';
         saveProductBtn.textContent = '수정 완료';
@@ -87,11 +82,11 @@ function showProductModal(mode, data = null) {
         document.getElementById('prd_comm').value = data.PRD_COMM || '';
         document.getElementById('prd_reg_date').value = formatter(data.PRD_REG_DATE, true);
 		
-		loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT)
-		loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
+		loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT)		
 		loadCommonCodesToSelect('prdColorSelect', 'opt_color', data.OPT_COLOR);
 	    loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
 	    loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
+		loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
     }
 
     const modalEl = document.getElementById('exampleModal');
@@ -494,26 +489,37 @@ async function processProductData(mode) {
 
     // ⭐ 3. 선택된 옵션 조합 수집 (mode에 따라 분기)
     const selectedOptions = [];
-	
-	if (mode === 'register') { // 등록 모드이고 옵션 그리드가 존재할 때
-		toastGridInstances.forEach(gridInstance => {
-	        const checkedRowsFromGrid = gridInstance.getCheckedRows();
-	        checkedRowsFromGrid.forEach(row => {
-	            selectedOptions.push({
-	                opt_color: row.colorCode, // 예시: grid columns name이 'colorCode'인 경우
-	                opt_size: row.sizeCode,
-	                opt_height: row.heightCode,
-	                opt_stock: Number(row.stock),
-	                // opt_price: Number(row.price) // 필요한 경우 추가
-	            });
-	        });
-		});
-		if (selectedOptions.length === 0) {
-            alert("하나 이상의 제품 옵션 조합을 선택해주세요.");
-            return;
-        }
+    if (mode === 'register' && optionGridInstance) { // 등록 모드이고 옵션 그리드가 존재할 때
+        const checkedOptionRows = optionGridInstance.getCheckedRows();
+        checkedOptionRows.forEach(row => {
+            selectedOptions.push({
+                opt_color: row.OPT_COLOR_CODE, 
+                opt_size: row.OPT_SIZE_CODE,
+                opt_height: row.OPT_HEIGHT_CODE,
+                opt_stock: Number(row.OPT_STOCK) 
+            });
+        });
     } else if (mode === 'update') { // 수정 모드일 때 (이전 HTML 테이블 방식 가정)
+        // 수정 모드에서 옵션을 어떻게 처리할지 결정해야 합니다.
+        // 1. 수정 시에는 옵션 자체를 수정하지 않거나 (제한적)
+        // 2. 등록 시와 동일하게 HTML 테이블 방식으로 옵션을 다시 표시하고 수집하거나
+        // 3. 서버에서 원래 옵션을 받아와 input 필드로 표시한 후 수집 (가장 일반적)
+        // 여기서는 '옵션 자체를 수정하지 않거나' 혹은 '서버에서 받아온 옵션을 그대로 사용'하는 경우를 가정합니다.
+        // 만약 수정 모드에서도 옵션을 선택/변경하게 할 것이라면, 해당 UI에서 데이터를 수집하는 로직을 추가해야 합니다.
+        // 현재 코드에서는 document.querySelectorAll('#optionGroupsContainer ...') 로직을 사용하지 않습니다.
+        
+        // ⭐ 중요: 수정 시 선택된 옵션 처리 방식 결정
+        // 예시: 수정 시 옵션 자체를 변경하지 않고 서버에서 받은 기존 옵션을 그대로 전송 (만약 UI가 없다면)
+        // 또는, 수정 모드에서 옵션 변경 UI(HTML 테이블 등)가 있다면 거기서 데이터를 다시 수집.
+        // 이 부분은 사용자님의 구체적인 UI/UX 요구사항에 따라 구현해야 합니다.
+        // 현재는 'options' 배열이 필요하다면, showProductModal에서 넘어온 `data.options`를 활용하거나,
+        // 별도의 옵션 상세 조회 API를 호출하여 가져와야 합니다.
+        // 여기서는 일단 비어있거나, 이전 모달을 띄울 때 받아온 data.options를 저장해두었다가 사용하는 식으로 가정합니다.
+        // 예시: showProductModal 함수에서 `data.options`를 어딘가에 임시 저장했다가 여기서 사용
+        // const currentProductOptions = window.currentEditOptions; // 예시
+        // if (currentProductOptions) { selectedOptions.push(...currentProductOptions); }
         alert("수정 모드에서 옵션 수집 로직은 아직 정의되지 않았습니다. 옵션이 전송되지 않을 수 있습니다.");
+        // alert 메시지는 개발 단계에서만 사용하고, 실제 배포 시에는 제거하세요.
     }
     
     if (selectedOptions.length === 0 && mode === 'register') { // 등록 시 옵션 필수
@@ -554,64 +560,24 @@ async function processProductData(mode) {
 
         if (response.ok) {
             const result = await response.json();
-			alert(`제품이 성공적으로 ${mode === 'register' ? '등록' : '수정'}되었습니다: ` + (result.message || ''));
+            alert(`제품이 성공적으로 ${successMessage}되었습니다: ` + (result.message || ''));
+            console.log(`제품 ${successMessage} 성공! 모달 닫기 시도.`);
 
-            // ⭐⭐⭐ 제품 등록/수정 성공 후 모달 필드 초기화 - 조건문 제거 ⭐⭐⭐
-            // 입력 필드 초기화
-            document.getElementById('prd_nm').value = '';
-            document.getElementById('prd_price').value = '';
-            document.getElementById('prd_code').value = '';
-            document.getElementById('prd_comm').value = '';
+            const productModalElement = document.getElementById('exampleModal');
+            const productModalInstance = bootstrap.Modal.getInstance(productModalElement); 
             
-            // 드롭다운 기본값으로 재설정 (첫 번째 옵션 선택 또는 빈 문자열)
-            // 실제 드롭다운에 `--선택--` 등의 옵션이 있다면 그 value 값으로 설정하는 것이 좋습니다.
-            // 없으면 빈 문자열로 설정하여 선택되지 않은 상태로 만듭니다.
-            document.getElementById('prdUnitSelect').value = ''; 
-            document.getElementById('prdTypeSelect').value = ''; 
-            document.getElementById('prdColorSelect').value = ''; 
-            document.getElementById('prdSizeSelect').value = '';
-            document.getElementById('prdHeightSelect').value = '';
-
-            // prd_id_hidden 필드도 초기화 (수정 완료 후 다시 등록 모드로 전환될 경우 대비)
-            if (prdIdHiddenInput) {
-                prdIdHiddenInput.value = '';
-            }
-
-            // 현재 날짜로 재설정
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            document.getElementById('prd_reg_date').value = `${year}-${month}-${day}`;
-
-            // Toast UI Grid 및 옵션 그룹 초기화
-            const optionGroupsContainer = document.getElementById('optionGroupsContainer');
-            if (optionGroupsContainer) {
-                optionGroupsContainer.innerHTML = ''; // 생성된 그리드들을 모두 제거
-            }
-            // 전역 Toast UI Grid 인스턴스 맵 비우기
-            if (window.toastGridInstances) {
-                window.toastGridInstances.clear();
-            }
-            // 최상위 '모두 선택' 체크박스도 초기화
-            const overallSelectAllOptions = document.getElementById('selectAllOptions');
-            if (overallSelectAllOptions) {
-                overallSelectAllOptions.checked = false;
-            }
-            // --- 초기화 로직 끝 ---
-
-            // 모달 닫기
-            const productModalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
             if (productModalInstance) {
-                productModalInstance.hide();
-            }
-            // 제품 목록 새로고침
-            if (window.grid && typeof window.grid.readData === 'function') {
-                window.grid.readData();
-            } else if (typeof loadProductList === 'function') {
-//                loadProductList();
-            }
-			         
+                productModalElement.addEventListener('hidden.bs.modal', function handler() {
+                    console.log("모달이 완전히 닫혔습니다. 이제 메인 그리드 새로고침 시도.");
+                    if (window.prod_grid) { 
+                        window.prod_grid.readData({ prd_yn: '' });
+                    } else {
+                        console.error("오류: prod_grid 객체를 찾을 수 없어 메인 그리드를 새로고침할 수 없습니다."); 
+                    }
+                    productModalElement.removeEventListener('hidden.bs.modal', handler);
+                });
+                productModalInstance.hide(); 
+            }         
         } else {
             const errorData = await response.json().catch(() => response.text());
             const errorMessage = typeof errorData === 'object' ? (errorData.message || JSON.stringify(errorData)) : errorData;

@@ -34,13 +34,25 @@ document.addEventListener('DOMContentLoaded', function() {
 				prd_yn: ''
 			  },
 			  responseHandler: function(res) {
-		    	return {
-					data: res.data || [],  // 배열 강제 지정
-					pagination: {
-						page: res.pagination.page,
-						totalCount: Number(res.pagination.totalCount)  // 숫자 변환
-					}
-				};
+				const dataArray = res.data ? res.data.contents || [] : []; 
+				                    
+				// 페이지네이션 정보는 res.data.pagination에 있습니다.
+				const paginationInfo = res.data ? res.data.pagination || { page: 1, totalCount: dataArray.length } : { page: 1, totalCount: 0 };
+				
+				console.log("★★★★ responseHandler - 처리된 데이터 배열 (dataArray):", dataArray);
+				console.log("★★★★ responseHandler - 처리된 페이지네이션 (paginationInfo):", paginationInfo);
+				
+				return {
+                    data: dataArray, // ⭐ 여기서 res.data.contents를 사용
+                    pagination: {
+                        page: paginationInfo.page, 
+                        totalCount: Number(paginationInfo.totalCount) 
+                    }
+                };
+				
+				
+
+				
 			  }
 		    }
 		  }
@@ -56,8 +68,22 @@ document.addEventListener('DOMContentLoaded', function() {
 		  { header: '선택된굽', name: 'OPT_HEIGHT', hidden: true },
 		  { header: '선택된사이즈', name: 'OPT_SIZE', hidden: true },
 		  
-	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 200 },
-	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true , width: 100 },
+	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 200, 		  
+			filter: 
+			{
+	            type: 'text', 
+	            showApplyBtn: true,
+	            showClearBtn: true 
+	        } 
+		  },
+	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true , width: 100 ,
+			filter: 
+			{
+	            type: 'text', 
+	            showApplyBtn: true,
+	            showClearBtn: true 
+	        } 
+		  },
 	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true , width: 70 },
 		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true , width: 70 },
 		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true , width: 70 },
