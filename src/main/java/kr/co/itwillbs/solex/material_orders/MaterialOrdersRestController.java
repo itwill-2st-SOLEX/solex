@@ -21,13 +21,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Log4j2
 @RestController
-@RequestMapping("/material")
+@RequestMapping("/material_orders")
 public class MaterialOrdersRestController {
 	
 	@Autowired
 	private MaterialOrdersService materialOrdersService;
 	
+	@PostMapping("/registration")
+	public void materialOrderRegist(@RequestBody  Map<String, Object> matordMap) {
+		System.out.println("mat ord map = " + matordMap);
+		materialOrdersService.materialOrderRegist(matordMap);	
+	}
 	
+	//select 박스 자재 id 가져오는 코드
+	@GetMapping("/getMatId")
+	public List<Map<String, Object>> getMatId() {
+		return materialOrdersService.getMatId();
+	}
+	
+	//무한스크롤 자재 발주 목록
+	@GetMapping("/materialList")
+    public List<Map<String, Object>> materialOrdersService(@RequestParam("page") int page, @RequestParam("size") int size) {
+		int offset = page * size;
+        return materialOrdersService.getMaterialOrderList(offset, size);
+    }
 
 	
 }

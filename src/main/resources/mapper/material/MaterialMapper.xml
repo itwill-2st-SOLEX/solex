@@ -42,7 +42,7 @@
 		on m.mat_unit = cd.det_id
 	</select>
 	
-<!-- 	등록에서 공통코드 가져오기 -->
+<!-- 	등록에서 공통코드(자재단위) 가져오기 -->
 	<select id="getMatUnits" resultType="map">
 	    SELECT 
         	det_id,
@@ -51,22 +51,7 @@
 	    WHERE cod_id = 'mat_unit'
 	</select>
 	
-<!-- 	등록에서 공통코드 가져오기 -->
-	<select id="getCommonCodeDetails" resultType="map">
-		SELECT 
-			CASE
-				WHEN COD_ID = 'mat' THEN DET_ID
-				ELSE NULL END AS "matUnit",
-			CASE 
-				WHEN COD_ID = 'mat_sts' THEN DET_ID
-				ELSE NULL END AS "matIsActive"	 
-		FROM code_detail
-		WHERE 
-			COD_ID IN ('mat', 'mat_sts')
-		ORDER BY COD_ID, DET_ID
-	</select>
-	
-<!-- 	자재둥록 -->
+<!-- 	자재등록 -->
 	<insert id="registMat">
 		INSERT INTO material(
 			cli_id, mat_cd, mat_nm, mat_price, mat_unit, 

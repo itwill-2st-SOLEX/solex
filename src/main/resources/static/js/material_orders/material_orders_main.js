@@ -19,20 +19,67 @@ document.addEventListener('DOMContentLoaded', function(){
 		autoWidth : true,
 		columns: [
 			//헤더, 네임, 얼라인(센터)
-			{header: '발주ID', name : 'mat_ord_id', align: 'center'},
-			{header: '자재ID', name : 'mat_id', align: 'center'},
-			{header: '요청자ID', name : 'emp_id', align: 'center'},
-			{header: '발주설명', name : 'mat_comm', align: 'center'},
-			{header: '발주 요청일', name : 'mat_reg_date', align: 'center'},
-			{header: '예상 입고일', name : 'mat_eta_date', align: 'center'},
-			{header: '실제 입고일', name : 'mat_ata_date', align: 'center'},
-			{header: '최종 수정일', name : 'mat_lmd_date', align: 'center'},
-			{header: '승인/반려', name : 'mat_ok', align: 'center'},
+			{header: '발주ID', name : 'matOrdId', align: 'center'},
+			{header: '자재ID', name : 'matId', align: 'center'},
+			{header: '요청자ID', name : 'empId', align: 'center'},
+			{header: '발주설명', name : 'matComm', align: 'center'},
+			{header: '발주 요청일', name : 'matRegDate', align: 'center'},
+			{header: '예상 입고일', name : 'matEtaDate', align: 'center'},
+			{header: '실제 입고일', name : 'matAtaDate', align: 'center'},
+			{header: '최종 수정일', name : 'matLmdDate', align: 'center'},
+			{header: '승인/반려', name : 'mat_ok', align: 'center',formatter: ({ rowKey }) =>
+			     `<button class="btn btn-secondary" name="approval" data-row-key="${rowKey}">승인</button>
+		 		 <button class="btn btn-secondary" name="deny" data-row-key="${rowKey}">반려</button>`}
 		]
 	
 	}); //tui 그리드 가져오기 끝 
 	
+	// 자재id 목록 받아와 select 에 채워주는 함수
+	async function fetchAndPopulateMaterial(selectElement) {
+		try {
+			const response =  await fetch('/SOLEX/material_orders/getMatId'); // 자재목록을 가져올 api 엔드포인트에 요청
+			
+			const materials = await response.json(); //응답본문을 json객체로 변환
+			
+			materials.forEach(mat => { // 가져온 자재목록을 순회하며 dropdown에 추가
+				const option = document.createElement('option');
+				option.value = mat.MAT_ID;
+				option.textContent = mat.MAT_NM;
+				selectElement.appendChild(option); 
+			});
+		} catch (error) {
+			console.error('자재목록 로딩 실패:', error);
+		}
+	}			
+	
 	//자재 발주 목록 조회
+	async function loadMatList(page) {
+		const response = await fetch(`/SOLEX/material_orders/materialList?page=${page}&size=${pageSize}`);
+		const rawData = await response.json();
+		const data = rawData.map(row => ({
+			matOrdId: row.matOrdId,
+			matId: row.matId,
+			empId: row.empId,
+			matComm: row.matComm,
+			matRegDate: row.matRegDate,
+			matEtaDate: row.matEtaDate,
+			matAtaDate: row.matAtaDate,
+			matLmdDate: row.matLmdDate
+		}));
+		
+		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
+		page === 0 ? grid.resetData(data) : grid.appendRows(data);
+		
+		//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
+		currentPage++;
+		
+		//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
+		if(data.length < pageSize) grid.off("scrollEnd");
+	}
+
+	loadMatList(currentPage); //최조 1페이지 로딩
+	grid.on('scrollEnd', () =>  loadDrafts(currentPage)); // 스크롤 끝나면 다음 페이지 로딩
+	
 	
 	
 	// 발주등록 버튼
@@ -60,41 +107,112 @@ document.addEventListener('DOMContentLoaded', function(){
 		
 		// 안에 내용 틀 js 형식으로 가져오기 
 		form.innerHTML = `
-					<div class="mb-3">
-						<label>발주ID</label>
-						<input type="text" class="form-control d-inline-block w-25" name="mat_ord_id" required><br>
-					</div>
-					<div class="mb-3">
+			<div class="modal-body big-box">
+				<div class="row mb-3">
+					<div class="col">
 						<label>자재ID</label>
-						<input type="text" class="form-control d-inline-block w-25" name="mat_id" required><br>
-					</div>
-					<div class="mb-3">
+						<div><select id="matId" class="form-control d-inline-block " name="mat_id" required>
+						<option value="">-- 자재를 선택하세요 --</option></select>   </div>
+					</div>	
+					<div class="col">
 						<label>요청자ID</label>
-						<input type="text" class="form-control d-inline-block w-25" name="emp_id" placeholder="아마 로그인한 사람아이디"><br>
+						<div><input type="text" class="form-control d-inline-block " name="emp_id" placeholder="아마 로그인한 사람아이디"></div>
 					</div>
-					<div class="mb-3">
+				</div>
+				<div class="row mb-3">
+					<div class="col">
 						<label>발주 설명</label>
-						<input type="text" class="form-control d-inline-block w-25" name="mat_comm" required><br>
+						<div><input type="text" class="form-control d-inline-block " name="mat_comm" required></div>
 					</div>
-					<div class="mb-3">
+				</div>
+				<div class="row mb-3">
+					<div class="col">
 						<label>발주 요청일</label>
-						<input type="date" class="form-control d-inline-block w-25" name="mat_reg_date" required><br>
+						<div><input type="date" class="form-control d-inline-block " name="mat_reg_date" required></div>
 					</div>
-					<div class="mb-3">
+				</div>
+				<div class="row mb-3">
+					<div class="col">
 						<label>예상 입고일</label>
-						<input type="date" class="form-control d-inline-block w-25" name="mat_eta_date" required><br>
+						<div><input type="date" class="form-control d-inline-block " name="mat_eta_date" required></div>
 					</div>
-					<div class="mb-3">
+				</div>
+				<div class="row mb-3">
+					<div class="col">
 						<label>실제 입고일</label>
-						<input type="date" class="form-control d-inline-block w-25" name="mat_ata_date" required><br>
+						<div><input type="date" class="form-control d-inline-block" name="mat_ata_date" required></div>
 					</div>
-					<div class="modal-footer">
-						<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
-						<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
-						<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-					</div>
-				`;
-						modalBody.appendChild(form); // 최종 폼 삽입
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+					<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
+					<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
+				</div>
+			</div>
+		`;
+				
+		const matIdSelect = form.querySelector('#matId');
+		await fetchAndPopulateMaterial(matIdSelect);
+		modalBody.appendChild(form); // 최종 폼 삽입
 		
+		//실제 등록
+		if(registerBtn){
+			registerBtn.addEventListener('click', async function(event) {
+				event.preventDefault(); // type="submit"이므로 기본 제출 방지
+									
+				const formData = new FormData(form);
+				const payload = {
+					mat_id : formData.get('mat_id'),
+					emp_id : formData.get('emp_id'),
+					mat_reg_date : formData.get('mat_reg_date'),
+					mat_eta_date : formData.get('mat_eta_date'),
+					mat_ata_date : formData.get('mat_ata_date'),
+					mat_lmd_date : formData.get('mat_lmd_date'),
+					mat_comm : formData.get('mat_comm')
+				};
+				
+				console.log('서버로 보낼 데이터 = ', payload);
+				
+				try {
+					const response = await fetch(`/SOLEX/material_orders/registration`, {
+						method : 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body:JSON.stringify(payload)
+					});
+					
+					if(response.ok){
+						alert('발주 등록 성공');
+						window.location.reload();
+					} else {
+						alert('발주 등록 실패');
+					}
+				} catch(error) {
+					console.log('전송중 오류발생 = ', error);
+					alert('서버 전송 실패');
+				}
+			});
+		}							
 	}// 모달 내부 끝
+	
+	// 승인버튼 누르면 모달창뜨게
+	document.addEventListener('click', async function(event) {
+		
+		const clickedButton = event.target; 
+		const buttonName = clickedButton.name;
+		
+		if(buttonName === 'approval'){ // 승인버튼 누를 시 
+			openModal();
+			
+		} else if(buttonName === 'deny') { // 반려버튼 누를 시 
+			alert("반려되었습니다.");
+			
+		}
+
+	});
+	
+
+	
+	
 }); //domContentLoaded

@@ -34,17 +34,6 @@ public class MaterialRestController {
         return materialService.getMaterialList(offset, size);
     }
 	
-	
-	//자재 등록 - 단위 및 사용여부 공통코드 가져오기
-	@GetMapping("/codeListJson")
-	public Map<String, Object> getCommonCodeListJson() {
-		List<Map<String, Object>> commonCodeList = materialService.getCommonCodeListJson();
-		Map<String, Object> response= new HashMap<>();
-		response.put("matCodeList", commonCodeList);
-		System.out.println("code list mat =" + response);
-		return response;
-	}
-	
 	//자재 등록 - 단위 및 사용여부 공통코드 가져오기
 	@GetMapping("/code")
 	public List<Map<String, Object>> getMatUnits() {
@@ -62,7 +51,7 @@ public class MaterialRestController {
 	    return "redirect:/material";
 	}
 	
-	// toast_ui grid 수정
+	// toast_ui grid 자재 수정
 	@PutMapping("/updateGridCell")
 	public ResponseEntity<Map<String, String>> updateGridCell(@RequestBody Map<String, Object> payload) {
 		

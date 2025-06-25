@@ -27,32 +27,7 @@ public class MaterialService {
 		List<Map<String, Object>> list = materialMapper.getMaterialList(offset, size);
 		return list;
 	}
-	
-	//자재등록 - 공통코드 세부사항 가져오기 
-	public List<Map<String, Object>> getCommonCodeListJson() {
-		List<Map<String, Object>> commonCodes = materialMapper.getCommonCodeDetails();
-		List<Map<String, Object>> resultList = new ArrayList<>();
-		
-		for(Map<String, Object> codeMap : commonCodes) {
-			Map<String, Object> formattedMap = new HashMap<>();
-			
-			//matUnit
-			if(codeMap.get("matUnit") !=null) {
-				formattedMap.put("matUnit", codeMap.get("matUnit").toString().trim());
-			}
-			
-			if(codeMap.get("matIsActive") !=null) {
-				formattedMap.put("matIsActive", codeMap.get("matIsActive").toString().trim());
-			}
-		       // 빈 맵이 아닌 경우에만 추가 (예: {"empCatCd": "cat_01"})
-            if (!formattedMap.isEmpty()) {
-                resultList.add(formattedMap);
-            }
-		}
-		System.out.println("가공 후 최종 resultList: " + resultList);
-		return resultList;
-	}
-	
+	// 자재 단위 가져오기 (자재등록에서 select)
 	public List<Map<String, Object>> getMatUnits() {
 		 return materialMapper.getMatUnits();
 	}

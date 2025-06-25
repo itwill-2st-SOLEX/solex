@@ -21,4 +21,21 @@ public class MaterialOrdersService {
 		return materialOrdersMapper.getMaterialOrders();
 	}
 
+	public void materialOrderRegist(Map<String, Object> matordMap) {
+		// TODO Auto-generated method stub
+		materialOrdersMapper.materialOrderRegist(matordMap);
+	}
+
+	//자재 등록에서 자재 id 가져오는 코드
+	public List<Map<String, Object>> getMatId() {
+		// TODO Auto-generated method stub
+		return materialOrdersMapper.getMatId();
+	}
+
+	public List<Map<String, Object>> getMaterialOrderList(int offset, int size) {
+		List<Map<String, Object>> list = materialOrdersMapper.getMaterialOrderList(offset, size);
+		System.out.println("list = " + list);
+		return list;
+	}
+
 }
