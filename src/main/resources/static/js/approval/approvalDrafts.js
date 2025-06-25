@@ -49,17 +49,6 @@ $(function() {
 		}
 	});
 
-	async function fetchCodeOptions(groupId) {
-		try {
-			const response = await fetch(`/SOLEX/approval/api/codes?group=${groupId}`);
-			const data = await response.json();
-			return data.map(({ DET_ID, DET_NM }) => `<option value="${DET_ID}">${DET_NM}</option>`).join("");
-		} catch (error) {
-			console.error(`${groupId} 코드 불러오기 실패:`, error);
-			return "<option disabled>불러오기 실패</option>";
-		}
-	}
-
 	// 기안서 종류별 동적 화면 구성
 	const formTemplates = {
 		"doc_type_01": `
@@ -97,10 +86,10 @@ $(function() {
 				</div>
 			</div>
   			<div class="btn-group" role="group" aria-label="반차 연차 선택">
-  				<input type="radio" class="btn-check" name="lea_type" id="businessTrip" value="반차" checked>
+  				<input type="radio" class="btn-check" name="lea_type" id="businessTrip" value="half" checked>
   				<label class="btn btn-purple" for="businessTrip">반차</label>
   				
-  				<input type="radio" class="btn-check" name="lea_type" id="fieldWork" value="연차">
+  				<input type="radio" class="btn-check" name="lea_type" id="fieldWork" value="full">
   				<label class="btn btn-purple" for="fieldWork">연차</label>
   			</div>
   			<div class="mb-3">
@@ -206,40 +195,6 @@ $(function() {
   		`
 	};
 
-	// 기안서 종류별로 제목 및 달력 시간표시 나타내기
-	$('#docTypeSelect').on('change', async function() {
-		const selected = $(this).val();
-		const selectedText = $(this).find('option:selected').text();
-		$('.approval-line h2').text(selectedText);
-
-		const formHtml = formTemplates[selected] || '<p>지원되지 않는 문서 유형입니다.</p>';
-		$('#dynamicFormArea').html(`
-	      <input type="hidden" name="doc_type" value="${selected}" />
-	      ${formHtml}
-	    `);
-		// 2. 사원 정보 채우기
-		fillEmployeeInfo();
-		attachDateRangeChange();
-
-		flatpickr("#dateRange", {
-			mode: selected === 'doc_type_01' || selected === 'doc_type_02' ? "range" : "single",
-			enableTime: selected !== 'doc_type_03' ? true : false,
-			time_24hr: true,
-			dateFormat: selected === 'doc_type_03' ? "Y-m-d" : "Y-m-d H:i",
-			minuteIncrement: 30
-		});
-
-		if (selected === 'doc_type_03') {
-			const positionOptions = await fetchCodeOptions('position');
-			$('#docPositionSelect').html(`<option value="">선택하세요</option>${positionOptions}`);
-
-			const deptOptions = await fetchCodeOptions('dept');
-			$('#docDeptSelect').html(`<option value="">선택하세요</option>${deptOptions}`);
-		}
-	});
-
-	$('#docTypeSelect').trigger('change');
-
 	// 결재 요청
 	document.querySelectorAll('.submit-btn').forEach(btn => {
 	    btn.addEventListener('click', async () => {
@@ -247,6 +202,36 @@ $(function() {
 	        const action = btn.dataset.action;
 			const stepNo    = btn.dataset.aplStepNo; 
 			const aplId     = btn.dataset.aplId;      
+			const empId     = btn.dataset.empId; 
+			const docType = btn.dataset.docType;
+			
+			// ───────── 휴가 전용 필드 ─────────
+		    let leaveType      = null;
+		    let leaveStartDate = null;
+		    let leaveEndDate   = null;
+
+		    if (docType === 'doc_type_01') {
+		      leaveType      = document.querySelector('#detailModal input[name="lea_type"]:checked')?.value;
+		      leaveStartDate = document.querySelector('#detailModal #startDate')?.value; // ex) 2025-07-01 09:00
+		      leaveEndDate   = document.querySelector('#detailModal #endDate')?.value;   // ex) 2025-07-02 18:00
+		    }
+
+		    // 공통 + 선택 필드를 합쳐 payload 구성
+		    const payload = {
+		      status : action,
+		      aplId  : aplId,
+		      stepNo : stepNo,
+		      docType: docType,
+			  empId  : empId
+		    };
+
+		    if (docType === 'doc_type_01') {
+		      Object.assign(payload, {
+		        leaveType      : leaveType,
+		        leaStartDate   : leaveStartDate,
+		        leaEndDate     : leaveEndDate   // ← key는 서버에서 편한 이름으로 맞춰도 OK
+		      });
+		    }
 
 	        try {
 	            const res = await fetch(`/SOLEX/approval/document/${docId}`, {
@@ -254,16 +239,7 @@ $(function() {
 	                headers: {
 	                    'Content-Type': 'application/json'
 	                },
-	                body: JSON.stringify({
-	                    // === 요청 바디 예시 ===
-	                    status   : action,      // 결재 결과
-	                    aplId  : aplId,
-						stepNo : stepNo,
-	                    comment    : action === 'apl_sts_03'
-	                                  ? '사유를 입력하세요'
-	                                  : null,
-						
-	                })
+	                body: JSON.stringify(payload)
 	            });
 
 	            if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -305,10 +281,23 @@ $(function() {
 				const el = form.querySelector(`[name="${key.toLowerCase()}"]`);
 				if (el) el.value = value;
 			}
+			
+			// 상세 모달 버튼에 필요값 주입
+			document
+				.querySelectorAll('#detailModal .submit-btn')
+				.forEach(btn => {
+					btn.dataset.docId = row.doc_id;
+					btn.dataset.aplStepNo  = row.apl_step_no;   
+					btn.dataset.aplId      = row.apl_id; 
+					btn.dataset.docType    = row.doc_type_code; 
+					btn.dataset.empId     = data.EMP_ID
+				});
+	
+					
+// 결재선 부분 시작		
 			const nameList = (data.APL_EMP_POS_NM || "").split(",");
 			const statusList = (data.APL_STS || "").split(",");
 			const timeList = (data.APL_ACTION_TIME || "").split(",");
-			debugger;
 			// thead 구성
 			const theadRow = document.querySelector(".approval-line thead tr");
 			theadRow.innerHTML = "";
@@ -363,18 +352,8 @@ $(function() {
 				`;
 				rowEl.appendChild(td);
 			}
-
-
 			tbody.appendChild(rowEl);
-
-			// 1️⃣ 상세 모달에 doc_id 주입
-			document
-				.querySelectorAll('#detailModal .submit-btn')
-				.forEach(btn => {
-					btn.dataset.docId = row.doc_id;
-					btn.dataset.aplStepNo  = row.apl_step_no;   
-					btn.dataset.aplId      = row.apl_id;  
-				});
+// 결재선 부분 끝	
 				
 			// 모달 오픈
 			document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
@@ -403,17 +382,4 @@ function fillEmployeeInfo() {
 			alert('사원 정보를 불러오지 못했습니다.');
 		}
 	});
-}
-// 날짜 추출하기
-function attachDateRangeChange() {
-	const input = document.getElementById('dateRange');
-	if (!input) return;
-	input.removeEventListener('change', onDateRangeChange);
-	input.addEventListener('change', onDateRangeChange);
-}
-
-function onDateRangeChange() {
-	const [startDate, endDate] = this.value.split(' to ');
-	document.getElementById('startDate').value = startDate || '';
-	document.getElementById('endDate').value = endDate || '';
 }
