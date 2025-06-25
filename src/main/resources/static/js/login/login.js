@@ -11,7 +11,7 @@ $(function() {
         }
 
         if (saveEmp) {
-            localStorage.setItem("savedEmpNum", empNo);
+            localStorage.setItem("empNum", empNo);
         } else {
             localStorage.removeItem("savedEmpNum");
         }

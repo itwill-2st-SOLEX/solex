@@ -135,7 +135,10 @@ h3 {
   user-select: text;
   padding-top: 10px;
 }
-
+.list .last{
+  border-bottom: 2px solid #d1d5db;
+  padding-bottom: 5px;
+}
 /* 메시지 리스트 */
 .chat-messages {
     margin-top: 16px;
@@ -149,6 +152,7 @@ h3 {
     scrollbar-color: #3b82f6 #e0e7ff;
     min-height: 0;
     min-width: 0;
+    height: 494px;
 }
 
 .chat-messages::-webkit-scrollbar {
@@ -279,4 +283,41 @@ h3 {
 
 .search-box input:focus {
   border-color: #3b82f6;
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-wrapper.sent {
+  align-items: flex-end;
+}
+
+.message-wrapper.received {
+  align-items: flex-start;
+}
+.icon {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: red;
+  color: white;
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  box-shadow: 0 0 0 2px white;
+}
+
+.hidden {
+  display: none;
 }
