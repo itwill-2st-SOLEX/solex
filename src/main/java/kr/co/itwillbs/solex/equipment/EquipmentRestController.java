@@ -38,13 +38,37 @@ public class EquipmentRestController {
         return list; 
     }
 	
+	@PostMapping
+	public ResponseEntity<String> createEquipment(@RequestBody Map<String, Object> params) throws Exception {	
+
+        System.out.println(params);
+
+    try {
+          // 서비스 메소드 호출 (리턴값이 없으므로 변수에 담지 않음)
+			equipmentService.createEquipment(params);
+          
+          // 예외가 발생하지 않고 여기까지 왔다면 성공한 것.
+          return ResponseEntity.ok("정상적으로 처리되었습니다.");
+
+      } catch (RuntimeException e) {
+          // 서비스에서 던진 RuntimeException을 여기서 잡습니다.
+          // 클라이언트에게 "재고 부족" 등의 실제 오류 메시지를 전달합니다.
+          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+      
+      } catch (Exception e) {
+          // 그 외 예측하지 못한 다른 모든 예외 처리
+          e.printStackTrace(); // 서버 로그에 전체 오류 기록
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류가 발생했습니다.");
+      }
+	}
+	
 	
 //	
-//	@GetMapping("{odd_id}") // 
-//	public List<Map<String, Object>> getOrderDetail(@PathVariable("odd_id") String odd_id) throws Exception {
-//		List<Map<String, Object>> list = orderRequestsService.getOrderDetail(odd_id);
-//		return list; 
-//	}
+	@GetMapping("{eqp_code}") // 
+	public List<Map<String, Object>> getEquipmentDetail(@PathVariable("eqp_code") String eqp_code) throws Exception {
+		List<Map<String, Object>> list = equipmentService.getEquipmentDetail(eqp_code);
+		return list; 
+	}
 //	
 //	@PostMapping // 1.재고 조회, 2.재고 차감, 3.상태 변경
 //	public ResponseEntity<String> updateOrderStatus(@RequestBody Map<String, Object> params) throws Exception {		

@@ -39,6 +39,57 @@
 	ORDER BY cli.cli_id asc
 	</select>
 
+
+
+	<!-- 설비 생성 -->
+	<insert id="createEquipment" parameterType="Map">
+		<selectKey keyProperty="eqp_code_num" resultType="int" order="BEFORE">
+			SELECT EQP_CODE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		
+		INSERT INTO equipment (
+			eqp_code,
+			eqp_name,
+			eqp_comm,
+			eqp_price,
+			eqp_sts,
+			eqp_purchase_date,
+			eqp_installation_date,
+			prc_id,
+			cli_id
+		) VALUES (
+			'EQ' || LPAD(#{eqp_code_num}, 3, '0'),
+			#{eqp_name},
+			#{eqp_comm},
+			#{eqp_price},
+			#{eqp_sts},
+			#{eqp_purchase_date},
+			#{eqp_installation_date},
+			#{prc_id},
+			#{cli_id}
+		)
+	</insert>
+
+
+	<!-- 설비 상세 조회 -->
+	<select id="getEquipmentDetail" parameterType="String" resultType="Map">
+	SELECT
+		eqp.eqp_id as EQP_ID,
+		eqp.eqp_code as EQP_CODE,
+		eqp.eqp_name as EQP_NAME,
+		eqp.eqp_comm as EQP_COMM,
+		eqp.eqp_price as EQP_PRICE,
+		eqp.eqp_sts as EQP_STS,
+		TO_CHAR(eqp.eqp_purchase_date, 'YYYY-MM-DD') AS EQP_PURCHASE_DATE,
+		TO_CHAR(eqp.eqp_installation_date, 'YYYY-MM-DD') AS EQP_INSTALLATION_DATE,
+		prc.prc_nm as PRC_NM,
+		cli.cli_nm as CLI_NM
+	FROM equipment eqp
+	left JOIN process prc ON eqp.prc_id = prc.prc_id	
+	left JOIN client cli ON eqp.cli_id = cli.cli_id
+	WHERE eqp.eqp_code = #{eqp_code}
+	</select>
+
 	
 	<select id="getOrderDetail" parameterType="Map" resultType="Map">
 	<![CDATA[

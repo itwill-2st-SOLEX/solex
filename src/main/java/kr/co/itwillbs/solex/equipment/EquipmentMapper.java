@@ -15,8 +15,18 @@ public interface EquipmentMapper {
 	    @Param("limit") int limit
 	);
 
+
+	// 공정 정보, 제조사 정보 조회
 	List<Map<String, Object>> getProcessList();
 	List<Map<String, Object>> getClientList();
+
+
+	// 설비 생성
+	Integer createEquipment(Map<String, Object> params);
+
+	// 설비 상세 조회
+	List<Map<String, Object>> getEquipmentDetail(@Param("eqp_code") String eqp_code);
+
 	// // 주문 상세 조회 쿼리
 	// List<Map<String, Object>> getOrderDetail(@Param("odd_id") String odd_id);
 

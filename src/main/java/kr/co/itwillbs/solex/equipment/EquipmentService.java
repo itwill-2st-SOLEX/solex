@@ -30,6 +30,26 @@ public class EquipmentService {
 		return formData;
 	}
 
+    // 설비 생성
+    @Transactional(rollbackFor = Exception.class) 
+	public void createEquipment(Map<String, Object> params) {
+        
+        // 설비 생성    
+        Integer result = equipmentMapper.createEquipment(params);
+        // null 체크 추가
+        if (result == null || result <= 0) {
+            throw new RuntimeException("설비 생성에 실패했습니다.");
+        }
+		
+	}
+
+
+    public List<Map<String, Object>> getEquipmentDetail(String eqp_code) {
+        List<Map<String,Object>> resultList = equipmentMapper.getEquipmentDetail(eqp_code);
+        return resultList;
+    }
+
+
 	// public List<Map<String, Object>> getOrderDetail(String odd_id) {
 	// 	List<Map<String, Object>> resultList = orderRequestsMapper.getOrderDetail(odd_id);
 	// 	return resultList;
