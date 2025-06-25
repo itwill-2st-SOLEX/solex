@@ -14,17 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class WorkerService {
 
-    private final OrderController orderController;
-
 	@Autowired
 	WorkerMapper workerMapper;
 	
 	@Autowired
 	ManagerMapper managerMapper;
 
-    WorkerService(OrderController orderController) {
-        this.orderController = orderController;
-    }
 
 	public Map<String, Object> getWorkerSummary(Long empId) {
 		return workerMapper.getWorkerSummary(empId);

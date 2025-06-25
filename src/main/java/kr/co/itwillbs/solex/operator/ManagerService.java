@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ManagerService {
@@ -34,10 +35,12 @@ public class ManagerService {
 	}
 	
 	// 작업 상태 업데이트 
+	@Transactional
 	public void updateWpoSts(Map<String, Object> map) {
 		
 		//String wrkId = (String) map.get("wrkId");
 		String wpoStatus = (String) map.get("wpoStatus");
+		Long wrkId = Long.parseLong((String) map.get("wrkId"));
 		
 		switch (wpoStatus) {
 			case "wpo_sts_02":
@@ -59,26 +62,42 @@ public class ManagerService {
 				// 상태 : wpo_sts_03 -> wpo_sts_04 --> 
 					//>> 공정완료 -> 품질검사중으로 변경
 				managerMapper.updateWpoSts04(map);
-				
-					//>> 품질 이력 테이블에 추가하기 위해 품질검사 id, 작업프로세스 id 검색해서 map에 추가
-				System.out.println(map);
-
-				int wrkId = Integer.parseInt((String) map.get("wrkId"));
-				
+								
 				Map quaMap = managerMapper.selectWpoSts04(wrkId);
 				
 				map.put("wpoId", quaMap.get("WPO_ID"));
 				map.put("quaId", quaMap.get("QUA_ID"));
 				map.put("qhiStartDate", LocalDateTime.now());
-				
+				map.put("qhiEmpId", map.get("empId"));
+					
 					//>> 품질 이력 테이블에 추가
 				managerMapper.insertWpoSts04(map);
+				
 				
 				break;
 				
 			case "wpo_sts_05":
-				//상태 : wpo_sts_05 >> 품질검사완료 -> 공정이관, 
-				// 					  work_process의 작업종료일 변경, 다음공정의 작업상태를 01로 변경
+				// 상태 : wpo_sts_04 -> wpo_sts_05 -->
+				
+					//>> 품질이력 테이블 업데이트 하기위해 품질이력id 가져오기
+				Map qhiMap = managerMapper.selectWpoSts05(wrkId);
+				
+				map.put("qhiEndDate", LocalDateTime.now());
+				map.put("qhiId", qhiMap.get("QHI_ID"));
+				
+				//int wpoBcount = Integer.parseInt((String) map.get("wpoBcount"));
+				
+				//map.put("wpoBcount", wpoBcount);
+				
+				System.out.println("050500550 : " + map);
+				
+					// >>품질이력 테이블 업데이트
+				managerMapper.updateWpoSts05_qh(map);				
+				
+					// >> 불량개수, 상태 업데이트
+				managerMapper.updateWpoSts05_wp(map);
+				
+
 				break;
 			
 		

@@ -25,7 +25,6 @@
   	<!-- 자신에게 해당하는 작업현황 전체 목록 가져오기 -->
   	<select id="getManagerList">
 		SELECT
-			
 		    wo.wrk_id, 			<!-- 작업지시ID  -->
 		    vs.prd_code,		<!-- 공정ID -->
 		    vs.prd_nm,			<!-- 제품명 -->
@@ -38,7 +37,7 @@
 		    wp.wpo_id,
 		    wp.wpo_ocount,		<!-- 작업지시수량 -->
             wp.wpo_jcount,		<!-- 작업완료수량 -->
-            wp.wpo_bcount,		<!-- 불량수량 -->
+            qh.qhi_bcount,		<!-- 불량수량 -->
 			
 			wp.wpo_status,
 		    cd.det_nm AS wpo_status_Name,	<!-- 생산상태 -->
@@ -52,7 +51,10 @@
 		    JOIN work_process wp ON wp.wrk_id = wo.wrk_id		<!-- 공정-작업순서 -->
 		    JOIN vw_suju_summary vs ON wo.odd_id = vs.odd_id	<!-- 공정-제품상세(수주 뷰) -->
 		    LEFT JOIN code_detail cd ON wp.wpo_status = cd.det_id	<!-- 상세공코-작업상태 -->
-		
+			LEFT JOIN quality_item qi ON p.qua_id = qi.qua_id
+			LEFT JOIN quality_history qh ON qi.qua_id = qh.qua_id
+			
+			
 		JOIN (			<!-- 접속한 사람의 부서와 팀에 해당하는 자료 조회하기 위한 서브쿼리 -->
 	        SELECT e.emp_dep_nm, e.emp_team_nm, emp.emp_dep_cd, emp.emp_team_cd
 	        FROM VIEW_EMPLOYEE e
@@ -139,20 +141,32 @@
 	</select>
 	
 	<!-- 	>> 품질 이력 테이블에 추가  -->
-	<insert id="insertWpoSts04">
- 		INSERT INTO quality_history(wpo_id, qua_id, qhi_start_date)
- 		VALUES (#{wpoId}, #{quaId}, #{qhiStartDate})
+	<insert id="insertWpoSts04"  useGeneratedKeys="true" keyProperty="qhiId">
+ 		INSERT INTO quality_history(qhi_target_id, qua_id, qhi_start_date, qhi_emp_id)
+ 		VALUES (#{wpoId}, #{quaId}, #{qhiStartDate}, #{qhiEmpId})
 	</insert>
 	
 	<!-- 상태 : wpo_sts_04 품질검사중 -> 05 품질검사완료 -->
-	<!-- 	>> 불량개수 업데이트 -->
+	<!-- 	>> 불량개수, 상태 업데이트 -->
 	<update id="updateWpoSts05_wp">
-
+		UPDATE work_process
+		SET wpo_bcount=#{wpoBcount}, wpo_status=#{wpoStatus}
+		WHERE wrk_id=#{wrkId}
 	</update>
 	
-	<!-- 	>> 품질이력 테이블에도 업데이트 -->
+	<!--  	>> 검사 완료를 위해 품질검사id 찾아오기 -->
+	<select id="selectWpoSts05">
+		SELECT q.qhi_id
+		FROM quality_history q
+			JOIN work_process w ON q.wpo_id = w.wpo_id
+		WHERE w.wrk_id = #{wrkId}  
+	</select>
+	
+	<!-- 	>> 품질검사이력 테이블에도 업데이트 -->
 	<update id="updateWpoSts05_qh">
-
+		UPDATE quality_history
+		SET wpo_bcount=#{wpoBcount}, qhi_end_date = #{qhiEndDate}
+		WHERE qhi_id=#{qhiId}
 	</update>
 	
   </mapper>

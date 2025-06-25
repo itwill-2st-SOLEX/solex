@@ -24,33 +24,36 @@ const grid = new tui.Grid({
 				{
 	                header: '작업수량',
 	                name: 'optionGroup2',
-	                childNames: ['wpoOcount', 'wpoJcount', 'wpoBcount']
+	                childNames: ['oddCnt', 'wpoOcount', 'wpoJcount', 'wpoBcount']
 	            }
 	        ]
 	      },
     columns: [
 		{ header: '지시번호', name: 'wrkId', align: 'center', width: 70 },
 		{ header: '제품코드', name: 'prdCd', align: 'center', filter: 'select' },
-		{ header: '제품명', name: 'prdNm', align: 'center', filter: 'select', width: 190},
+		{ header: '제품명', name: 'prdNm', align: 'center', filter: 'select', width: 180},
 		
 		{ header: '컬러', name: 'prdColor', align: 'center', filter: 'select' , width: 80},
 		{ header: '사이즈', name: 'prdSize', align: 'center', filter: 'select' , width: 80},
 		{ header: '굽높이', name: 'prdHeight', align: 'center', filter: 'select' , width: 80},
 		
-		{ header: '지시', name: 'wpoOcount', align: 'center', filter: 'select'},
-		{ header: '완료', name: 'wpoJcount', align: 'center', filter: 'select'},
+		{ header: '수주', name: 'oddCnt', align: 'center', sortable: 'true' , width: 80},
+		{ header: '지시', name: 'wpoOcount', align: 'center', sortable: 'true' , width: 80},
+		{ header: '완료', name: 'wpoJcount', align: 'center', sortable: 'true' , width: 80},
 		{ header: '불량', 
 		  name: 'wpoBcount', 
 		  align: 'center', 
-		  filter: 'select', 
+		  sortable: 'true',
+		  width: 80,
+		  defaultValue: 0,
 		  editor: customTextEditor,		//숫자만 입력하도록 설정
 		  //입력이 불가능할때는 '생산중' 표시하기
 		  // 생산중만 회색으로 표시
 		  formatter: ({ row, value }) => {
-			if (row.wpoStatus === 'wpo_sts_04') {
+			if (row.wpoStatus === 'wpo_sts_04' || row.wpoStatus === 'wpo_sts_05' ) {
 		      return value; 
 		    } else {
-		      return `<span style="color: #aaa;">생산중</span>`; 
+		      return `<span style="color: #aaa;">-</span>`; 
 		    }
 		  }
 		}, 
@@ -63,7 +66,7 @@ const grid = new tui.Grid({
 
 		    return `
 		        <div class="progress" style="height: 20px; position: relative;">
-		            <div class="progress-bar bg-success" 
+		            <div class="progress-bar progress-bar-striped bg-success" 
 		                 role="progressbar" 
 		                 style="width: ${rate}%;" 
 		                 aria-valuenow="${rate}" 
@@ -77,7 +80,7 @@ const grid = new tui.Grid({
 		},
 		{ header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: 'true' },
 		{ header: '진행상태', name: 'wpoStatusName', align: 'center', filter: 'select', className: 'bold-text' },
-		{ header: '작업지시', name: 'wpoBtn', align: 'center', sortable: 'true', editable: false, width: 100},
+		{ header: '작업지시', name: 'wpoBtn', align: 'center', editable: false, width: 100},
 		
     ],
 });
@@ -140,7 +143,7 @@ document.getElementById('grid').addEventListener('click', async (e) => {
 	  
 	} else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼 
 		
-		// 편집 중이면 편집 종료 → grid 데이터 반영
+		// 편집 중이면 편집 종료 → grid 데이터 반영 (원래 있는거)
 		await grid.finishEditing();
 		
 		const wrkId = target.getAttribute('data-id');
@@ -155,18 +158,15 @@ document.getElementById('grid').addEventListener('click', async (e) => {
 		  const rowKey = data.findIndex(row => row.wrkId == wrkId);
 
 		  const bcount = grid.getValue(rowKey, 'wpoBcount');
-		  if (!bcount || Number(bcount) === 0) {
+		  if (!bcount || Number(bcount) < 0) {
 		    alert('불량 수량을 입력해주세요.');
 		    return;
 		  }
-			  
-      	await updateStatus(wrkId, 'wpo_sts_05'); // 품질검사완료
+		  
+		  
+      	await updateStatus(wrkId, 'wpo_sts_05', Number(bcount)); // 품질검사완료
 	  
-/*  }else if (target.classList.contains('transfer-btn')) {	
-	  
-	  await updateStatus(wrkId, 'wpo_sts_05'); //다음 공정으로 이관
-     */
-    } else if (target.classList.contains('success-btn')) {
+//	} else if (target.classList.contains('success-btn')) {		//공정이관
 		// 공정 이관 처리
 		//??????????????????????????????????????????????
   	}
@@ -298,21 +298,20 @@ async function managerList(page) {
 		const managerCount = data.managerCount;	//전체 개수(무한스크롤)
 		const hasInProgress = list.some(n => n.WPO_STATUS === 'wpo_sts_02');
 		
-		
-		console.log(data)
-		
+				
 		const gridData = list.map((n, idx) => {
 			let btn = '';
+			let bcount = n.WPO_BCOUNT || 0;
 			
-			// 진행률 계산
-		    const wpoProRate = n.WPO_OCOUNT > 0
-		        ? Math.round((n.WPO_JCOUNT / n.WPO_OCOUNT) * 1000) / 10  // 소수점 1자리
+			// 불량 개수 제외하고 진행률 계산
+		    const wpoProRate = n.ODD_CNT > 0
+		        ? Math.round(((n.WPO_JCOUNT -bcount) / n.ODD_CNT) * 1000) / 10  // 소수점 1자리
 		        : 0;
 			
 		    const wpoStatus = n.WPO_STATUS;
 			
-		    if (!hasInProgress && wpoStatus === 'wpo_sts_01') {
-		        btn = `<button class="btn start-btn btn-sm btn-primary " data-id="${n.WRK_ID}">작업시작</button>`;
+		    if (wpoStatus === 'wpo_sts_01' && !hasInProgress) {
+		        btn = `<button class="btn start-btn btn-sm btn-primary" data-id="${n.WRK_ID}" >작업시작</button>`;
 		    } else if (wpoStatus === 'wpo_sts_02') {
 		        btn = '';  // 버튼 없음
 		    } else if (wpoStatus === 'wpo_sts_03') {
@@ -322,15 +321,16 @@ async function managerList(page) {
 		    } else if (wpoStatus === 'wpo_sts_05') {
 		        btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WRK_ID}">공정이관</button>`;
 		    }
-			console.log(wpoProRate)
 			
 		    return {
+				wpoId: n.WPO_ID,
 		        wrkId: n.WRK_ID,
 		        prdCd: n.PRD_CODE,
 		        prdNm: n.PRD_NM,
 		        prdColor: n.PRD_COLOR,
 		        prdSize: n.PRD_SIZE,
 		        prdHeight: n.PRD_HEIGHT,
+				oddCnt: n.ODD_CNT,
 		        wpoOcount: n.WPO_OCOUNT,
 		        wpoJcount: n.WPO_JCOUNT,
 		        wpoBcount: n.WPO_BCOUNT,
@@ -364,13 +364,21 @@ async function managerList(page) {
 
 
 // 상태 업데이트 함수 (서버 호출, 그리드 갱신 포함)
-async function updateStatus(wrkId, newStatus) {
+async function updateStatus(wrkId, newStatus, wpoBcount = null) {
   try {
-    // 1. 서버에 상태 변경 요청
+	
+	const body = { wrkId, wpoStatus: newStatus };
+    
+	//불량 수량 확인
+	if (wpoBcount !== null) {
+      body.wpoBcount = wpoBcount;  // 불량 수량도 함께 보냄
+    }
+		
+    // 서버에 상태 변경 요청
     const res = await fetch(`/SOLEX/operator/api/updateStatus`, {
       method: 'PATCH',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({wrkId, wpoStatus: newStatus})
+      body: JSON.stringify(body)
     });
 
     if (!res.ok) throw new Error('상태 업데이트 실패');

@@ -1,6 +1,5 @@
 package kr.co.itwillbs.solex.operator;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,11 +47,11 @@ public class ManagerRestController {
 	    
 	    // 내 작업 전체 목록
 	    List<Map<String, Object>> managerList = managerService.getManagerList(params);
-	    int vacationCount = managerService.getManagerCount(empId);
+	    //int vacationCount = managerService.getManagerCount(empId);
 
 	    Map<String, Object> result = new HashMap<>();
 	    result.put("list", managerList);
-	    System.out.println(result);
+	    System.out.println("rrrrrrrrrrrrr : " + result);
 	    
 	    return result;
 	}
@@ -60,12 +60,17 @@ public class ManagerRestController {
 	@PatchMapping("/updateStatus")
 	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map) {
 		
-		map.put("empId", empId);
+		map.put("empId", empId);		
+		
 		managerService.updateWpoSts(map);
 		
 		return ResponseEntity.ok().build();
 	}
 	
+	@PostMapping("/saveBcount")
+	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map) {
+		System.out.println("save : " + map);
+		return ResponseEntity.ok().build();
 	
-
+	}
 }
