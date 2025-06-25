@@ -91,4 +91,13 @@ public class ProductsRestController {
         response.put("message", "제품 등록 성공!");
         return ResponseEntity.ok(response);
     }
+	
+	// 제품 update
+	@PostMapping("/productUpdate")
+	public String editProduct(@RequestBody Map<String, Object> requestMap) {
+		
+		return null;
+	}
+	
+	
 }

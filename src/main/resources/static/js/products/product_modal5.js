@@ -1,3 +1,4 @@
+/*  250625 오후 3시30분 - 단일옵션 체크박스만 됨.  */
 // 전역 변수로 옵션 데이터 저장 (공통 코드 로드 후)
 let allColorOptions = [];
 let allSizeOptions = [];
@@ -224,37 +225,67 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
 
 // 각 색상 그룹별 Toast UI Grid 인스턴스를 저장할 Map
 const toastGridInstances = new Map();
-async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
-    console.log(`옵션 그리드 ${isAutoLoad ? '자동 로드' : '수동 생성'} 시작`);
-    console.log('data:', data);
 
+// 옵션 조합 생성 및 테이블에 표시 (그룹핑 포함)
+async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
+	
+	console.log(`옵션 그리드 ${isAutoLoad ? '자동 로드' : '수동 생성'} 시작`);
+	console.log('data??? ' + JSON.stringify(data) );
+
+    // 1. 현재 선택된 드롭다운 값 가져오기 (선택된 조합을 기본 체크하기 위함)
+    const selectedColorCode = document.getElementById('prdColorSelect').value;
+    const selectedSizeCode = document.getElementById('prdSizeSelect').value;
+    const selectedHeightCode = document.getElementById('prdHeightSelect').value;
+	
+	
+
+    // 2. 서버에서 각 옵션 그룹의 모든 공통 코드를 다시 가져오기 (비동기 병렬 처리)
     const [allColorsResponse, allSizesResponse, allHeightsResponse] = await Promise.all([
         fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_color`),
         fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_size`),
         fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_height`)
     ]);
 
+    // 응답 에러 처리
     if (!allColorsResponse.ok || !allSizesResponse.ok || !allHeightsResponse.ok) {
-        alert("옵션 데이터를 불러오는 데 실패했습니다.");
+        alert("옵션 데이터를 불러오는 데 실패했습니다. 서버 상태를 확인해주세요.");
+        console.error("옵션 데이터 로드 실패:", allColorsResponse.status, allSizesResponse.status, allHeightsResponse.status);
         return;
     }
 
-    const allColors = (await allColorsResponse.json()).data;
-    const allSizes = (await allSizesResponse.json()).data;
-    const allHeights = (await allHeightsResponse.json()).data;
+    const allColorsData = await allColorsResponse.json();
+    const allSizesData = await allSizesResponse.json();
+    const allHeightsData = await allHeightsResponse.json();
 
+    const allColors = allColorsData.data;
+    const allSizes = allSizesData.data;
+    const allHeights = allHeightsData.data;
+
+    // 데이터 형식 유효성 검사
+    if (!Array.isArray(allColors) || !Array.isArray(allSizes) || !Array.isArray(allHeights)) {
+        alert("서버에서 받은 옵션 데이터 형식이 올바르지 않습니다.");
+        console.error("잘못된 옵션 데이터 형식:", allColors, allSizes, allHeights);
+        return;
+    }
+
+    // 메인 컨테이너 가져오기
     const optionGroupsContainer = document.getElementById('optionGroupsContainer');
     if (!optionGroupsContainer) {
-        alert("옵션 그룹 영역이 없습니다.");
+        console.error("Error: '#optionGroupsContainer' element not found in the DOM.");
+        // 사용자에게 오류 메시지를 표시하거나 다른 처리를 할 수 있습니다.
+        alert("옵션 그룹을 표시할 공간을 찾을 수 없습니다. 개발자에게 문의하세요.");
         return;
     }
-    optionGroupsContainer.innerHTML = '';
+    optionGroupsContainer.innerHTML = ''; // 기존 옵션 그룹 초기화
 
+    // 색상별로 옵션 조합을 그룹핑할 Map 생성
+    // Map<String, List<{color, size, height}>> 형태
     const groupedCombinations = new Map();
 
+    // 모든 가능한 조합 생성 및 색상별로 그룹핑
     allColors.forEach(color => {
-        const colorCode = color.code || color.DET_ID;
-        const colorName = color.name || color.DET_NM;
+        const colorCode = color.code || color.DET_ID; // 실제 DB 코드
+        const colorName = color.name || color.DET_NM; // 사용자에게 보여줄 이름 (예: White)
 
         allSizes.forEach(size => {
             const sizeCode = size.code || size.DET_ID;
@@ -264,123 +295,204 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
                 const heightCode = height.code || height.DET_ID;
                 const heightName = height.name || height.DET_NM;
 
+                // 해당 색상 그룹이 없으면 새로 생성
                 if (!groupedCombinations.has(colorCode)) {
                     groupedCombinations.set(colorCode, {
-                        name: colorName,
+                        name: colorName, // 색상 이름 저장
                         combinations: []
                     });
                 }
-
+				
+				// ⭐ 여기에 isSelected 로직을 수정합니다 ⭐
                 let isSelected = false;
                 if (isAutoLoad && data && Array.isArray(data)) {
-                    isSelected = data.some(opt =>
-                        opt.OPT_COLOR === colorCode &&
-                        opt.OPT_SIZE === sizeCode &&
-                        opt.OPT_HEIGHT === heightCode
-                    );
-                } else if (isAutoLoad && data) {
-                    isSelected = (
-                        data.OPT_COLOR === colorCode &&
-                        data.OPT_SIZE === sizeCode &&
-                        data.OPT_HEIGHT === heightCode
+                    isSelected = data.some(existingOption => 
+                        existingOption.OPT_COLOR === colorCode &&
+                        existingOption.OPT_SIZE === sizeCode &&
+                        existingOption.OPT_HEIGHT === heightCode
                     );
                 }
-
+                // 만약 단일 옵션만 체크해야 한다면 기존 로직을 아래 else if 블록에 포함시킬 수 있습니다.
+                 else if (isAutoLoad && data) {
+                    isSelected = (colorCode === data.OPT_COLOR && sizeCode === data.OPT_SIZE && heightCode === data.OPT_HEIGHT);
+                 }
+				
+				
+				
+				
+				
+                // 현재 조합 추가
                 groupedCombinations.get(colorCode).combinations.push({
-                    colorCode, colorName, sizeCode, sizeName, heightCode, heightName,
-                    isSelected
+					colorCode, colorName, sizeCode, sizeName, heightCode, heightName,					
+                    isSelected: isSelected // 수정된 isSelected 값 사용
                 });
             });
         });
     });
-
-    toastGridInstances.clear();
+	
+	
+    // --- ⭐ 여기서부터 Toast UI Grid 관련 로직 ⭐ ---
+    toastGridInstances.clear(); // 기존 그리드 인스턴스 참조를 초기화
 
     groupedCombinations.forEach((colorGroup, colorCode) => {
         const optionGroupDiv = document.createElement('div');
-        optionGroupDiv.classList.add('option-group', 'mb-4');
+        optionGroupDiv.classList.add('option-group', 'mb-4'); // 간격을 위해 mb-4 추가
 
         const groupHeader = document.createElement('h4');
-        groupHeader.classList.add('mb-2');
+        groupHeader.classList.add('mb-2'); // 제목 아래 간격 추가
         groupHeader.textContent = `색상: ${colorGroup.name} (${colorCode})`;
         optionGroupDiv.appendChild(groupHeader);
 
+        // Toast UI Grid를 렌더링할 컨테이너 (각 색상 그룹마다 하나씩)
         const gridContainer = document.createElement('div');
-        gridContainer.id = `grid-color-${colorCode}`;
+        gridContainer.id = `grid-color-${colorCode}`; // 각 그리드에 고유 ID 부여
         optionGroupDiv.appendChild(gridContainer);
         optionGroupsContainer.appendChild(optionGroupDiv);
 
+        // Toast UI Grid 인스턴스 생성
         const grid = new tui.Grid({
-            el: gridContainer,
-            data: colorGroup.combinations,
-            rowHeaders: ['checkbox'],
-            rowKey: (row) => `${row.colorCode}-${row.sizeCode}-${row.heightCode}`,
-            rowClass: (row) => {
-                return row.isSelected ? 'selected-row highlighted-row' : '';
-            },
+            el: gridContainer, // 그리드를 렌더링할 DOM 요소
+            data: colorGroup.combinations, // 그룹화된 조합 데이터를 바로 사용
+            rowHeaders: ['checkbox'], // 체크박스 행 헤더 추가
             columns: [
-                { header: '색상', name: 'colorName', sortable: true, align: 'center' },
-                { header: '사이즈', name: 'sizeName', sortable: true, align: 'center', filter: { type: 'text', showApplyBtn: true, showClearBtn: true } },
-                { header: '높이', name: 'heightName', sortable: true, align: 'center', filter: { type: 'text', showApplyBtn: true, showClearBtn: true } },
                 {
-                    header: '관리',
+                    header: '색상',
+                    name: 'colorName',
+					sortable: true,
+					align: 'center'
+                },
+                {
+                    header: '사이즈',
+                    name: 'sizeName',
+					sortable: true,
+					align: 'center',
+					filter: 
+					{
+			            type: 'text', 
+			            showApplyBtn: true,
+			            showClearBtn: true 
+			        }
+                },
+                {
+                    header: '높이',
+                    name: 'heightName',
+					sortable: true, 
+					align: 'center',
+					filter: 
+					{
+			            type: 'text', 
+			            showApplyBtn: true,
+			            showClearBtn: true 
+			        }
+                },
+                 {
+                    header: '관리', // 삭제 버튼 등을 넣을 셀
                     name: 'actions',
                     align: 'center',
-                    formatter: () => '<button class="btn btn-danger btn-sm delete-option-btn">삭제</button>'
+					
+                    formatter: () => {
+                        return '<button class="btn btn-danger btn-sm delete-option-btn">삭제</button>';
+                    }
                 }
-            ]
+            ],
         });
 
+        // 각 그리드 인스턴스를 Map에 저장하여 나중에 참조할 수 있도록 합니다.
+        toastGridInstances.set(colorCode, grid);
+        // 초기 선택된 행이 있다면 체크박스 상태 업데이트
         colorGroup.combinations.forEach((combo, index) => {
             if (combo.isSelected) {
-                grid.check(index); // checkbox도 체크
+                grid.check(index); // 해당 인덱스의 행 체크
             }
         });
 
-        toastGridInstances.set(colorCode, grid);
+        grid.on('checkAll', () => {
+            updateOverallSelectAllCheckbox();
+        });
+        grid.on('uncheckAll', () => {
+            updateOverallSelectAllCheckbox();
+        });
+		// 개별 체크박스 변경 시
+		grid.on('check', (ev) => {
+		    // 행에 'selected-row' 클래스 추가 (선택된 행 시각화)
+		    // ⭐ getRowElement 대신 querySelector 사용
+		    const rowElement = grid.el.querySelector(`.tui-grid-row[data-row-key="${ev.rowKey}"]`);
+		    if (rowElement) {
+		        rowElement.classList.add('selected-row');
+		    }
+		    updateColorGroupSelectAllCheckbox(grid);
+		    updateOverallSelectAllCheckbox();
+		});
+		grid.on('uncheck', (ev) => {
+		    // 행에 'selected-row' 클래스 제거
+		    // ⭐ getRowElement 대신 querySelector 사용
+		    const rowElement = grid.el.querySelector(`.tui-grid-row[data-row-key="${ev.rowKey}"]`);
+		    if (rowElement) {
+		        rowElement.classList.remove('selected-row');
+		    }
+		    updateColorGroupSelectAllCheckbox(grid);
+		    updateOverallSelectAllCheckbox();
+		});
 
-        // 이벤트 처리
-        grid.on('check', ev => {
-            updateOverallSelectAllCheckbox();
-        });
-        grid.on('uncheck', ev => {
-            updateOverallSelectAllCheckbox();
-        });
-        grid.on('click', ev => {
+        // 삭제 버튼 이벤트 리스너 (위에서 정의한 'actions' 컬럼의 버튼)
+        grid.on('click', (ev) => {
             if (ev.columnName === 'actions' && ev.target.classList.contains('delete-option-btn')) {
-                grid.removeRow(ev.rowKey);
+                const rowKey = ev.rowKey;
+                grid.removeRow(rowKey); // 행 삭제
+                updateColorGroupSelectAllCheckbox(grid);
                 updateOverallSelectAllCheckbox();
             }
         });
     });
 
-    // 상단 전체 선택 체크박스
+    // --- ⭐ 체크박스 상태 동기화 함수 ⭐ ---
+
+    // 최상위 '모두 선택' 체크박스 (#selectAllOptions)
     const overallSelectAllOptions = document.getElementById('selectAllOptions');
     if (overallSelectAllOptions) {
+        // 초기 상태 업데이트
         updateOverallSelectAllCheckbox();
-        overallSelectAllOptions.onclick = (e) => {
-            const isChecked = e.target.checked;
+
+        // 최상위 '모두 선택' 체크박스 클릭 이벤트 리스너
+        overallSelectAllOptions.onclick = (event) => { // addEventListener 대신 onclick으로 단순화
+            const isChecked = event.target.checked;
             toastGridInstances.forEach(grid => {
-                isChecked ? grid.checkAll() : grid.uncheckAll();
+                if (isChecked) {
+                    grid.checkAll(); // 모든 그리드의 모든 행 선택
+                } else {
+                    grid.uncheckAll(); // 모든 그리드의 모든 행 선택 해제
+                }
             });
         };
     }
 
+    // 모든 색상 그룹의 '모두 선택' 체크박스 상태를 기반으로 전체 체크박스 상태를 업데이트하는 함수
     function updateOverallSelectAllCheckbox() {
         if (!overallSelectAllOptions) return;
-        let allChecked = true;
-        toastGridInstances.forEach(grid => {
-            if (grid.getCheckedRows().length !== grid.getRowCount()) {
-                allChecked = false;
-            }
-        });
-        overallSelectAllOptions.checked = allChecked;
+
+        let allGridsAllChecked = true;
+        if (toastGridInstances.size === 0) { // 생성된 그리드가 없으면 체크 해제
+            allGridsAllChecked = false;
+        } else {
+            toastGridInstances.forEach(grid => {
+                // Toast UI Grid의 checkAll / uncheckAll 상태는 `grid.getCheckedRows().length === grid.getRowCount()` 로 확인 가능
+                if (grid.getCheckedRows().length !== grid.getRowCount()) {
+                    allGridsAllChecked = false;
+                }
+            });
+        }
+        overallSelectAllOptions.checked = allGridsAllChecked;
+    }
+
+    // 특정 색상 그룹의 '모두 선택' 체크박스 상태를 업데이트하는 함수 (Toast UI Grid는 내부적으로 처리)
+    // 이 함수는 사실상 필요 없을 수 있습니다. 각 그리드의 `rowHeaders: ['checkbox']`가 자동으로 헤더 체크박스를 관리하기 때문입니다.
+    // 다만, 개별 행이 변경될 때 상위 헤더 체크박스를 강제로 업데이트해야 하는 경우에만 사용합니다.
+    function updateColorGroupSelectAllCheckbox(grid) {
+        // grid.checkAll() / grid.uncheckAll() 이벤트를 통해 자연스럽게 처리됩니다.
+        // 명시적으로 업데이트하려면 `grid.getCheckedRows().length === grid.getRowCount()` 와 같은 방식으로 로직을 구현해야 합니다.
+        // Toast UI Grid의 기본 동작을 신뢰하는 것이 좋습니다.
     }
 }
-
-
-
-
 
 // ⭐ 통합된 제품 등록/수정 처리 함수
 async function processProductData(mode) { 
