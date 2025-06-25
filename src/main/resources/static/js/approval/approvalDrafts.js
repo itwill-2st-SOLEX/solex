@@ -202,6 +202,7 @@ $(function() {
 	        const action = btn.dataset.action;
 			const stepNo    = btn.dataset.aplStepNo; 
 			const aplId     = btn.dataset.aplId;      
+			const empId     = btn.dataset.empId; 
 			const docType = btn.dataset.docType;
 			
 			// ───────── 휴가 전용 필드 ─────────
@@ -220,7 +221,8 @@ $(function() {
 		      status : action,
 		      aplId  : aplId,
 		      stepNo : stepNo,
-		      docType: docType
+		      docType: docType,
+			  empId  : empId
 		    };
 
 		    if (docType === 'doc_type_01') {
@@ -288,6 +290,7 @@ $(function() {
 					btn.dataset.aplStepNo  = row.apl_step_no;   
 					btn.dataset.aplId      = row.apl_id; 
 					btn.dataset.docType    = row.doc_type_code; 
+					btn.dataset.empId     = data.EMP_ID
 				});
 	
 					
