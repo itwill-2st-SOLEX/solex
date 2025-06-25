@@ -21,7 +21,6 @@ public class CodeRestController {
 	
 	// 공통코드 무한스크롤
 	@GetMapping("/code/data")
-	@ResponseBody
 	public Map<String, Object> getPagedCodeList(
 	    @RequestParam(name = "page", defaultValue = "1") int page,
 	    @RequestParam(name = "perPage") int perPage,
@@ -58,7 +57,6 @@ public class CodeRestController {
 	
 	// 공통코드 저장
 	@PostMapping("/code/save")
-	@ResponseBody
 	public Map<String, Object> saveCode(@RequestBody Map<String, List<Map<String, Object>>> map) {
 
 	    List<Map<String, Object>> insertList = map.get("createdRows");
@@ -83,7 +81,6 @@ public class CodeRestController {
 	
 	// 상세공통코드 무한스크롤
 	@GetMapping("/detailCode/data")
-	@ResponseBody
 	public Map<String, Object> getPagedDetailCodeList(
 	    @RequestParam(name = "cod_id") String cod_id,
 	    @RequestParam(name = "page", defaultValue = "1") int page,
@@ -107,7 +104,6 @@ public class CodeRestController {
 	
 	// 상세공통코드 저장
 	@PostMapping("/detailCode/save")
-	@ResponseBody
 	public Map<String, Object> saveDetailCode(@RequestBody Map<String, List<Map<String, Object>>> map) {
 		
 		List<Map<String, Object>> insertList = map.get("createdRows");
