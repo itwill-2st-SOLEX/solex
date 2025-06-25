@@ -1,7 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  
+
 <mapper namespace="kr.co.itwillbs.solex.lot.LotMapper">
+
+	<!-- 제품유형 리스트 조회 -->
+	<select id="selectDetailCodeListByCodId" resultType="map">
+		SELECT
+		DET_ID,
+		DET_NM
+		FROM CODE_DETAIL
+		WHERE COD_ID = #{codId}
+		ORDER BY DET_SORT
+	</select>
+
+	<!-- 완제품 -->
+	<select id="getFilteredProductLots" parameterType="map" resultType="map">
+		SELECT
+			'prd_' || PRD_LOT_ID AS ID,
+			PRD_LOT_CODE || ' (' || CD.DET_NM || ')' AS TEXT,
+			1 AS CHILDREN
+		FROM PRODUCT_LOT PL
+		JOIN CODE_DETAIL CD ON PL.PRD_LOT_STATUS = CD.DET_ID
+		WHERE 1 = 1
+		<if test="lotCode != null and lotCode != ''">
+			AND PL.PRD_LOT_CODE LIKE '%' || #{lotCode} || '%'
+		</if>
+		<if test="lotStatus != null">
+			AND PL.PRD_LOT_STATUS = #{lotStatus}
+		</if>
+		<if test="prdType != null">
+			AND PL.PRD_TYPE_ID = #{prdType}
+		</if>
+		ORDER BY PRD_LOT_ID DESC
+	</select>
+
+	<!-- 공정 -->
+	<select id="selectProcessLotNodes" resultType="map">
+		SELECT
+		CONCAT('prc_', pl.prc_lot_id) AS id,
+		'공정ID:' || pl.prc_id || ' / ' ||
+		pl.erp_nm AS text,
+		'true' AS children
+		FROM process_lot pl
+		INNER JOIN
+		prdLot_processLot_mapping map ON pl.prc_lot_id = map.prc_lot_id
+		WHERE
+		map.prd_lot_id = #{prdLotId}
+	</select>
+
+	<!-- 자재 + 설비목록 -->
+	<select id="selectMaterialAndEquipmentNodes" resultType="map">
+		SELECT
+		CONCAT('mat_', ml.mat_lot_id) AS id,
+		'[자재] ' || ml.mat_lot_code || ' x
+		' || pm.mat_count AS text,
+		'false' AS children
+		FROM
+		processLot_matLot_mapping pm
+		INNER JOIN material_lot ml ON
+		pm.mat_lot_id = ml.mat_lot_id
+		WHERE pm.prc_lot_id = #{prcLotId}
+
+		UNION
+		ALL
+
+		SELECT
+		CONCAT('equ_', em.equ_id) AS id,
+		'[설비] ' || em.equ_id || ' 사용
+		' || em.usage_hours || '시간' AS text,
+		'false' AS children
+		FROM
+		processLot_equipment_mapping em
+		WHERE em.prc_lot_id = #{prcLotId}
+	</select>
 
 </mapper>

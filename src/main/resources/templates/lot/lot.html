@@ -19,29 +19,23 @@
 			
 				<h3>LOT 추적</h3>
 				
-				<form class="search-area" onsubmit="handleSearch(); return false;">
+				<div class="search-area">
 					<input type="text" id="searchInput" placeholder="lot번호 또는 제품명으로 검색">
 					
 					<div class="controll-area">
 						<div class="select-area">
 							<select id="productTypeSelect" class="selectBox">
-								<option value="">전체 제품</option>
-								<option value="완제품">완제품</option>
-								<option value="자재">자재</option>
 							</select>
 						
 							<select id="productCategorySelect" class="selectBox">
-								<option value="">전체 품목</option>
-								<option value="운동화">운동화</option>
-								<option value="워커">워커</option>
 							</select>
 						</div>
 						<div class="btn-area">
-							<button class="btn custom-btn-blue" type="submit">검색</button>
+							<button class="btn custom-btn-blue" type="button" onclick="loadFilteredLotTree()">검색</button>
 							<button class="btn custom-btn-blue" type="button" onclick="resetFilters()">초기화</button>
 						</div>
 					</div>
-				</form>
+				</div>
 				
 				<div class="lotArea">
 					<div class="lotTree-area" id="lotListContainer">

@@ -60,7 +60,7 @@
 }
 
 #lotTree {
-  min-height: 200px;
+  max-height: 600px;
   border: 1px solid #ccc;
   padding: 10px;
 }
