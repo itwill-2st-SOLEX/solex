@@ -120,6 +120,12 @@
    		)
 	</insert>
 	
+	<update id="addUsedDays">
+	     UPDATE vacation
+	     SET vac_used = vac_used + #{usedDays, jdbcType=INTEGER}
+	     WHERE emp_id = #{empId, jdbcType=INTEGER}
+	</update>
+	
 <!--	사직서 등록-->
 	<insert id="resignationDoc" parameterType="map">
 		INSERT INTO resignation_doc (doc_id,
@@ -138,6 +144,8 @@
 		       MAX(pos.det_nm) AS emp_pos_nm,
 		       MAX(dep.det_nm) AS emp_dep_nm,
 		       MAX(team.det_nm) AS emp_team_nm,
+		       MAX(l.lea_start_date) AS lea_start_date,
+       		   MAX(l.lea_end_date) AS lea_end_date,
 		       MAX(
 		         CASE 
 		           WHEN TO_CHAR(l.lea_start_date, 'HH24:MI:SS') != '00:00:00' THEN 

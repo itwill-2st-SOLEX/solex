@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface ClientMapper {
+	
+	List<Map<String, Object>> getClientNameList();
 
 	List<Map<String, Object>> selectClients(Map<String, Object> params);
 
