@@ -9,4 +9,11 @@
 			prd_nm as name
 		FROM product
 	</select>
+	
+	<select id="findByProductId" resultType="map">
+		SELECT 
+			prd_id as opt_id,
+		FROM product_option
+		where prd_id = #{itemId}
+	</select>
 </mapper>

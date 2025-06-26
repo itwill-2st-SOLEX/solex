@@ -12,4 +12,6 @@ public interface AreaMapper {
 
 	List<Map<String,Object>> getWarehouseAreaHistory(Long areaId);
 
+	List<Map<String, Object>> selectStockList(int offset, int size);
+
 }

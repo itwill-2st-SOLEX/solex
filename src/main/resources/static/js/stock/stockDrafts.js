@@ -8,26 +8,24 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '창고 번호', name: 'whs_id' },
-			{ header: '창고 이름', name: 'whs_nm', sortable: 'true' },
-			{ header: '위치', name: 'whs_full_adr', sortable: 'true' },
-			{ header: '구역 개수', name: 'are_cnt' },
-			{ header: '담당자 이름(사번)', name: 'emp_nm_id' },
-			{ header: '상태', name: 'whs_sts' }						
+			{ header: '재고 번호', name: 'stk_id' },
+			{ header: '재고 구분', name: 'stk_type', sortable: 'true' },
+			{ header: '품목명', name: 'stk_nm', sortable: 'true' },
+			{ header: '재고량', name: 'stk_qty' },
+			{ header: '단위', name: 'stk_unit' }						
 		]
 	});
 	
 	async function loadDrafts(page) {
 		try {
-			const response = await fetch(`/SOLEX/warehouse?page=${page}&size=${pageSize}`);
+			const response = await fetch(`/SOLEX/stock?page=${page}&size=${pageSize}`);
 			const rawData = await response.json();
 			const data = rawData.map(row => ({
-				whs_id: row.ID,
-				whs_nm: row.NM,
-				whs_full_adr: row.FULL,
-				are_cnt: row.CNT,
-				emp_nm_id: row.EMP,
-				whs_sts: row.STS
+//				stk_id: row.ID,
+				stk_type: row.NM,
+				stk_nm: row.ITEM_NM,
+				stk_qty: row.QTY,
+				stk_unit: row.ITEM_UNIT
 			}));
 			page === 0 ? grid.resetData(data) : grid.appendRows(data);
 			currentPage++;
@@ -43,13 +41,13 @@ $(function() {
 	grid.on('scrollEnd', () => loadDrafts(currentPage));
 
 	grid.on('click', (ev) => {
-		if (ev.columnName === 'whs_id') {
+		if (ev.columnName === 'stk_id') {
 			const rowData = grid.getRow(ev.rowKey);
 			openDetailModal(rowData);       
 		}
 	});
 	
-	let historyGrid = null;
+	let detailGrid = null;
 
 	/**  공통: JSON 응답(fetch) ― 바디가 없으면 기본값 반환 */
 	async function fetchJson(url, defaultValue = null) {
@@ -115,15 +113,16 @@ $(function() {
 	    <div id="historyGrid" class="border"></div>
 	  `);
 
-	  historyGrid = new tui.Grid({
+	  detailGrid = new tui.Grid({
 	  	el: document.getElementById('historyGrid'),
 	  	bodyHeight: 300,
 	  	scrollY: true,
 	      	data: [],
 	      	columns: [
-	  	        { header: '변동일시', name: 'actionTime', sortable: true, width: 160 },
-	  	        { header: '구분',     name: 'inOut',       width: 70, align: 'center' },
-	  	        { header: '수량',     name: 'qty',         align: 'right', width: 80 }
+	  	        { header: '이름', name: 'det_nm', sortable: true, width: 160 },
+	  	        { header: '창고',     name: 'det_whs',       width: 70, align: 'center' },
+	  	        { header: '구역',     name: 'det_are',         align: 'right', width: 80 },
+				{ header: '수량',     name: 'det_qty',         align: 'right', width: 80 }
 	      	]
 	  });
 
@@ -141,7 +140,7 @@ $(function() {
 
 	    if (!detail.AREAS || detail.AREAS.length === 0) {
 	      $sel.append('<option disabled selected>구역 없음</option>');
-	      historyGrid.resetData([]);
+	      detailGrid.resetData([]);
 	    } else {
 	      // 첫 구역 히스토리
 	      await renderAreaHistory(detail.AREAS[0].AREA_ID);
@@ -192,8 +191,8 @@ $(function() {
 	        <div class="col-3">
 	          <select class="form-select form-select-sm area-type" required>
 	            <option value="" disabled selected>구역 구분</option>
-	            <option value="area_type_01" data-code="area_type_01">자재</option>
-	            <option value="area_type_02" data-code="area_type_02">제품</option>
+	            <option value="material" data-code="area_type_01">자재</option>
+	            <option value="product" data-code="area_type_02">제품</option>
 	          </select>
 	        </div>
 

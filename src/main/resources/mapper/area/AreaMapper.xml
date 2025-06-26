@@ -30,5 +30,21 @@
 		ON wh.whs_his_sts = s.det_id
 		WHERE wh.are_id = #{areaId}
 	</select>
+	
+	<select id="selectStockList" resultType="map">
+		SELECT  s.det_nm AS nm, 
+				ar.are_qty AS qty, 
+				COALESCE(m.mat_nm , p.prd_nm) item_nm, 
+				COALESCE(m.mat_unit, p.prd_unit) item_unit
+	    FROM area ar
+	    LEFT JOIN code_detail s
+	           ON ar.are_type = s.det_id
+	    LEFT JOIN material m
+	           ON ar.are_type = 'area_type_01'
+	          AND ar.item_id  = m.mat_id
+	    LEFT JOIN product  p
+	           ON ar.are_type = 'area_type_02'
+	          AND ar.item_id  = p.prd_id
+	</select>
 
 </mapper>
