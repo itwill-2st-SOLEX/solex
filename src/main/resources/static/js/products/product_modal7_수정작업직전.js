@@ -70,24 +70,11 @@ async function showProductModal(mode, data = null) {
         loadCommonCodesToSelect('prdTypeSelect', 'prd_type');
         
     } else if (mode === 'edit' && data) {
-        modalTitle.textContent = '제품 상세정보';
-//        saveProductBtn.textContent = '수정 완료';
-//        if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 총 ' + result.opt_count + '건';
-//        saveProductBtn.onclick = () => processProductData('update');
-		
-		// 250626 수정, 삭제기능 안되게 함.
-		const editableElements = document.querySelectorAll('input');
-		editableElements.forEach(element => {
-		    element.setAttribute('readonly', 'readonly');
-		});
-		const selectElements = document.querySelectorAll('select');
-		selectElements.forEach(select => {
-			select.setAttribute('disabled', 'disabled');
-		});
-		saveProductBtn.style.display='none';
-		
+        modalTitle.textContent = '제품 정보 수정';
+        saveProductBtn.textContent = '수정 완료';
+        if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 수정';
+        saveProductBtn.onclick = () => processProductData('update'); 
         
-		
         // 모달 필드에 기존 데이터 채우기 (옵션 데이터를 가져오기 전에 미리 채움)
         if (prdIdHiddenInput) prdIdHiddenInput.value = data.PRD_ID;
         if (prdNmElement) prdNmElement.value = data.PRD_NM || '';
@@ -98,9 +85,6 @@ async function showProductModal(mode, data = null) {
         
         loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT);
         loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);
-		loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
-	    loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
-		loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
     }
 
     const modalEl = document.getElementById('exampleModal');
@@ -112,7 +96,6 @@ async function showProductModal(mode, data = null) {
         if (mode === 'edit' && data) {
             let productOptions = [];
             try {
-				// 1. 제품 옵션 목록 불러오기
                 // await을 사용하여 productOptions를 동기적으로 기다립니다.
                 const response = await fetch(`/SOLEX/products/api/productOptions?prdId=${data.PRD_ID}`);
                 if (!response.ok) {
@@ -122,54 +105,14 @@ async function showProductModal(mode, data = null) {
                 if (result.data) {
                     productOptions = result.data;
                 }
-				
-				// 2. 총 옵션 개수 불러오기 (새로운 fetch 요청 추가)
-				console.log('result ? ' + JSON.stringify(result)); // result.opt_count
-				console.log('result.opt_count ? ' + JSON.stringify(result.opt_count)); // result.opt_count
-				
-//				generateCombinationsBtn.style.display='result.opt_count';
-				if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 총 ' + result.opt_count + '건';
-				generateCombinationsBtn.setAttribute('disabled', 'true');
             } catch (error) {
                 console.error("제품 옵션 로드 오류:", error);
                 alert("제품 옵션을 불러오는 중 오류가 발생했습니다.");
                 productOptions = []; // 오류 발생 시에도 빈 배열로 진행
             }
             console.log('productOptions for grid:', productOptions);
-			// --- TUI Grid 로직 시작 ---
-           	// 1. TUI Grid 인스턴스 생성
-           	const grid = new tui.Grid({
-               el: optionGroupsContainer, // Grid를 렌더링할 HTML 요소
-               data: productOptions,     // 서버에서 가져온 옵션 데이터
-               scrollX: false,
-               scrollY: false,
-               columns: [
-                   {
-                       header: '색상', 
-                       name: 'COLORNAME',
-					   align: 'center',
-					   sortable: true ,
-                       filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
-                   },
-                   {
-                       header: '사이즈',
-                       name: 'SIZENAME',
-                       align: 'center',
-					   sortable: true ,
-                       filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
-                   },
-                   {
-                       header: '높이',
-                       name: 'HEIGHTNAME',
-                       align: 'center',
-					   sortable: true ,
-                       filter: { type: 'number', showApplyBtn: true, showClearBtn: true }
-                   }
-                   
-               ],
-               summary: { // 요약 정보를 표시하고 싶다면 추가
-               }
-           });
+            // 이제 모달이 완전히 표시되었으니 그리드를 안전하게 생성합니다.
+            generateAndDisplayCombinations(true, productOptions);
         } else if (mode === 'new') {
             // 'new' 모드에서도 옵션 그리드를 초기화해야 한다면 여기에 호출
             // 예를 들어, 빈 상태의 그리드를 보여주고 싶을 때
@@ -402,6 +345,12 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
                 { header: '색상', name: 'colorName', sortable: true, align: 'center' },
                 { header: '사이즈', name: 'sizeName', sortable: true, align: 'center', filter: { type: 'text', showApplyBtn: true, showClearBtn: true } },
                 { header: '높이', name: 'heightName', sortable: true, align: 'center', filter: { type: 'text', showApplyBtn: true, showClearBtn: true } },
+                {
+                    header: '관리',
+                    name: 'actions',
+                    align: 'center',
+                    formatter: () => '<button class="btn btn-danger btn-sm delete-option-btn">삭제</button>'
+                }
             ]
         });
 
@@ -452,6 +401,10 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
     }
 }
 
+
+
+
+
 // ⭐ 통합된 제품 등록/수정 처리 함수
 async function processProductData(mode) { 
     console.log(`제품 ${mode === 'register' ? '등록' : '수정'} 시작`);
@@ -467,8 +420,6 @@ async function processProductData(mode) {
     const prdType = document.getElementById('prdTypeSelect').value;
     const prdComm = document.getElementById('prd_comm').value;
     const prdRegDate = document.getElementById('prd_reg_date').value; 
-    // 수정일은 update 모드에서 현재 시간으로 자동 설정
-    const prdUpDate = mode === 'update' ? getNowForOracle() : null; 
 
     // 2. 유효성 검사 (변경 없음)
     if (!prdNm) { alert("제품명을 입력해주세요."); return; }
@@ -479,95 +430,137 @@ async function processProductData(mode) {
     if (!prdComm) { alert("제품 설명을 입력해주세요."); return; }
     console.log("기본 필드 유효성 검사 통과.");
 
-    // ⭐ 3. 선택된 옵션 조합 수집
+    // ⭐ 3. 선택된 옵션 조합 수집 (mode에 따라 분기)
     const selectedOptions = [];
 	
-	// 등록 모드 또는 수정 모드 모두 Toast UI Grid에서 선택된 옵션을 가져옵니다.
-    // generateAndDisplayCombinations에서 이미 그리드가 생성되었고 데이터가 로드된 상태라고 가정합니다.
-    if (mode === 'register' || mode === 'update') {
+	if (mode === 'register') { // 등록 모드이고 옵션 그리드가 존재할 때
 		toastGridInstances.forEach(gridInstance => {
 	        const checkedRowsFromGrid = gridInstance.getCheckedRows();
 	        checkedRowsFromGrid.forEach(row => {
 	            selectedOptions.push({
-	                // 그리드 컬럼 name과 일치하는 속성명 사용
-	                opt_color: row.colorCode, 
+	                opt_color: row.colorCode, // 예시: grid columns name이 'colorCode'인 경우
 	                opt_size: row.sizeCode,
 	                opt_height: row.heightCode,
-	                // 재고(stock)와 가격(price) 컬럼이 그리드에 추가되어 있다면 여기서 함께 수집
-                    // 만약 그리드에 재고/가격 입력 필드가 있다면, 해당 필드의 값을 가져와야 합니다.
-                    // 현재 formatter에 delete 버튼만 있으므로, stock/price는 별도 입력 필드에서 가져오거나,
-                    // 그리드에 editable cell로 추가되어야 합니다. (이 부분은 추후 구현 필요)
-	                opt_stock: row.stock ? Number(row.stock) : 0, // 그리드에 stock 컬럼이 있다면
-	                opt_price: row.price ? Number(row.price) : 0 // 그리드에 price 컬럼이 있다면
+	                opt_stock: Number(row.stock),
+	                // opt_price: Number(row.price) // 필요한 경우 추가
 	            });
 	        });
 		});
-
-        // 등록 모드에서는 옵션 선택이 필수
-        if (mode === 'register' && selectedOptions.length === 0) {
+		if (selectedOptions.length === 0) {
             alert("하나 이상의 제품 옵션 조합을 선택해주세요.");
             return;
         }
-        // 수정 모드에서는 모든 기존 옵션을 유지하거나,
-        // 체크된 옵션만 업데이트하도록 로직을 조절할 수 있습니다.
-        // 현재 로직은 체크된 옵션만 서버로 보냅니다.
+    } else if (mode === 'update') { // 수정 모드일 때 (이전 HTML 테이블 방식 가정)
+		
     }
     
+    if (selectedOptions.length === 0 && mode === 'register') { // 등록 시 옵션 필수
+        alert("하나 이상의 제품 옵션 조합을 선택해주세요.");
+        return;
+    }
     console.log("선택된 옵션:", selectedOptions);
-    
-    // 4. 서버로 전송할 데이터 객체 구성
+
+    // 4. 서버로 보낼 전체 데이터 객체 생성 (변경 없음)
     const productData = {
         prd_nm: prdNm,
-        prd_price: prdPrice,
+        prd_price: Number(prdPrice),
         prd_code: prdCode,
         prd_unit: prdUnit,
         prd_type: prdType,
         prd_comm: prdComm,
-        prd_reg_date: prdRegDate,
-        // 수정 모드일 경우에만 prd_id와 prd_up_date를 포함
-        ...(mode === 'update' && { prd_id: prdId, prd_up_date: prdUpDate }),
-        options: selectedOptions // 수집된 옵션 데이터
+        prd_reg_date: prdRegDate, 
+        options: selectedOptions // 옵션 데이터 포함
     };
-    console.log("전송할 제품 데이터:", productData);
 
-    // 5. API 호출 (변경 없음)
-    const url = mode === 'register' ? '/SOLEX/products/api/productRegist' : '/SOLEX/products/api/productUpdate';
-    const method = 'POST'; // 등록/수정 모두 POST 사용
+    if (mode === 'update') {
+        productData.prd_id = prdId; // 수정 시에만 ID 추가
+    }
+
+    console.log(`전송할 제품 데이터 (${mode === 'register' ? '등록' : '수정'}):`, JSON.stringify(productData));
+
+    // 5. Fetch API를 이용한 서버 전송 (변경 없음)
+    const apiUrl = mode === 'register' ? `/SOLEX/products/api/productRegist` : `/SOLEX/products/api/productUpdate`;
+    const successMessage = mode === 'register' ? "등록" : "수정";
+    const failMessage = mode === 'register' ? "등록" : "수정";
 
     try {
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(productData)
+        const response = await fetch(apiUrl, {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productData),
         });
 
-        const result = await response.json();
-
         if (response.ok) {
-            alert(result.message);
-            // 모달 닫기
-            const modalEl = document.getElementById('exampleModal');
-            const productModal = bootstrap.Modal.getInstance(modalEl); // 현재 열린 모달 인스턴스 가져오기
-            if (productModal) {
-                productModal.hide(); // 모달 숨기기 -> 'hidden.bs.modal' 이벤트가 발동하여 페이지 새로고침
+            const result = await response.json();
+			alert(`제품이 성공적으로 ${mode === 'register' ? '등록' : '수정'}되었습니다: ` + (result.message || ''));
+
+            // ⭐⭐⭐ 제품 등록/수정 성공 후 모달 필드 초기화 - 조건문 제거 ⭐⭐⭐
+            // 입력 필드 초기화
+            document.getElementById('prd_nm').value = '';
+            document.getElementById('prd_price').value = '';
+            document.getElementById('prd_code').value = '';
+            document.getElementById('prd_comm').value = '';
+            
+            // 드롭다운 기본값으로 재설정 (첫 번째 옵션 선택 또는 빈 문자열)
+            // 실제 드롭다운에 `--선택--` 등의 옵션이 있다면 그 value 값으로 설정하는 것이 좋습니다.
+            // 없으면 빈 문자열로 설정하여 선택되지 않은 상태로 만듭니다.
+            document.getElementById('prdUnitSelect').value = ''; 
+            document.getElementById('prdTypeSelect').value = ''; 
+            document.getElementById('prdColorSelect').value = ''; 
+            document.getElementById('prdSizeSelect').value = '';
+            document.getElementById('prdHeightSelect').value = '';
+
+            // prd_id_hidden 필드도 초기화 (수정 완료 후 다시 등록 모드로 전환될 경우 대비)
+            if (prdIdHiddenInput) {
+                prdIdHiddenInput.value = '';
             }
+
+            // 현재 날짜로 재설정
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('prd_reg_date').value = `${year}-${month}-${day}`;
+
+            // Toast UI Grid 및 옵션 그룹 초기화
+            const optionGroupsContainer = document.getElementById('optionGroupsContainer');
+            if (optionGroupsContainer) {
+                optionGroupsContainer.innerHTML = ''; // 생성된 그리드들을 모두 제거
+            }
+            // 전역 Toast UI Grid 인스턴스 맵 비우기
+            if (window.toastGridInstances) {
+                window.toastGridInstances.clear();
+            }
+            // 최상위 '모두 선택' 체크박스도 초기화
+            const overallSelectAllOptions = document.getElementById('selectAllOptions');
+            if (overallSelectAllOptions) {
+                overallSelectAllOptions.checked = false;
+            }
+            // --- 초기화 로직 끝 ---
+
+            // 모달 닫기
+            const productModalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+            if (productModalInstance) {
+                productModalInstance.hide();
+            }
+            // 제품 목록 새로고침
+            if (window.grid && typeof window.grid.readData === 'function') {
+                window.grid.readData();
+            } else if (typeof loadProductList === 'function') {
+//                loadProductList();
+            }
+			         
         } else {
-            // 서버에서 에러 메시지를 반환하는 경우
-            alert(result.message || `제품 ${mode === 'register' ? '등록' : '수정'} 실패`);
-            console.error(`Error during product ${mode}:`, result.message || 'Unknown error');
+            const errorData = await response.json().catch(() => response.text());
+            const errorMessage = typeof errorData === 'object' ? (errorData.message || JSON.stringify(errorData)) : errorData;
+            alert(`제품 ${failMessage}에 실패했습니다: ${response.status} - ${errorMessage}`);
+            console.error(`제품 ${failMessage} 실패 응답:`, errorData);
         }
     } catch (error) {
-        console.error(`Fetch error during product ${mode}:`, error);
-        alert(`네트워크 오류 또는 서버 응답 오류가 발생했습니다: ${error.message}`);
+        console.error(`제품 ${failMessage} 중 네트워크 오류 또는 예외 발생:`, error);
+        alert(`제품 ${failMessage} 중 예상치 못한 오류가 발생했습니다. 네트워크 연결을 확인해주세요.`);
     }
 }
-
-
-
-
-
 
 // ⭐ 중요: 초기 로드 시 이미 체크되어 있는 체크박스에 대한 색상 적용 ⭐
 // 이 부분은 generateAndDisplayCombinations 함수 끝에 추가하거나,

@@ -132,7 +132,55 @@
 	        #{opt_height}
 	    )
   	</insert>
-		
+  	<!-- 제품에 대한 모든 옵션 값 출력 -->
+	<select id="getProductOptionsByProductId" resultType="java.util.Map">
+      SELECT
+             o.OPT_COLOR,  
+             o.OPT_SIZE,
+             o.OPT_HEIGHT,
+			 cd_col.det_nm as colorName,
+			 cd_size.det_nm as sizeName,
+			 cd_height.det_nm as heightName
+			
+		FROM PRODUCT_OPTION o
+   LEFT JOIN code_detail cd_col 
+		  ON cd_col.det_id = o.opt_color
+   LEFT JOIN code_detail cd_size 
+		  ON cd_size.det_id = o.opt_size
+   LEFT JOIN code_detail cd_height 
+		  ON cd_height.det_id = o.opt_height
+       WHERE PRD_ID = #{prdId}
+       ORDER BY o.OPT_COLOR, o.OPT_SIZE, o.OPT_HEIGHT 	
+    </select>
+	<select id="selectOptionTotalCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM PRODUCT P
+		  JOIN PRODUCT_OPTION O
+				ON P.PRD_ID = O.PRD_ID
+		 WHERE P.PRD_ID = #{prdId} 
+		   AND UPPER(O.OPT_YN)='Y'
+	</select>
+	   
+    
+    <!-- 제품 수정, 삭제 기능은 없애기로 함. 6월26일 -->
+<!--     <update id="updateProduct" parameterType="map"> -->
+<!--         UPDATE PRODUCT -->
+<!--         SET -->
+<!--             PRD_NM = #{prd_nm}, -->
+<!--             PRD_PRICE = #{prd_price}, -->
+<!--             PRD_CODE = #{prd_code}, -->
+<!--             PRD_UNIT = #{prd_unit}, -->
+<!--             PRD_TYPE = #{prd_type}, -->
+<!--             PRD_COMM = #{prd_comm}, -->
+<!--             PRD_UP_DATE = TO_DATE(#{prd_up_date}, 'YYYY-MM-DD HH24:MI:SS') -->
+<!--         WHERE -->
+<!--             PRD_ID = #{prd_id} -->
+<!--     </update> -->
 
+<!--     <delete id="deleteProductOptions" parameterType="string"> -->
+<!--         DELETE FROM PRODUCT_OPTION -->
+<!--         WHERE PRD_ID = #{prdId} -->
+<!--     </delete> -->
+    
 
 </mapper>	

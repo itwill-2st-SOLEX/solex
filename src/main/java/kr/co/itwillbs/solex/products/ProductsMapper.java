@@ -28,6 +28,13 @@ public interface ProductsMapper {
     
     // 최근 제품 prd_id 가져옴.
 	Long selectLatestProductId();
+
+	List<Map<String, Object>> getProductOptionsByProductId(String prdId);
+
+	void updateProduct(Map<String, Object> productData);
+	void deleteProductOptions(String prdIdToUpdate);
+
+	int selectOptionTotalCount(String prdId);
 	
 	
 	

@@ -82,8 +82,6 @@ public class ProductsRestController {
 	// 제품 insert
 	@PostMapping("/productRegist")
 	public ResponseEntity<Map<String, String>> registerProduct(@RequestBody Map<String, Object> requestMap) {
-        System.out.println("registerProduct 메서드 안에 requestMap: " + requestMap);
-
         // 서비스 호출, Map을 그대로 넘김
         productsService.registerProduct(requestMap);
 
@@ -94,10 +92,38 @@ public class ProductsRestController {
 	
 	// 제품 update
 	@PostMapping("/productUpdate")
-	public String editProduct(@RequestBody Map<String, Object> requestMap) {
+	public ResponseEntity<Map<String, String>> editProduct(@RequestBody Map<String, Object> productData) {
 		
-		return null;
+		productsService.editProduct(productData);
+		
+		Map<String, String> response = new java.util.HashMap<>();
+        response.put("message", "제품 수정 성공!");
+        
+        return ResponseEntity.ok(response); 
 	}
+	
+	// PRD_ID를 받아 해당 제품의 모든 옵션 목록을 반환하는 API 엔드포인트
+    @GetMapping("/productOptions")
+    public ResponseEntity<Map<String, Object>> getProductOptions(@RequestParam("prdId") String prdId) {
+    	
+    	// OPTION COUNT
+    	int totalOptionCount = productsService.getOptionTotalCount(prdId);
+    	
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<Map<String, Object>> options = productsService.getProductOptions(prdId);
+            response.put("status", "success");
+            response.put("data", options);
+            response.put("opt_count", totalOptionCount);
+            System.out.println("response ?? " + response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("제품 옵션 조회 중 오류 발생: " + e.getMessage());
+            response.put("status", "error");
+            response.put("message", "제품 옵션을 불러오는 데 실패했습니다: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 	
 	
 }

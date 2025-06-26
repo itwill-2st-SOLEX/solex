@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.prod_grid = new tui.Grid({
 	    el: document.getElementById('prod-grid'),
 	    bodyHeight: 600,
-	    rowHeaders: ['checkbox'],
+//	    rowHeaders: ['checkbox'],
 	    scrollY: true,
 	    pageOptions: {
 	      useClient: false,
@@ -32,15 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		      method: 'GET',
 			  initParams: {
 				prd_yn: ''
-			  },
+			},
 			  responseHandler: function(res) {
 				const dataArray = res.data ? res.data.contents || [] : []; 
-				                    
-				// 페이지네이션 정보는 res.data.pagination에 있습니다.
 				const paginationInfo = res.data ? res.data.pagination || { page: 1, totalCount: dataArray.length } : { page: 1, totalCount: 0 };
-				
-				console.log("★★★★ responseHandler - 처리된 데이터 배열 (dataArray):", dataArray);
-				console.log("★★★★ responseHandler - 처리된 페이지네이션 (paginationInfo):", paginationInfo);
 				
 				return {
                     data: dataArray, // ⭐ 여기서 res.data.contents를 사용
@@ -49,10 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         totalCount: Number(paginationInfo.totalCount) 
                     }
                 };
-				
-				
-
-				
 			  }
 		    }
 		  }
@@ -84,10 +75,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	            showClearBtn: true 
 	        } 
 		  },
-	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true , width: 70 },
-		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true , width: 70 },
-		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true , width: 70 },
-		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true, width: 70}
+	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true , width: 80 },
+		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true , width: 80 },
+		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true , width: 80 },
+		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true, width: 80}
 	    ]
 	});
   

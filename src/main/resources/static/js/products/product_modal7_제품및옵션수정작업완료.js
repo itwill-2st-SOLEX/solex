@@ -70,24 +70,11 @@ async function showProductModal(mode, data = null) {
         loadCommonCodesToSelect('prdTypeSelect', 'prd_type');
         
     } else if (mode === 'edit' && data) {
-        modalTitle.textContent = '제품 상세정보';
-//        saveProductBtn.textContent = '수정 완료';
-//        if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 총 ' + result.opt_count + '건';
-//        saveProductBtn.onclick = () => processProductData('update');
-		
-		// 250626 수정, 삭제기능 안되게 함.
-		const editableElements = document.querySelectorAll('input');
-		editableElements.forEach(element => {
-		    element.setAttribute('readonly', 'readonly');
-		});
-		const selectElements = document.querySelectorAll('select');
-		selectElements.forEach(select => {
-			select.setAttribute('disabled', 'disabled');
-		});
-		saveProductBtn.style.display='none';
-		
+        modalTitle.textContent = '제품 정보 수정';
+        saveProductBtn.textContent = '수정 완료';
+        if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 수정';
+        saveProductBtn.onclick = () => processProductData('update'); 
         
-		
         // 모달 필드에 기존 데이터 채우기 (옵션 데이터를 가져오기 전에 미리 채움)
         if (prdIdHiddenInput) prdIdHiddenInput.value = data.PRD_ID;
         if (prdNmElement) prdNmElement.value = data.PRD_NM || '';
@@ -98,9 +85,6 @@ async function showProductModal(mode, data = null) {
         
         loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT);
         loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);
-		loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
-	    loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
-		loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
     }
 
     const modalEl = document.getElementById('exampleModal');
@@ -112,7 +96,6 @@ async function showProductModal(mode, data = null) {
         if (mode === 'edit' && data) {
             let productOptions = [];
             try {
-				// 1. 제품 옵션 목록 불러오기
                 // await을 사용하여 productOptions를 동기적으로 기다립니다.
                 const response = await fetch(`/SOLEX/products/api/productOptions?prdId=${data.PRD_ID}`);
                 if (!response.ok) {
@@ -122,54 +105,14 @@ async function showProductModal(mode, data = null) {
                 if (result.data) {
                     productOptions = result.data;
                 }
-				
-				// 2. 총 옵션 개수 불러오기 (새로운 fetch 요청 추가)
-				console.log('result ? ' + JSON.stringify(result)); // result.opt_count
-				console.log('result.opt_count ? ' + JSON.stringify(result.opt_count)); // result.opt_count
-				
-//				generateCombinationsBtn.style.display='result.opt_count';
-				if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 총 ' + result.opt_count + '건';
-				generateCombinationsBtn.setAttribute('disabled', 'true');
             } catch (error) {
                 console.error("제품 옵션 로드 오류:", error);
                 alert("제품 옵션을 불러오는 중 오류가 발생했습니다.");
                 productOptions = []; // 오류 발생 시에도 빈 배열로 진행
             }
             console.log('productOptions for grid:', productOptions);
-			// --- TUI Grid 로직 시작 ---
-           	// 1. TUI Grid 인스턴스 생성
-           	const grid = new tui.Grid({
-               el: optionGroupsContainer, // Grid를 렌더링할 HTML 요소
-               data: productOptions,     // 서버에서 가져온 옵션 데이터
-               scrollX: false,
-               scrollY: false,
-               columns: [
-                   {
-                       header: '색상', 
-                       name: 'COLORNAME',
-					   align: 'center',
-					   sortable: true ,
-                       filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
-                   },
-                   {
-                       header: '사이즈',
-                       name: 'SIZENAME',
-                       align: 'center',
-					   sortable: true ,
-                       filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
-                   },
-                   {
-                       header: '높이',
-                       name: 'HEIGHTNAME',
-                       align: 'center',
-					   sortable: true ,
-                       filter: { type: 'number', showApplyBtn: true, showClearBtn: true }
-                   }
-                   
-               ],
-               summary: { // 요약 정보를 표시하고 싶다면 추가
-               }
-           });
+            // 이제 모달이 완전히 표시되었으니 그리드를 안전하게 생성합니다.
+            generateAndDisplayCombinations(true, productOptions);
         } else if (mode === 'new') {
             // 'new' 모드에서도 옵션 그리드를 초기화해야 한다면 여기에 호출
             // 예를 들어, 빈 상태의 그리드를 보여주고 싶을 때
@@ -451,6 +394,10 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
         overallSelectAllOptions.checked = allChecked;
     }
 }
+
+
+
+
 
 // ⭐ 통합된 제품 등록/수정 처리 함수
 async function processProductData(mode) { 
