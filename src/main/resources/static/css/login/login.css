@@ -10,7 +10,19 @@ html, body {
   height: 100%;
   font-family: 'Noto Sans KR', sans-serif;
 }
-
+.erorr{
+	color: red;
+    text-align: end;
+    width: 300px;
+    font-size: 12px;
+}
+.form-in{
+	display: flex;
+}
+.small-label {
+  font-size: 12px;
+  width: 100px;
+}
 .login-wrapper {
   height: 100%;
   display: flex;
@@ -88,7 +100,6 @@ html, body {
 
 .login-form label {
   margin-bottom: 1rem;
-  font-size: 0.9rem;
 }
 
 .login-btn {

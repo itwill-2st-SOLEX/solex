@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.material.MaterialMapper">
+
+<!-- 	자재 가져오기  -->
+	<select id="getMaterial" resultType="map">
+		SELECT 
+			mat_id as "matId",
+			cli_id as "cliId",
+			mat_cd as "matCd",
+			mat_nm as "matNm",
+			cd.det_nm as "matUnit",
+			mat_price as "matPrice",
+			mat_comm as "matComm",
+			mat_reg_date as "matRegDate",
+			mat_mod_date as "matModDate",
+			mat_is_active as "matIsActive"
+		FROM material m 
+		left join code_detail cd 
+		on m.mat_nm = cd.det_nm
+		ORDER BY mat_id DESC
+	</select>
+	
+<!-- 	자재 가져오기 -->
+	<select id="getMaterialList" resultType="map">
+		SELECT 
+			mat_id as "matId",
+			cli_id as "cliId",
+			mat_cd as "matCd",
+			mat_nm as "matNm",
+			cd.det_nm as "matUnit",
+			TO_CHAR(mat_price, 'FM999,999,999') as "matPrice",
+			mat_comm as "matComm",
+			TO_CHAR(mat_reg_date,'yyyy-MM-dd') as "matRegDate",
+			TO_CHAR(mat_mod_date,'yyyy-MM-dd') as "matModDate",
+			mat_is_active as "matIsActive"
+		FROM material m 
+		left join code_detail cd 
+		on m.mat_unit = cd.det_id
+	</select>
+	
+<!-- 	등록에서 공통코드(자재단위) 가져오기 -->
+	<select id="getMatUnits" resultType="map">
+	    SELECT 
+        	det_id,
+        	det_nm
+	    FROM code_detail
+	    WHERE cod_id = 'mat_unit'
+	</select>
+	
+<!-- 	자재등록 -->
+	<insert id="registMat">
+		INSERT INTO material(
+			cli_id, mat_cd, mat_nm, mat_price, mat_unit, 
+			mat_comm, mat_reg_date, mat_is_active
+			) VALUES (
+			#{cli_id, jdbcType=NUMERIC},
+			#{mat_cd, jdbcType=VARCHAR},
+			#{mat_nm, jdbcType=VARCHAR},
+			#{mat_price, jdbcType=NUMERIC},
+			#{matUnit, jdbcType=VARCHAR},
+			#{mat_comm, jdbcType=VARCHAR},
+			#{mat_reg_date, jdbcType=DATE},
+			'Y'
+		)
+	</insert>
+	
+<!-- 	자재수정 -->
+	<update id="updateMatPrice">
+		UPDATE material
+		SET mat_price = #{mat_price}
+		WHERE mat_id = #{mat_id}
+	</update>
+	
+	<update id="updateMatComm">
+		UPDATE material
+		SET mat_comm = #{mat_comm}
+		WHERE mat_id = #{mat_id}
+	</update>
+	
+	<update id="updateMatIsActive">
+		UPDATE material
+		SET mat_is_active = #{mat_is_active}
+		WHERE mat_id = #{mat_id}
+	</update>
+	
+	<update id="updateGridCell" parameterType="java.util.Map">
+		UPDATE material
+		SET ${n} = #{v}
+		WHERE mat_id = #{matId}
+    </update>
+	
+</mapper>

@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.workOrder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -37,5 +38,19 @@ public class WorkOrderService {
 		// 주문테이블 상태값 업테이트
 		 String oddId = (String) prdInfo.get(0).get("oddId");
 		mapper.updateSujuOrderSts(oddId);
+	}
+	
+	// 창고 조회
+	public List<Map<String, Object>> getWarehouses(String prdId) {
+		return mapper.getWarehouses(prdId);
+	}
+	
+	// 창고 자재 등록
+	@Transactional
+	public void warehousesInsert(Map<String, Object> prdInfo) {
+		prdInfo.put("whs_his_date", LocalDateTime.now());
+		mapper.warehousesInsert(prdInfo);
+		mapper.stockUpdate(prdInfo);
+		mapper.areaUpdate(prdInfo);
 	}
 }

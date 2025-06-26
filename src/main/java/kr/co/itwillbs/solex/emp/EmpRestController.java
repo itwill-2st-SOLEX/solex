@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +22,14 @@ public class EmpRestController {
 
 	@Autowired
 	private EmpService empService;
+	
+	// 인사등록
+	@PostMapping("")
+	public void registerEmployee(@RequestBody Map<String, Object> empMap) {
+
+		empService.registerEmployee(empMap); // 인스턴스를 통한 호출
+	
+	}
 
 	// 무한스크롤
 	@GetMapping("/empList")

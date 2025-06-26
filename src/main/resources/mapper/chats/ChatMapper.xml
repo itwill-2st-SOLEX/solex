@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.chats.ChatMapper">
+<!-- 	사원 목록 조회 -->
+	<select id="getEmpList" resultType="map">
+		SELECT emp_nm
+			   , emp_num AS emp_cd
+		       , pos.det_nm AS pos
+		       , dep.det_nm AS dep
+		  FROM employee e
+		  JOIN code_detail pos
+		    ON e.emp_pos_cd = pos.det_id
+		  JOIN code_detail dep
+		    ON e.emp_dep_cd = dep.det_id
+		 WHERE e.emp_num != #{empNum}
+		 
+	</select>
+<!-- 	대화 목록 조회 -->
+	<select id="getChatList" resultType="map">
+		SELECT send.emp_nm AS sender_nm
+		       , re.emp_nm AS receiver_nm
+	       	   , m.sender_id AS sender_id
+    		   , m.receiver_id AS receiver_id
+    		   , m.room_id
+		       , content AS last_message
+ 		  FROM messenger m
+		  JOIN employee send
+		    ON m.sender_id = send.emp_num
+		  JOIN employee re
+		    ON m.receiver_id = re.emp_num
+		 WHERE m.MSG_ID IN (
+		        SELECT MAX(MSG_ID)
+		        FROM messenger
+		        WHERE (sender_id = #{empNum} OR receiver_id = #{empNum})
+		          AND (leave_id != #{empNum})
+		        GROUP BY 
+		            CASE 
+		                WHEN SENDER_ID = #{empNum} THEN RECEIVER_ID
+		                ELSE SENDER_ID
+		            END
+		       )
+		ORDER BY SENT_AT DESC
+	</select>
+<!-- 	채팅방 메세지 불러오기 -->
+	<select id="getChatHistory" resultType="map">
+		SELECT m.sender_id
+		       , m.receiver_id
+               , sender.emp_nm AS sender_nm
+		       , receiver.emp_nm AS receiver_nm
+               , m.content
+		       , TO_CHAR(m.sent_at, 'YYYY-MM-DD HH24:MI') AS SENT_TIME
+		       , m.is_read
+		  FROM messenger m
+          JOIN employee sender
+            ON m.sender_id = sender.emp_num
+          JOIN employee receiver
+            ON m.receiver_id = receiver.emp_num 
+		 WHERE (sender_id = #{empNum} AND receiver_id = #{partnerId})
+		    OR (sender_id = #{partnerId} AND receiver_id = #{empNum})
+		 ORDER BY sent_at ASC
+	</select>
+    
+<!--     메세지 저장 -->
+	<insert id="saveMessage">
+		INSERT INTO messenger (msg_id, 
+							   sender_id,
+							   receiver_id,
+							   room_id,
+							   content
+		) VALUES (
+		  SEQ_MSG_ID.NEXTVAL,
+		  #{sender},
+		  #{receiver},
+		  #{roomId},
+		  #{content}
+		)
+	</insert>
+<!-- 	채팅방 읽음처리 -->
+	<update id="chatRead">
+		UPDATE messenger
+		   SET is_read = 'Y'
+		 WHERE room_id = #{roomId}
+		   AND receiver_id = #{empId}
+		   AND is_read = 'N'
+	</update>
+<!-- 	채팅방 조회 -->
+	<select id="getChatRoomStatus" resultType="int">
+		SELECT leave_status
+	      FROM messenger
+	     WHERE room_id = #{room_id1}
+	       OR room_id = #{room_id2}
+	     AND ROWNUM = 1
+	</select>
+<!-- 	채팅방 상태값 업데이트 -->
+	 <update id="updateChatRoomStatus">
+	    UPDATE messenger
+	       SET leave_status = #{status},
+	           leave_id = #{empId}
+	     WHERE (sender_id = #{empId} and receiver_id = #{partnerId})
+            OR (receiver_id = #{empId} and sender_id = #{partnerId})
+    </update>
+<!--     채팅방 삭제 -->
+    <delete id="deleteChatRoom">
+        DELETE 
+          FROM messenger
+         WHERE room_id = #{room_id1}
+            OR room_id = #{room_id2}
+    </delete>
+</mapper>	

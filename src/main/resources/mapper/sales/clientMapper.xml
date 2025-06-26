@@ -3,6 +3,14 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.sales.ClientMapper">
+
+  <select id="getClientNameList" resultType="map">
+		SELECT 
+			c.cli_id as cli_id,
+			c.cli_nm as cli_nm
+		FROM client c 
+		WHERE cli_type = 'client_cat_01'
+  </select>
   <select id="selectClients" resultType="map">
      SELECT
             cli_id, biz_reg_no, cli_add, cli_ceo, cli_da,
