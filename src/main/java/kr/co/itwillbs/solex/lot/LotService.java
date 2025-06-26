@@ -29,38 +29,65 @@ public class LotService {
 	    if (lotStatus != null && lotStatus.trim().isEmpty()) lotStatus = null;
 	    if (prdType != null && prdType.trim().isEmpty()) prdType = null;
 	    
-	    System.out.println("lotCode = " + id); // 255 확인
-	    System.out.println("lotCode = " + lotCode); // 255 확인
-	    System.out.println("lotStatus = " + lotStatus); // null
-	    System.out.println("prdType = " + prdType); // null
-		
         if (id == null) {
-            // 최상위 노드: 완제품 LOT
+        	// 최상위 LOT 목록 조회
         	List<Map<String, Object>> rawList = lotMapper.getFilteredProductLots(lotCode, lotStatus, prdType);
-        	
-        	System.out.println("rawList : " + rawList);
         	
             List<Map<String, Object>> converted = new ArrayList<>();
             for (Map<String, Object> row : rawList) {
                 Map<String, Object> newRow = new HashMap<>();
                 newRow.put("id", row.get("ID"));
                 newRow.put("text", row.get("TEXT"));
-                newRow.put("children", row.get("CHILDREN"));
+                
+                // children을 boolean으로 변환
+                Object childrenVal = row.get("CHILDREN");
+                boolean hasChildren = false;
+                if (childrenVal instanceof Number) {
+                    hasChildren = ((Number) childrenVal).intValue() > 0;
+                } else if (childrenVal instanceof String) {
+                    hasChildren = "1".equals(childrenVal);
+                }
+                newRow.put("children", hasChildren);
+                
                 converted.add(newRow);
             }
             
-            System.out.println("converted : " + converted);
-
             return converted;
-        } else if (lotCode.startsWith("prd_")) {
-            int prdLotId = Integer.parseInt(lotCode.replace("prd_", ""));
-            return lotMapper.selectProcessLotNodes(prdLotId);
-        } else if (lotCode.startsWith("prc_")) {
-            int prcLotId = Integer.parseInt(lotCode.replace("prc_", ""));
-            return lotMapper.selectMaterialAndEquipmentNodes(prcLotId);
+        } else if (id.startsWith("prd_")) {
+        	// 하위 공정 LOT 조회
+            int prdLotId = Integer.parseInt(id.replace("prd_", ""));
+            
+            List<Map<String, Object>> rawList = lotMapper.selectProcessLotNodes(prdLotId);
+            
+            List<Map<String, Object>> converted = new ArrayList<>();
+            for (Map<String, Object> row : rawList) {
+                Map<String, Object> newRow = new HashMap<>();
+                newRow.put("id", row.get("ID"));
+                newRow.put("text", row.get("TEXT"));
+                newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
+                converted.add(newRow);
+            }
+            
+            return converted;
+        } else if (id.startsWith("prc_")) {
+        	// 최하위 자재 / 설비 LOT 조회
+            int prcLotId = Integer.parseInt(id.replace("prc_", ""));
+            
+            
+            List<Map<String, Object>> rawList = lotMapper.selectMaterialAndEquipmentNodes(prcLotId);
+            
+            List<Map<String, Object>> converted = new ArrayList<>();
+            for (Map<String, Object> row : rawList) {
+                Map<String, Object> newRow = new HashMap<>();
+                newRow.put("id", row.get("ID"));
+                newRow.put("text", row.get("TEXT"));
+                newRow.put("children", false);
+                converted.add(newRow);
+            }
+            
+            return converted;
         }
         return Collections.emptyList();
     }
-
 
 }

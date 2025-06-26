@@ -38,41 +38,46 @@
 	<!-- 공정 -->
 	<select id="selectProcessLotNodes" resultType="map">
 		SELECT
-		CONCAT('prc_', pl.prc_lot_id) AS id,
-		'공정ID:' || pl.prc_id || ' / ' ||
-		pl.erp_nm AS text,
-		'true' AS children
+		    'prc_' || pl.PRC_LOT_ID AS ID,
+		    p.PRC_NM || ' / ' || p.PRC_CODE AS TEXT,
+		    CASE
+		        WHEN EXISTS (
+		            SELECT 1 FROM processLot_matLot_mapping pm WHERE pm.PRC_LOT_ID = pl.PRC_LOT_ID
+		            UNION
+		            SELECT 1 FROM processLot_equipment_mapping pe WHERE pe.PRC_LOT_ID = pl.PRC_LOT_ID
+		        )
+		        THEN 1 ELSE 0
+		    END AS CHILDREN
 		FROM process_lot pl
-		INNER JOIN
-		prdLot_processLot_mapping map ON pl.prc_lot_id = map.prc_lot_id
-		WHERE
-		map.prd_lot_id = #{prdLotId}
+		JOIN prdLot_processLot_mapping map ON pl.PRC_LOT_ID = map.PRC_LOT_ID
+		JOIN process p ON pl.PRC_ID = p.PRC_ID
+		WHERE map.PRD_LOT_ID = #{prdLotId}
 	</select>
 
 	<!-- 자재 + 설비목록 -->
 	<select id="selectMaterialAndEquipmentNodes" resultType="map">
-		SELECT
-		CONCAT('mat_', ml.mat_lot_id) AS id,
-		'[자재] ' || ml.mat_lot_code || ' x
-		' || pm.mat_count AS text,
-		'false' AS children
-		FROM
-		processLot_matLot_mapping pm
-		INNER JOIN material_lot ml ON
-		pm.mat_lot_id = ml.mat_lot_id
-		WHERE pm.prc_lot_id = #{prcLotId}
-
-		UNION
-		ALL
-
-		SELECT
-		CONCAT('equ_', em.equ_id) AS id,
-		'[설비] ' || em.equ_id || ' 사용
-		' || em.usage_hours || '시간' AS text,
-		'false' AS children
-		FROM
-		processLot_equipment_mapping em
-		WHERE em.prc_lot_id = #{prcLotId}
+		SELECT * FROM (
+	        -- 자재 LOT
+	        SELECT
+	            'mat_' || ml.MAT_LOT_ID AS ID,
+	            '자재: ' || m.MAT_NM || ' (' || ml.MAT_LOT_CODE || ')' AS TEXT,
+	            0 AS CHILDREN
+	        FROM material_lot ml
+	        JOIN processLot_matLot_mapping map ON ml.MAT_LOT_ID = map.MAT_LOT_ID
+	        JOIN material m ON ml.MAT_ID = m.MAT_ID
+	        WHERE map.PRC_LOT_ID = #{prcLotId}
+	
+	        UNION ALL
+	
+	        -- 설비 LOT
+	        SELECT
+	            'equ_' || e.EQP_ID AS ID,
+	            '설비: ' || e.EQP_NAME || ' (' || e.EQP_CODE || ')' AS TEXT,
+	            0 AS CHILDREN
+	        FROM equipment e
+	        JOIN processLot_equipment_mapping map ON e.EQP_ID = map.EQU_ID
+	        WHERE map.PRC_LOT_ID = #{prcLotId}
+	    )
 	</select>
 
 </mapper>

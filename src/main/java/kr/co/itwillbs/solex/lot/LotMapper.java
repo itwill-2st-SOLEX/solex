@@ -15,10 +15,10 @@ public interface LotMapper {
 	// 최상위 LOT 목록 조회
 	List<Map<String, Object>> getFilteredProductLots(@Param("lotCode") String lotCode, @Param("lotStatus") String lotStatus, @Param("prdType") String prdType);
 	
-	// 
-    List<Map<String, Object>> selectProcessLotNodes(int prdLotId);
+	// 하위 공정 LOT 조회
+    List<Map<String, Object>> selectProcessLotNodes(@Param("prdLotId") int prdLotId);
     
-    // 
-    List<Map<String, Object>> selectMaterialAndEquipmentNodes(int prcLotId);
+    // 최하위 자재 / 설비 LOT 조회
+    List<Map<String, Object>> selectMaterialAndEquipmentNodes(@Param("prcLotId") int prcLotId);
 
 }

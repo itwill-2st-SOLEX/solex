@@ -35,6 +35,7 @@ function loadFilteredLotTree() {
 			}
 		}
 	});
+	
 }
 
 // 셀렉트 박스 초기화

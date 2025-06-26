@@ -39,14 +39,12 @@ public class LotRestController {
 	    String lotStatus = params.get("lotStatus");
 	    String prdType = params.get("prdType");
 	    
-	    System.out.println("id : " + id + ", lotCode : " + lotCode + ", lotStatus : " + lotStatus + ", prdType : " + prdType);
-
 	    if (id == null || id.trim().isEmpty()) {
 	        return lotService.getFilteredProductLots(id, lotCode, lotStatus, prdType);
 	    } else if (id.startsWith("prd_")) {
-//	        return lotService.getProcessLotsByProductId(id.replace("prd_", ""));
+	        return lotService.getFilteredProductLots(id, lotCode, lotStatus, prdType);
 	    } else if (id.startsWith("prc_")) {
-//	        return lotService.getMaterialsAndEquipments(id.replace("prc_", ""));
+	        return lotService.getFilteredProductLots(id, lotCode, lotStatus, prdType);
 	    }
 	    
 	    return Collections.emptyList();
