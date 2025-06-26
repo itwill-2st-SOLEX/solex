@@ -34,7 +34,6 @@ public class CustomUserDetailService implements UserDetailsService {
         String password = (String) userMap.get("EMP_PW");
         String role = (String) userMap.get("EMP_POS_CD");
 
-        // DB에 role이 없으므로 하드코딩: 기본 USER 권한 부여
         return User.builder()
                 .username(empNumFromDb)
                 .password(password)
