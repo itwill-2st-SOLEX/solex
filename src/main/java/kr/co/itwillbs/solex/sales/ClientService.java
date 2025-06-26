@@ -34,6 +34,11 @@ public class ClientService {
 
 //    @Value("${business.api.secret}")
     private String serviceKey;
+    
+    public List<Map<String, Object>> getClientNameList() {
+		// TODO Auto-generated method stub
+		return clientMapper.getClientNameList();
+	}
 
 
     public List<Map<String,Object>> selectClients(Map<String, Object> params) {

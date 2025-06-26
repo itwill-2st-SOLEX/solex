@@ -1,5 +1,8 @@
 package kr.co.itwillbs.solex.approval;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -7,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.co.itwillbs.solex.document.DocumentMapper;
-import lombok.RequiredArgsConstructor;
 
 @Service
 public class ApprovalService {
@@ -41,21 +43,37 @@ public class ApprovalService {
 		approvalRequest.put("emp_id", loginEmpId);
 		approvalRequest.put("docId", docId);
 		
-		System.out.println("---------------------***********************----------------------");
 		System.out.println(approvalRequest);
 		
 		approvalMapper.updateApprovalLine(approvalRequest);
 		
-		System.out.println("---------------------#####################----------------------");
 		
 		String status = (String) approvalRequest.get("status");
         Long   aplId  = Long.valueOf(approvalRequest.get("aplId").toString());
         Integer step  = Integer.valueOf(approvalRequest.get("stepNo").toString());
+        String docType  = (String) approvalRequest.get("docType");
+        String leaveType  = (String) approvalRequest.get("leaveType");
         
-        System.out.println("---------------------+++++++++++++++++++++++++++----------------------");
+        long usedDays;
         
         if (status.equals("apl_sts_02")) {
         	approvalRequest.replace("status", "doc_sts_02");
+        	
+        	if (docType.equals("doc_type_01")) {
+        		
+        		Long empId  = Long.valueOf(approvalRequest.get("empId").toString());
+        		// 날짜 문자열 → OffsetDateTime 파싱
+                OffsetDateTime start = OffsetDateTime.parse((String) approvalRequest.get("leaStartDate"));   // "2025-06-02T03:00:00.000+00:00"
+                OffsetDateTime end   = OffsetDateTime.parse((String) approvalRequest.get("leaEndDate"));
+        		
+        		if ("반차".equals(leaveType)) {
+                    usedDays = (long) 0.5;                      // 반차를 1로 처리 (0.5로 쓰고 싶으면 0.5)
+                } else {                               // 연차
+                    usedDays   = ChronoUnit.DAYS.between(start, end) + 1;   // 양쪽 날짜 모두 포함
+                }
+        		
+        		documentMapper.addUsedDays(empId, usedDays);
+        	}
         	if (step == 1) {
         		documentMapper.updateDocumentStatus(approvalRequest);
         	}
@@ -64,9 +82,5 @@ public class ApprovalService {
         	approvalRequest.replace("status", "doc_sts_03");
         	documentMapper.updateDocumentStatus(approvalRequest);
         } 
-        else {
-        	System.out.println("말도 안되는 상태값임");
-        }
-       
     }
 }
