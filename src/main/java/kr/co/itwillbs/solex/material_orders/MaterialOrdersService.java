@@ -28,10 +28,14 @@ public class MaterialOrdersService {
 
 	//자재 등록에서 자재 id 가져오는 코드
 	public List<Map<String, Object>> getMatId() {
-		// TODO Auto-generated method stub
 		return materialOrdersMapper.getMatId();
 	}
 
+	// 창고 select box 가져오는 코드 
+	public List<Map<String, Object>> getWarehouseAndArea() {
+		return materialOrdersMapper.getWarehouseAndArea();
+	}
+	
 	
 	public List<Map<String, Object>> getMaterialOrderList(int offset, int size) {
 		List<Map<String, Object>> list = materialOrdersMapper.getMaterialOrderList(offset, size);
@@ -39,10 +43,5 @@ public class MaterialOrdersService {
 		return list;
 	}
 	
-	// 창고 select box 가져오는 코드 
-	public List<Map<String, Object>> getWarehouseAndArea() {
-		
-		return materialOrdersMapper.getWarehouseAndArea();
-	}
 
 }

@@ -48,14 +48,14 @@
 		)
 	</insert>
 	
-<!-- 	자재 id 가져오기 selectbox -->
+<!-- 	자재 id 가져오기 select_box -->
 	<select id="getMatId" resultType="map">
 		SELECT mat_id, mat_nm
 		FROM material
 	</select>
 	
 <!-- 	창고 목록 가져오기 -->
-	<select id="getWarehouseAndArea">
+	<select id="getWarehouseAndArea" resultType="map">
 		SELECT whs_id, whs_nm
 		FROM warehouse
 	</select>

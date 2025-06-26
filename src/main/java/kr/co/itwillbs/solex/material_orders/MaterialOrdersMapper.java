@@ -17,6 +17,7 @@ public interface MaterialOrdersMapper {
 
 	List<Map<String, Object>> getMaterialOrderList(int offset, int size);
 
+	// 창고목록 - select box 
 	List<Map<String, Object>> getWarehouseAndArea();
 	
 	

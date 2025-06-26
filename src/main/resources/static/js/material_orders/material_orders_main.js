@@ -36,33 +36,34 @@ document.addEventListener('DOMContentLoaded', function(){
 	
 	}); //tui 그리드 가져오기 끝 
 	
-	// 자재id 목록 받아와 select 에 채워주는 함수
+	// 자재id 목록 받아오는 함수 - select box
 	async function fetchAndPopulateMaterial(selectElement) {
-			const response =  await fetch('/SOLEX/material_orders/getMatId'); // 자재목록을 가져올 api 엔드포인트에 요청
-			
-			const materials = await response.json(); //응답본문을 json객체로 변환
-			
-			materials.forEach(mat => { // 가져온 자재목록을 순회하며 dropdown에 추가
-				const option = document.createElement('option');
-				option.value = mat.MAT_ID;
-				option.textContent = mat.MAT_NM;
-				selectElement.appendChild(option); 
-			});
+		const response =  await fetch('/SOLEX/material_orders/getMatId'); // 자재목록을 가져올 api 엔드포인트에 요청
+		
+		const materials = await response.json(); //응답본문을 json객체로 변환
+		
+		materials.forEach(mat => { // 가져온 자재목록을 순회하며 dropdown에 추가
+			const option = document.createElement('option');
+			option.value = mat.MAT_ID;
+			option.textContent = mat.MAT_NM;
+			selectElement.appendChild(option); 
+		});
 	}
 
 	
-	//저장 될 창고 및 구역 가져오는 함수
+	// 저장 될 창고 및 구역 가져오는 함수 - select box
 	async function warehouseAndArea(selectElement){
 		const response = await fetch('/SOLEX/material_orders/getWarehouseAndArea');
-		const warehouse = await response.json();
+		const warehouse = await response.json(); // 리스트 받아오기
+		console.log("select Element =" , selectElement);  //null
+		
 		warehouse.forEach(whs => {
 			const option = document.createElement('option');
 			option.value = whs.WHS_ID;
 			option.textContent = whs.WHS_NM;
-			console.log('option = ' , option);
-			selectElement.appendChild(option);
+//			selectElement.appendChild(option);
 		});
-		
+
 	}			
 	
 	//자재 발주 목록 조회
@@ -79,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			matEtaDate: row.matEtaDate,
 			matAtaDate: row.matAtaDate,
 			matLmdDate: row.matLmdDate
-		}));
+	}));
 		
 		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
 		page === 0 ? grid.resetData(data) : grid.appendRows(data);
@@ -249,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function(){
 					  <div class="col">
 					  	<label>저장될 창고</label>
 						<div>
-							<select id="matId" class="form-control d-inline-block " name="whs_id" required>
+							<select id="whsId" class="form-control d-inline-block" name="whs_id" required>
 							<option value="">-- 창고를 선택하세요 --</option></select>
 						</div>
 					  </div>
@@ -274,11 +275,9 @@ document.addEventListener('DOMContentLoaded', function(){
 			      </div>
 			    `;
 				
-				
+				modalBody.appendChild(form); // 최종 폼 삽입
 				const whsIdSelect = form.querySelector('#whsId');
 				await warehouseAndArea(whsIdSelect);
-				console.log("whsIdSelect", whsIdSelect);			
-//				modalBody.appendChild(form); // 최종 폼 삽입
 				
 				
 			    // 승인 버튼
@@ -297,10 +296,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			  }
 			
 			  modal.show();
-				
-			
 										
-	
 									
 	}// 모달 내부 끝
 	

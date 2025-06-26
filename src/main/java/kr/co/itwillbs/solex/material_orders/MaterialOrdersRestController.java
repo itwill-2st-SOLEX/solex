@@ -45,7 +45,6 @@ public class MaterialOrdersRestController {
 		return materialOrdersService.getWarehouseAndArea();
 	}
 	
-	
 	//무한스크롤 자재 발주 목록
 	@GetMapping("/materialList")
     public List<Map<String, Object>> materialOrdersService(@RequestParam("page") int page, @RequestParam("size") int size) {
