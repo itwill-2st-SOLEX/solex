@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 
-@Log4j2
 @Controller
 @RequestMapping("/orders")
 public class OrderController {

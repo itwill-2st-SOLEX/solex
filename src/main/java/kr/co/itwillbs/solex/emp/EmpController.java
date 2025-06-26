@@ -39,11 +39,4 @@ public class EmpController {
 		return "emp/emp_main";
 	}
 
-
-	
-
-
-
-
-
 }

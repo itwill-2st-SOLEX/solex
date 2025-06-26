@@ -380,12 +380,11 @@ document.addEventListener('DOMContentLoaded', function(){
 					            return;
 					        }
 					        
-					        const url = '/SOLEX/emp/registration';
+					        const url = '/SOLEX/emp';
 					        const method = 'POST';
 
 					        const formData = new FormData(form); // 동적으로 생성된 'form' 사용
 					        const payload = {
-//					            emp_num: formData.get('emp_num'),
 					            emp_nm: formData.get('emp_nm'),
 					            emp_birth: formData.get('emp_birth').replace(/\./g, '-'), // YYYY.MM.DD -> YYYY-MM-DD
 					            emp_hire: formData.get('emp_hire'),
@@ -506,7 +505,6 @@ document.addEventListener('DOMContentLoaded', function(){
 							const month = (date.getMonth() + 1).toString().padStart(2,'0');
 							const day = date.getDate().toString().padStart(2,'0');
 							const formattedDate = `${year}.${month}.${day}`; // YYYY.MM.DD
-							debugger;
 
 							document.querySelector('input[name="emp_nm"]').value = empData.EMP_NM;
 							document.querySelector('input[name="emp_nm"]').readOnly = true; // 이름 수정 불가

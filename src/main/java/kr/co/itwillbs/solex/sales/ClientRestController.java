@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.sales;
 
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +10,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,14 +17,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.log4j.Log4j2;
 
-
-
-@Log4j2
 @RestController
 @RequestMapping("/clients")
 public class ClientRestController {
@@ -41,7 +36,6 @@ public class ClientRestController {
 	
     @GetMapping("/data") // 예: /clients/data?limit=20&offset=0&search_term=김미
     public ResponseEntity<Map<String, Object>> getClientsData(@RequestParam Map<String, Object> params) {
-        log.info("API - 거래처 목록 조회 요청 파라미터: {}", params);
 
         Map<String, Object> response = new HashMap<>();
 
@@ -53,7 +47,6 @@ public class ClientRestController {
             response.put("data", clients); // 조회된 클라이언트 리스트
             return ResponseEntity.ok(response); // HTTP 200 OK, JSON 응답
         } catch (Exception e) {
-            log.error("API - 거래처 목록 조회 중 오류 발생: {}", e.getMessage(), e);
             response.put("status", "ERROR");
             response.put("message", "거래처 목록 조회 중 오류 발생: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -66,7 +59,6 @@ public class ClientRestController {
 		String emp_id = (String) session.getAttribute("emp_id");
 
 		param.put("emp_id", emp_id);
-		log.info(param);
 
 		int rows = clientService.createClient(param);
 		Map<String, Object> response = new HashMap<>();
@@ -114,7 +106,6 @@ public class ClientRestController {
         try {
 
             int rowAffected = clientService.updateClient(param);
-            log.info(rowAffected);
 
             if (rowAffected > 0) {
                 response.put("status", "OK");
@@ -126,7 +117,6 @@ public class ClientRestController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
         } catch (Exception e) {
-            log.error("거래처 정보 수정 중 오류 발생: " + e.getMessage(), e);
             response.put("status", "ERROR");
             response.put("message", "거래처 정보 수정 중 오류 발생: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -146,11 +136,8 @@ public class ClientRestController {
 
 	@PostMapping("/check-biz")
 	 public ResponseEntity<Map<String, Object>> checkBiz(@RequestBody Map<String, String> request) {
-		log.info("정보 받아옴");
         String bizNumber = request.get("bizNumber");
-        log.info("정보 받아옴"+bizNumber);
         Map<String, Object>  taxType = clientService.queryBizNumber(bizNumber);
-        log.info("taxType : "+taxType);
         return ResponseEntity.ok(Map.of("taxType", taxType));
     }
 	

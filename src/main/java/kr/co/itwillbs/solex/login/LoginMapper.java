@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface LoginMapper {
-
-	Map<String, String> loginEmp(@Param("emp_num") String emp_num, @Param("emp_pw") String emp_pw);
+	// 사번에 맞는 암호화 비번 들고오기 
+	Map<String, Object> findByEmpNum(String empNum);
 
 }

@@ -7,7 +7,12 @@
 	width: 100%;
 	text-align: center;
 }
- 	
+/* 셀 선택시  */
+/* .tui-grid-cell.clickable-cell:hover {
+  cursor: pointer !important;
+  text-decoration: underline;
+  background-color: #f0f9ff; 눈에 띄는 배경색으로 변경
+}	 */
 .logo-img {
 	width: 80%;
 }
@@ -99,3 +104,7 @@ body {
 	margin-left: 10px;
 }
 
+.side-div {
+	display: flex;
+	padding-left: 10% !important;
+}

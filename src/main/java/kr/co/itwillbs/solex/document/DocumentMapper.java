@@ -31,4 +31,5 @@ public interface DocumentMapper {
 	Integer findSteps(String docType);
 	
 	void updateDocumentStatus(Map<String, Object> approvalRequest);
+	void addUsedDays(@Param("empId") long empId, @Param("usedDays") long usedDays);
 }

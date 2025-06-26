@@ -24,6 +24,14 @@ public class EmpRestController {
 
 	@Autowired
 	private EmpService empService;
+	
+	// 인사등록
+	@PostMapping("")
+	public void registerEmployee(@RequestBody Map<String, Object> empMap) {
+
+		empService.registerEmployee(empMap); // 인스턴스를 통한 호출
+	
+	}
 
 	// 무한스크롤
 	@GetMapping("/empList")
