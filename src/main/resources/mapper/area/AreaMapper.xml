@@ -15,13 +15,15 @@
             are_nm,
             are_type,
             item_id,
-            are_max
+            are_max,
+            are_qty
         ) VALUES (
             #{whs_id},
             #{area_nm},
             #{area_tp},
             #{item_id},
-            #{max_cnt}
+            #{max_cnt},
+            #{qty}
         )
     </insert>
     
@@ -49,9 +51,11 @@
 	
 	<select id="selectStockList" resultType="map">
 		SELECT  s.det_nm AS nm, 
-				ar.are_qty AS qty, 
-				COALESCE(m.mat_nm , p.prd_nm) item_nm, 
-				COALESCE(m.mat_unit, p.prd_unit) item_unit
+				s.det_id AS code,
+				SUM(ar.are_qty) AS qty, 
+				ar.item_id AS item_id,
+				COALESCE(m.mat_nm , p.prd_nm) AS item_nm, 
+				u.det_nm AS item_unit
 	    FROM area ar
 	    LEFT JOIN code_detail s
 	           ON ar.are_type = s.det_id
@@ -61,6 +65,14 @@
 	    LEFT JOIN product  p
 	           ON ar.are_type = 'area_type_02'
 	          AND ar.item_id  = p.prd_id
+        LEFT   JOIN code_detail  u
+        		ON u.det_id = COALESCE(m.mat_unit, p.prd_unit)
+        GROUP  BY
+	        s.det_nm,
+	        s.det_id,
+	        ar.item_id,
+	        COALESCE(m.mat_nm , p.prd_nm),
+	        u.det_nm
 	</select>
 
 </mapper>

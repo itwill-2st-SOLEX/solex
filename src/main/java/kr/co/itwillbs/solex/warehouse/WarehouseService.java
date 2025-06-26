@@ -73,9 +73,8 @@ public class WarehouseService {
 		
 		
 		for (Map<String, Object> area : areas) {
-			System.out.println("000000000000000000000000000");
-			System.out.println(area);
-			area.put("whs_id", whsId);          
+			area.put("whs_id", whsId);   
+			area.put("qty", 0L);
             areaMapper.insertArea(area);        // 단일 INSERT
             
             System.out.println("000000000000000000000000000");
@@ -95,7 +94,7 @@ public class WarehouseService {
                     Map<String, Object> detail = new HashMap<>();
                     detail.put("areaId", areaId);
                     detail.put("itemId", opt.get("OPT_ID"));
-                    detail.put("qty", 0L); // 필요 시
+                    detail.put("qty", 0L); 
                     areaMapper.insertDetail(detail);      // 다건 INSERT
                 }
 
