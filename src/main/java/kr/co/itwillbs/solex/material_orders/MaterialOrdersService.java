@@ -32,10 +32,17 @@ public class MaterialOrdersService {
 		return materialOrdersMapper.getMatId();
 	}
 
+	
 	public List<Map<String, Object>> getMaterialOrderList(int offset, int size) {
 		List<Map<String, Object>> list = materialOrdersMapper.getMaterialOrderList(offset, size);
 		System.out.println("list = " + list);
 		return list;
+	}
+	
+	// 창고 select box 가져오는 코드 
+	public List<Map<String, Object>> getWarehouseAndArea() {
+		
+		return materialOrdersMapper.getWarehouseAndArea();
 	}
 
 }

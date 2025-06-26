@@ -16,6 +16,8 @@ public interface MaterialOrdersMapper {
 	List<Map<String, Object>> getMatId();
 
 	List<Map<String, Object>> getMaterialOrderList(int offset, int size);
+
+	List<Map<String, Object>> getWarehouseAndArea();
 	
 	
 }

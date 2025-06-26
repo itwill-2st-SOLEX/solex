@@ -33,11 +33,18 @@ public class MaterialOrdersRestController {
 		materialOrdersService.materialOrderRegist(matordMap);	
 	}
 	
-	//select 박스 자재 id 가져오는 코드
+	//select box 자재 id 가져오는 코드
 	@GetMapping("/getMatId")
 	public List<Map<String, Object>> getMatId() {
 		return materialOrdersService.getMatId();
 	}
+	
+	//select box 창고목록 가져오는 코드
+	@GetMapping("/getWarehouseAndArea")
+	public List<Map<String, Object>> getWarehouseAndArea() {
+		return materialOrdersService.getWarehouseAndArea();
+	}
+	
 	
 	//무한스크롤 자재 발주 목록
 	@GetMapping("/materialList")
