@@ -79,10 +79,10 @@
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#">
+                      <a class="dropdown-item" href="#" onclick="openMessengerPopup(event)">
                         <span class="d-flex align-items-center align-middle">
-                          <i class="flex-shrink-0 icon-base bx bx-credit-card icon-md me-3"></i
-                          ><span class="flex-grow-1 align-middle">Billing Plan</span>
+                            <i class="menu-icon tf-icons bx bx-message-rounded"></i>
+                          <span class="flex-grow-1 align-middle">메신저</span>
                           <span class="flex-shrink-0 badge rounded-pill bg-danger">4</span>
                         </span>
                       </a>
@@ -92,7 +92,7 @@
                     </li>
                     <li>
                       <a href="#" class="dropdown-item" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
-                        <i class="icon-base bx bx-power-off icon-md me-3"></i><span>Log Out</span>
+                        <i class="icon-base bx bx-power-off icon-md me-3"></i><span>로그아웃</span>
                       </a>
                     </li>
                     <form id="logoutForm" action="/SOLEX/logout" method="post" style="display:none;"></form>
@@ -103,4 +103,15 @@
             </div>
           </nav>
   </div>
+  <script>
+	  function openMessengerPopup(event) {
+	    event.preventDefault();
+	    const popup = window.open('/SOLEX/chats', 'MessengerWindow', 'width=500,height=700,left=100,top=100');
+	    if (!popup || popup.closed) {
+	      alert('팝업 차단 해제해주세요!');
+	    } else {
+	      popup.focus();
+	    }
+	  }
+	</script>
 </th:block>
