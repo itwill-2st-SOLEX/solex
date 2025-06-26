@@ -26,7 +26,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/login")
-                .failureUrl("/login?error=true")
+                .failureUrl("/auth/login?error=true")
                 .usernameParameter("emp_num")
                 .passwordParameter("emp_pw")
                 .successHandler((request, response, authentication) -> {

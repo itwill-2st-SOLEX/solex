@@ -19,7 +19,6 @@ public class ChatWebSocketController {
 	// 메세지 디비 저장
 	@MessageMapping("/chat.send")
 	public void sendMessage(@Payload Map<String, Object> message) {
-		System.out.println("message" + message);
 		String roomId = (String) message.get("roomId");
 		service.saveMessage(message);
 		// 여기서 직접 전송 (roomId가 포함된 경로로)
