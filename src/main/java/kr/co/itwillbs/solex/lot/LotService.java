@@ -29,9 +29,13 @@ public class LotService {
 	    if (lotStatus != null && lotStatus.trim().isEmpty()) lotStatus = null;
 	    if (prdType != null && prdType.trim().isEmpty()) prdType = null;
 	    
+	    System.out.println("id : " + id + ", lotCode : " + lotCode + ", lotStatus : " + lotStatus + ", prdType : " + prdType);
+	    
         if (id == null) {
         	// 최상위 LOT 목록 조회
         	List<Map<String, Object>> rawList = lotMapper.getFilteredProductLots(lotCode, lotStatus, prdType);
+        	
+        	System.out.println("rawList : " + rawList);
         	
             List<Map<String, Object>> converted = new ArrayList<>();
             for (Map<String, Object> row : rawList) {
@@ -72,7 +76,6 @@ public class LotService {
         } else if (id.startsWith("prc_")) {
         	// 최하위 자재 / 설비 LOT 조회
             int prcLotId = Integer.parseInt(id.replace("prc_", ""));
-            
             
             List<Map<String, Object>> rawList = lotMapper.selectMaterialAndEquipmentNodes(prcLotId);
             

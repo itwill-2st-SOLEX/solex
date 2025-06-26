@@ -59,10 +59,21 @@
     padding: 10px;
 }
 
-#lotTree {
-  max-height: 600px;
-  border: 1px solid #ccc;
-  padding: 10px;
+.title-area {
+    height: 70px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.sub-title {
+	font-size: 20px;
+}
+
+.sub-area {
+	min-height: 490px;
+	max-height: 490px;
+	border: 1px solid #ccc;
+	padding: 10px;
 }
 
 .lotDetail-area {
@@ -71,4 +82,18 @@
     border: 2px solid #f2f2f2;
     border-radius: 15px;
     padding: 10px;
+}
+
+.tab-buttons {
+	display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+
+.detail-area .sub-area {
+    display: none;
+}
+.detail-area .sub-area.active {
+    display: block;
 }

@@ -17,11 +17,22 @@
 	<!-- 완제품 -->
 	<select id="getFilteredProductLots" parameterType="map" resultType="map">
 		SELECT
-			'prd_' || PRD_LOT_ID AS ID,
-			PRD_LOT_CODE || ' (' || CD.DET_NM || ')' AS TEXT,
-			1 AS CHILDREN
-		FROM PRODUCT_LOT PL
-		JOIN CODE_DETAIL CD ON PL.PRD_LOT_STATUS = CD.DET_ID
+    		'prd_' || pl.prd_lot_id AS id,
+		    pl.prd_lot_code || ' - ' || cd.det_nm || ' (' || cd_status.det_nm || ')' AS text,
+		    CASE
+		        WHEN EXISTS (
+		            SELECT 1
+		            FROM prdLot_processLot_mapping m
+		            WHERE m.prd_lot_id = pl.prd_lot_id
+		        ) THEN 1 ELSE 0
+		    END AS children
+		FROM product_lot pl
+		JOIN work_order wo ON pl.wrk_id = wo.wrk_id
+		JOIN suju_order_detail sod ON wo.odd_id = sod.odd_id
+		JOIN product_option po ON sod.opt_id = po.opt_id
+		JOIN product p ON po.prd_id = p.prd_id
+		JOIN code_detail cd ON p.prd_type = cd.det_id          -- 제품유형명
+		JOIN code_detail cd_status ON pl.prd_lot_status = cd_status.det_id  -- 생산상태명
 		WHERE 1 = 1
 		<if test="lotCode != null and lotCode != ''">
 			AND PL.PRD_LOT_CODE LIKE '%' || #{lotCode} || '%'
@@ -30,7 +41,7 @@
 			AND PL.PRD_LOT_STATUS = #{lotStatus}
 		</if>
 		<if test="prdType != null">
-			AND PL.PRD_TYPE_ID = #{prdType}
+			AND p.prd_type = #{prdType}
 		</if>
 		ORDER BY PRD_LOT_ID DESC
 	</select>
@@ -59,20 +70,20 @@
 		SELECT * FROM (
 	        -- 자재 LOT
 	        SELECT
-	            'mat_' || ml.MAT_LOT_ID AS ID,
-	            '자재: ' || m.MAT_NM || ' (' || ml.MAT_LOT_CODE || ')' AS TEXT,
-	            0 AS CHILDREN
-	        FROM material_lot ml
-	        JOIN processLot_matLot_mapping map ON ml.MAT_LOT_ID = map.MAT_LOT_ID
-	        JOIN material m ON ml.MAT_ID = m.MAT_ID
-	        WHERE map.PRC_LOT_ID = #{prcLotId}
+			  'mat_' || ml.mat_lot_id AS id,
+			  m.mat_nm || ' / ' || m.mat_cd AS text,
+			  0 AS children
+			FROM processLot_matLot_mapping pm
+			JOIN material_lot ml ON pm.mat_lot_id = ml.mat_lot_id
+			JOIN material m ON ml.mat_id = m.mat_id
+			WHERE pm.prc_lot_id = #{prcLotId}
 	
 	        UNION ALL
 	
 	        -- 설비 LOT
 	        SELECT
-	            'equ_' || e.EQP_ID AS ID,
-	            '설비: ' || e.EQP_NAME || ' (' || e.EQP_CODE || ')' AS TEXT,
+	            'eq_' || e.equ_id AS id,
+  				eq.equ_nm || ' / ' || eq.equ_code AS text,
 	            0 AS CHILDREN
 	        FROM equipment e
 	        JOIN processLot_equipment_mapping map ON e.EQP_ID = map.EQU_ID
