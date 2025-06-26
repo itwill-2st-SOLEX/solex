@@ -40,11 +40,11 @@ public class ManagerService {
 		
 		//String wrkId = (String) map.get("wrkId");
 		String wpoStatus = (String) map.get("wpoStatus");
-		Long wrkId = Long.parseLong((String) map.get("wrkId"));
+		Long wpoId = Long.parseLong((String) map.get("wpoId"));
 		
 		switch (wpoStatus) {
 			case "wpo_sts_02":
-				// 상태 : wpo_sts_01 -> 02 
+			// 상태 : wpo_sts_01 -> 02 
 				// 	>> 작업대기 -> '작업시작' 상태로 변경 
 				// 		상태코드 변경, 작업시작일 저장
 				map.put("wpoStartDate", LocalDateTime.now());
@@ -53,53 +53,80 @@ public class ManagerService {
 				break;
 				
 			case "wpo_sts_03":
-				// 상태 : wpo_sts_02 >> wpo_sts_03
+			// 상태 : wpo_sts_02 >> wpo_sts_03
 				// 		입력값 조회하여 끝났는지 확인하기 위해 select	
 				//		WorkerService에서 처리하므로 할 거 없음
 				break;
 				
 			case "wpo_sts_04":
-				// 상태 : wpo_sts_03 -> wpo_sts_04 --> 
-					//>> 공정완료 -> 품질검사중으로 변경
+			// 상태 : wpo_sts_03 -> wpo_sts_04 --> 
+				//>> 공정완료 -> 품질검사중으로 변경
 				managerMapper.updateWpoSts04(map);
 								
-				Map quaMap = managerMapper.selectWpoSts04(wrkId);
+				Map quaMap = managerMapper.selectWpoSts04(wpoId);
 				
-				map.put("wpoId", quaMap.get("WPO_ID"));
+				//map.put("wpoId", quaMap.get("WPO_ID"));
 				map.put("quaId", quaMap.get("QUA_ID"));
 				map.put("qhiStartDate", LocalDateTime.now());
 				map.put("qhiEmpId", map.get("empId"));
 					
-					//>> 품질 이력 테이블에 추가
+				//>> 품질 이력 테이블에 추가
 				managerMapper.insertWpoSts04(map);
 				
 				
 				break;
 				
 			case "wpo_sts_05":
-				// 상태 : wpo_sts_04 -> wpo_sts_05 -->
+			// 상태 : wpo_sts_04 -> wpo_sts_05 -->
 				
-					//>> 품질이력 테이블 업데이트 하기위해 품질이력id 가져오기
-				Map qhiMap = managerMapper.selectWpoSts05(wrkId);
+				//>> 품질이력 테이블 업데이트 하기위해 품질이력id 가져오기
+				Map qhiMap = managerMapper.selectWpoSts05(wpoId);
 				
 				map.put("qhiEndDate", LocalDateTime.now());
 				map.put("qhiId", qhiMap.get("QHI_ID"));
-				
-				//int wpoBcount = Integer.parseInt((String) map.get("wpoBcount"));
-				
-				//map.put("wpoBcount", wpoBcount);
-				
-				System.out.println("050500550 : " + map);
-				
-					// >>품질이력 테이블 업데이트
+
+				// >>품질이력 테이블 업데이트
 				managerMapper.updateWpoSts05_qh(map);				
 				
-					// >> 불량개수, 상태 업데이트
+				// >> 불량개수, 상태 업데이트
 				managerMapper.updateWpoSts05_wp(map);
 				
 
 				break;
 			
+			case "wpo_sts_09":
+			// 상태 : wpo_sts_05 -> wpo_sts_09 -->
+				map.put("wpoEndDate", LocalDateTime.now());
+				
+				System.out.println("9 : " + map);
+				//>> 현재 공정 완료처리하기
+				managerMapper.updateWpoSts09_curr(map);
+				
+				//>> 다음 공정 상태값 변경하기
+				
+				//>> 현재 공정 정보와 다음에 수행해야할 공정의 정보 찾아오기
+				Map stepInfo = managerMapper.selectStepInfo(wpoId);
+				
+				System.out.println(stepInfo);
+
+				//다음 공정이 존재하면
+				if (stepInfo.get("NEXT_WPO_ID") != null  ) {
+					//다음 공정 정보 업데이트할 정보 전달
+					int jcount = ((Number) stepInfo.get("WPO_JCOUNT")).intValue();
+					int bcount = ((Number) stepInfo.get("BCOUNT")).intValue();
+					int nextWpoId = ((Number) stepInfo.get("NEXT_WPO_ID")).intValue();
+					
+					stepInfo.put("wpoNewStatus", "wpo_sts_01");		//상태값 공정대기
+					stepInfo.put("wpoStartDate", LocalDateTime.now());	//공정시작일
+					stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
+					stepInfo.put("wpoId", nextWpoId);	//다음 공정id				
+				
+					managerMapper.updateNextStep(stepInfo);
+					
+				} else {
+					//마지막 공정이면
+					//수주 디테일에 생산수량 업데이트
+				}
 		
 		}
 		

@@ -27,7 +27,7 @@ public interface ManagerMapper {
 	// 상태 : wpo_sts_02 >> wpo_sts_03
 	// Worker에서 처리
 		// 입력값 조회하여 끝났는지 확인하기 위해 select	
-	Map<String, Object> selectWpoSts03(Long wrkId);
+	Map<String, Object> selectWpoSts03(Long wpoId);
 	
 		// 생산량이 모두 완료되었으면 상태값 변경하기 위해 update
 	int updateWpoSts03(Map<String, Object> map);
@@ -38,19 +38,30 @@ public interface ManagerMapper {
 	int updateWpoSts04(Map<String, Object> map);
 	
 		//>> 품질 이력 테이블에 추가하기 위해 품질검사 id, 작업프로세스 id 가져오기
-	Map<String, Object> selectWpoSts04(Long wrkId);
+	Map<String, Object> selectWpoSts04(Long wpoId);
 	
 		//>> 품질 이력 테이블에 추가
 	int insertWpoSts04(Map<String, Object> map);
+	
 	
 	// 상태 : wpo_sts_04 -> 05
 		//>> 불량개수, 상태 업데이트
 	int updateWpoSts05_wp(Map<String, Object> map);
 	
 		//>> 품질이력id 찾아오기
-	Map<String, Object> selectWpoSts05(Long wrkId);
+	Map<String, Object> selectWpoSts05(Long wpoId);
 	
 		//>> 품질검사이력 테이블에도 업데이트
 	int updateWpoSts05_qh(Map<String, Object> map);
+	
+	
+	// 상태 : wpo_sts_05 -> 09
+		//>> 공정이관상태로 변경 
+	int updateWpoSts09_curr(Map<String, Object> map);
+	
+		//>> 다음 공정 정보 찾아오기
+	Map<String, Object> selectStepInfo(Long wpoId);
+	
+	int updateNextStep(Map<String, String> map);
 	
 }

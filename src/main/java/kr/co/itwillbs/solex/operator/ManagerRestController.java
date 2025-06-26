@@ -22,7 +22,8 @@ public class ManagerRestController {
 	public ManagerService managerService;
 	
 	//로그인 구현 필요
-	Long empId = 26L;
+	// 26->29->23->75
+	Long empId = 75L;
 
 	
 	//내 부서 정보
@@ -51,7 +52,6 @@ public class ManagerRestController {
 
 	    Map<String, Object> result = new HashMap<>();
 	    result.put("list", managerList);
-	    System.out.println("rrrrrrrrrrrrr : " + result);
 	    
 	    return result;
 	}

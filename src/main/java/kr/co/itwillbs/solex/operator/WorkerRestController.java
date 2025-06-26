@@ -18,18 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/operator/api")
 public class WorkerRestController {
 
-    private final OrderController orderController;
-
 	@Autowired
 	public WorkerService workerService;
 	
 	//로그인 구현 필요
 	Long empId = 26L;
-
-
-    WorkerRestController(OrderController orderController) {
-        this.orderController = orderController;
-    }
 
 	
 	//내 부서 정보
@@ -37,7 +30,7 @@ public class WorkerRestController {
 	public Map<String, Object> getWorkerSummary() {
 		
 	    Map<String, Object> result = workerService.getWorkerSummary(empId);
-
+	    System.out.println("summary : " +  result);
 	    return result;
 	}
 	

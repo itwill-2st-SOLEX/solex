@@ -18,7 +18,8 @@
 		    vs.prd_nm,				<!-- 제품명 -->
 		    vs.prd_color || ' / ' || vs.prd_size || 'mm / ' || vs.prd_height || 'ea' AS prd_option,	<!-- 제품옵션(색상 / 사이즈 / 굽높이) -->
 		    
-			wp.wpo_id, 
+		    wp.wpo_id,			<!-- 작업-공정코드 -->
+			wp.wrk_id, 			<!-- 작업지시코드 -->
 		    wp.wpo_ocount,		<!-- 작업지시수량 -->
 			wp.wpo_jcount,		<!-- 작업완료수량 -->
 			wp.wpo_end_date,
