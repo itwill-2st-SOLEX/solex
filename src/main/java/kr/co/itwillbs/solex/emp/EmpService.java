@@ -32,10 +32,14 @@ public class EmpService {
 	}
 
 	//인사목록 (재직중)
-	 public List<Map<String, Object>> getEmpList(String includeEmpSts) {
+	 public List<Map<String, Object>> getEmpList(String searchType, String searchKeyword, String includeEmpSts) {
 
-	        List<Map<String, Object>> empList = mapper.getEmpListFiltered(includeEmpSts);
+//	        System.out.println("Service: getEmpList called with searchType=" + searchType +
+//	                           ", searchKeyword=" + searchKeyword + ", includeEmpSts=" + includeEmpSts);
 
+	        List<Map<String, Object>> empList = mapper.getEmpListFiltered(searchType, searchKeyword, includeEmpSts);
+
+//	        System.out.println("Service: getEmpListFiltered returned " + (empList != null ? empList.size() : "null") + " items.");
 	        return empList;
 	    }
 
@@ -64,7 +68,7 @@ public class EmpService {
 	            if (codeMap.get("empTeamCd") != null) {
 	                formattedMap.put("empTeamCd", codeMap.get("empTeamCd").toString().trim());
 	            }
-	            // empStsCd
+	            // empStsCd (핵심!)
 	            if (codeMap.get("empStsCd") != null) {
 	                formattedMap.put("empStsCd", codeMap.get("empStsCd").toString().trim());
 	            }
@@ -73,12 +77,13 @@ public class EmpService {
 	                resultList.add(formattedMap);
 	            }
 	        }
-	        System.out.println("가공 후 최종 resultList: " + resultList);
+	        System.out.println("가공 후 최종 resultList: " + resultList); // 추가: 이 로그도 꼭 확인!
 	        return resultList;
 	    }
 
 	public List<Map<String, Object>> getEmpCodeListFromMapper() {
 	    List<Map<String, Object>> empCodeList = mapper.getAllCodeDetails();
+
 	    return empCodeList;
 	}
 

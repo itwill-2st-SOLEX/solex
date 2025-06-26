@@ -6,14 +6,12 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.log4j.Log4j2;
@@ -40,33 +38,6 @@ public class EmpRestController {
         return empService.getempList(offset, size);
     }
 
-	// 등록 json으로 반환하기 위한 매핑
-	@GetMapping("/codes")
-	public List<Map<String, Object>> getCodes() {
-		return empService.getAllcodes();
-	}
-	
-	// 등록 모달
-	@ResponseBody
-	@PostMapping("/registration")
-	public String register_post(@RequestBody Map<String, Object> empMap) throws Exception{
-		System.out.println(empMap);
-		String empBirthRaw = (String) empMap.get("emp_birth");
-		String encryptedBirth = AESUtil.encrypt(empBirthRaw);
-		
-		// Map에 암호화된 값 넣기
-		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("emp_birth", encryptedBirth);
-		try {
-			int  insertCount = empService.registerEmp(empMap); // 인스턴스를 통한 호출
-		} catch(Exception e) {
-		    e.printStackTrace();
-		}
-
-		return "redirect:/emp";
-	}
-
-	
 	 // ajax를 통해 json으로 공통 코드 목록을 리턴
     @GetMapping("/codelistJson")
     public Map<String, Object> getCommonCodeListJson() {
@@ -81,16 +52,26 @@ public class EmpRestController {
 	// AJAX 를 통해 목록 조회 요청 결과를 JSON 으로 리턴하기 위한 요청 매핑
     @GetMapping("/listJson")
     public Map<String, Object> getEmpListJson(
+        @RequestParam(name = "searchType", defaultValue = "", required = false) String searchType,
+        @RequestParam(name = "searchKeyword", defaultValue = "", required = false) String searchKeyword,
         @RequestParam(value="includeEmpSts", required = false) String includeEmpSts) {
 
+    	System.out.println("searchType " + searchType);
+    	System.out.println("searchKeyword " +  searchKeyword);
     	System.out.println("includeEmpSts " + includeEmpSts);
 
-        List<Map<String, Object>> empList = empService.getEmpList(includeEmpSts);
+        List<Map<String, Object>> empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("empList", empList);
 
         return responseMap;
+    }
+
+    // 등록 json으로 반환하기 위한 매핑
+    @GetMapping("/codes")
+    public List<Map<String, Object>> getCodes() {
+        return empService.getAllcodes();
     }
 
     // 수정을 위한 매핑
@@ -123,6 +104,7 @@ public class EmpRestController {
  	            System.out.println("Update fail due to exception !!");
  	        }
  	}
+ 	
 
 
 }

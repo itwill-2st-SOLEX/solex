@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function(){
 	    ]
 	});
 	
-	//체크박스 
 	const checkAllCheckbox = document.getElementById('check-all');
 	
 	checkAllCheckbox.addEventListener('change', (event) => {
@@ -65,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	      	}));
 
 			//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
+
 			page === 0 ? grid.resetData(data) : grid.appendRows(data);
 
 			//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 		// 등록 모달 열기
 		async function openModal(empData = null) {
-			console.log('>>> openModal 호출, empData:', empData); 
+			console.log('>>> openModal 호출, empData:', empData); // 이 로그를 확인하세요!
 		    const modalElement = document.getElementById('exampleModal');
 		    const modal = new bootstrap.Modal(modalElement);
 		    const modalBody = modalElement.querySelector('.modal-body');

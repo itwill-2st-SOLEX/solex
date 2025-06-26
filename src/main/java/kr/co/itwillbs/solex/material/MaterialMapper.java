@@ -6,6 +6,9 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface MaterialMapper {
+	
+	// 자재리스트
+	List<Map<String, Object>> getMeterialNameList();
 
 	//자재 목록
 	List<Map<String, Object>> getMaterial();

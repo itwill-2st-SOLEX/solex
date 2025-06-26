@@ -27,6 +27,11 @@ public class MaterialRestController {
 	@Autowired
 	private MaterialService materialService;
 	
+	@GetMapping("")
+    public List<Map<String, Object>> getMeterialNameList() {
+        return materialService.getMeterialNameList();
+    }
+	
 	//자재목록 JSON으로 리턴
 	@GetMapping("/materialList")
     public List<Map<String, Object>> getMeterialList(@RequestParam("page") int page, @RequestParam("size") int size) {

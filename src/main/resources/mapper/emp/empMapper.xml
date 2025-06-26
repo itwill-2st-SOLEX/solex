@@ -71,7 +71,7 @@
 	            ELSE NULL END AS "empStsCd",    
 	            DET_ID AS "codeValue",   
 	            DET_NM AS "codeName"     
-	    FROM code_detail
+	            FROM code_detail
 	    WHERE
 	        COD_ID IN ('cat', 'pos', 'team', 'sts') OR COD_ID LIKE 'dep%'
 	    ORDER BY COD_ID, DET_ID
@@ -108,6 +108,17 @@
             AND emp_sts_cd = 'sts_01'
         </otherwise>
     </choose>
+
+    <if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+        <choose>
+            <when test="searchType == 'empNm'">
+                AND emp_nm LIKE '%' || #{searchKeyword} || '%'
+            </when>
+            <when test="searchType == 'empNum'">
+                AND emp_num LIKE '%' || #{searchKeyword} || '%'
+            </when>
+        </choose>
+    </if>
         ORDER BY emp_num ASC
     </select>
     

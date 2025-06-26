@@ -15,6 +15,12 @@ public class MaterialService {
 	@Autowired
 	private MaterialMapper materialMapper;
 	
+	public List<Map<String, Object>> getMeterialNameList() {
+		// TODO Auto-generated method stub
+		return materialMapper.getMeterialNameList();
+	}
+
+	
 	//자재 목록
 	public List<Map<String, Object>> getMaterial() {
 		
