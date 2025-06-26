@@ -5,7 +5,11 @@
 <mapper namespace="kr.co.itwillbs.solex.area.AreaMapper">
   
 	<!-- 단건 INSERT -->
-    <insert id="insertArea" parameterType="map">
+    <insert id="insertArea" 
+			parameterType="map"
+			useGeneratedKeys="true"
+			keyProperty="are_id"
+			keyColumn="are_id">
         INSERT INTO area (
             whs_id,
             are_nm,
@@ -21,6 +25,18 @@
         )
     </insert>
     
+    <insert id="insertDetail" parameterType="map">
+        INSERT INTO area_detail (
+            are_id,
+            item_id,
+            are_det_qty
+        ) VALUES (
+            #{areaId},
+            #{itemId},
+            #{qty}
+        )
+    </insert>
+    
     <select id="getWarehouseAreaHistory" resultType="map">
 		SELECT wh.whs_his_date AS action_time,
 				wh.whs_his_cnt AS quantity,
@@ -29,6 +45,22 @@
 		LEFT JOIN code_detail s 
 		ON wh.whs_his_sts = s.det_id
 		WHERE wh.are_id = #{areaId}
+	</select>
+	
+	<select id="selectStockList" resultType="map">
+		SELECT  s.det_nm AS nm, 
+				ar.are_qty AS qty, 
+				COALESCE(m.mat_nm , p.prd_nm) item_nm, 
+				COALESCE(m.mat_unit, p.prd_unit) item_unit
+	    FROM area ar
+	    LEFT JOIN code_detail s
+	           ON ar.are_type = s.det_id
+	    LEFT JOIN material m
+	           ON ar.are_type = 'area_type_01'
+	          AND ar.item_id  = m.mat_id
+	    LEFT JOIN product  p
+	           ON ar.are_type = 'area_type_02'
+	          AND ar.item_id  = p.prd_id
 	</select>
 
 </mapper>

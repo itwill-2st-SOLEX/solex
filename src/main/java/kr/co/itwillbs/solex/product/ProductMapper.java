@@ -11,4 +11,6 @@ public interface ProductMapper {
 	// 자재리스트
 	List<Map<String, Object>> getProductNameList();
 
+	List<Map<String, Object>> findByProductId(Long itemId);
+
 }
