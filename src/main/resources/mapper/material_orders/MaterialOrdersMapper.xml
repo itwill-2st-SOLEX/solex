@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.material_orders.MaterialOrdersMapper">
+	
+<!-- 	자재 가져오기  -->
+	<select id="getMaterialOrders" resultType="map">
+		SELECT 
+			mat_ord_id as "matOrdId",
+			mat_id as "matId",
+			emp_id as "empId",
+			mat_qty as "matQty",
+			mat_reg_date as "matRegDate",
+			mat_eta_date as "matEtaDate",
+			mat_ata_date as "matAtaDate",
+			mat_lmd_date as "matLmdDate",
+			mat_comm as "matComm"
+		FROM material_orders
+	</select>
+	
+	<select id="getMaterialOrderList" resultType="map">
+		SELECT 
+			mat_ord_id as "matOrdId",
+			mat_id as "matId",
+			emp_id as "empId",
+			mat_qty as "matQty",
+			TO_CHAR(mat_reg_date, 'yyyy-MM-dd') as "matRegDate",
+			TO_CHAR(mat_eta_date, 'yyyy-MM-dd') as "matEtaDate",
+			TO_CHAR(mat_ata_date, 'yyyy-MM-dd') as "matAtaDate",
+			TO_CHAR(mat_lmd_date, 'yyyy-MM-dd') as "matLmdDate",
+			mat_comm as "matComm"
+		FROM material_orders
+	</select>
+	
+<!-- 	자재발주 등록 -->
+	<insert id="materialOrderRegist">
+		INSERT INTO material_orders
+		(mat_id, mat_qty, mat_reg_date, mat_eta_date, mat_ata_date, mat_comm)
+		VALUES (
+		#{mat_id, jdbcType=NUMERIC},
+		#{mat_qty, jdbcType=NUMERIC},
+		#{mat_reg_date, jdbcType=DATE},
+		#{mat_eta_date, jdbcType=DATE},
+		#{mat_ata_date, jdbcType=DATE},
+		#{mat_comm, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+<!-- 	자재 id 가져오기 selectbox -->
+	<select id="getMatId" resultType="map">
+		SELECT mat_id, mat_nm
+		FROM material
+	</select>
+	
+<!-- 	창고 목록 가져오기 -->
+	<select id="getWarehouseAndArea">
+		SELECT whs_id, whs_nm
+		FROM warehouse
+	</select>
+	
+	
+</mapper>
