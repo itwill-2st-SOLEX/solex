@@ -73,11 +73,16 @@ public class WarehouseService {
 		
 		
 		for (Map<String, Object> area : areas) {
-			area.put("whs_id", whsId);          // FK
+			System.out.println("000000000000000000000000000");
+			System.out.println(area);
+			area.put("whs_id", whsId);          
             areaMapper.insertArea(area);        // 단일 INSERT
             
-            Long itemId = ((Number) area.get("item_id")).longValue(); 
-            Long areaId = ((Number) area.get("area_id")).longValue();
+            System.out.println("000000000000000000000000000");
+            System.out.println(area);
+            
+            Long itemId = Long.parseLong((String) area.get("item_id")); 
+            Long areaId = ((Number) area.get("are_id")).longValue();
             String areaTp = (String) area.get("area_tp");
             
             /* 3-2) AREA_DETAIL 분기 처리 */
@@ -88,19 +93,19 @@ public class WarehouseService {
 
                 for (Map<String, Object> opt : options) {
                     Map<String, Object> detail = new HashMap<>();
-                    detail.put("area_id", areaId);
-                    detail.put("item_id", opt.get("OPT_ID"));
-                    detail.put("ARE_DET_QTY", 0L); // 필요 시
-                    areaDetailMapper.insertDetail(detail);      // 다건 INSERT
+                    detail.put("areaId", areaId);
+                    detail.put("itemId", opt.get("OPT_ID"));
+                    detail.put("qty", 0L); // 필요 시
+                    areaMapper.insertDetail(detail);      // 다건 INSERT
                 }
 
             } else if ("area_type_01".equals(areaTp)) {
                 // (B) 자재가 ‘원부자재’라면 옵션 없이 1건만 등록
                 Map<String, Object> detail = new HashMap<>();
-                detail.put("area_id", areaId);
-                detail.put("item_id", area.get("item_id"));
-                detail.put("max_cnt", area.get("max_cnt"));
-                areaDetailMapper.insertDetail(detail);
+                detail.put("areaId", areaId);
+                detail.put("itemId", itemId);
+                detail.put("qty", 0L);
+                areaMapper.insertDetail(detail);
             }
         }
         

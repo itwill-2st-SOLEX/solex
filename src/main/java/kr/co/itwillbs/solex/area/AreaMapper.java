@@ -14,4 +14,6 @@ public interface AreaMapper {
 
 	List<Map<String, Object>> selectStockList(int offset, int size);
 
+	void insertDetail(Map<String, Object> detail);
+
 }

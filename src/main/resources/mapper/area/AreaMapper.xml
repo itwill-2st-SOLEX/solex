@@ -5,7 +5,11 @@
 <mapper namespace="kr.co.itwillbs.solex.area.AreaMapper">
   
 	<!-- 단건 INSERT -->
-    <insert id="insertArea" parameterType="map">
+    <insert id="insertArea" 
+			parameterType="map"
+			useGeneratedKeys="true"
+			keyProperty="are_id"
+			keyColumn="are_id">
         INSERT INTO area (
             whs_id,
             are_nm,
@@ -18,6 +22,18 @@
             #{area_tp},
             #{item_id},
             #{max_cnt}
+        )
+    </insert>
+    
+    <insert id="insertDetail" parameterType="map">
+        INSERT INTO area_detail (
+            are_id,
+            item_id,
+            are_det_qty
+        ) VALUES (
+            #{areaId},
+            #{itemId},
+            #{qty}
         )
     </insert>
     
