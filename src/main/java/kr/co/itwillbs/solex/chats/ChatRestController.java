@@ -49,7 +49,6 @@ public class ChatRestController {
 	// 채팅방 읽음 수정
 	@PatchMapping("")
 	public void chatRead(@RequestBody Map<String, Object> readInfo) {
-		System.out.println("readInfo" + readInfo);
 		service.chatRead(readInfo);
 	}
 	
@@ -57,9 +56,13 @@ public class ChatRestController {
 	@DeleteMapping("/{roomId}")
 	public void leaveChatRoom(@PathVariable("roomId") String roomId, 
 						      @RequestBody Map<String, Object> chatInfo) {
-		System.out.println("roomId" + roomId);
-		System.out.println("chatInfo" + chatInfo);
 	    service.leaveChatRoom(roomId, chatInfo);
 	}
 	
+	// 안읽은 메세지 갯수
+	@GetMapping("/unreadCount")
+	public int getUnreadCount(HttpSession session) {
+	    String empId = (String) session.getAttribute("empNum");
+	    return service.getUnreadMessageCnt(empId);
+	}
 }

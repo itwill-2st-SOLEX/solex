@@ -25,4 +25,6 @@ public interface ChatMapper {
 	public void updateChatRoomStatus(@Param("status") int status, @Param("empId") String empId,  @Param("partnerId") String partnerId);
 	// 3. 채팅방 삭제
 	public void deleteChatRoom(@Param("room_id1") String room_id1, @Param("room_id2") String room_id2);
+	// 안읽은 메세지 갯수
+	public int getUnreadMessageCnt(String empId);
 }
