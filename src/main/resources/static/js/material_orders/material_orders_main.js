@@ -19,19 +19,26 @@ document.addEventListener('DOMContentLoaded', function(){
 		autoWidth : true,
 		columns: [
 			//헤더, 네임, 얼라인(센터)
-			{header: '발주ID', name : 'matOrdId', align: 'center', width: 75},
-			{header: '자재ID', name : 'matId', align: 'center', width: 85},
-			{header: '요청자ID', name : 'empId', align: 'center', width: 85},
-			{header: '발주설명', name : 'matComm', align: 'center', width: 315},
-			{header: '발주수량', name : 'matQty', align: 'center', width: 85},
-			{header: '발주 요청일', name : 'matRegDate', align: 'center', width: 105},
-			{header: '예상 입고일', name : 'matEtaDate', align: 'center', width: 105},
-			{header: '실제 입고일', name : 'matAtaDate', align: 'center', width: 105},
-			{header: '최종 수정일', name : 'matLmdDate', align: 'center', width: 105},
-			{header: '승인/반려', name : 'mat_ok', align: 'center', width: 235, 
-				formatter: ({ rowKey }) =>
-			     `<button class="btn btn-secondary" name="approval" data-row-key="${rowKey}">승인</button>
-		 		 <button class="btn btn-secondary" name="deny" data-row-key="${rowKey}">반려</button>`}
+			{header: '발주ID', name : 'matOrdId', align: 'center', width: 89},
+			{header: '자재ID', name : 'matId', align: 'center', width: 99},
+			{header: '요청자ID', name : 'empId', align: 'center', width: 99},
+			{header: '발주설명', name : 'matComm', align: 'center', width: 330},
+			{header: '발주수량', name : 'matQty', align: 'center', width: 99},
+			{header: '발주 요청일', name : 'matRegDate', align: 'center', width: 118},
+			{header: '예상 입고일', name : 'matEtaDate', align: 'center', width: 118},
+			{header: '실제 입고일', name : 'matAtaDate', align: 'center', width: 118},
+//			{header: '최종 수정일', name : 'matLmdDate', align: 'center', width: 105},
+			{header: '승인/반려', name : 'mat_ok', align: 'center', width: 250, 
+				formatter: ({ value, rowKey }) =>	{
+//				   // 값이 '반려'(또는 '승인')라면 그대로 출력
+				    if (value === '승인' || value === '반려') return value;
+
+				   // 아직 미처리 → 버튼 렌더링
+				   return `
+				     <button class="btn btn-secondary" name="approval" data-row-key="${rowKey}">승인</button>
+				     <button class="btn btn-secondary" name="deny"     data-row-key="${rowKey}">반려</button> `;
+				 }
+			 }
 		]
 	
 	}); //tui 그리드 가져오기 끝 
@@ -56,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function(){
 		console.log('matId' , matId);
 		const url = matId ? `/SOLEX/material_orders/getWarehouse?matId=${matId}`: '/SOLEX/material_orders/getWarehouse';
 		
-		const response = await fetch(url); // 6.26여까지 잘 넘어옴
+		const response = await fetch(url); 
 		const warehouseList = await response.json(); // 리스트 받아오기
 		
 		warehouseList.forEach(whs => {
@@ -103,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			matEtaDate: row.matEtaDate,
 			matAtaDate: row.matAtaDate,
 			matlmddate: row.matlmddate
-	}));
+		}));
 		
 		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
 		page === 0 ? grid.resetData(data) : grid.appendRows(data);
@@ -124,130 +131,152 @@ document.addEventListener('DOMContentLoaded', function(){
 
 	
 	// 승인버튼 누르면 모달창뜨게
-	grid.on('click', ev => {
-	  // ev.targetType === 'cell' 일 때만 처리
-	  if (ev.columnName !== 'mat_ok') return;
-	
-	  // 클릭된 실제 DOM 버튼
-	  const btn = ev.nativeEvent.target.closest('button');
-	  if (!btn) return;
-	
-	  // 행 rowKey 얻기
-	  const rowKey = ev.rowKey;    
-	  if (btn.name === 'approval') {
-		console.log("rowKey = ", rowKey);
-	    openModal('approval', rowKey);
-	  } else if (btn.name === 'deny') {
-	    alert('반려되었습니다.');
-	  }
+	grid.on('click', async ev => {
+		  // ev.targetType === 'cell' 일 때만 처리
+		  if (ev.columnName !== 'mat_ok') return;
+		
+		  // 클릭된 실제 DOM 버튼
+		  const btn = ev.nativeEvent.target.closest('button');
+		  if (!btn) return;
+		
+		  // 행 rowKey 얻기
+		  const rowKey = ev.rowKey;    
+		  const rowData = grid.getRow(rowKey);
+		  
+		  if (btn.name === 'approval') {
+		    openModal('approval', rowKey); //승인 모달 열림
+			return; 
+		  }
+		  if (btn.name === 'deny') {
+			try {
+		      const res = await fetch('/SOLEX/material_orders/materialDeny', {
+		        method : 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body   : JSON.stringify({ mat_ord_id: rowData.matOrdId })  // 필요한 키만 전송
+		      });
+
+			  if (!res.ok) {
+				  const msg = await res.text();
+				  alert('반려 실패: ' + msg);
+				  return;
+			  }
+			  
+			  // 2) 성공하면 UI 갱신
+			  alert('반려되었습니다.');
+			  grid.setValue(rowKey, 'mat_ok', '반려');   // 버튼 → '반려' 텍스트
+		    } catch (err) {
+		        console.error('[반려 요청 오류]', err);
+		        alert('서버 통신 중 오류가 발생했습니다.');
+		    }			
+		  }
 	});
 
 	// 모달 오픈
-		async function openModal(mode, rowKey = null) {
+	async function openModal(mode, rowKey = null) {
+		
+		const modalEl   = document.getElementById('exampleModal');
+		const modal     = new bootstrap.Modal(modalEl);
+		const modalBody = modalEl.querySelector('.modal-body');
+		const modalTit  = document.getElementById('exampleModalLabel');
+		
+		// 모달 열릴때마다 기존 내용 제거
+		modalBody.innerHTML = '';
 			
-			const modalEl   = document.getElementById('exampleModal');
-			const modal     = new bootstrap.Modal(modalEl);
-			const modalBody = modalEl.querySelector('.modal-body');
-			const modalTit  = document.getElementById('exampleModalLabel');
-			
-			// 모달 열릴때마다 기존 내용 제거
-			modalBody.innerHTML = '';
-			
-			if (mode === 'register') {
-				modalTit.textContent = '자재 발주 등록';
-				// 폼 생성
-			  	const form = document.createElement('form');
-			  	form.id = 'materialOrderForm';
-			  	// 안에 내용 틀 js 형식으로 가져오기 
-		  		form.innerHTML = `
-		  			<div class="modal-body big-box">
-		  				<div class="row mb-3">
-		  					<div class="col">
-		  						<label>자재ID</label>
-		  						<div><select id="matId" class="form-control d-inline-block" name= "mat_id" required>
-		  						<option value="">-- 자재를 선택하세요 --</option></select>   </div>
-		  					</div>	
-							<div class="col">
-		  						<label>발주 수량</label>
-		  						<div><input type="number" class="form-control d-inline-block" name= "mat_qty" required></div>
-		  					</div>
-		  				</div>
-		  				<div class="row mb-3">
-		  					<div class="col">
-		  						<label>발주 설명</label>
-		  						<div><input type="text" class="form-control d-inline-block" name= "mat_comm" required></div>
-		  					</div>
-		  				</div>
-		  				<div class="row mb-3">
-		  					<div class="col">
-		  						<label>발주 요청일</label>
-		  						<div><input type="date" class="form-control d-inline-block" name= "mat_reg_date" required></div>
-		  					</div>
-		  				</div>
-		  				<div class="row mb-3">
-		  					<div class="col">
-		  						<label>예상 입고일</label>
-		  						<div><input type="date" class="form-control d-inline-block" name= "mat_eta_date" required></div>
-		  					</div>
-		  				</div>
-		  				<div class="row mb-3">
-		  					<div class="col">
-		  						<label>실제 입고일</label>
-		  						<div><input type="date" class="form-control d-inline-block" name= "mat_ata_date" required></div>
-		  					</div>
-		  				</div>
-		  				<div class="modal-footer">
-		  					<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
-		  					<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
-		  					<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-		  				</div>
-		  			</div>
-		  		`;
+		if (mode === 'register') {
+			modalTit.textContent = '자재 발주 등록';
+			// 폼 생성
+		  	const form = document.createElement('form');
+		  	form.id = 'materialOrderForm';
+		  	// 안에 내용 틀 js 형식으로 가져오기 
+	  		form.innerHTML = `
+	  			<div class="modal-body big-box">
+	  				<div class="row mb-3">
+	  					<div class="col">
+	  						<label>자재ID</label>
+	  						<div><select id="matId" class="form-control d-inline-block" name= "mat_id" required>
+	  						<option value="">-- 자재를 선택하세요 --</option></select>   </div>
+	  					</div>	
+						<div class="col">
+	  						<label>발주 수량</label>
+	  						<div><input type="number" class="form-control d-inline-block" name= "mat_qty" required></div>
+	  					</div>
+	  				</div>
+	  				<div class="row mb-3">
+	  					<div class="col">
+	  						<label>발주 설명</label>
+	  						<div><input type="text" class="form-control d-inline-block" name= "mat_comm" required></div>
+	  					</div>
+	  				</div>
+	  				<div class="row mb-3">
+	  					<div class="col">
+	  						<label>발주 요청일</label>
+	  						<div><input type="date" class="form-control d-inline-block" name= "mat_reg_date" required></div>
+	  					</div>
+	  				</div>
+	  				<div class="row mb-3">
+	  					<div class="col">
+	  						<label>예상 입고일</label>
+	  						<div><input type="date" class="form-control d-inline-block" name= "mat_eta_date" required></div>
+	  					</div>
+	  				</div>
+	  				<div class="row mb-3">
+	  					<div class="col">
+	  						<label>실제 입고일</label>
+	  						<div><input type="date" class="form-control d-inline-block" name= "mat_ata_date" required></div>
+	  					</div>
+	  				</div>
+	  				<div class="modal-footer">
+	  					<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+	  					<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
+	  					<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
+	  				</div>
+	  			</div>
+	  		`;
 			  				
-				const matIdSelect = form.querySelector('#matId');
-		  		await fetchAndPopulateMaterial(matIdSelect);
-		  		modalBody.appendChild(form); // 최종 폼 삽입
-			  		
-		  		//실제 등록
-		  		if(registerBtn){
-		  			registerBtn.addEventListener('click', async function(event) {
-		  				event.preventDefault(); // type="submit"이므로 기본 제출 방지
-		  									
-		  				const formData = new FormData(form);
-		  				const payload = {
-		  					mat_id : formData.get('mat_id'),
-		  					emp_id : formData.get('emp_id'),
-		  					mat_qty : formData.get('mat_qty'),
-		  					mat_reg_date : formData.get('mat_reg_date'),
-		  					mat_eta_date : formData.get('mat_eta_date'),
-		  					mat_ata_date : formData.get('mat_ata_date'),
-		  					mat_lmd_date : formData.get('mat_lmd_date'),
-		  					mat_comm : formData.get('mat_comm')
-		  				};
+			const matIdSelect = form.querySelector('#matId');
+	  		await fetchAndPopulateMaterial(matIdSelect);
+	  		modalBody.appendChild(form); // 최종 폼 삽입
+		  		
+	  		//실제 등록
+	if(registerBtn){
+	  			registerBtn.addEventListener('click', async function(event) {
+	  				event.preventDefault(); // type="submit"이므로 기본 제출 방지
+	  									
+	  				const formData = new FormData(form);
+	  				const payload = {
+	  					mat_id : formData.get('mat_id'),
+	  					emp_id : formData.get('emp_id'),
+	  					mat_qty : formData.get('mat_qty'),
+	  					mat_reg_date : formData.get('mat_reg_date'),
+	  					mat_eta_date : formData.get('mat_eta_date'),
+	  					mat_ata_date : formData.get('mat_ata_date'),
+	  					mat_lmd_date : formData.get('mat_lmd_date'),
+	  					mat_comm : formData.get('mat_comm')
+	  				};
 			  				
-		  				console.log('서버로 보낼 데이터 = ', payload);
+	  				console.log('서버로 보낼 데이터 = ', payload);
 			  				
-			  				try {
-			  					const response = await fetch(`/SOLEX/material_orders/registration`, {
-			  						method : 'POST',
-			  						headers: {
-			  							'Content-Type': 'application/json'
-			  						},
-			  						body:JSON.stringify(payload)
-			  					});
-			  					
-			  					if(response.ok){
-			  						alert('발주 등록 성공');
-			  						window.location.reload();
-			  					} else {
-			  						alert('발주 등록 실패');
-			  					}
-			  				} catch(error) {
-			  					console.log('전송중 오류발생 = ', error);
-			  					alert('서버 전송 실패');
-			  				}
-			  			});		
-					}
+	  				try {
+	  					const response = await fetch(`/SOLEX/material_orders/registration`, {
+	  						method : 'POST',
+	  						headers: {
+	  							'Content-Type': 'application/json'
+	  						},
+	  						body:JSON.stringify(payload)
+	  					});
+	  					
+	  					if(response.ok){
+	  						alert('발주 등록 성공');
+	  						window.location.reload();
+	  					} else {
+	  						alert('발주 등록 실패');
+	  					}
+	  				} catch(error) {
+	  					console.log('전송중 오류발생 = ', error);
+	  					alert('서버 전송 실패');
+	  				}
+	  			});		
+			}
 			} else if (mode === 'approval') { //자재가 저장 될 수 있는 창고 목록 보여주기 
 			    modalTit.textContent = '발주 승인';
 
@@ -321,25 +350,29 @@ document.addEventListener('DOMContentLoaded', function(){
 				        method : 'POST',
 				        headers: {'Content-Type':'application/json'},
 				        body   : JSON.stringify({
-							 mat_ord_id: rowdata.matordid,
-							 mat_id: matidvalue,
-							 are_id: areidvalue,
-							 whs_his_cnt: whshiscntval,
-							 whs_id: whsidvalue
+							 mat_ord_id: rowData.matOrdId,
+							 mat_id: matIdValue,
+							 are_id: areIdValue,
+							 whs_his_cnt: whsHisCntVal,
+							 whs_id: whsIdValue
 						  })
 				      });
 				  
-			      if (res.ok) {
-			        alert('승인 완료');
-			        modal.hide();
-			        loadMatList(0);             // 그리드만 새로고침
-			      } else{
-					console.log('error = ' , await res.text());
-					alert('승인 실패');
-				  } 
-			    };
-			  }
-			
+				      if (res.ok) {
+				        alert('승인 완료');
+				        modal.hide();
+	//			        loadMatList(0);             // 그리드만 새로고침
+						//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
+						grid.setValue(rowKey, 'mat_ok', '승인');
+						
+						grid.refreshCell(rowKey, 'mat_ok');
+						
+				      } else{
+						console.log('error = ' , await res.text());
+						alert('승인 실패');
+					  } 
+				    };
+				  }
 			  modal.show();
 										
 									

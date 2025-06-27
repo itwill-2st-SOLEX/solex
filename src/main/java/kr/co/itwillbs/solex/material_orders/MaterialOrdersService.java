@@ -53,14 +53,23 @@ public class MaterialOrdersService {
 	// 승인버튼 누르면 insert
 	@Transactional
 	public void materialApprove(Map<String, Object> map) {
+
 	    int warehistory = materialOrdersMapper.matAppWareHis(map);
 	    int areaDetail = materialOrdersMapper.matAppAreaDetail(map);
 	    int area = materialOrdersMapper.matAppArea(map);
 	    int stockLeger = materialOrdersMapper.matAppStockLeger(map);
+	    materialOrdersMapper.updateApproval(map);
 
 	    if (warehistory != 1 || areaDetail != 1 || area != 1 || stockLeger != 1) {
 	        throw new IllegalStateException("승인 처리 실패: warehistory=" + warehistory + ", areaDetail=" + areaDetail + ", area=" + area  + ", stockLeger=" + stockLeger );
 	    }
+	}
+	
+	// 반려버튼 누르면 insert
+	public void updateDeny(Map<String, Object> map) {
+
+	    materialOrdersMapper.updateDeny(map);
+	    
 	}
 
 

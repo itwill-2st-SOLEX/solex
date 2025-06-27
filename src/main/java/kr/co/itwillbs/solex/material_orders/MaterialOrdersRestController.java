@@ -74,6 +74,13 @@ public class MaterialOrdersRestController {
 	    return ResponseEntity.ok().build();
 	}
 	
+	// 반려 버튼 누르면
+	@PostMapping("/materialDeny")
+	public ResponseEntity<Void> materialDeny(@RequestBody Map<String, Object> map) {
+		materialOrdersService.updateDeny(map);
+	    return ResponseEntity.ok().build();
+	}
+	
 
 	
 }
