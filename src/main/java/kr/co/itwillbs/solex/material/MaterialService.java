@@ -20,7 +20,6 @@ public class MaterialService {
 		return materialMapper.getMeterialNameList();
 	}
 
-	
 	//자재 목록
 	public List<Map<String, Object>> getMaterial() {
 		
@@ -33,6 +32,7 @@ public class MaterialService {
 		List<Map<String, Object>> list = materialMapper.getMaterialList(offset, size);
 		return list;
 	}
+	
 	// 자재 단위 가져오기 (자재등록에서 select)
 	public List<Map<String, Object>> getMatUnits() {
 		 return materialMapper.getMatUnits();

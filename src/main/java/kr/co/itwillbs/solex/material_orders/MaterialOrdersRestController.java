@@ -40,11 +40,25 @@ public class MaterialOrdersRestController {
 	}
 	
 	//select box 창고목록 가져오는 코드
-	@GetMapping("/getWarehouseAndArea")
-	public List<Map<String, Object>> getWarehouseAndArea() {
-		return materialOrdersService.getWarehouseAndArea();
+	@GetMapping("/getWarehouse")
+	public List<Map<String, Object>> getWarehouse(@RequestParam("matId") String matId) {
+		System.out.println(matId);
+		
+		int num = Integer.parseInt(matId);
+		
+
+		return materialOrdersService.getWarehouse(num);
 	}
 	
+	//select box 구역목록 가져오는 코드
+	@GetMapping("/getArea")
+	public List<Map<String, Object>> getArea(@RequestParam("whsId") String whsId, @RequestParam("matId") String matId) {
+		System.out.println(whsId);
+		
+		int num1 = Integer.parseInt(whsId);
+		int num2 = Integer.parseInt(matId);
+		return materialOrdersService.getArea(num1, num2);
+	}
 	
 	//무한스크롤 자재 발주 목록
 	@GetMapping("/materialList")
@@ -52,6 +66,14 @@ public class MaterialOrdersRestController {
 		int offset = page * size;
         return materialOrdersService.getMaterialOrderList(offset, size);
     }
+	
+	// 승인 버튼 누르면
+	@PostMapping("/materialApprove")
+	public ResponseEntity<Void> materialApprove(@RequestBody Map<String, Object> map) {
+		materialOrdersService.materialApprove(map);
+	    return ResponseEntity.ok().build();
+	}
+	
 
 	
 }
