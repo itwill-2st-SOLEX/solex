@@ -17,6 +17,6 @@ public interface AreaMapper {
 
 	void insertDetail(Map<String, Object> detail);
 
-	Map<String, Object> getStockDetail(@Param("itemId") int itemId, @Param("type") int type);
+	List<Map<String, Object>> getStockDetail(@Param("itemId") int itemId, @Param("type") String type);
 
 }

@@ -28,8 +28,8 @@ public class StockService {
 		return areaMapper.selectStockList(offset, size);
 	}
 
-	public Map<String, Object> getStockDetail(String itemId, String type, Long loginEmpId) {
-        return areaMapper.getStockDetail(Integer.parseInt(itemId), Integer.parseInt(type));
+	public List<Map<String, Object>> getStockDetail(String itemId, String type, Long loginEmpId) {
+        return areaMapper.getStockDetail(Integer.parseInt(itemId), type);
 	}
 
 }
