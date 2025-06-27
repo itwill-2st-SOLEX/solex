@@ -107,25 +107,34 @@ public class ManagerService {
 				//>> 현재 공정 정보와 다음에 수행해야할 공정의 정보 찾아오기
 				Map stepInfo = managerMapper.selectStepInfo(wpoId);
 				
-				System.out.println(stepInfo);
+				//다음 공정 정보 업데이트할 정보 전달
+				int jcount = ((Number) stepInfo.get("WPO_JCOUNT")).intValue();
+				int bcount = ((Number) stepInfo.get("BCOUNT")).intValue();
+				
+				stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
 
+				
 				//다음 공정이 존재하면
-				if (stepInfo.get("NEXT_WPO_ID") != null  ) {
-					//다음 공정 정보 업데이트할 정보 전달
-					int jcount = ((Number) stepInfo.get("WPO_JCOUNT")).intValue();
-					int bcount = ((Number) stepInfo.get("BCOUNT")).intValue();
+				if (stepInfo.get("NEXT_WPO_ID") != null ) {
+
 					int nextWpoId = ((Number) stepInfo.get("NEXT_WPO_ID")).intValue();
 					
 					stepInfo.put("wpoNewStatus", "wpo_sts_01");		//상태값 공정대기
 					stepInfo.put("wpoStartDate", LocalDateTime.now());	//공정시작일
 					stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
-					stepInfo.put("wpoId", nextWpoId);	//다음 공정id				
-				
+					stepInfo.put("wpoId", nextWpoId);	//다음 공정id	
+
 					managerMapper.updateNextStep(stepInfo);
 					
 				} else {
+					
 					//마지막 공정이면
 					//수주 디테일에 생산수량 업데이트
+					stepInfo.put("wpoId", stepInfo.get("WPO_ID"));
+					stepInfo.put("oddModDate", LocalDateTime.now());	//변경일
+					
+					managerMapper.updateSujuDetail(stepInfo);
+					System.out.println("끝!");
 				}
 		
 		}

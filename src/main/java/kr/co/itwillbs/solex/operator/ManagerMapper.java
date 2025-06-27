@@ -62,6 +62,17 @@ public interface ManagerMapper {
 		//>> 다음 공정 정보 찾아오기
 	Map<String, Object> selectStepInfo(Long wpoId);
 	
-	int updateNextStep(Map<String, String> map);
+		//>> 다음 공정 데이터 업데이트하기
+	int updateNextStep(Map map);
 	
+		//>> 마지막 공정에서 수주 디테일 테이블 업데이트
+	int updateSujuDetail(Map map);
+	
+	// 작업별 사원 생산량 리스트
+	List<Map<String, Object>> selectWorkerList(Map map);
+
+	// 작업별 사원 생산량 요약
+	List<Map<String, Object>> selectWorkerSum(Map map);
+	
+
 }

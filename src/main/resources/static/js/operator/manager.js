@@ -118,6 +118,15 @@ grid.on('editingFinish', ev => {
   }
 });
 
+// 그리드에서 목록 중 하나를 클릭하면 실제 작업 내역 보여주기
+/*grid.on('click', async (ev) => {
+	const row = grid.getRow(ev.rowKey);
+	  if (!row) return;
+
+	  // wpoId 하나만 넘기면 내부에서 목록을 불러와 그리드를 만든다
+	  await showWorkerDetailModal(row.wpoId, row);
+});
+*/
 
 // 버튼 클릭 이벤트 위임
 document.getElementById('grid').addEventListener('click', async (e) => {
@@ -261,6 +270,63 @@ function dateFormatter(date, includeTime = false) {
 	return result;
 }
 
+// 모달 표시 함수
+async function showWorkerDetailModal(wpoId, headerRow) {
+	try {
+	    // ① 데이터 가져오기
+	    const url = `/SOLEX/operator/api/workerReport?page=0&size=${pageSize}&wpoId=${wpoId}`;
+	    const res = await fetch(url);
+	    if (!res.ok) throw new Error('실적 목록 조회 실패');
+	    const { list = [] } = await res.json();
+
+	    // ② 모달 기본 골격 삽입
+	    const modalContainer = document.getElementById('showModal');
+	    const modalFooter    = document.getElementById('modalFooter');
+	    modalContainer.innerHTML = `
+	        <h5 class="mb-3">지시번호 ${headerRow.wrkId} : ${headerRow.prdNm}</h5>
+	        <div id="workerGrid" style="width:100%;"></div>
+	    `;
+	    modalFooter.innerHTML = `<button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>`;
+
+	    // ③ 토스트 그리드 생성
+	    new tui.Grid({
+	      el: document.getElementById('workerGrid'),
+	      bodyHeight: 300,
+	      rowHeaders: ['rowNum'],
+	      scrollY: true,
+	      scrollX: false,
+	      data: list.map(n => ({
+	        wreId   : n.WRE_ID,
+	        wreJcount: n.WRE_JCOUNT,
+	        wreDate : dateFormatter(n.WRE_DATE, true),
+	        wreMemo : n.WRE_MEMO || ''
+	      })),
+	      columns: [
+	        { header: '실적ID',  name: 'wreId',   align: 'center', width: 70 },
+	        { header: '수량',    name: 'wreJcount', align: 'center' },
+	        { header: '작업일',  name: 'wreDate', align: 'center' },
+	        { header: '비고',    name: 'wreMemo', align: 'center', width: 250 }
+	      ],
+	      summary: {
+	        position: 'bottom',
+	        columnContent: {
+	          wreJcount: {
+	            template: v => `<div style="text-align:center;">총 작업수량: ${v.sum}</div>`
+	          }
+	        }
+	      }
+	    });
+
+	    // ④ 모달 열기
+	    new bootstrap.Modal(document.getElementById('exampleModal')).show();
+	  } catch (e) {
+	    console.error(e);
+	    alert('실적 모달을 여는 데 실패했습니다.');
+	  }
+	
+	
+}
+
 
 //공정 요약 정보
 async function managerSummary() {
@@ -298,7 +364,7 @@ async function managerList(page) {
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 
 		const list = data.list;
-		const managerCount = data.managerCount;	//전체 개수(무한스크롤)
+		//const managerCount = data.managerCount;	//전체 개수(무한스크롤)
 		const hasInProgress = list.some(n => n.WPO_STATUS === 'wpo_sts_02');
 		
 				
@@ -306,13 +372,13 @@ async function managerList(page) {
 			let btn = '';
 			let bcount = n.QHI_BCOUNT || 0;
 			
-			console.log(n.QHI_BCOUNT)
+			
 			
 			// 불량 개수 제외하고 진행률 계산
 		    const wpoProRate = n.ODD_CNT > 0
 		        ? Math.round(((n.WPO_JCOUNT - bcount) / n.ODD_CNT) * 1000) / 10  // 소수점 1자리
 		        : 0;
-			
+							
 		    const wpoStatus = n.WPO_STATUS;
 			
 		    if (wpoStatus === 'wpo_sts_01' && !hasInProgress) {

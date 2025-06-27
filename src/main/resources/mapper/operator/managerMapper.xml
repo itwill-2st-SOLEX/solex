@@ -65,11 +65,11 @@
 		             AND p.det_id = my_emp.emp_dep_cd
 		WHERE wp.wpo_status != 'wpo_sts_00' <!-- 작업대기상태 -->
 		ORDER BY
+		    wo.wrk_id,
 		    CASE 
 		        WHEN wp.wpo_status = 'wpo_sts_09' THEN 99
-		        ELSE TO_NUMBER(SUBSTR(wp.wpo_status, -2))
-		    END,
-		    wo.wrk_id
+		        <!-- ELSE TO_NUMBER(SUBSTR(wp.wpo_status, -2)) -->
+		    END
   		<!-- OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY -->
 
   	</select>
@@ -203,7 +203,7 @@
 		    TO_NUMBER(wp1.wpo_step)           AS step,
 		    
 		    <!-- 다음 공정 번호 -->
-		    (SELECT MIN(TO_NUMBER(wp2.wpo_step))
+		    ( SELECT MIN(TO_NUMBER(wp2.wpo_step))
 		     FROM work_process wp2
 		     JOIN work_order   wo2 ON wp2.wrk_id = wo2.wrk_id
 		     WHERE wo2.odd_id = wo1.odd_id
@@ -213,9 +213,9 @@
 		    NVL(qh.qhi_bcount,0)             AS bcount,
 		    
 		    <!-- 다음 공정 ID(한 건만 필요하면 MIN/ROWNUM)  -->
-		    (SELECT MIN(wp2.wpo_id)          
+		     (SELECT MIN(wp2.wpo_id)          
 		     FROM work_process wp2
-		     JOIN work_order   wo2 ON wp2.wrk_id = wo2.wrk_id
+		     	JOIN work_order   wo2 ON wp2.wrk_id = wo2.wrk_id
 		     WHERE wo2.odd_id = wo1.odd_id
 		       AND TO_NUMBER(wp2.wpo_step) = TO_NUMBER(wp1.wpo_step) + 1) AS next_wpo_id
 		
@@ -232,6 +232,36 @@
   		WHERE wpo_id=#{wpoId}
   	</update>
   	
+  	<!-- 수주 테이블에 실제로 작업이 완료된 값을 업데이트하기 -->
+  	<update id="updateSujuDetail">
+		UPDATE suju_order_detail sod
+		SET sod.odd_actual_cnt = #{wpoOcount}, sod.odd_sts = 'odd_sts_04', sod.odd_mod_date=#{oddModDate}
+		WHERE sod.odd_id IN (
+		         SELECT wo.odd_id
+		         FROM work_order wo
+		         	JOIN work_process wp ON wp.wrk_id = wo.wrk_id
+		         WHERE wp.wpo_id = #{wpoId}
+		)
+  	</update>
+  	
+  	<!-- 그리드에서 현황 클릭했을 때 사원 작업 현황 표시하기 -->
+  	  	
+  	<!-- 사원별 생산량 합계 -->
+  	<select id="selectWorkerList">
+  		SELECT wr.emp_id, ve.emp_num, ve.emp_nm, wr.wre_jcount, wr.wre_date, wre_memo
+        FROM work_report wr JOIN view_employee ve ON wr.emp_id=ve.emp_id
+        WHERE wr.emp_id=#{empId} AND wr.wpo_id = #{wpo_id}
+        GROUP BY wr.wre_date desc
+  	</select>
+  	
+  	<!-- 사원별 생산량 합계 -->
+  	<select id="selectWorkerSum">
+  		SELECT wr.emp_id, ve.emp_num, ve.emp_nm, sum(wr.wre_jcount) as emp_sum
+        FROM work_report wr JOIN view_employee ve ON wr.emp_id=ve.emp_id
+        WHERE wr.emp_id=#{empId} AND wr.wpo_id = #{wpo_id}
+        GROUP BY wr.emp_id, ve.emp_num, ve.emp_nm
+  	</select>
+
 	
   </mapper>
 	
