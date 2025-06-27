@@ -5,19 +5,37 @@
 <mapper namespace="kr.co.itwillbs.solex.area.AreaMapper">
   
 	<!-- 단건 INSERT -->
-    <insert id="insertArea" parameterType="map">
+    <insert id="insertArea" 
+			parameterType="map"
+			useGeneratedKeys="true"
+			keyProperty="are_id"
+			keyColumn="are_id">
         INSERT INTO area (
             whs_id,
             are_nm,
             are_type,
             item_id,
-            are_max
+            are_max,
+            are_qty
         ) VALUES (
             #{whs_id},
             #{area_nm},
             #{area_tp},
             #{item_id},
-            #{max_cnt}
+            #{max_cnt},
+            #{qty}
+        )
+    </insert>
+    
+    <insert id="insertDetail" parameterType="map">
+        INSERT INTO area_detail (
+            are_id,
+            item_id,
+            are_det_qty
+        ) VALUES (
+            #{areaId},
+            #{itemId},
+            #{qty}
         )
     </insert>
     
@@ -30,5 +48,48 @@
 		ON wh.whs_his_sts = s.det_id
 		WHERE wh.are_id = #{areaId}
 	</select>
-
+	
+	<select id="selectStockList" resultType="map">
+		SELECT  s.det_nm AS nm, 
+				s.det_id AS code,
+				SUM(ar.are_qty) AS qty, 
+				ar.item_id AS item_id,
+				COALESCE(m.mat_nm , p.prd_nm) AS item_nm, 
+				u.det_nm AS item_unit
+	    FROM area ar
+	    LEFT JOIN code_detail s
+	           ON ar.are_type = s.det_id
+	    LEFT JOIN material m
+	           ON ar.are_type = 'area_type_01'
+	          AND ar.item_id  = m.mat_id
+	    LEFT JOIN product  p
+	           ON ar.are_type = 'area_type_02'
+	          AND ar.item_id  = p.prd_id
+        LEFT   JOIN code_detail  u
+        		ON u.det_id = COALESCE(m.mat_unit, p.prd_unit)
+        GROUP  BY
+	        s.det_nm,
+	        s.det_id,
+	        ar.item_id,
+	        COALESCE(m.mat_nm , p.prd_nm),
+	        u.det_nm
+	</select>
+	
+	<select id="getStockDetail" resultType="map">
+		SELECT  ar.are_id, 
+				ad.item_id, 
+				ad.are_det_qty, 
+				COALESCE(m.mat_nm, p.prd_nm) AS item_nm
+		FROM area ar
+		JOIN area_detail ad
+			ON ad.are_id = ar.are_id             
+		LEFT JOIN material m                       
+			ON ar.are_type = 'area_type_01'          
+	    	AND ad.item_id = m.mat_id
+		LEFT JOIN product p                        
+	    	ON ar.are_type = 'area_type_02'         
+	    	AND ad.item_id  = p.prd_id
+		WHERE ar.item_id = 50                           
+	    	AND ar.are_type = #{type}
+	</select>
 </mapper>
