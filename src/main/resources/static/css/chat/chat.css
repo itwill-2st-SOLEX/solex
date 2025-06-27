@@ -109,7 +109,6 @@ h3 {
   font-weight: 600;
   font-size: 15px;
   color: #374151;
-  border-bottom: 1px solid #d1d5db;
   cursor: pointer;
   transition: background-color 0.18s ease, color 0.18s ease;
   user-select: none;
@@ -294,7 +293,7 @@ h3 {
   position: relative;
 }
 
-.badge {
+.badge, .chat-badge {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -308,7 +307,7 @@ h3 {
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  box-shadow: 0 0 0 2px white;
+/*  box-shadow: 0 0 0 2px white;*/
 }
 
 .hidden {
@@ -355,7 +354,12 @@ h3 {
 .message-wrapper.received .read-status {
   align-self: flex-start;
 }
-
 .read-status.unread {
   color: red;
+}
+.empty-chat-msg {
+	text-align: center;
+	padding: 20px;
+	color: #6b7280;
+	font-size: 0.9rem;
 }
