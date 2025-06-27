@@ -53,7 +53,6 @@ function loadFilteredLotTree() {
 					lotStatus: status,
 					prdType: type
 				};
-
 				$.ajax({
 					url: '/SOLEX/lot/list',
 					data: baseParams,

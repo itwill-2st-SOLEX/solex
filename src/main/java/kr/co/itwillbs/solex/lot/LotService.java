@@ -29,30 +29,16 @@ public class LotService {
 	    if (lotStatus != null && lotStatus.trim().isEmpty()) lotStatus = null;
 	    if (prdType != null && prdType.trim().isEmpty()) prdType = null;
 	    
-	    System.out.println("id : " + id + ", lotCode : " + lotCode + ", lotStatus : " + lotStatus + ", prdType : " + prdType);
-	    
         if (id == null) {
         	// 최상위 LOT 목록 조회
         	List<Map<String, Object>> rawList = lotMapper.getFilteredProductLots(lotCode, lotStatus, prdType);
-        	
-        	System.out.println("rawList : " + rawList);
         	
             List<Map<String, Object>> converted = new ArrayList<>();
             for (Map<String, Object> row : rawList) {
                 Map<String, Object> newRow = new HashMap<>();
                 newRow.put("id", row.get("ID"));
                 newRow.put("text", row.get("TEXT"));
-                
-                // children을 boolean으로 변환
-                Object childrenVal = row.get("CHILDREN");
-                boolean hasChildren = false;
-                if (childrenVal instanceof Number) {
-                    hasChildren = ((Number) childrenVal).intValue() > 0;
-                } else if (childrenVal instanceof String) {
-                    hasChildren = "1".equals(childrenVal);
-                }
-                newRow.put("children", hasChildren);
-                
+                newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
                 converted.add(newRow);
             }
             

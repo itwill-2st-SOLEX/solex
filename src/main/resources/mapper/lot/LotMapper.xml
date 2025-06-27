@@ -4,13 +4,14 @@
 
 <mapper namespace="kr.co.itwillbs.solex.lot.LotMapper">
 
-	<!-- 제품유형 리스트 조회 -->
+	<!-- 제품유형 / LOT상태 리스트 조회 -->
 	<select id="selectDetailCodeListByCodId" resultType="map">
 		SELECT
 		DET_ID,
 		DET_NM
 		FROM CODE_DETAIL
 		WHERE COD_ID = #{codId}
+		AND	  DET_YN = 'y'
 		ORDER BY DET_SORT
 	</select>
 
@@ -82,12 +83,12 @@
 	
 	        -- 설비 LOT
 	        SELECT
-	            'eq_' || e.equ_id AS id,
-  				eq.equ_nm || ' / ' || eq.equ_code AS text,
+	            'eq_' || e.eqp_id AS id,
+  				e.eqp_name || ' / ' || e.eqp_code AS text,
 	            0 AS CHILDREN
 	        FROM equipment e
-	        JOIN processLot_equipment_mapping map ON e.EQP_ID = map.EQU_ID
-	        WHERE map.PRC_LOT_ID = #{prcLotId}
+	        JOIN processLot_equipment_mapping eq ON e.EQP_ID = eq.EQP_ID
+	        WHERE eq.PRC_LOT_ID = #{prcLotId}
 	    )
 	</select>
 
