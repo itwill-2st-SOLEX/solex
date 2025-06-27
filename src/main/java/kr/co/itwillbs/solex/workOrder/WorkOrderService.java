@@ -58,5 +58,7 @@ public class WorkOrderService {
 		mapper.areaUpdate(prdInfo);
 		// 4. 구역 디테일 update
 		mapper.areaDetailUpdate(prdInfo);
+		// 5. 수주 detail update
+		mapper.sujuDetailUpdate(prdInfo);
 	}
 }

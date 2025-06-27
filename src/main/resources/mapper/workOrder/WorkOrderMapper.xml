@@ -22,9 +22,7 @@
 			 '작업 대기',
 			 '작업중',
 			 '작업 완료',
-			 '출고 대기(공장 > 창고)',
-			 '창고 대기',
-			 '출고 대기(창고 > 거래처)'
+			 '출고 대기(공장 > 창고)'
 		 )
 		 ORDER BY odd_id DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
@@ -137,7 +135,7 @@
 		)
 	</insert>
 <!-- 	재고 테이블 업데이트-->
-	<insert id="stock_ledger">
+	<insert id="stockUpdate">
 		INSERT INTO stock_ledger (item_id,
 								  warehouse_id,
 								  are_id,
@@ -161,7 +159,14 @@
 <!-- 	구역 디테일 update -->
 	<update id="areaDetailUpdate">
 			UPDATE area_detail
-			   SET item_id = item_id + #{assignQty}
+			   SET are_det_qty = are_det_qty + #{assignQty}
 			 WHERE item_id = #{optId}
-		</update>
+			   AND are_id = #{areaId}
+	</update>
+<!-- 	 5. 수주 detail update -->
+	<update id="sujuDetailUpdate">
+			UPDATE suju_order_detail
+			   SET odd_sts = 'odd_sts_06'
+			 WHERE odd_id = #{oddId}
+	</update>
 </mapper>

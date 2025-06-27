@@ -49,7 +49,7 @@ public class WorkOrderRestController {
 	@PostMapping("/warehouses")
 	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo) {
 		System.out.println("prdInfo : " + prdInfo);
-		//		service.warehousesInsert(prdInfo);
+		service.warehousesInsert(prdInfo);
 	}
 	
 	

@@ -29,4 +29,6 @@ public interface WorkOrderMapper {
 	void areaUpdate(Map<String, Object> prdInfo);
 	// 4. 구역 디테일 update
 	void areaDetailUpdate(Map<String, Object> prdInfo);
+	//  5. 수주 detail update
+	void sujuDetailUpdate(Map<String, Object> prdInfo);
 }

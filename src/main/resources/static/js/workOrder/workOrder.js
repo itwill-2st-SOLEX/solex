@@ -402,6 +402,7 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 		method: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({
+			oddId: oddId,
 			areaId: areaId, // 구역 id
 			optId: optId, // 옵션 id
 			warehouseId: warehouseId, // 창고 id
