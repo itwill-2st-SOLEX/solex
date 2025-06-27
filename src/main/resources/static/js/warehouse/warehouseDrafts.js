@@ -8,7 +8,7 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '창고 번호', name: 'whs_id' },
+			{ header: '창고 번호', name: 'whs_id', align: 'center' },
 			{ header: '창고 이름', name: 'whs_nm', sortable: 'true' },
 			{ header: '위치', name: 'whs_full_adr', sortable: 'true' },
 			{ header: '구역 개수', name: 'are_cnt' },
