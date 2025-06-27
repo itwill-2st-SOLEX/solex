@@ -48,11 +48,7 @@ public class MaterialRestController {
 	//자재등록 - post 
 	@PostMapping("/registration")
 	public String registrationPost(@RequestBody Map<String, Object> matMap) throws Exception {
-		try {
 			materialService.registerMat(matMap); // 인스턴스를 통한 호출
-		} catch(Exception e) {
-		    e.printStackTrace();
-		}
 	    return "redirect:/material";
 	}
 	

@@ -147,21 +147,22 @@ document.addEventListener('DOMContentLoaded', function(){
 	// 자재 목록 조회 
 	async function loadDrafts(page) { //page번호를 인자로 받아 자재목록을 불러옴 (30개당 한페이지)
 
-			const response = await fetch(`/SOLEX/material/materialList?page=${page}&size=${pageSize}`); // 백엔드api에 fetch요청 30명씩 끊어서 ... 
-      		const rawData = await response.json(); // 받은 데이터를 필요한 형태로 가공
-      		const data = rawData.map(row => ({ // 이게 서버에서 받아온 사원정보 리스트(배열) 이런식으로 들어있음 //
-			// .map()함수는 배열의 요소를 다른형태로 바꿔서 새 배열을 만든다는데 뭔말;
-			// row는 객체를 하나씩 꺼내서 사용할 필드만 골라 새 객체를 만들어 넣음 (=그리드에 넣을 데이터를 원하는 형태로 변환)
-	        matId: row.matId,
-			cliId: row.cliId, 
-	        matCd: row.matCd,
-	        matNm: row.matNm,
-	        matUnit: row.matUnit,
-			mat_price: row.matPrice,
-			mat_comm: row.matComm,
-			matRegDate: row.matRegDate,
-			mat_is_active: row.matIsActive
-      	}));
+		const response = await fetch(`/SOLEX/material/materialList?page=${page}&size=${pageSize}`); // 백엔드api에 fetch요청 30명씩 끊어서 ... 
+		const rawData = await response.json(); // 받은 데이터를 필요한 형태로 가공
+		const data = rawData.map(row => ({ // 이게 서버에서 받아온 사원정보 리스트(배열) 이런식으로 들어있음 //
+		// .map()함수는 배열의 요소를 다른형태로 바꿔서 새 배열을 만든다는데 뭔말;
+		// row는 객체를 하나씩 꺼내서 사용할 필드만 골라 새 객체를 만들어 넣음 (=그리드에 넣을 데이터를 원하는 형태로 변환)
+	    matId: row.matId,
+		cliId: row.cliId, 
+	    matCd: row.matCd,
+	    matNm: row.matNm,
+	    matUnit: row.matUnit,
+		mat_price: row.matPrice,
+		mat_comm: row.matComm,
+		matRegDate: row.matRegDate,
+		mat_is_active: row.matIsActive
+		
+  	}));
 
 		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
 		page === 0 ? grid.resetData(data) : grid.appendRows(data);
