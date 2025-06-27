@@ -5,7 +5,7 @@ $(function() {
 	initEnterKeySend();
 	checkboxEvent();
 	fetchUsersAndRender();
-
+	unreadCnt();
 	// 채팅방 나가기
 	document.getElementById('singleTrash').addEventListener('click', leaveChatRoom);
 });
@@ -20,11 +20,16 @@ function initTabEvents() {
 	const tabUsers = document.getElementById('tab-users');
 	const tabChats = document.getElementById('tab-chats');
 
-	tabUsers.addEventListener('click', () => toggleTab('users'));
+	tabUsers.addEventListener('click', () => {
+		toggleTab('users')
+		unreadCnt();
+	});
+
 	tabChats.addEventListener('click', () => {
 		toggleTab('chats');
 		fetchChatList();
 		hideChatBadge();
+		unreadCnt();
 	});
 }
 
@@ -117,21 +122,40 @@ function fetchChatList() {
 			const chatList = document.getElementById('chat-list');
 			chatList.innerHTML = '';
 
+			// 대화 목록이 없는 경우
+			if (chats.length === 0) {
+				const emptyMsg = document.createElement('li');
+				emptyMsg.textContent = '대화 목록이 없습니다.';
+				emptyMsg.classList.add('empty-chat-msg');
+				chatList.appendChild(emptyMsg);
+				return;
+			}
+
 			chats.forEach(chat => {
 				const isMeSender = String(chat.SENDER_ID) === String(empId);
 				const partnerName = isMeSender ? chat.RECEIVER_NM : chat.SENDER_NM;
 				const partnerId = isMeSender ? chat.RECEIVER_ID : chat.SENDER_ID;
+				const unreadCount = chat.UNREAD_COUNT || 0;
 
 				const li = document.createElement('li');
+				li.style.position = 'relative';
+
 				li.innerHTML = `
-					<label style="display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #d1d5db; cursor: pointer;">
+					<label style="display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #d1d5db; cursor: pointer; width: 100%;">
 						<input type="checkbox" class="chat-check"  data-partner-id="${partnerId}" onclick="event.stopPropagation()"/>
-						<div class="last">
+						<div class="last" style="flex: 1;">
 							<strong>${partnerName}</strong><br/>
 							<small>${chat.LAST_MESSAGE}</small>
 						</div>
+
+						${unreadCount > 0 ? `
+							<span class="chat-badge" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+								${unreadCount}
+							</span>
+						` : ''}
 					</label>
 				`;
+
 				li.addEventListener('click', () => openChatroom(partnerName, partnerId));
 				chatList.appendChild(li);
 			});
@@ -144,10 +168,12 @@ function fetchChatList() {
 	});
 }
 
+
 // 채팅방 열기 + 메시지 불러오기
 function openChatroom(name, targetId) {
 	partnerId = targetId;
-	currentRoomId = `room_${partnerId}`;
+
+	currentRoomId = `room_${empId}_${partnerId}`;
 
 	document.getElementById('chatHeader').textContent = name;
 	document.getElementById('view-users').classList.add('hidden');
@@ -155,7 +181,6 @@ function openChatroom(name, targetId) {
 	document.getElementById('view-chatroom').classList.remove('hidden');
 	document.getElementById('chatMessages').innerHTML = '';
 
-	// 메세지 불러오기
 	$.ajax({
 		url: `/SOLEX/chats/history/${partnerId}`,
 		method: 'GET',
@@ -175,7 +200,6 @@ function openChatroom(name, targetId) {
 		}
 	});
 
-	// 읽음 처리
 	$.ajax({
 		url: '/SOLEX/chats',
 		method: 'PATCH',
@@ -186,6 +210,7 @@ function openChatroom(name, targetId) {
 		}),
 		success: function() {
 			console.log('읽음 처리 완료');
+			unreadCnt();
 		},
 		error: function() {
 			console.error('읽음 처리 실패');
@@ -195,7 +220,7 @@ function openChatroom(name, targetId) {
 	connectWebSocket(currentRoomId);
 }
 
-// 웹소켓 연결 및 메시지 수신 처리
+// 웹소켓 연결
 function connectWebSocket(roomId) {
 	if (stompClient !== null) {
 		stompClient.disconnect();
@@ -207,7 +232,6 @@ function connectWebSocket(roomId) {
 	stompClient.connect({}, function() {
 		stompClient.subscribe(`/topic/chatroom/${roomId}`, function(msg) {
 			const message = JSON.parse(msg.body);
-
 			const isMine = String(message.sender) === String(empId);
 
 			renderMessage({
@@ -216,7 +240,7 @@ function connectWebSocket(roomId) {
 			}, isMine);
 
 			const isChatroomHidden = document.getElementById('view-chatroom').classList.contains('hidden');
-			const isOtherRoom = currentRoomId !== `room_${message.sender_id}`;
+			const isOtherRoom = currentRoomId !== `room_${message.sender}_${message.receiver}`
 
 			if (isChatroomHidden || isOtherRoom) {
 				showChatBadge();
@@ -225,7 +249,7 @@ function connectWebSocket(roomId) {
 	});
 }
 
-// 메시지 전송 함수
+// 메시지 전송
 function sendMessage() {
 	const input = document.getElementById('chatInput');
 	const content = input.value.trim();
@@ -259,11 +283,9 @@ function renderMessage(message, isMine, isRead) {
 	readStatusDiv.textContent = isRead ? '' : '안읽음';
 
 	if (isMine) {
-		// 내가 보낸 거: [안읽음] 말풍선
 		wrapper.appendChild(readStatusDiv);
 		wrapper.appendChild(msgDiv);
 	} else {
-		// 받은 거: 말풍선 [안읽음]
 		wrapper.appendChild(msgDiv);
 		wrapper.appendChild(readStatusDiv);
 	}
@@ -272,30 +294,26 @@ function renderMessage(message, isMine, isRead) {
 	chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-
-// 알림 뱃지 표시
+// 뱃지
 function showChatBadge() {
 	const badge = document.getElementById('chat-badge');
 	if (badge) badge.classList.remove('hidden');
 }
 
-// 알림 뱃지 숨기기
 function hideChatBadge() {
 	const badge = document.getElementById('chat-badge');
 	if (badge) badge.classList.add('hidden');
 }
 
-// 상단 체크박스와 하위 체크박스 동기화
+// 체크박스 동기화
 function checkboxEvent() {
 	const masterCheck = document.getElementById('masterCheck');
 
-	// 마스터 체크박스 클릭 시 → 전체 체크 or 해제
 	masterCheck.addEventListener('change', function() {
 		const allChecks = document.querySelectorAll('.chat-check');
 		allChecks.forEach(cb => cb.checked = masterCheck.checked);
 	});
 
-	// 각 하위 체크박스 변경 시 → 전부 체크되었는지 확인
 	document.addEventListener('change', function(e) {
 		if (e.target.classList.contains('chat-check')) {
 			const all = document.querySelectorAll('.chat-check');
@@ -317,7 +335,7 @@ function leaveChatRoom() {
 	let deleteCount = 0;
 
 	partnerIds.forEach(partnerId => {
-		const roomId = `${partnerId}`;
+		const roomId = `room_${empId}_${partnerId}`;
 
 		$.ajax({
 			url: `/SOLEX/chats/${roomId}`,
@@ -329,11 +347,9 @@ function leaveChatRoom() {
 			}),
 			success: function() {
 				deleteCount++;
-				// 모든 삭제 요청이 끝나면 목록 새로고침
 				if (deleteCount === partnerIds.length) {
 					alert('채팅방을 나갔습니다.');
 					fetchChatList();
-					// 체크박스 초기화
 					document.getElementById('masterCheck').checked = false;
 				}
 			},
@@ -343,3 +359,37 @@ function leaveChatRoom() {
 		});
 	});
 }
+// 안읽은 메세지 갯수
+function unreadCnt() {
+	$.ajax({
+		url: '/SOLEX/chats/unreadCount',
+		method: 'GET',
+		success: function(count) {
+			const badge = document.getElementById('chat-badge');
+			if (count > 0) {
+				badge.textContent = count;
+				badge.classList.remove('hidden');
+			} else {
+				badge.classList.add('hidden');
+			}
+			// 헤더 배지 업데이트
+			updateHeaderBadge(count);
+		},
+		error: function() {
+			console.error('안읽은 메시지 수 불러오기 실패');
+		}
+	});
+}
+
+// 페이지 헤더에 있는 안읽은 메세지
+//function updateHeaderBadge(count) {
+//	const badge = document.getElementById('header-chat-badge');
+//	if (!badge) return;
+//
+//	if (count > 0) {
+//		badge.textContent = count;
+//		badge.classList.remove('d-none');
+//	} else {
+//		badge.classList.add('d-none');
+//	}
+//}
