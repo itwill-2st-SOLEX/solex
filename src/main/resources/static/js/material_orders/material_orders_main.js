@@ -356,21 +356,21 @@ document.addEventListener('DOMContentLoaded', function(){
 							 whs_his_cnt: whsHisCntVal,
 							 whs_id: whsIdValue
 						  })
-				      });
+				     });
 				  
-				      if (res.ok) {
-				        alert('승인 완료');
-				        modal.hide();
-	//			        loadMatList(0);             // 그리드만 새로고침
-						//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
-						grid.setValue(rowKey, 'mat_ok', '승인');
-						
-						grid.refreshCell(rowKey, 'mat_ok');
-						
-				      } else{
-						console.log('error = ' , await res.text());
-						alert('승인 실패');
-					  } 
+			      if (res.ok) {
+			        alert('승인 완료');
+			        modal.hide();
+//			        loadMatList(0);             // 그리드만 새로고침
+					//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
+					grid.setValue(rowKey, 'mat_ok', '승인');
+					
+					grid.refreshCell(rowKey, 'mat_ok');
+					
+			      } else{
+					console.log('error = ' , await res.text());
+					alert('승인 실패');
+				  } 
 				    };
 				  }
 			  modal.show();
