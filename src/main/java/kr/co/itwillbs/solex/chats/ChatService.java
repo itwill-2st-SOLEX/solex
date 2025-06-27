@@ -32,32 +32,52 @@ public class ChatService {
 		mapper.saveMessage(message);
 	}
 
-	// 채팅방 읽음 
+	// 채팅방 읽음
 	public void chatRead(Map<String, Object> readInfo) {
+		String roomId = (String) readInfo.get("roomId");
+
+		// ✅ roomId 분해
+		String[] parts = roomId.split("_");
+		String id1 = parts[1];
+		String id2 = parts[2];
+		String roomId1 = "room_" + id1 + "_" + id2;
+		String roomId2 = "room_" + id2 + "_" + id1;
+
+		readInfo.put("roomId1", roomId1);
+		readInfo.put("roomId2", roomId2);
+
 		mapper.chatRead(readInfo);
 	}
+
 	// 채팅방 나가기
 	@Transactional
 	public void leaveChatRoom(String roomId, Map<String, Object> chatInfo) {
-		String empId = (String)chatInfo.get("empId");
-		String partnerId = (String)chatInfo.get("partnerId");
-		System.out.println("QWEQWEWQ" + roomId);
-		String room_id1 = "room_" +  roomId;
-		String room_id2 = "room_" +  empId;
-		System.out.println("!@!WEQWEWQ" + room_id1);
-		System.out.println("QWE!@#@!#QWEWQ" + room_id2);
-		
+		String empId = (String) chatInfo.get("empId");
+		String partnerId = (String) chatInfo.get("partnerId");
+
+		String room_id1 = "room_" + empId + "_" + partnerId;
+		String room_id2 = "room_" + partnerId + "_" + empId;
+
+		System.out.println("room_id1: " + room_id1);
+		System.out.println("room_id2: " + room_id2);
+
 		// 현재 상태 조회
 		int currentStatus = mapper.getChatRoomStatus(room_id1, room_id2);
-		System.out.println("currentStatus" + currentStatus);
+		System.out.println("currentStatus: " + currentStatus);
+
 		if (currentStatus == 0) {
-			// 1명 현재 유저 나감 처리
+			// 한 명 나감 처리
 			mapper.updateChatRoomStatus(1, empId, partnerId);
 		} else if (currentStatus == 1) {
+			// 두 명 모두 나간 경우 → 삭제
 			mapper.updateChatRoomStatus(2, empId, partnerId);
-			
-	        mapper.deleteChatRoom(room_id1, room_id2);
-		} 
+			mapper.deleteChatRoom(room_id1, room_id2);
+		}
 	}
 	
+	// 안읽은 메세지 갯수
+	public int getUnreadMessageCnt(String empId) {
+		return mapper.getUnreadMessageCnt(empId);
+	}
+
 }

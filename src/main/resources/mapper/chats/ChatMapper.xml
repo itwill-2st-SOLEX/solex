@@ -20,30 +20,36 @@
 	</select>
 <!-- 	대화 목록 조회 -->
 	<select id="getChatList" resultType="map">
-		SELECT send.emp_nm AS sender_nm
-		       , re.emp_nm AS receiver_nm
-	       	   , m.sender_id AS sender_id
-    		   , m.receiver_id AS receiver_id
-    		   , m.room_id
-		       , content AS last_message
- 		  FROM messenger m
-		  JOIN employee send
-		    ON m.sender_id = send.emp_num
-		  JOIN employee re
-		    ON m.receiver_id = re.emp_num
+		SELECT send.emp_nm AS sender_nm,
+	    	   re.emp_nm AS receiver_nm,
+	    	   m.sender_id AS sender_id,
+	    	   m.receiver_id AS receiver_id,
+	    	   m.room_id,
+	    	   m.content AS last_message,
+	    -- 안읽은 메시지 수
+	    	  (SELECT COUNT(*)
+		         FROM messenger m2
+		        WHERE m2.room_id = m.room_id
+		          AND m2.receiver_id = #{empNum}
+		          AND m2.is_read = 'N'
+		          AND (m2.leave_status IS NULL OR m2.leave_status != 2)
+	    	  ) AS unread_count
+		  FROM messenger m
+		  JOIN employee send ON m.sender_id = send.emp_num
+		  JOIN employee re ON m.receiver_id = re.emp_num
 		 WHERE m.MSG_ID IN (
-		        SELECT MAX(MSG_ID)
-		        FROM messenger
-		        WHERE (sender_id = #{empNum} OR receiver_id = #{empNum})
-		          AND (leave_id != #{empNum})
-		        GROUP BY 
-		            CASE 
-		                WHEN SENDER_ID = #{empNum} THEN RECEIVER_ID
-		                ELSE SENDER_ID
-		            END
-		       )
-		ORDER BY SENT_AT DESC
-	</select>
+		    SELECT MAX(MSG_ID)
+		    FROM messenger
+		    WHERE (sender_id = #{empNum} OR receiver_id = #{empNum})
+		      AND (leave_id != #{empNum} OR leave_id IS NULL)
+		    GROUP BY 
+		        CASE 
+		            WHEN SENDER_ID = #{empNum} THEN RECEIVER_ID
+		            ELSE SENDER_ID
+		        END
+		 )
+	     ORDER BY SENT_AT DESC
+		</select>
 <!-- 	채팅방 메세지 불러오기 -->
 	<select id="getChatHistory" resultType="map">
 		SELECT m.sender_id
@@ -60,6 +66,7 @@
             ON m.receiver_id = receiver.emp_num 
 		 WHERE (sender_id = #{empNum} AND receiver_id = #{partnerId})
 		    OR (sender_id = #{partnerId} AND receiver_id = #{empNum})
+		    AND NOT (m.leave_status = 1 AND m.leave_id = #{empNum})
 		 ORDER BY sent_at ASC
 	</select>
     
@@ -81,18 +88,17 @@
 <!-- 	채팅방 읽음처리 -->
 	<update id="chatRead">
 		UPDATE messenger
-		   SET is_read = 'Y'
-		 WHERE room_id = #{roomId}
-		   AND receiver_id = #{empId}
-		   AND is_read = 'N'
+	       SET is_read = 'Y'
+	     WHERE (room_id = #{roomId1} OR room_id = #{roomId2})
+	       AND receiver_id = #{empId}
+	       AND is_read = 'N'
 	</update>
 <!-- 	채팅방 조회 -->
 	<select id="getChatRoomStatus" resultType="int">
 		SELECT leave_status
-	      FROM messenger
-	     WHERE room_id = #{room_id1}
-	       OR room_id = #{room_id2}
-	     AND ROWNUM = 1
+	  	  FROM messenger
+		 WHERE (room_id = #{room_id1} OR room_id = #{room_id2})
+		   AND ROWNUM = 1
 	</select>
 <!-- 	채팅방 상태값 업데이트 -->
 	 <update id="updateChatRoomStatus">
@@ -104,9 +110,17 @@
     </update>
 <!--     채팅방 삭제 -->
     <delete id="deleteChatRoom">
-        DELETE 
-          FROM messenger
-         WHERE room_id = #{room_id1}
-            OR room_id = #{room_id2}
-    </delete>
+		DELETE FROM messenger
+		 WHERE room_id = #{room_id1}
+		    OR room_id = #{room_id2}
+	</delete>
+	
+<!--	안읽은 메세지 갯수-->
+	<select id="getUnreadMessageCnt" resultType="int">
+		SELECT COUNT(*)
+	      FROM messenger
+	     WHERE receiver_id = #{empId}
+	       AND is_read = 'N'
+	       AND leave_status != 2
+	</select>
 </mapper>	

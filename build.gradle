@@ -48,10 +48,6 @@ dependencies {
 	// ✅ LocalDateTime 직렬화용
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
     
-    // 스프링 시큐리티 의존성 (수업)
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
-//	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-//	testImplementation 'org.springframework.security:spring-security-test'
 	
 }
 
