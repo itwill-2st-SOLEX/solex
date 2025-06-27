@@ -31,17 +31,24 @@ public class OrderRequestsService {
 		 // 재고 조회
         List<String> stockStatus = orderRequestsMapper.checkStock(params);
         
+        
         // Stream API를 사용한 간결한 확인
         if (stockStatus.stream().anyMatch(status -> "부족".equals(status))) {
-            // 오류 발생 시, 문자열 대신 예외를 던집니다.
             throw new RuntimeException("재고가 부족하여 처리할 수 없습니다.");
         }
 
-        // 재고 차감    
-        Integer result = orderRequestsMapper.updateStock(params);
+
+         // ★★★ 핵심 수정사항 ★★★
+        // 1. 재고 차감 프로시저 호출
+        orderRequestsMapper.updateStock(params); // 리턴값을 받지 않음
+
+
+        // 2. 파라미터로 넘겨줬던 Map에서 'result_code' 키로 결과를 꺼내 확인
+        String resultCode = (String) params.get("result_code");
         // null 체크 추가
-        if (result == null || result <= 0) {
-            throw new RuntimeException("재고 차감에 실패했습니다.");
+        // 3. 프로시저가 'SUCCESS'를 반환하지 않았다면 실패로 간주하고 예외 발생
+        if (!"SUCCESS".equals(resultCode)) {
+            throw new RuntimeException("재고 차감 프로시저 실행에 실패했습니다.");
         }
         
         // 주문 상태 변경

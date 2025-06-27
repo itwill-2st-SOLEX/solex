@@ -15,15 +15,19 @@
 		cd3.det_nm as OPT_SIZE, -- 상품 사이즈
 		cd4.det_nm as OPT_HEIGHT, -- 상품 굽높이
 		CASE
-			WHEN (
-				SELECT COUNT(*)
-				FROM BOM b
-				LEFT JOIN STOCK s ON b.mat_id = s.item_id AND s.stk_cat = 'stk_cat_02'
-				WHERE b.opt_id = opt.opt_id
-				AND NVL(s.stk_cnt, 0) &lt; (b.bom_cnt * odd.odd_cnt)
-			) &gt; 0 THEN '생산 불가'
-			ELSE '생산 가능'
-		END AS PRODUCTION_STATUS,
+        WHEN (
+            SELECT COUNT(*)
+            FROM BOM b
+            WHERE b.opt_id = opt.opt_id
+            AND NVL((
+                SELECT SUM(ar.are_qty)
+                  FROM area ar
+                 WHERE ar.item_id = b.mat_id
+                   AND ar.are_type = 'area_type_01'
+            ), 0) &lt; (b.bom_cnt * odd.odd_cnt)
+        ) &gt; 0 THEN '생산 불가'
+        ELSE '생산 가능'
+    	END AS PRODUCTION_STATUS,
 		TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE, -- 수정일
 		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE -- 납품 예정일
 	FROM suju_order ord
@@ -44,24 +48,36 @@
 	<select id="getOrderDetail" parameterType="Map" resultType="Map">
 	<![CDATA[
 	SELECT
-		odd.odd_id as ODD_ID,
-		cli.cli_nm as CLI_NM,
-		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE,
-		prd.prd_nm as PRD_NM,
-		cd2.det_nm as OPT_COLOR,
-		cd3.det_nm as OPT_SIZE,
-		cd4.det_nm as OPT_HEIGHT,
-		odd.odd_cnt as ODD_CNT,
-		stk_1.stk_cnt as STK_CNT,
-		mat.mat_nm as MAT_NM,
-		bom.bom_cnt as BOM_CNT,
-		(bom.bom_cnt * odd.odd_cnt) as TOTAL_BOM_CNT,
-		stk_material.stk_cnt as STK_MATERIAL_CNT,
-		CASE
-			WHEN stk_material.stk_cnt >= (bom.bom_cnt * odd.odd_cnt)
-			THEN '충분'
-			ELSE '부족'
-		END as STK_MATERIAL_STATUS
+	    odd.odd_id as ODD_ID,
+	    cli.cli_nm as CLI_NM,
+	    TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE,
+	    prd.prd_nm as PRD_NM,
+	    cd2.det_nm as OPT_COLOR,
+	    cd3.det_nm as OPT_SIZE,
+	    cd4.det_nm as OPT_HEIGHT,
+	    odd.odd_cnt as ODD_CNT,
+	    NVL((
+	        SELECT SUM(ar.are_qty) FROM area ar
+	        WHERE ar.item_id = opt.opt_id AND ar.are_type = 'area_type_02' -- 완제품 구역 코드 (가정)
+	    ), 0) as STK_CNT,
+	    
+	    mat.mat_nm as MAT_NM,
+	    bom.bom_cnt as BOM_CNT,
+	    (bom.bom_cnt * odd.odd_cnt) as TOTAL_BOM_CNT,
+	
+	    NVL((
+	        SELECT SUM(ar.are_qty) FROM area ar
+	        WHERE ar.item_id = mat.mat_id AND ar.are_type = 'area_type_01' -- 자재 구역 코드
+	    ), 0) as STK_MATERIAL_CNT,
+
+	    CASE
+	        WHEN NVL((
+	            SELECT SUM(ar.are_qty) FROM area ar
+	            WHERE ar.item_id = mat.mat_id AND ar.are_type = 'area_type_01'
+	        ), 0) >= (bom.bom_cnt * odd.odd_cnt)
+	        THEN '충분'
+	        ELSE '부족'
+	    END as STK_MATERIAL_STATUS
 	FROM suju_order_detail odd
 	JOIN suju_order ord ON odd.ord_id = ord.ord_id
 	JOIN client cli ON ord.cli_id = cli.cli_id
@@ -70,11 +86,11 @@
 	LEFT JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
 	LEFT JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
 	LEFT JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
-	LEFT JOIN stock stk_1 ON stk_1.item_id = opt.opt_id
+	-- [수정 4] stock 테이블과의 JOIN 2개 모두 삭제
+	-- LEFT JOIN stock stk_1 ON stk_1.item_id = opt.opt_id
 	JOIN bom ON bom.opt_id = opt.opt_id
 	JOIN material mat ON bom.mat_id = mat.mat_id
-	LEFT JOIN stock stk_material ON stk_material.item_id = mat.mat_id
-
+	-- LEFT JOIN stock stk_material ON stk_material.item_id = mat.mat_id
 	WHERE odd.odd_id = #{odd_id}
 	]]>
 	</select>
@@ -85,38 +101,32 @@
 	<!-- 재고 조회 -->
 	<select id="checkStock" parameterType="Map" resultType="String">
 	<![CDATA[
-		select
-        CASE
-        WHEN stk.stk_cnt >= (bom.bom_cnt * odd.odd_cnt * 1.1)
-        THEN '충분'
-        ELSE '부족'
-        END 
-        from suju_order_detail odd
-        left join bom bom 
-        on bom.opt_id = odd.opt_id
-        left join stock stk 
-        on stk.item_id = bom.mat_id
-        where odd.odd_id = #{odd_id}
+	    SELECT
+	        CASE
+	            WHEN (
+	                -- 이 주문(odd_id)에 필요한 자재 중, 재고가 부족한 자재의 개수를 센다.
+	                SELECT COUNT(*)
+	                FROM suju_order_detail odd
+	                JOIN bom b ON odd.opt_id = b.opt_id
+	                WHERE odd.odd_id = #{odd_id}
+	                -- 현재 재고 < (필요한 총량 * 1.1) 인 경우만 카운트
+	                AND NVL((
+	                    SELECT SUM(ar.are_qty) FROM area ar
+	                    WHERE ar.item_id = b.mat_id AND ar.are_type = 'area_type_01'
+	                ), 0) < CEIL(b.bom_cnt * odd.odd_cnt * 1.1)
+	            ) > 0 THEN '부족' -- 재고가 부족한 자재가 1개 이상이면 '부족'
+	            ELSE '충분'
+	        END
+	    FROM DUAL
 	]]>
 	</select>
 	<!-- 총재고 차감 -->
-	<update id="updateStock" parameterType="Map">
+	<update id="updateStock" parameterType="Map" statementType="CALLABLE">
 		<![CDATA[
-			MERGE INTO stock s          
-			USING (
-				SELECT
-					b.mat_id,
-					CEIL(b.bom_cnt * odd.odd_cnt * 1.1) AS total_cnt
-				FROM 
-					suju_order_detail odd
-				JOIN 
-					bom b ON b.opt_id = odd.opt_id
-				WHERE 
-					odd.odd_id = #{odd_id}
-			) source
-			ON (s.item_id = source.mat_id)
-			WHEN MATCHED THEN           
-				UPDATE SET s.stk_cnt = s.stk_cnt - source.total_cnt
+			{ CALL DEDUCT_STOCK_FOR_ORDER(
+				#{odd_id, mode=IN},       -- 이 값은 프로시저에 전달하는 입력(IN) 값
+				#{result_code, mode=OUT, jdbcType=VARCHAR} -- 이 값은 프로시저로부터 받을 출력(OUT) 값
+			) }
 		]]>
 	</update>
 	<!-- 어떤 구역에 선입 선출이 되게 빼야 됨 -->

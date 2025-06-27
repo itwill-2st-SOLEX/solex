@@ -27,6 +27,9 @@ public interface EquipmentMapper {
 	// 설비 상세 조회
 	List<Map<String, Object>> getEquipmentDetail(@Param("eqp_code") String eqp_code);
 
+	// 설비 수정
+	Integer updateEquipment(Map<String, Object> params);
+
 	// // 주문 상세 조회 쿼리
 	// List<Map<String, Object>> getOrderDetail(@Param("odd_id") String odd_id);
 

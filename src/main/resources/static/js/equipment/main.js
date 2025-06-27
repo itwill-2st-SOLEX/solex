@@ -1,214 +1,253 @@
-// order.js
-
+// ===================================================================
+// 1. 전역 변수 및 상태 관리
+// ===================================================================
 let currentPage = 0;
 const pageSize = 20;
 const gridHeight = 600;
-let isLoading = false; // 데이터 로딩 중인지 여부 (중복 요청 방지)
-let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 스크롤 종료 조건)
+let isLoading = false;
+let hasMoreData = true;
+let originalEquipmentData = null;
 
+// ★★★ 개선점 1: 폼 옵션 데이터를 전역 변수로 관리 (API 호출 최소화) ★★★
+// 페이지 로드 시 한 번만 채워놓고 계속 재사용합니다.
+let formSelectOptions = {
+    clientList: [],
+    processList: []
+};
 
-
-// 2. ToastUI Grid 생성 (변경 없음)
+// ===================================================================
+// 2. TUI Grid 인스턴스 생성 (변경 없음)
+// ===================================================================
 const grid = new tui.Grid({
     el: document.getElementById('grid'),
     bodyHeight: gridHeight,
     scrollY: true,
     scrollX: false,
-    data: [], // 초기 데이터는 비어있음
     columns: [
-        { header: '설비 코드', name: 'EQP_CODE', width: 150,align: 'center', sortable: true },
+        { header: '설비 코드', name: 'EQP_CODE', width: 150, align: 'center', sortable: true },
         { header: '제조사', name: 'CLI_NM', align: 'center', sortable: true },
-        { header: '공정 명', name: 'PRC_NM', width: 150,align: 'center', sortable: true },
+        { header: '공정 명', name: 'PRC_NM', width: 150, align: 'center', sortable: true },
         { header: '설비 명', name: 'EQP_NAME', align: 'center', sortable: true },
-        { header: '설비 가격', name: 'EQP_PRICE', width: 100, align: 'center', sortable: true },
+        { header: '설비 가격', name: 'EQP_PRICE', width: 100, align: 'center', sortable: true},
         { header: '구입일', name: 'EQP_PURCHASE_DATE', width: 100, align: 'center', sortable: true },
         { header: '설치일', name: 'EQP_INSTALLATION_DATE', width: 100, align: 'center', sortable: true },
         { header: '사용여부', name: 'EQP_STS', width: 80, align: 'center', sortable: true }
     ],
 });
 
-// 3. DOM 로드 후 실행될 코드
-document.addEventListener('DOMContentLoaded', async function() { // async 키워드 추가
-  // 날짜 데이터로드
-	setupLinkedDateInputs('EQP_PURCHASE_DATE', 'EQP_INSTALLATION_DATE');
-	
-	// 초기 그리드 데이터 로드 (페이지 로드 시)
-	fetchGridData(currentPage); // 초기 페이지와 (비어있는) 검색어 전달
-	
-	// 무한 스크롤 이벤트 리스너 추가
-	grid.on('scrollEnd', async ({ horz, vert }) => {
-    /* if (vert.isReachedBottom) { // 스크롤이 그리드 바닥에 도달했을 때
-      if (hasMoreData && !isLoading) { // 더 불러올 데이터가 있고, 현재 로딩 중이 아닐 때
-        currentPage++; // 다음 페이지 번호로 업데이트
-        // await fetchGridData(currentPage); // 다음 페이지 데이터 로드
-      } 
-    } */
-	});
+// ===================================================================
+// 3. 초기화 및 이벤트 리스너 설정 (DOM 로드 후)
+// ===================================================================
+document.addEventListener('DOMContentLoaded', async function() {
+    // ★★★ 개선점 2: 페이지 로드 시 필수 데이터를 미리 한 번만 가져옵니다. ★★★
+    await initializePage();
 
-  const openCreateEquipmentModalBtn = document.getElementById('openEquipmentModalBtn');
-  openCreateEquipmentModalBtn.addEventListener('click', openCreateEquipmentModal);
-  
-  // 숫자 포맷팅
-  const eqpPriceInput = document.getElementById('EQP_PRICE');
-  eqpPriceInput.addEventListener('input', handlePriceInput);
-
-  
-  grid.on('click', (ev) => {
-		if (ev.columnName === 'EQP_NAME') {
-			const rowData = grid.getRow(ev.rowKey);
-      console.log(rowData);
-			openDetailModal(rowData);
-		}
-	});
-
-  // 폼 제출
-  const submitBtn = document.getElementById('submitBtn');
-  submitBtn.addEventListener('click', submitForm);
+    // 이벤트 리스너들을 설정합니다.
+    setupEventListeners();
 });
 
-// 초기 grid 테이블에 들어갈 list
-async function fetchGridData(page = currentPage) {
+/**
+ * 페이지에 필요한 모든 초기 데이터를 로드하고 설정하는 함수
+ */
+async function initializePage() {
+    await fetchFormOptions(); // select box 옵션 데이터 로드
+    await fetchGridData(0); // 그리드의 첫 페이지 데이터 로드
+    setupLinkedDateInputs('EQP_PURCHASE_DATE', 'EQP_INSTALLATION_DATE');
+}
 
-  isLoading = true; // 로딩 중 플래그 설정 (전역 변수)
-  try {
-    const params = new URLSearchParams();
-    params.append('page', currentPage);
-    params.append('pageSize', pageSize);
-    
-    const url = `/SOLEX/equipment/data?${params.toString()}`; 
+/**
+ * 페이지의 모든 이벤트 리스너를 설정하는 함수
+ */
+function setupEventListeners() {
+    // 무한 스크롤
+    // grid.on('scrollEnd', async ({ vert }) => {
+    //     if (vert.isReachedBottom && hasMoreData && !isLoading) {
+    //         currentPage++;
+    //         await fetchGridData(currentPage);
+    //     }
+    // });
 
-    
-    const response = await fetch(url);
-
-    // 2. 응답 상태 확인
-    if (!response.ok) { // HTTP 상태 코드가 200-299 범위가 아니면 오류
-        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-    }
-    
-    // 3. 응답 데이터를 JSON으로 파싱
-    const data = await response.json();
-    console.log(data);
-
-    data.forEach(item => {
-      item.EQP_PRICE = formatNumber(item.EQP_PRICE);
+    // 그리드 행 클릭 -> 상세 모달 열기
+    grid.on('click', (ev) => {
+        if (ev.rowKey !== undefined && ev.columnName === 'EQP_NAME') {
+            const rowData = grid.getRow(ev.rowKey);
+            openDetailModal(rowData);
+        }
     });
 
+    // 설비 등록 버튼 -> 생성 모달 열기
+    document.getElementById('openEquipmentModalBtn').addEventListener('click', openCreateEquipmentModal);
 
+    // 가격 입력 포맷팅
+    document.getElementById('EQP_PRICE').addEventListener('input', handlePriceInput);
+}
 
-    // 4. 그리드 데이터 업데이트
-    if (page === 0) { // 첫 페이지 요청 시 (새로운 검색 또는 초기 로드)
-      grid.resetData(data); // 기존 데이터를 모두 지우고 새 데이터로 채움
-    } else { // 다음 페이지 요청 시 (무한 스크롤)
-      grid.appendRows(data); // 기존 데이터에 새 데이터를 추가
+// ===================================================================
+// 4. 데이터 로딩 (API 호출) 함수
+// ===================================================================
+
+/**
+ * 그리드 데이터를 서버에서 가져와 그리드에 채우는 함수
+ */
+async function fetchGridData(page = 0) {
+    if (isLoading) return;
+    isLoading = true;
+    try {
+        const params = new URLSearchParams({ page, pageSize });
+        const response = await fetch(`/SOLEX/equipment/data?${params.toString()}`);
+        if (!response.ok) throw new Error('그리드 데이터 로딩 실패');
+        
+        const data = await response.json();
+        data.forEach(item => {
+            item.EQP_PRICE = formatNumber(item.EQP_PRICE);
+        });
+
+        if (page === 0) {
+            grid.resetData(data);
+        } else {
+            grid.appendRows(data);
+        }
+        hasMoreData = data.length === pageSize;
+    } catch (error) {
+        console.error('fetchGridData 오류:', error);
+        hasMoreData = false;
+    } finally {
+        isLoading = false;
     }
+}
 
-    if (data.length < pageSize) {
-      hasMoreData = false; // 더 이상 불러올 데이터 없음 플래그 설정 (전역 변수)
-    } else {
-      hasMoreData = true; // 더 불러올 데이터가 있을 가능성 (전역 변수)
+/**
+ * ★★★ 개선점 3: Select Box 옵션 데이터를 한 번만 가져와 전역 변수에 저장 ★★★
+ */
+async function fetchFormOptions() {
+    try {
+        const response = await fetch('/SOLEX/equipment/form-data');
+        if (!response.ok) throw new Error('폼 옵션 데이터 로딩 실패');
+        const data = await response.json();
+        // 가져온 데이터를 전역 변수에 저장합니다.
+        formSelectOptions.clientList = data.clientList || [];
+        formSelectOptions.processList = data.processList || [];
+    } catch (error) {
+        console.error('fetchFormOptions 오류:', error);
+        alert('페이지 초기화에 필요한 옵션 정보를 불러오는 데 실패했습니다.');
     }
-
-  } catch (error) {
-    console.error('그리드 데이터 로딩 중 오류 발생:', error);
-    hasMoreData = false; // 오류 발생 시에는 더 이상 데이터를 로드하지 않음 (전역 변수)
-  } finally {
-    isLoading = false; // 로딩 완료 플래그 해제 (전역 변수)
-    // 로딩 스피너 등을 여기서 숨길 수 있습니다.
-  }
 }
 
-async function fetchFormData() {
-  const url = `/SOLEX/equipment/form-data`;
-  const response = await fetch(url);
+// ===================================================================
+// 5. 모달 관련 함수
+// ===================================================================
 
-  // 2. 응답 상태 확인
-  if (!response.ok) { // HTTP 상태 코드가 200-299 범위가 아니면 오류
-    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-  }
-  // 3. 응답 데이터를 JSON으로 파싱
-  const data = await response.json();
-  console.log("fetchFormData",data);
-
-  // 4. 분리해둔 공통 함수를 '호출'하여 select 박스 채우기
-  populateSelect('CLI_NM', data.clientList, 'CLI_ID', 'CLI_NM');
-  populateSelect('PRC_NM', data.processList, 'PRC_ID', 'PRC_NM');
+/**
+ * [생성 모달] '설비 등록' 모달을 엽니다.
+ */
+function openCreateEquipmentModal() {
+    resetModalForm(); // 폼을 깨끗하게 초기화
+    setupModalForCreate(); // 생성 모드에 맞게 모달 설정
+    
+    const modal = new bootstrap.Modal(document.getElementById('myModal'));
+    modal.show();
 }
 
-async function openCreateEquipmentModal() {
-  await fetchFormData();
+/**
+ * [상세/수정 모달] '설비 상세' 모달을 엽니다.
+ */
+async function openDetailModal(rowData) {
+    resetModalForm(); // 폼을 깨끗하게 초기화
+    console.log(rowData);
+    try {
+        const response = await fetch(`/SOLEX/equipment/${rowData.EQP_CODE}`);
+        if (!response.ok) throw new Error('상세 데이터 로딩 실패');
+        
+        const equipmentData = (await response.json())[0];
 
-  // 수정 요청
-  const oldBtn  = document.getElementById('submitBtn');  
-  // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
-  const newBtn = oldBtn.cloneNode(true); 
-  // 2. 기존 버튼을 새로운 버튼으로 교체
-  oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
+        originalEquipmentData = equipmentData;
+		
+		    console.log(equipmentData);
+        
+        // 상세 데이터로 폼을 채웁니다.
+        populateModalForm(equipmentData);
+        
+        // 수정 모드에 맞게 모달을 설정합니다.
+        setupModalForUpdate(equipmentData.EQP_CODE);
 
-  newBtn.textContent = '등록'; 
-  newBtn.addEventListener('click', () => {
-    createEquipment();
-  });
-
-
-  const modal = document.getElementById('myModal');
-  const modalInstance = new bootstrap.Modal(modal);
-  modalInstance.show();
-} 
-
-async function openDetailModal(selectedData) {
-  const equipmentDetailUrl = `/SOLEX/equipment/${selectedData.EQP_CODE}`;
-  const formDataUrl = '/SOLEX/equipment/form-data';
-
-  try {
-    const [detailResponse, formResponse] = await Promise.all([
-      fetch(equipmentDetailUrl),
-      fetch(formDataUrl)
-    ]);
-
-    if (!detailResponse.ok || !formResponse.ok) {
-      throw new Error('데이터를 가져오는 중 오류가 발생했습니다.');
-  }
-  const equipmentData = (await detailResponse.json())[0];
-  const formData = await formResponse.json();
-  await populateSelect('CLI_NM', formData.clients, 'CLI_ID', 'CLI_NM');
-  await populateSelect('PRC_NM', formData.processes, 'PRC_ID', 'PRC_NM');
-  
-  // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
-  document.getElementById('EQP_COMM').value = equipmentData.EQP_COMM;
-  document.getElementById('EQP_INSTALLATION_DATE').value = equipmentData.EQP_INSTALLATION_DATE;
-  document.getElementById('EQP_PURCHASE_DATE').value = equipmentData.EQP_PURCHASE_DATE;
-  document.getElementById('EQP_NAME').value = equipmentData.EQP_NAME;
-  document.getElementById('EQP_PRICE').value = (equipmentData.EQP_PRICE);
-  document.getElementById('EQP_STS').value = equipmentData.EQP_STS;
-  
-  // Select Box는 '이름(NM)'이 아닌 'ID'로 값을 설정해야 합니다.
-  document.getElementById('CLI_NM').value = equipmentData.CLI_ID;
-  document.getElementById('PRC_NM').value = equipmentData.PRC_ID;
-  
-
-  // 수정 요청
-  const oldBtn  = document.getElementById('submitBtn');  
-  // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
-  const newBtn = oldBtn.cloneNode(true); 
-  // 2. 기존 버튼을 새로운 버튼으로 교체
-  oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
-
-  newBtn.textContent = '수정'; 
-  newBtn.addEventListener('click', () => {
-    UpdateEquipment(selectedData.EQP_CODE);
-  });
-
-
-
-
-  const modal = document.getElementById('myModal');
-  const modalInstance = new bootstrap.Modal(modal);
-  modalInstance.show();
-
+        const modal = new bootstrap.Modal(document.getElementById('myModal'));
+        modal.show();
+    } catch (error) {
+        console.error('openDetailModal 오류:', error);
+        alert('상세 정보를 불러오는 데 실패했습니다.');
+    }
 }
 
+// ===================================================================
+// 6. 폼 및 헬퍼 함수
+// ===================================================================
+
+/**
+ * ★★★ 신규 함수: 모달의 모든 입력 필드를 초기화합니다. ★★★
+ */
+function resetModalForm() {
+    document.getElementById('EQP_NAME').value = '';
+    document.getElementById('EQP_PRICE').value = '';
+    document.getElementById('EQP_PURCHASE_DATE').value = '';
+    document.getElementById('EQP_INSTALLATION_DATE').value = '';
+    document.getElementById('EQP_STS').value = '';
+    document.getElementById('EQP_COMM').value = '';
+
+    // Select box는 reset()으로 기본값이 선택되지 않을 수 있어 수동으로 채웁니다.
+    populateSelect('CLI_NM', formSelectOptions.clientList, 'CLI_ID', 'CLI_NM');
+    populateSelect('PRC_NM', formSelectOptions.processList, 'PRC_ID', 'PRC_NM');
+    originalEquipmentData = {};
+}
+
+/**
+ * ★★★ 신규 함수: 상세 데이터로 모달 폼을 채웁니다. ★★★
+ */
+function populateModalForm(data) {
+    document.getElementById('EQP_NAME').value = data.EQP_NAME || '';
+    document.getElementById('EQP_COMM').value = data.EQP_COMM || '';
+    document.getElementById('EQP_PURCHASE_DATE').value = data.EQP_PURCHASE_DATE || '';
+    document.getElementById('EQP_INSTALLATION_DATE').value = data.EQP_INSTALLATION_DATE || '';
+    document.getElementById('EQP_STS').value = data.EQP_STS || '';
+
+    console.log(data.EQP_PRICE);
+    document.getElementById('EQP_PRICE').value = formatNumber(data.EQP_PRICE || 0);
+    
+    // ★★★ 버그 수정: ID로 select box 값을 정확하게 설정합니다. ★★★
+    console.log(data.CLI_ID);
+    console.log(data.PRC_ID);
+    document.getElementById('CLI_NM').value = data.CLI_ID || '';
+    document.getElementById('PRC_NM').value = data.PRC_ID || '';
+}
+
+/**
+ * ★★★ 신규 함수: '등록' 모드에 맞게 모달 버튼을 설정합니다. ★★★
+ */
+function setupModalForCreate() {
+    document.getElementById('exampleModalLabel').textContent = '설비 등록'; // 모달 제목 변경
+    const submitBtn = document.getElementById('submitBtn');
+    const newBtn = submitBtn.cloneNode(true); // 이벤트 리스너 제거
+    submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+    
+    newBtn.textContent = '등록';
+    newBtn.addEventListener('click', createEquipment); // submitForm 함수 직접 연결
+}
+
+/**
+ * ★★★ 신규 함수: '수정' 모드에 맞게 모달 버튼을 설정합니다. ★★★
+ */
+function setupModalForUpdate(eqpCode) {
+    document.getElementById('exampleModalLabel').textContent = '설비 정보 수정'; // 모달 제목 변경
+    const submitBtn = document.getElementById('submitBtn');
+    const newBtn = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+
+    newBtn.textContent = '수정';
+    newBtn.addEventListener('click', () => {
+      // 수정 로직은 submitForm과 유사하게 별도 함수로 만들거나,
+      // submitForm 내에서 분기 처리할 수 있습니다.
+      updateEquipment(eqpCode); 
+    });
+}
 // 거래처, 공정 select 채우는 함수
 async function populateSelect(selectId, list, valueKey, textKey) {
   const selectElement = document.getElementById(selectId);
@@ -236,7 +275,6 @@ function getFormattedDate(date) {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
-
 // 구입일과 설치일을 연결하는 함수
 async function setupLinkedDateInputs(purchaseDateId, installationDateId) {
   const purchaseInput = document.getElementById(purchaseDateId);
@@ -270,7 +308,6 @@ async function setupLinkedDateInputs(purchaseDateId, installationDateId) {
       }
   });
 }
-
 // 가격 포맷팅
 async function handlePriceInput(event) {
   let value = event.target.value;
@@ -284,8 +321,9 @@ async function handlePriceInput(event) {
 }
 
 // DB에서 조회했을때 가격 포맷팅
-async function formatNumber(num) {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+function formatNumber(num) {
+  const formatNumber = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return formatNumber;
 }
 
 
@@ -352,48 +390,24 @@ async function validateForm() {
   return true;
 }
 
-// 폼 제출
-async function submitForm() {
-  if (!validateForm()) {
-    return;
-  }
+async function createEquipment() {
+  if (!validateForm()) return;
+  
+  const data = getCurrentFormData();
+  
   try {
-    const data = {
-    eqp_name: document.getElementById('EQP_NAME').value.trim(),
-
-    eqp_price: Number(document.getElementById('EQP_PRICE').value.replace(/,/g, '')),
-
-    eqp_purchase_date: document.getElementById('EQP_PURCHASE_DATE').value,
-    eqp_installation_date: document.getElementById('EQP_INSTALLATION_DATE').value,
-    eqp_comm: document.getElementById('EQP_COMM').value,
-
-    cli_id: Number(document.getElementById('CLI_NM').value),
-    prc_id: Number(document.getElementById('PRC_NM').value),
-  };
-
-    console.log('서버로 전송할 최종 데이터:', data);
-
-
-    const res = await fetch(`/SOLEX/equipment`, {
-    method : 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  });
-
-  if (!res.ok) {
-    const errorMessage = await res.text(); 
-    throw new Error(errorMessage); 
-  }
-
-  const successMessage = await res.text(); // "정상적으로 처리되었습니다."
-  alert(successMessage + ' 🙌');
-  window.location.reload(); // 페이지 새로고침
-
-  } catch (err) {
-  console.error('작업 처리 중 오류 발생:', err);
-  alert(err.message);
+      const response = await fetch('/SOLEX/equipment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('서버 등록 실패');
+      
+      alert('성공적으로 등록되었습니다.');
+      window.location.reload();
+  } catch (error) {
+      console.error('createEquipment 오류:', error);
+      alert(error.message);
   }
 }
 
@@ -421,5 +435,58 @@ async function submitMaterialRequestForm(selectedId) {
   } catch (err) {
     console.error('자재 요청 중 오류 발생:', err);
     alert(err.message);
+  }
+}
+
+function getCurrentFormData() {
+  const price = document.getElementById('EQP_PRICE').value.replace(/,/g, '');
+  const data = {
+      eqp_name: document.getElementById('EQP_NAME').value.trim(),
+      eqp_comm: document.getElementById('EQP_COMM').value.trim(),
+      eqp_price: Number(price) || 0,
+      eqp_purchase_date: document.getElementById('EQP_PURCHASE_DATE').value,
+      eqp_installation_date: document.getElementById('EQP_INSTALLATION_DATE').value,
+      eqp_sts: document.getElementById('EQP_STS').value,
+      cli_id: Number(document.getElementById('CLI_NM').value),
+      prc_id: Number(document.getElementById('PRC_NM').value),
+  };
+  return data;
+}
+
+// 업데이트 함수
+async function updateEquipment(eqpCode) {
+  if (!validateForm()) return;
+
+  const currentData = getCurrentFormData();
+
+  // 원본 데이터와 현재 폼 데이터를 비교
+  const isChanged = 
+      originalEquipmentData.EQP_NAME !== currentData.eqp_name ||
+      originalEquipmentData.EQP_COMM !== currentData.eqp_comm ||
+      originalEquipmentData.EQP_PRICE !== currentData.eqp_price ||
+      originalEquipmentData.EQP_PURCHASE_DATE !== currentData.eqp_purchase_date ||
+      originalEquipmentData.EQP_INSTALLATION_DATE !== currentData.eqp_installation_date ||
+      originalEquipmentData.EQP_STS !== currentData.eqp_sts ||
+      originalEquipmentData.CLI_ID !== currentData.cli_id ||
+      originalEquipmentData.PRC_ID !== currentData.prc_id;
+
+  if (!isChanged) {
+      alert('변경된 내용이 없습니다.');
+      return;
+  }
+
+  try {
+      const response = await fetch(`/SOLEX/equipment/${eqpCode}`, {
+          method: 'PATCH', // 또는 'PATCH'
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(currentData)
+      });
+      if (!response.ok) throw new Error('서버 수정 실패');
+
+      alert('성공적으로 수정되었습니다.');
+      window.location.reload();
+  } catch (error) {
+      console.error('updateEquipment 오류:', error);
+      alert(error.message);
   }
 }

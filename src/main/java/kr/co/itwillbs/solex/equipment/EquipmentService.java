@@ -49,55 +49,13 @@ public class EquipmentService {
         return resultList;
     }
 
-
-	// public List<Map<String, Object>> getOrderDetail(String odd_id) {
-	// 	List<Map<String, Object>> resultList = orderRequestsMapper.getOrderDetail(odd_id);
-	// 	return resultList;
-	// }
-	
-	// // 1.재고 조회, 2.재고 차감, 3.상태 변경
-	// @Transactional(rollbackFor = Exception.class) 
-	// public void  updateOrderStatus(Map<String, Object> params) throws Exception {
-
-	// 	 // 재고 조회
-    //     List<String> stockStatus = orderRequestsMapper.checkStock(params);
-        
-    //     // Stream API를 사용한 간결한 확인
-    //     if (stockStatus.stream().anyMatch(status -> "부족".equals(status))) {
-    //         // 오류 발생 시, 문자열 대신 예외를 던집니다.
-    //         throw new RuntimeException("재고가 부족하여 처리할 수 없습니다.");
-    //     }
-
-    //     // 재고 차감    
-    //     Integer result = orderRequestsMapper.updateStock(params);
-    //     // null 체크 추가
-    //     if (result == null || result <= 0) {
-    //         throw new RuntimeException("재고 차감에 실패했습니다.");
-    //     }
-        
-    //     // 주문 상태 변경
-    //     Integer result2 = orderRequestsMapper.updateOrderStatus(params);
-    //     // null 체크 추가
-    //     if (result2 == null || result2 <= 0) {
-    //         throw new RuntimeException("주문 상태 변경에 실패했습니다.");
-    //     }
-
-	// }   
+    public void updateEquipment(Map<String, Object> params) {
+        // 설비 생성    
+        Integer result = equipmentMapper.updateEquipment(params);
+        // null 체크 추가
+        if (result == null || result <= 0) {
+            throw new RuntimeException("설비 생성에 실패했습니다.");
+        }
+    }
 
 }
-
-
-
-// 설비 정보, 공정 정보
-
-// 두개의 테이블에 대한 매핑테이블
-
-// 와이?!?!?!?!?!?!?!?!??!?
-// 공정 하나의 여려개 가능
-// 공정에 여러 설비가 들어가니깐.
-// 
-
-// 굿
-
-// 설비 테이블 + 공정 테이블 = 매핑 테이블	
-// 언제까지?
