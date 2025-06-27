@@ -1,10 +1,31 @@
-document.addEventListener('DOMContentLoaded', () => {
+// 1. 원자재 목록을 서버에서 가져오기
+let materialList = [];
+document.addEventListener('DOMContentLoaded', async () => {
+	try {
+        const response = await fetch('/SOLEX/boms/api/materialList'); // 원자재 목록을 제공하는 API 엔드포인트
+        const data = await response.json();
+		
+        materialList = data.map(item => ({
+            text: item.MAT_NM, // select 박스에 보여질 텍스트
+            value: item.MAT_NM,  // 실제 선택될 값 (예: 원자재 ID)
+            unit: item.MAT_UNIT,  // 단위 정보를 추가로 저장 (자동 입력을 위해)
+			id: item.MAT_ID,
+			comm: item.MAT_COMM
+        }));
+        // '선택하세요' 옵션 추가
+        materialList.unshift({ text: '선택하세요', value: '', id: '', unit: '', comm: '' });
+
+    } catch (error) {
+        console.error('원자재 목록을 가져오는데 실패했습니다:', error);
+        // 에러 처리: 기본값 설정 또는 사용자에게 알림
+    }
 	
-	// 상세공통코드 그리드 생성
+	// 그리드 생성
 	window.bom_grid = new tui.Grid({
-		el: document.getElementById('bom-grid'),
+		el: document.getElementById('bom_grid'),
 		bodyHeight: 600,
 		rowHeaders: ['checkbox'],
+		scrollX: true,
 		scrollY: true,
 		pageOptions: {
 			useClient: false,
@@ -34,43 +55,58 @@ document.addEventListener('DOMContentLoaded', () => {
 			initialRequest: false
 		},
 		columns: [
-//			{ header: 'BOM번호', name: 'BOM_ID', align : 'center' },
-//			{ header: '제품', name: 'OPT_ID',align : 'center', sortable: 'true' },
-			{ header: '원자재', name: 'MAT_NM',align : 'center', sortable: 'true' },
-			{ header: '소모량', name: 'BOM_CNT', sortable: 'true',align : 'center' , width: 70 },
+			{ header: '옵션코드', name: 'OPT_ID', hidden: true }, 
+			{ header: '옵션코드', name: 'MAT_ID', hidden: true }, 
+			{
+                header: '원자재',
+                name: 'MAT_NM', // 실제 그리드 데이터의 'MAT_NM'은 select에서 선택된 'value'가 됩니다.
+                align: 'left',
+				width: 200,
+                sortable: true,
+                editor: {
+                    type: 'select',
+                    options: {
+                        listItems: materialList // 서버에서 가져온 데이터 사용
+                    }
+                }
+            },
+			{ header: '소모량', name: 'BOM_CNT', sortable: 'true',align : 'right' , width: 70, editor: 'text' },
 			{ header: '단위', name: 'BOM_UNIT', sortable: 'true',align : 'center' , width: 80 },
-//			{ header: '설명', name: 'BOM_COMM', sortable: 'true',align : 'center' },
-			{ header: '등록일', name: 'BOM_REG_DATE', sortable: 'true',align : 'center', formatter: ({ value }) => window.formatDateTime(value) }
+			{ header: '설명', name: 'BOM_COMM', sortable: 'true',align : 'left' , width: 200, editor: 'text' },
+			{ header: '등록일', name: 'BOM_REG_DATE', sortable: 'true',align : 'center', formatter: ({ value }) => window.formatDateTime(value), width: 90 },
+			{ header: '수정일', name: 'BOM_MOD_DATE', sortable: 'true',align : 'center', formatter: ({ value }) => window.formatDateTime(value), width: 90 }
 		]
 	});
+	
+	// ⭐ 그리드 생성 후 바로 이벤트 리스너 등록
+    window.bom_grid.on('afterChange', (ev) => {
+        ev.changes.forEach(({ rowKey, columnName, value }) => {
+            if (columnName === 'MAT_NM') {
+				console.log('MAT_NM 컬럼 변경 감지!'); // MAT_NM 변경 시 이 로그가 찍히는지 확인
+                const selectedMaterial = materialList.find(item => item.value === value);
+				console.log('Selected Material:', selectedMaterial); // 찾은 데이터 확인
+                if (selectedMaterial && selectedMaterial.unit && selectedMaterial.comm) {
+					// 실제 값을 설정합니다.
+					window.bom_grid.setValue(rowKey, 'MAT_ID', selectedMaterial.id, false);
+                    window.bom_grid.setValue(rowKey, 'BOM_UNIT', selectedMaterial.unit, false);
+//                    window.bom_grid.setValue(rowKey, 'BOM_COMM', selectedMaterial.comm, false);
+                } else {
+					// 선택 해제되거나 찾을 수 없을 경우 초기화
+					window.bom_grid.setValue(rowKey, 'MAT_ID', '', false);
+                    window.bom_grid.setValue(rowKey, 'BOM_UNIT', '', false);
+//                    window.bom_grid.setValue(rowKey, 'BOM_COMM', '', false);
+                }
+            }
+        });
+    });
+	
 	window.loadBomList = function(opt_id) {
-		
 		if (!opt_id) return;
 		window.selectedOptId = opt_id;
+		
 		// ✅ 기존 데이터 및 내부 상태 초기화
 		window.bom_grid.resetData([]);
 		// ✅ 첫 페이지부터 무한스크롤 다시 시작
 		window.bom_grid.readData(1, { opt_id });
 	};
-	
-//	// 검색기능
-//	document.getElementById('codeDetail-search').addEventListener('keypress', (e) => {
-//		if (e.key === 'Enter') {
-//			triggerCodeDetailSearch();
-//		}
-//	});
-//
-//	function triggerCodeDetailSearch() {
-//		const keyword = document.getElementById('codeDetail-search').value.trim();
-//		
-//		// 기존 데이터 초기화
-//		codeDetail_grid.resetData([]);
-//		
-//		// readData 호출 (예: COD_ID 필요 시 selectedCodId도 같이 전달)
-//		codeDetail_grid.readData(1, {
-//			keyword: keyword,
-//			cod_id: window.selectedCodId || ''
-//		});
-//	}
-	
 });

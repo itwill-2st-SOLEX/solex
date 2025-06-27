@@ -15,5 +15,11 @@ public interface BomsMapper {
 
 	int selectTotalBomCount(String opt_id);
 
+	void insertBomInfo(List<Map<String, Object>> insertList);
+
+	void updateBomInfo(List<Map<String, Object>> updateList);
+
+	List<Map<String, Object>> selectMaterialList();
+
 
 }

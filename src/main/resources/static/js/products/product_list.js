@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		  { header: '선택된굽', name: 'OPT_HEIGHT', hidden: true },
 		  { header: '선택된사이즈', name: 'OPT_SIZE', hidden: true },
 		  
-	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 200, 		  
+	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 150, 		  
 			filter: 
 			{
 	            type: 'text', 
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	            showClearBtn: true 
 	        } 
 		  },
-	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true , width: 100 ,
+	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true ,
 			filter: 
 			{
 	            type: 'text', 
@@ -75,21 +75,22 @@ document.addEventListener('DOMContentLoaded', function() {
 	            showClearBtn: true 
 	        } 
 		  },
-	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true , width: 80 },
-		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true , width: 80 },
-		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true , width: 80 },
-		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true, width: 80}
+	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true  },
+		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true },
+		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true },
+		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true}
 	    ]
 	});
   
   	// 행 클릭 시 상세공통코드 리스트 호출 함수 호출
-	window.selectedOptId = null;
+	window.selectedPrdId = null;
 	
 	prod_grid.on('focusChange', ev => {
 		const rowKey = ev.rowKey;
 		const rowData = prod_grid.getRow(rowKey);
 		if (rowData && window.loadBomList) {
-			selectedOptId = rowData.OPT_ID;
+//			selectedOptId = rowData.OPT_ID;
+			selectedPrdId = rowData.PRD_ID;
 			window.loadBomList(rowData.OPT_ID);
 		}
 	});

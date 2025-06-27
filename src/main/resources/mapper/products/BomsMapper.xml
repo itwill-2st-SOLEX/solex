@@ -28,4 +28,64 @@
 		  WHERE	opt_id = #{opt_id}
 		 OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
 	</select>
+	
+	<insert id="insertBomInfo" parameterType="map">
+	    INSERT ALL
+	    <foreach collection="list" item="bom">
+	        INTO BOM (
+	        	      OPT_ID
+	        	    , MAT_ID
+	        	    , BOM_CNT
+	        	    , BOM_UNIT
+	        	    , BOM_COMM
+	        		, BOM_REG_DATE
+	        	   )
+	        VALUES (
+	                  #{bom.OPT_ID}
+	                , #{bom.MAT_ID}
+	                , #{bom.BOM_CNT}
+	                , #{bom.BOM_UNIT}
+	                , #{bom.BOM_COMM}
+	                , SYSDATE)
+	    </foreach>
+	    SELECT 1 FROM DUAL
+	</insert>
+	
+	<!-- 상세공통코드 기존 행 수정 -->
+	<update id="updateBomInfo" parameterType="map">
+	    MERGE INTO CODE_DETAIL target
+	    USING (
+	        <foreach collection="list" item="codeDetail" separator="UNION ALL">
+	            SELECT
+	                #{codeDetail.DET_ID} AS DET_ID,
+	                #{codeDetail.COD_ID} AS COD_ID,
+	                #{codeDetail.DET_NM} AS DET_NM,
+	                #{codeDetail.DET_YN} AS DET_YN,
+	                #{codeDetail.DET_SORT} AS DET_SORT
+	            FROM DUAL
+	        </foreach>
+	    ) src
+	    ON (target.DET_ID = src.DET_ID AND target.COD_ID = src.COD_ID)
+	    WHEN MATCHED THEN
+	        UPDATE SET
+	            target.DET_NM = src.DET_NM,
+	            target.DET_YN = src.DET_YN,
+	            target.DET_SORT = src.DET_SORT
+	</update>
+	
+	<!-- 원자재 목록 -->
+	<select id="selectMaterialList" parameterType="map">
+	SELECT
+			m.MAT_ID,
+			m.MAT_CD,
+			m.MAT_NM,
+			-- m.MAT_UNIT,
+			cd.DET_NM as MAT_UNIT,
+			m.MAT_COMM 
+	   FROM MATERIAL m
+	   JOIN CODE_DETAIL cd
+	 	 ON m.MAT_UNIT = cd.DET_ID
+	  
+	 WHERE mat_is_active = UPPER('y')
+	</select>
 </mapper>	

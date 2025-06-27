@@ -24,4 +24,20 @@ public class BomsService {
 	}
 
 
+	// BOM 추가
+	public void insertBomInfo(List<Map<String, Object>> insertList) {
+		bomsMapper.insertBomInfo(insertList);
+	}
+
+	// BOM 수정
+	public void updateBomInfo(List<Map<String, Object>> updateList) {
+		bomsMapper.updateBomInfo(updateList);
+	}
+
+
+	public List<Map<String, Object>> getMaterialList() {
+		return bomsMapper.selectMaterialList();
+	}
+
+
 }

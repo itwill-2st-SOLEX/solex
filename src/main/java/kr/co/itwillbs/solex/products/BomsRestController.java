@@ -56,5 +56,42 @@ public class BomsRestController {
 	    return Map.of("result", true, "data", data);
 	}
 	
+	@PostMapping("/save")
+	public Map<String, Object> saveBomInfo(@RequestBody Map<String, List<Map<String, Object>>> map) {
+		
+		List<Map<String, Object>> insertList = map.get("createdRows");
+	    List<Map<String, Object>> updateList = map.get("updatedRows");
+	    
+	    if ((insertList == null || insertList.isEmpty()) && (updateList == null || updateList.isEmpty())) {
+            return Map.of("success", false, "message", "저장할 데이터가 없습니다.");
+        }
+
+	    // 상세공통코드 신규 행 추가
+	    if (insertList != null && !insertList.isEmpty()) {
+	    	bomsService.insertBomInfo(insertList);
+	    }
+
+	    // 상세공통코드 기존 행 수정
+	    if (updateList != null && !updateList.isEmpty()) {
+	    	bomsService.updateBomInfo(updateList);
+	    }
+		
+		return Map.of("success", true);
+	}
+	// 단위 셀렉트바 옵션들
+	@GetMapping("/materialList")
+	public List<Map<String, Object>> getmaterialList() {
+		
+		List<Map<String, Object>> materials = bomsService.getMaterialList();
+		System.out.println("materials 잘가지고 옴?? : " + materials);
+		
+		
+		return materials;
+	}
+	
+	
+	
+	
+	
 	
 }
