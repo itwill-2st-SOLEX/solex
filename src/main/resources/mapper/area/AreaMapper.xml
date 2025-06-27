@@ -76,20 +76,35 @@
 	</select>
 	
 	<select id="getStockDetail" resultType="map">
-		SELECT  ar.are_id, 
-				ad.item_id, 
-				ad.are_det_qty, 
-				COALESCE(m.mat_nm, p.prd_nm) AS item_nm
-		FROM area ar
-		JOIN area_detail ad
-			ON ad.are_id = ar.are_id             
-		LEFT JOIN material m                       
-			ON ar.are_type = 'area_type_01'          
-	    	AND ad.item_id = m.mat_id
-		LEFT JOIN product p                        
-	    	ON ar.are_type = 'area_type_02'         
-	    	AND ad.item_id  = p.prd_id
-		WHERE ar.item_id = 50                           
-	    	AND ar.are_type = #{type}
+		SELECT  ar.are_nm AS area_nm, 
+				w.whs_nm AS warehouse_nm,
+		        ad.item_id AS item_id, 
+		        ad.are_det_qty AS qty, 
+		        COALESCE(m.mat_nm, pr.prd_nm) AS item_nm,
+		        cd_unit.det_nm       AS item_unit,
+		        cd_color.det_nm AS op_color,     
+		        cd_size.det_nm AS op_size,       
+		        cd_height.det_nm AS op_height  
+		FROM        area         ar
+		JOIN        area_detail  ad
+		       ON   ad.are_id   = ar.are_id          
+		LEFT JOIN   warehouse	w    
+		    ON w.whs_id = ar.whs_id   
+		LEFT JOIN   material     m                       
+		       ON   ar.are_type = 'area_type_01'          
+		      AND   ad.item_id  = m.mat_id
+		LEFT JOIN   product         pr
+		       ON   ar.are_type = 'area_type_02'
+		      AND   ar.item_id  = pr.prd_id
+		LEFT JOIN   product_option      po                        
+		       ON   ar.are_type = 'area_type_02'         
+		      AND   ad.item_id  = po.opt_id
+		LEFT JOIN   code_detail     cd_unit
+		           ON cd_unit.det_id = COALESCE(m.mat_unit , pr.prd_unit)
+		LEFT JOIN   code_detail     cd_color  ON cd_color.det_id  = po.opt_color
+		LEFT JOIN   code_detail     cd_size   ON cd_size.det_id   = po.opt_size
+		LEFT JOIN   code_detail     cd_height ON cd_height.det_id = po.opt_height
+		WHERE  ar.item_id = #{itemId}                           
+			AND  ar.are_type = #{type} 
 	</select>
 </mapper>
