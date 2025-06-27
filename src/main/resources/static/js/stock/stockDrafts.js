@@ -58,16 +58,23 @@ $(function() {
 	/* ② 코드 → tui.Grid 컬럼 배열 */
 	const STOCK_COLUMNS = {
 	  area_type_01: [                     // 자재
-	    { header: 'LOT',    name: 'lot',  align: 'center', width: 100 },
+	    { header: '번호',    name: 'lot',  align: 'center', width: 100 },
 	    { header: '자재명', name: 'name', align: 'center', sortable: true },
-	    { header: '단위',   name: 'unit', align: 'center', width: 70 },
-	    { header: '재고량', name: 'qty',  align: 'right' }
+		{ header: '창고명', name: 'qty',  align: 'right' },
+		{ header: '구역명', name: 'qty',  align: 'right' },
+	    { header: '재고량', name: 'qty',  align: 'right' },
+		{ header: '단위',   name: 'unit', align: 'center', width: 70 }
 	  ],
 	  area_type_02: [                     // 제품
-	    { header: '모델',   name: 'model',  align: 'center', width: 120 },
-	    { header: '옵션',   name: 'option', align: 'center' },
-	    { header: '단위',   name: 'unit',   align: 'center', width: 70 },
-	    { header: '재고량', name: 'qty',    align: 'right' }
+		{ header: '번호',    name: 'lot',  align: 'center', width: 100 },
+	    { header: '제품명', name: 'name', align: 'center', sortable: true },
+		{ header: '색깔', name: 'qty',  align: 'right' },
+	    { header: '사이즈', name: 'qty',  align: 'right' },
+		{ header: '굽', name: 'qty',  align: 'right' },
+		{ header: '창고명', name: 'qty',  align: 'right' },
+		{ header: '구역명', name: 'qty',  align: 'right' },
+	    { header: '재고량', name: 'qty',  align: 'right' },
+		{ header: '단위',   name: 'unit', align: 'center', width: 70 }
 	  ]
 	};
 	

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import kr.co.itwillbs.solex.area.AreaMapper;
 import kr.co.itwillbs.solex.employee.EmployeeMapper;
@@ -27,9 +28,8 @@ public class StockService {
 		return areaMapper.selectStockList(offset, size);
 	}
 
-	public Map<String, Object> getStockDetail(String whsId, Long loginEmpId) {
-		
-        return null;
+	public Map<String, Object> getStockDetail(String itemId, String type, Long loginEmpId) {
+        return areaMapper.getStockDetail(Integer.parseInt(itemId), Integer.parseInt(type));
 	}
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface AreaMapper {
@@ -15,5 +16,7 @@ public interface AreaMapper {
 	List<Map<String, Object>> selectStockList(int offset, int size);
 
 	void insertDetail(Map<String, Object> detail);
+
+	Map<String, Object> getStockDetail(@Param("itemId") int itemId, @Param("type") int type);
 
 }

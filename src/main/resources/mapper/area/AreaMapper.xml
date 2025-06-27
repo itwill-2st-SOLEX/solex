@@ -74,5 +74,22 @@
 	        COALESCE(m.mat_nm , p.prd_nm),
 	        u.det_nm
 	</select>
-
+	
+	<select id="getStockDetail" resultType="map">
+		SELECT  ar.are_id, 
+				ad.item_id, 
+				ad.are_det_qty, 
+				COALESCE(m.mat_nm, p.prd_nm) AS item_nm
+		FROM area ar
+		JOIN area_detail ad
+			ON ad.are_id = ar.are_id             
+		LEFT JOIN material m                       
+			ON ar.are_type = 'area_type_01'          
+	    	AND ad.item_id = m.mat_id
+		LEFT JOIN product p                        
+	    	ON ar.are_type = 'area_type_02'         
+	    	AND ad.item_id  = p.prd_id
+		WHERE ar.item_id = 50                           
+	    	AND ar.are_type = #{type}
+	</select>
 </mapper>

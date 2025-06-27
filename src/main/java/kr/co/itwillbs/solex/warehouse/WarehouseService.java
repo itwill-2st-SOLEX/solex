@@ -95,6 +95,8 @@ public class WarehouseService {
                     detail.put("areaId", areaId);
                     detail.put("itemId", opt.get("OPT_ID"));
                     detail.put("qty", 0L); 
+                    System.out.println("시이발발발ㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹㄹ");
+                    System.out.println(detail);
                     areaMapper.insertDetail(detail);      // 다건 INSERT
                 }
 

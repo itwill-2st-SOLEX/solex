@@ -41,7 +41,7 @@ public class StockRestController {
     public Map<String, Object> getStockDetail(@PathVariable("itemId") String itemId, @RequestParam("type") String type) {
     	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
     	Long loginEmpId = 2L;
-    	return stockService.getStockDetail(itemId, loginEmpId);
+    	return stockService.getStockDetail(itemId, type, loginEmpId);
     }
   	
 }
