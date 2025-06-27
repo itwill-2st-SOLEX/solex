@@ -23,6 +23,8 @@ public class WorkOrderService {
 	
 	// 해당 제품코드 등록 모달 조회
 	public List<Map<String, Object>> getProcessTeam(String prdCd) {
+		System.out.println(mapper.ProcessTeam(prdCd));
+		System.out.println("prdCd" + prdCd);
 		return mapper.ProcessTeam(prdCd);
 	}
 	
@@ -48,9 +50,13 @@ public class WorkOrderService {
 	// 창고 자재 등록
 	@Transactional
 	public void warehousesInsert(Map<String, Object> prdInfo) {
-		prdInfo.put("whs_his_date", LocalDateTime.now());
+		// 1. 창고 이력 insert
 		mapper.warehousesInsert(prdInfo);
+		// 2. 재고 원장 insert
 		mapper.stockUpdate(prdInfo);
+		// 3.구역 update
 		mapper.areaUpdate(prdInfo);
+		// 4. 구역 디테일 update
+		mapper.areaDetailUpdate(prdInfo);
 	}
 }

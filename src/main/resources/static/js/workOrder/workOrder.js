@@ -23,7 +23,8 @@ $(function() {
 			{ header: '제품코드', name: 'prd_code', align: 'center', filter: 'select' },
 			{ header: '제품명', name: 'prd_nm', align: 'center', filter: 'select' },
 			{ header: '진행현황', name: 'odd_sts', align: 'center', sortable: 'true', className: 'clickable-cell' },
-			{ header: '생산수량', name: 'odd_cnt', align: 'center', filter: 'select' },
+			{ header: '목표생산수량', name: 'odd_cnt', align: 'center', filter: 'select' },
+			{ header: '실제생산수량', name: 'odd_actual_cnt', align: 'center', filter: 'select' },
 			{ header: '제품컬러', name: 'prd_color', align: 'center', filter: 'select' },
 			{ header: '제품 사이즈', name: 'prd_size', align: 'center', filter: 'select' },
 			{ header: '굽 높이', name: 'prd_height', align: 'center', filter: 'select' },
@@ -36,6 +37,7 @@ $(function() {
 		try {
 			const response = await fetch(`/SOLEX/workOrders/list?page=${page}&size=${pageSize}`);
 			const rawData = await response.json();
+				debugger;
 			const data = rawData.map(row => ({
 				odd_id: row.ODD_ID,
 				prd_code: row.PRD_CODE,
@@ -46,9 +48,10 @@ $(function() {
 				prd_size: row.PRD_SIZE,
 				prd_height: row.PRD_HEIGHT,
 				ord_end_date: row.ORD_END_DATE,
+				odd_actual_cnt: row.ODD_ACTUAL_CNT,
 				warehouse_btn: row.ODD_STS === '작업 완료'
 					? `<button class="btn btn-sm btn btn-warning assign-btn" data-ord-id="${row.ODD_ID}" 
-						data-odd-cnt="${row.ODD_CNT}" data-opt-id="${row.OPT_ID}" 
+						data-odd-actual-cnt="${row.ODD_ACTUAL_CNT}" data-opt-id="${row.OPT_ID}" 
 						data-prd-id="${row.PRD_ID}"> 창고배정</button>`
 					: ''
 			}));
@@ -56,7 +59,7 @@ $(function() {
 			currentPage++;
 			if (data.length < pageSize) grid.off("scrollEnd");
 		} catch (error) {
-			console.error('기안서 목록 조회 실패:', error);
+			console.error('작업지시 목록 조회 실패:', error);
 		}
 	}
 
@@ -77,12 +80,13 @@ $(function() {
 	});
 	// 창고배정 버튼 클릭시
 	document.getElementById('grid').addEventListener('click', function(e) {
+		if (!e.target.classList.contains('assign-btn')) return;
 		const oddId = e.target.dataset.ordId;
-		const oddCnt = parseInt(e.target.dataset.oddCnt, 10);
+		const actualCnt = e.target.dataset.oddActualCnt;
+		const odd_actual_cnt = parseInt(actualCnt, 10);
+		console.log('🔢 parseInt 결과:', actualCnt);
 		const optId = e.target.dataset.optId;
 		const prdId = e.target.dataset.prdId;
-		
-		debugger;
 		
 		document.getElementById('hiddenPrdId')?.remove();
 		const hiddenPrdInput = document.createElement('input');
@@ -98,7 +102,7 @@ $(function() {
 		hiddenInput.value = optId;
 		document.body.appendChild(hiddenInput);
 		
-		openAssignWarehouse(oddId, oddCnt);
+		openAssignWarehouse(oddId, odd_actual_cnt);
 	});
 });
 
@@ -318,9 +322,12 @@ function selectWarehouse(index) {
 	warehouse.teams
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.forEach(team => {
-			const opt = document.createElement('option');
+			let maxFormatted = team.max.toLocaleString();
+			let currentFormatted = team.currentCount.toLocaleString();
+			let opt = document.createElement('option');
+			
 			opt.value = team.name;
-			opt.textContent = `${team.name} (최대: ${team.max}, 현재: ${team.currentCount})`;
+			opt.textContent = `${team.name} (최대: ${maxFormatted}개, 현재: ${currentFormatted}개)`;
 			teamSelect.appendChild(opt);
 		});
 
@@ -328,7 +335,7 @@ function selectWarehouse(index) {
 }
 
 // 모달 열기 함수
-function openAssignWarehouse(oddId, oddCnt) {
+function openAssignWarehouse(oddId, odd_actual_cnt) {
 	const prdId = document.getElementById('hiddenPrdId')?.value;
 	
 	document.getElementById('warehouseSearch').value = '';
@@ -340,7 +347,7 @@ function openAssignWarehouse(oddId, oddCnt) {
 	const qtyInput = document.createElement('input');
 	qtyInput.type = 'hidden';
 	qtyInput.id = 'hiddenAssignQty';
-	qtyInput.value = oddCnt;
+	qtyInput.value = odd_actual_cnt;
 	document.body.appendChild(qtyInput);
 	// 초기화
 	document.getElementById('warehouseName').textContent = '-';
@@ -369,6 +376,7 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 
 	if (!warehouseId) return alert('창고를 선택해주세요.');
 	if (!team) return alert('구역을 선택해주세요.');
+	debugger;
 	if (!assignQty || assignQty <= 0) return alert('수량이 유효하지 않습니다.');
 
 	// 선택한 창고와 구역 찾기
@@ -394,15 +402,15 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 		method: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({
-			areaId: areaId,
-			optId: optId,
-			warehouseId: warehouseId,
-			areaName: team,			
-			assignQty: assignQty,
-			currentQty: currentQty,
+			areaId: areaId, // 구역 id
+			optId: optId, // 옵션 id
+			warehouseId: warehouseId, // 창고 id
+			areaName: team, // 구역 이름
+			assignQty: assignQty, // 생산수량
+			currentQty: currentQty, // 현제 구역 수량
 			totalQty: assignQty + currentQty
 		}),
-		success: function(data) {
+		success: function() {
 			alert('창고배정 등록 완료!');
 			const modalEl = document.getElementById('AssignWarehouseModal');
 			const modal = bootstrap.Modal.getInstance(modalEl);

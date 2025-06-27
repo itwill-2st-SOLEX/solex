@@ -39,9 +39,12 @@
   justify-content: center;
   font-weight: bold;
 }
-
+.modal-body {
+  max-height: calc(97vh - 200px);
+  overflow-y: auto !important;
+}
 .form-select {
-	width: 300px;
+	width: 366px;
 }
 
 .timeline-content {
