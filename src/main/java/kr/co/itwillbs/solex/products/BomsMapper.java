@@ -19,7 +19,10 @@ public interface BomsMapper {
 
 	void updateBomInfo(List<Map<String, Object>> updateList);
 
+	// 원자재 리스트 가져옴.
 	List<Map<String, Object>> selectMaterialList();
+
+	int deleteBom(@Param("bomIds") List<Integer> bomIds);
 
 
 }

@@ -32,7 +32,8 @@ async function showProductModal(mode, data = null) {
     const prdPriceElement = document.getElementById('prd_price');
     const prdCodeElement = document.getElementById('prd_code');
     const prdUnitSelectElement = document.getElementById('prdUnitSelect');
-    const prdTypeSelectElement = document.getElementById('prdTypeSelect');
+    const prdTypeSelectElement = document.getElementById('prdTypeSelect'); // 유형
+	const prdProcessDiv = document.getElementById('prd_process'); // 공정순서
     const prdCommElement = document.getElementById('prd_comm');
     const prdRegDateElement = document.getElementById('prd_reg_date');
     const prdUpDateElement = document.getElementById('prd_up_date');
@@ -55,7 +56,6 @@ async function showProductModal(mode, data = null) {
     if (generateCombinationsBtn) { // 버튼 요소가 존재하는지 먼저 확인
         generateCombinationsBtn.onclick = generateAndDisplayCombinations;
     }
-    // const combinationsContainer = document.getElementById('optionCombinationsContainer'); // 이 변수는 현재 사용되지 않습니다.
     // 옵션 요소 버튼 로직 --- 끝
 
     // 공통 필드 설정 및 로드 (모달이 열리기 전 미리 처리)
@@ -66,14 +66,11 @@ async function showProductModal(mode, data = null) {
         if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 등록';
         if (prdRegDateElement) prdRegDateElement.value = getNowForOracle(); 
         
-        loadCommonCodesToSelect('prdUnitSelect', 'prd_unit');
-        loadCommonCodesToSelect('prdTypeSelect', 'prd_type');
+        await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit');
+        await loadCommonCodesToSelect('prdTypeSelect', 'prd_type');
         
     } else if (mode === 'edit' && data) {
         modalTitle.textContent = '제품 상세정보';
-//        saveProductBtn.textContent = '수정 완료';
-//        if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 총 ' + result.opt_count + '건';
-//        saveProductBtn.onclick = () => processProductData('update');
 		
 		// 250626 수정, 삭제기능 안되게 함.
 		const editableElements = document.querySelectorAll('input');
@@ -96,19 +93,97 @@ async function showProductModal(mode, data = null) {
         if (prdCommElement) prdCommElement.value = data.PRD_COMM || '';
         if (prdRegDateElement) prdRegDateElement.value = formatter(data.PRD_REG_DATE, true);
         
-        loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT);
-        loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);
-		loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
-	    loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
-		loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
+        await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT);
+        await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);
+		await loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
+	    await loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
+		await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
     }
 
     const modalEl = document.getElementById('exampleModal');
     const productModal = new bootstrap.Modal(modalEl);
 
-    // --- 여기부터 중요한 수정 ---
+	
+	
+	
+	
+	
+	
+	
+	// 이 리스너 함수는 showProductModal 범위 내에서 정의되어야 `prdProcessDiv`에 접근 가능합니다.
+    const processTypeChange = async () => { // 이벤트 객체를 직접 받지 않으므로 `event` 파라미터 제거
+        const selectedPrdType = prdTypeSelectElement.value; // 직접 요소에서 값을 가져옴
+		
+        console.log('모달 내 제품 유형 선택:', selectedPrdType);
+
+        if (!selectedPrdType) {
+            prdProcessDiv.innerHTML = '<p>공정순서를 보시려면 제품 유형을 선택해주세요.</p>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/SOLEX/products/api/processByPrdType?prd_type=${selectedPrdType}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const processData = await response.json();
+            console.log('서버에서 받은 공정 데이터:', processData);
+
+            if (processData && processData.length > 0) {
+                let htmlContent = '<span><strong>생산 공정 순서</strong></span>';
+                htmlContent += '<ol>';
+                processData.forEach(process => {
+                    htmlContent += `
+                        <li>
+                            (<small>${process.PRC_CODE}</small>)<br>
+                            <span style="font-size: 0.9em; color: #666;">${process.PRC_DES || '설명 없음'}</span>
+                        </li>
+                    `;
+                });
+                htmlContent += '</ol>';
+                prdProcessDiv.innerHTML = htmlContent;
+            } else {
+                prdProcessDiv.innerHTML = '<p>해당 제품 유형에 대한 공정 정보가 없습니다.</p>';
+            }
+
+        } catch (error) {
+            console.error('공정 정보를 가져오는데 실패했습니다:', error);
+            prdProcessDiv.innerHTML = '<p style="color: red;">공정 정보를 불러오는 중 오류가 발생했습니다.</p>';
+        }
+    };
+
+    // 기존 리스너 제거 (중복 방지) - 이전에 이 리스너를 붙였다면 _changeListener 속성에 저장되어 있을 것입니다.
+    if (prdTypeSelectElement._processChangeListener) {
+        prdTypeSelectElement.removeEventListener('change', prdTypeSelectElement._processChangeListener);
+    }
+    // 새로운 리스너 부착
+    prdTypeSelectElement.addEventListener('change', processTypeChange);
+    // 리스너 함수를 요소에 저장하여 나중에 제거할 수 있도록 함
+    prdTypeSelectElement._processChangeListener = processTypeChange;
+
+	
+	
+	
+	
+	
+	
+    // 해당 select 요소에 'change' 이벤트를 강제로 한번 더 발생시켜야 할 수도 있습니다.
+    if (prdTypeSelectElement.value) {
+		console.log("초기 공정 순서 로드 시도 (prdTypeSelectElement.value 있음):", prdTypeSelectElement.value);
+		processTypeChange();
+    } else {
+        // 선택된 값이 없으면 초기화 메시지 표시
+        prdProcessDiv.innerHTML = '<p>공정순서를 보시려면 제품 유형을 선택해주세요.</p>';
+    }
+    // ⭐⭐ 공정 순서 로딩 로직 끝 ⭐⭐
+	
+	
+	
+	
+	
+	
     // 모달이 완전히 표시된 후에만 옵션 그리드를 로드합니다.
-    modalEl.addEventListener('shown.bs.modal', async () => { // await을 이 이벤트 리스너 안으로 옮깁니다.
+    modalEl.addEventListener('shown.bs.modal', async () => {
         if (mode === 'edit' && data) {
             let productOptions = [];
             try {
@@ -127,7 +202,6 @@ async function showProductModal(mode, data = null) {
 				console.log('result ? ' + JSON.stringify(result)); // result.opt_count
 				console.log('result.opt_count ? ' + JSON.stringify(result.opt_count)); // result.opt_count
 				
-//				generateCombinationsBtn.style.display='result.opt_count';
 				if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 총 ' + result.opt_count + '건';
 				generateCombinationsBtn.setAttribute('disabled', 'true');
             } catch (error) {
@@ -180,6 +254,11 @@ async function showProductModal(mode, data = null) {
     // 모달이 완전히 닫혔을 때 페이지를 새로고침하는 이벤트 리스너를 등록
     modalEl.addEventListener('hidden.bs.modal', function () {
         location.reload(); 
+		// 모달 닫힐 때, prdTypeSelectElement에 붙였던 리스너도 제거
+	    if (prdTypeSelectElement._processChangeListener) {
+	        prdTypeSelectElement.removeEventListener('change', prdTypeSelectElement._processChangeListener);
+	        prdTypeSelectElement._processChangeListener = null; // 참조 제거
+	    }
     }, { once: true }); // 한 번만 실행 후 리스너 제거
 
     // 마지막으로 모달을 표시합니다.

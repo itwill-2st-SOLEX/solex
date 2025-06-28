@@ -55,16 +55,24 @@
 									                </div>
 								                </div>
 								                <div class="row mb-4">
-										        	<div class="col">
-										            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
-														<br>
-														<select id="prdUnitSelect" class="form-select"></select>
-										            </div>
 									                <div class="col">
 									                    <label for="prd_type" class="form-label">제품 유형<span style="color:red">*</span></label>
 														<br>
 														<select id="prdTypeSelect" class="form-select"></select>
 									                </div>
+										        </div>
+								                <div class="row mb-4">
+									                <div class="col" id="prd_process">
+									                    <label for="prd_process" class="form-label">공정 순서</label>
+														<br>
+									                </div>
+										        </div>
+								                <div class="row mb-4">
+										        	<div class="col">
+										            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
+														<br>
+														<select id="prdUnitSelect" class="form-select"></select>
+										            </div>
 										        </div>
 												<div class="row mb-4">
 													<div class="col">
@@ -87,12 +95,6 @@
 														       value="${data.PRD_REG_DATE}">
 										            </div>
 										            <div class="col"></div>
-<!-- 									                <div class="col"> -->
-<!-- 									                    <label for="prd_up_date" class="form-label">제품 수정일<span style="color:red">*</span></label> -->
-<!-- 														<br> -->
-<!-- 														<input type="text" id="prd_up_date" name="prd_up_date" class="form-control" placeholder="제품 수정일"  -->
-<!-- 															value="${data.PRD_UP_DATE ? formatter(data.PRD_UP_DATE, true) : ''}" readonly> -->
-<!-- 									                </div> -->
 										        </div>
 												<div class="row mb-4" id="optionFields" hidden> 
 										        	<div class="col">
@@ -111,15 +113,12 @@
 														<select id="prdHeightSelect" class="form-select"></select>
 									                </div>
 										        </div>
-												
-												
 												<!-- 제품등록 시에 옵션 그룹핑한 테이블 예시 -->	
 												<button type="button" class="btn btn-primary btn-sm mt-2 add-single-option-btn" data-color-code="opt_color_01" id="generateCombinationsBtn">
 													옵션 추가
 												</button>
 												<br><br>
 												<div id="optionGroupsContainer" class="mb-3" ></div>
-<!-- 												<div id="option-grid-container" style="width: 100%; min-height: 200px;"></div>  -->
           
 												<!-- 옵션 그룹핑한 테이블 예시 끝 -->
 								        	</div><!-- custom-modal-content 끝 -->

@@ -16,7 +16,8 @@
 		 SELECT	
 		        b.BOM_ID, 
 				b.OPT_ID, -- 옵션
-				m.MAT_NM, -- 원자재
+				m.MAT_NM, -- 원자재 이름
+				m.MAT_ID, -- 원자재 ID
 				b.BOM_CNT, -- 소모량
 				b.BOM_UNIT, -- 단위
 				b.BOM_COMM, -- 설명
@@ -51,28 +52,29 @@
 	    SELECT 1 FROM DUAL
 	</insert>
 	
-	<!-- 상세공통코드 기존 행 수정 -->
+	<!-- BOM 기존 행 수정 -->
 	<update id="updateBomInfo" parameterType="map">
-	    MERGE INTO CODE_DETAIL target
-	    USING (
-	        <foreach collection="list" item="codeDetail" separator="UNION ALL">
-	            SELECT
-	                #{codeDetail.DET_ID} AS DET_ID,
-	                #{codeDetail.COD_ID} AS COD_ID,
-	                #{codeDetail.DET_NM} AS DET_NM,
-	                #{codeDetail.DET_YN} AS DET_YN,
-	                #{codeDetail.DET_SORT} AS DET_SORT
-	            FROM DUAL
-	        </foreach>
-	    ) src
-	    ON (target.DET_ID = src.DET_ID AND target.COD_ID = src.COD_ID)
-	    WHEN MATCHED THEN
-	        UPDATE SET
-	            target.DET_NM = src.DET_NM,
-	            target.DET_YN = src.DET_YN,
-	            target.DET_SORT = src.DET_SORT
-	</update>
-	
+    MERGE INTO BOM 
+        target USING (
+        <foreach collection="list" item="bom" separator="UNION ALL">
+          SELECT
+                 #{bom.BOM_ID} AS BOM_ID,        
+                 #{bom.OPT_ID} AS OPT_ID,        
+                 #{bom.MAT_ID} AS MAT_ID,        
+                 #{bom.BOM_CNT} AS BOM_CNT,      
+                 #{bom.BOM_UNIT} AS BOM_UNIT,    
+                 #{bom.BOM_COMM} AS BOM_COMM
+            FROM DUAL
+        </foreach>
+    ) src
+        ON (target.BOM_ID = src.BOM_ID)            
+      WHEN MATCHED THEN
+    UPDATE SET
+           target.BOM_CNT = src.BOM_CNT,       
+           target.BOM_UNIT = src.BOM_UNIT,     
+           target.BOM_COMM = src.BOM_COMM,     
+           target.BOM_MOD_DATE = SYSDATE       
+    </update>
 	<!-- 원자재 목록 -->
 	<select id="selectMaterialList" parameterType="map">
 	SELECT
@@ -88,4 +90,12 @@
 	  
 	 WHERE mat_is_active = UPPER('y')
 	</select>
+	
+	<delete id="deleteBom" parameterType="java.util.List">
+        DELETE FROM BOM
+        WHERE BOM_ID IN
+        <foreach collection="bomIds" item="bomId" open="(" separator="," close=")">
+            #{bomId}
+        </foreach>
+    </delete>
 </mapper>	

@@ -81,13 +81,29 @@ public class BomsRestController {
 	// 단위 셀렉트바 옵션들
 	@GetMapping("/materialList")
 	public List<Map<String, Object>> getmaterialList() {
-		
 		List<Map<String, Object>> materials = bomsService.getMaterialList();
-		System.out.println("materials 잘가지고 옴?? : " + materials);
-		
 		
 		return materials;
 	}
+	
+	// ⭐ BOM 삭제 API 엔드포인트 ⭐
+    @DeleteMapping("/deleteBom")
+    public ResponseEntity<Map<String, Object>> deleteBom(@RequestBody List<Integer> bomIds) {
+    	System.out.println("BOM ID 콘트롤러에 제대로 들어옴? " + bomIds);
+        Map<String, Object> response = new HashMap<>();
+        try {
+            int deletedCount = bomsService.deleteBom(bomIds);
+            response.put("success", true);
+            response.put("message", deletedCount + "개의 BOM이 삭제되었습니다.");
+            response.put("deletedCount", deletedCount);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "BOM 삭제 중 오류 발생: " + e.getMessage());
+            return ResponseEntity.status(500).body(response); // 500 Internal Server Error
+        }
+    }
 	
 	
 	

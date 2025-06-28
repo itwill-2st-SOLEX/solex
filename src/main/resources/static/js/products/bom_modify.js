@@ -89,29 +89,55 @@ document.addEventListener('DOMContentLoaded', () => {
 	    });;
 	});
 	
-	// ✅ 삭제 버튼
-//	document.querySelector('#codeDetail-delete').addEventListener('click', () => {
-//		const checkedRows = codeDetail_grid.getCheckedRows();
-//		if (checkedRows.length === 0) {
-//			alert('삭제할 행을 선택해주세요.');
-//			return;
-//		}
-//
-//		// ✅ 신규로 추가된 행만 필터링
-//		const onlyNewRowKeys = checkedRows
-//			.filter(row => row.__isNew)
-//			.map(row => row.rowKey);
-//
-//		if (onlyNewRowKeys.length === 0) {
-//			alert('추가된 행만 삭제할 수 있습니다.');
-//			return;
-//		}
-//
-//		onlyNewRowKeys
-//			.sort((a, b) => b - a)
-//			.forEach(rowKey => {
-//				codeDetail_grid.removeRow(rowKey);
-//			});
-//	});
-	
+	// ⭐ 삭제 버튼 클릭 이벤트 리스너 추가 ⭐
+    document.getElementById('bom-delete').addEventListener('click', async function() {
+        // 1. 선택된 행의 데이터 가져오기
+        const checkedRows = window.bom_grid.getCheckedRows();
+        
+        if (checkedRows.length === 0) {
+            alert('삭제할 BOM을 선택해주세요.');
+            return;
+        }
+
+        if (!confirm('선택된 BOM을 정말로 삭제하시겠습니까?')) {
+            return; // 사용자가 '취소'를 누르면 중단
+        }
+
+        // 2. 선택된 BOM_ID 리스트 추출
+        const bomIdsToDelete = checkedRows.map(row => row.BOM_ID);
+        console.log('삭제할 BOM_ID 리스트:', bomIdsToDelete);
+
+        try {
+            // 3. 서버로 삭제 요청 전송 (DELETE 메서드)
+            const response = await fetch('/SOLEX/boms/api/deleteBom', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bomIdsToDelete) // JSON 배열 형태로 ID 전송
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    alert('선택된 BOM이 성공적으로 삭제되었습니다.');
+                    // 4. 그리드 데이터 새로고침
+                    // 현재 선택된 OPT_ID로 그리드를 다시 로드
+                    if (window.selectedOptId) {
+                        window.loadBomList(window.selectedOptId);
+                    } else {
+                        // OPT_ID가 없으면 전체 그리드 새로고침 (또는 적절한 초기화)
+                        window.bom_grid.readData(); 
+                    }
+                } else {
+                    alert('BOM 삭제에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
+                }
+            } else {
+                alert('서버 오류: BOM 삭제에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('BOM 삭제 중 오류 발생:', error);
+            alert('네트워크 오류 또는 요청 처리 중 문제가 발생했습니다.');
+        }
+    });
 });

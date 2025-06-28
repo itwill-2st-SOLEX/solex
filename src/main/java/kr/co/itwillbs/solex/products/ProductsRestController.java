@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.itwillbs.solex.process.ProcessService;
 import kr.co.itwillbs.solex.sales.ClientType;
 
 
@@ -28,9 +29,10 @@ public class ProductsRestController {
 	
 	@Autowired
 	private ProductsService productsService;
-	
 	@Autowired
 	private BomsService bomsService;
+	@Autowired
+	private ProcessService processService;
 
 	// 상품 list
 	@GetMapping("/productList")
@@ -122,6 +124,25 @@ public class ProductsRestController {
             response.put("status", "error");
             response.put("message", "제품 옵션을 불러오는 데 실패했습니다: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
+        }
+    }
+    
+    // 제품 유형(prd_type)에 따른 생산 공정 순서 목록을 조회
+    @GetMapping("/processByPrdType")
+    public ResponseEntity<List<Map<String, Object>>> getProcessByPrdType(
+            @RequestParam("prd_type") String prd_type) {
+    	System.out.println("processByPrdType 콘트롤러에 잘 들어옴? " + prd_type +  " 파라미터 값 잘 들어옴? ");
+        try {
+            // Service 계층을 통해 공정 정보 조회
+//            List<Map<String, Object>> processList = bomsService.getProcessByPrdType(prd_type);
+            List<Map<String, Object>> processList = processService.getTypeProcessList(prd_type);
+            
+            // 조회된 데이터를 JSON 형태로 반환
+            return ResponseEntity.ok(processList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 오류 발생 시 500 Internal Server Error 반환
+            return ResponseEntity.status(500).body(null); 
         }
     }
 	
