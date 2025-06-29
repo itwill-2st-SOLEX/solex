@@ -1,4 +1,3 @@
-
 //전역 변수 설정
 let currentPage = 0;
 const pageSize = 20;
@@ -6,6 +5,7 @@ const gridHeight = 250;
 let empId = null;
 let wpoId = null;
 let currentWpoId = null;
+let beforeMemo = ''; 
 
 let completeQtyInput = document.getElementById('completeQty');
 let wreMemoInput = document.getElementById('wreMemo');
@@ -23,7 +23,7 @@ const grid = new tui.Grid({
 		{ header: '실적등록ID', name: 'wreId', align: 'center' },
 		{ header: '작업수량', name: 'wreJcount', align: 'center', filter: 'select' },
 		{ header: '작업일', name: 'wreDate', align: 'center', filter: 'select' },
-		{ header: '비고', name: 'wreMemo', align: 'center', filter: 'select', width: 400} //, editor: 'text'
+		{ header: '비고', name: 'wreMemo', align: 'center', filter: 'select', editor: 'text', width: 400}
     ],
 	
 
@@ -41,6 +41,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('completeQty').addEventListener('focus', function() {
   this.select();
 });
+
 
 //무한 스크롤 이벤트
 function bindScrollEvent() {
@@ -153,15 +154,6 @@ async function workerSummary() {
 	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 			console.log(data)
 			
-/*			if (data.WPO_ID == null) {
-				// 서버에서 응답 바디가 비었으면 작업 대기 상태로 판단
-				     alert('작업대기중입니다.');
-				     // 입력 필드 비활성화 등 UI 처리
-				     completeQtyInput.disabled = true;
-				     wreMemoInput.disabled = true;
-				     saveBtn.disabled = true;
-				     return;
-			}*/
 			// 프로그레스바 너비 및 텍스트 업데이트
 		    const progressBar = document.getElementById('progressBar');
 		    const progressText = document.getElementById('progressText');
@@ -171,7 +163,8 @@ async function workerSummary() {
 			let jcount = Number(data.WPO_JCOUNT);
 			let wpoProRate = data.WPO_OCOUNT > 0 ? Math.round((data.WPO_JCOUNT / data.WPO_OCOUNT) * 1000) / 10 : 0;
 			let isCompleted = jcount >= ocount;
-
+			
+			console.log(ocount)
 			// 100% 이상일 경우 입력 막기
 			if (isCompleted) {
 				// alert 반복 방지: 완료 상태가 처음 감지될 때만 알림 표시
@@ -189,6 +182,61 @@ async function workerSummary() {
 			  saveBtn.disabled = false;
 			  workerSummary.completedAlertShown = false;
 			}
+			
+			// 메모 편집
+			grid.on('editingStart', ev => {
+			    if (ev.columnName === 'wreMemo' && isCompleted) {
+			        ev.stop();
+			        alert('작업이 완료된 후에는 메모를 수정할 수 없습니다.');
+			    }
+			});
+			
+			
+			grid.on('editingFinish', async ev => {
+			    if (ev.columnName !== 'wreMemo') return;
+
+			    const row     = grid.getRow(ev.rowKey);
+			    const newMemo = String(ev.value ?? '').trim();
+
+			    // 변동이 없으면 종료
+			    if (newMemo === beforeMemo) return;
+
+			    // 사용자 확인
+			    if (!window.confirm('메모를 저장하시겠습니까?')) {
+			        // 취소 → 원래 값 복원
+			        grid.setValue(ev.rowKey, 'wreMemo', beforeMemo);
+			        return;
+			    }
+
+			    // PATCH 요청 전송
+			    const payload = {
+			        wreId   : row.wreId,   // 실적 PK
+			        newMemo : newMemo
+			    };
+
+			    try {
+			        const res = await fetch('/SOLEX/operator/api/updateMemo', {
+			            method : 'PATCH',
+			            headers: { 'Content-Type': 'application/json' },
+			            body   : JSON.stringify(payload)
+			        });
+
+			        if (!res.ok) {
+			            const msg = await res.text();
+			            throw new Error(msg || res.status);
+			        }
+
+			        // 성공 – 그리드 데이터 확정
+			        row.wreMemo = newMemo;
+			        await workerList(0);   // 레이아웃‑리렌더링
+
+			    } catch (err) {
+			        alert('메모 저장에 실패했습니다.');
+			        console.error(err);
+			        // 실패 – 롤백
+			        grid.setValue(ev.rowKey, 'wreMemo', beforeMemo);
+			    }
+			});
 			
 			empId = data.EMP_ID;
 			currentWpoId = data.WPO_ID; // ← 작업 ID
@@ -212,7 +260,6 @@ async function workerSummary() {
 			     progressText.textContent = `${wpoProRate}%`;
 
 			}
-			workerList(currentPage);
 			await workerList(currentPage);
 
 	    } catch (e) {
@@ -226,7 +273,8 @@ async function workerList(page) {
 		
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/operator/api/workerList?page=${page}&size=${pageSize}&empId=${empId}&wpoId=${currentWpoId}`;
+		//let url = `/SOLEX/operator/api/workerList?page=${page}&size=${pageSize}&empId=${empId}&wpoId=${currentWpoId}`;
+		let url = `/SOLEX/operator/api/workerList?empId=${empId}&wpoId=${currentWpoId}`;
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
@@ -237,7 +285,7 @@ async function workerList(page) {
         const gridData = list.map((n) => ({
 			
 			wreId: n.WRE_ID,
-            wreJcount: n.WRE_JCOUNT + ' 개',
+            wreJcount: n.WRE_JCOUNT,
             wreDate: dateFormatter(n.WRE_DATE, true),
             wreMemo: n.WRE_MEMO || ''
         }));

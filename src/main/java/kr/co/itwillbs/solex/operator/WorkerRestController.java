@@ -1,13 +1,15 @@
 package kr.co.itwillbs.solex.operator;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kr.co.itwillbs.solex.sales.OrderController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +24,7 @@ public class WorkerRestController {
 	public WorkerService workerService;
 	
 	//로그인 구현 필요
-	Long empId = 88L;
+	Long empId = 26L;
 
 	
 	//내 부서 정보
@@ -43,15 +45,15 @@ public class WorkerRestController {
 	}
 	
 	@GetMapping("/workerList")
-	public Map<String, Object> getWorkerReportList(@RequestParam(name = "page", required = false) Integer page,
-												         @RequestParam(name = "size", required = false) Integer size,
+	public Map<String, Object> getWorkerReportList(//@RequestParam(name = "page", required = false) Integer page,
+												        // @RequestParam(name = "size", required = false) Integer size,
 												         @RequestParam("empId") Long empId,
 												         @RequestParam("wpoId") Long wpoId) {
 		
 		Map<String, Object> params = new HashMap<>();
 		
-	    params.put("offset", page * size);
-	    params.put("size", size);
+	    //params.put("offset", page * size);
+	    //params.put("size", size);
 	    params.put("empId", empId);
 	    params.put("wpoId", wpoId);
 		
@@ -60,6 +62,23 @@ public class WorkerRestController {
 	    result.put("list", list);
 
 	    return result;
+	}
+	
+	@PatchMapping("/updateMemo")
+	public ResponseEntity<?> updateMemo(@RequestBody Map<String, Object> map) {
+
+	    Long wreId   = ((Number) map.get("wreId")).longValue();
+	    String memo  = (String) map.get("newMemo");
+	    
+	    map.put("wreId", wreId);
+	    map.put("wreMemo", memo);
+	    map.put("wreDate", LocalDateTime.now());
+
+	    int updated = workerService.updateWorkerMemo(map); // 1 반환 시 성공
+
+	    return (updated == 1)
+	           ? ResponseEntity.ok().build()
+	           : ResponseEntity.status(HttpStatus.BAD_REQUEST).body("update fail");
 	}
 
 }

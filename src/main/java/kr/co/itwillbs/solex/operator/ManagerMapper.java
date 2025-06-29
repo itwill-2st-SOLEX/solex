@@ -52,7 +52,7 @@ public interface ManagerMapper {
 	Map<String, Object> selectWpoSts05(Long wpoId);
 	
 		//>> 품질검사이력 테이블에도 업데이트
-	int updateWpoSts05_qh(Map<String, Object> map);
+	int updateWpoSts05_qh(Map map);
 	
 	
 	// 상태 : wpo_sts_05 -> 09
@@ -71,8 +71,8 @@ public interface ManagerMapper {
 	// 작업별 사원 생산량 리스트
 	List<Map<String, Object>> selectWorkerList(Map map);
 
-	// 작업별 사원 생산량 요약
-	List<Map<String, Object>> selectWorkerSum(Map map);
+	// 사원 생산량 변경
+	int updateWorkerCount(Map map);
 	
 
 }

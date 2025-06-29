@@ -126,7 +126,7 @@
 }
 
 #grid{
-	margin-top: 40px;
+	margin-top: 20px;
 }
 
 .bold-text {
@@ -144,7 +144,6 @@
 	font-weight: bold;
 }
 
-
 .progress-text {
     position: absolute;
     top: 50%;
@@ -156,4 +155,27 @@
     pointer-events: none; /* 클릭 방해 방지 */
 }
 
+.modal-body h5 {
+	margin-top: 20px !important;
+	margin-bottom: 30px !important;
+}
 
+.modal-body  h5 span {
+	margin-right: 40px;
+}
+
+/* 4 칸 들여쓰기 */
+#monthNav {
+	margin-top: 30px !important;
+	margin-bottom: 10px !important;
+}
+
+#monthNav button:hover i {
+    color: #0d6efd;            /* 파란색 강조 */
+    transform: scale(1.15);
+    transition: 0.15s;
+}
+#monthLabel {
+    min-width: 140px;          /* 폭 고정 → 레이아웃 흔들림 방지 */
+    text-align: center;
+}

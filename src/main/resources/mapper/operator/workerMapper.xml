@@ -12,24 +12,20 @@
 			my_emp.emp_id,
 			my_emp.emp_num,
 			my_emp.emp_nm,
-		    my_emp.emp_dep_nm || ' ' || my_emp.emp_team_nm AS dep_nm,		<!-- 부서 -->
+		    my_emp.emp_dep_nm || ' ' || my_emp.emp_team_nm AS dep_nm,		
 			
-		    vs.prd_code,			<!-- 제품코드 -->
-		    vs.prd_nm,				<!-- 제품명 -->
-		    vs.prd_color || ' / ' || vs.prd_size || 'mm / ' || vs.prd_height || 'ea' AS prd_option,	<!-- 제품옵션(색상 / 사이즈 / 굽높이) -->
+		    vs.prd_code,			
+		    vs.prd_nm,				
+		    vs.prd_color || ' / ' || vs.prd_size || 'mm / ' || vs.prd_height || 'ea' AS prd_option,
 		    
-		    wp.wpo_id,			<!-- 작업-공정코드 -->
-			wp.wrk_id, 			<!-- 작업지시코드 -->
-		    wp.wpo_ocount,		<!-- 작업지시수량 -->
-			wp.wpo_jcount,		<!-- 작업완료수량 -->
+		    wp.wpo_id,			
+			wp.wrk_id, 			
+		    wp.wpo_ocount,		
+			wp.wpo_jcount,		
 			wp.wpo_end_date,
-			<!--우선순위: 작업중이 1순위, 그다음 최근 완료-->
-	        CASE 
-	            WHEN wp.wpo_status = 'wpo_sts_02' THEN 1
-	            WHEN wp.wpo_status = 'wpo_sts_03' THEN 2
-	            ELSE 99
-	        END AS status_priority,
-	
+			wp.wpo_status,
+			<!--화면 표시 우선순위: 현재 작업중이 1순위,
+				현재 작업중인 내용이 없으면 최근에 완료한 작업 표시-->	
 	        ROW_NUMBER() OVER (
 	            PARTITION BY my_emp.emp_id 
 	            ORDER BY 
@@ -51,7 +47,7 @@
 				    ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
 				LEFT JOIN work_order wo 
 				    ON wp.wrk_id = wo.wrk_id
-				LEFT JOIN process p 
+				JOIN process p 
 				    ON wo.prc_id = p.prc_id 
 				    AND p.det_id = my_emp.emp_dep_cd
 				LEFT JOIN vw_suju_summary vs 
@@ -72,8 +68,15 @@
   		FROM work_report
   		WHERE emp_id=#{empId} AND wpo_id=#{wpoId}
   		ORDER BY wre_id desc
-  		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+  		<!--OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY-->
   	</select>
+  	
+  	<!--메모 변경하기-->
+  	<update id="updateWorkerMemo">
+  		UPDATE work_report
+  		SET wre_memo=#{newMemo}, wre_date=#{wreDate}
+  		WHERE wre_id = #{wreId}
+  	</update>
   	
   </mapper>
 

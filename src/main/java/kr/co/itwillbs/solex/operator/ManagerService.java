@@ -5,15 +5,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import kr.co.itwillbs.solex.orderrequest.OrderRequestsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ManagerService {
+
+    private final OrderRequestsService orderRequestsService;
 	
 	@Autowired
 	ManagerMapper managerMapper;
+
+    ManagerService(OrderRequestsService orderRequestsService) {
+        this.orderRequestsService = orderRequestsService;
+    }
 	
 	//로그인한 사람에 해당하는 공정 정보 가져오기
 	public Map<String, Object> getManagerSummary(Long empId) {
@@ -32,6 +39,28 @@ public class ManagerService {
 	//사원이 실적 등록할 때 마다 작업수량 업데이트
 	public int updateJcount(Long wpoId) {
 		return managerMapper.updateJcount(wpoId);
+	}
+	
+	// 작업별 사원 생산량 리스트
+	public List<Map<String, Object>> selectWorkerList(Map map){
+		return managerMapper.selectWorkerList(map);
+	}
+
+	// 사원의 생산수량 변경하기
+	@Transactional
+	public int updateWorkerCount(Map map) {
+		
+		Long wpoId = ((Number) map.get("wpoId")).longValue();
+
+	    int rowCnt = managerMapper.updateWorkerCount(map); // ① 수정 행 수
+	    
+	    if (rowCnt == 1) {                                 // ② 성공했을 때만 합계 재계산
+	        int a = managerMapper.updateJcount(wpoId);
+	        System.out.println("updateJcount rows    = " + a);          // ★2
+	    }
+	    
+	    return rowCnt;
+		
 	}
 	
 	// 작업 상태 업데이트 

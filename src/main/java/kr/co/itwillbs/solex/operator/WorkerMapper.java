@@ -12,4 +12,6 @@ public interface WorkerMapper {
 	void insertWorkCount(Map map);
 	
 	List<Map<String, Object>> getWorkerList(Map map);
+	
+	int updateWorkerMemo(Map map);
 }

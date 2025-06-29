@@ -58,6 +58,10 @@ public class WorkerService {
 	public List<Map<String, Object>> getWorkerList(Map map) {
 		return workerMapper.getWorkerList(map);
 	}
+	
+	public int updateWorkerMemo(Map map) {
+		return workerMapper.updateWorkerMemo(map);
+	}
 }
 
 
