@@ -86,6 +86,11 @@ async function setupModalContents() {
     const myModalElement = document.getElementById('myModal');
     const mode = myModalElement.dataset.mode || 'new';
 
+
+    // 모달 제목과 제출 버튼 요소를 가져옵니다.
+    const modalTitle = document.getElementById('myModalTitle');
+    const submitBtn = document.getElementById('submitOrderBtn');
+
     createInnerGrid();
     attachModalEventListeners();
     initializeSearchableSelect('client-select-box', '/SOLEX/orders/clients', onClientSelect);
@@ -93,12 +98,21 @@ async function setupModalContents() {
     
     setTimeout(() => {
         if (mode === 'detail') {
+            // 상세 보기 모드일 때
+            modalTitle.textContent = '수주 수정'; // 제목을 '수주 수정'으로 변경
+            submitBtn.textContent = '수정';      // 버튼 텍스트를 '수정'으로 변경
+
             const orderData = JSON.parse(myModalElement.dataset.orderData);
             populateModalWithData(orderData);
         } else {
+            // 신규 등록 모드일 때 (원래 상태로 복원)
+            modalTitle.textContent = '수주 등록'; // 제목을 '수주 등록'으로 복원
+            submitBtn.textContent = '등록';      // 버튼 텍스트를 '등록'으로 복원
+
             resetOrderForm();
             initDate();
         }
+
         if (INNER_TUI_GRID_INSTANCE) INNER_TUI_GRID_INSTANCE.refreshLayout();
     }, 150);
 }
@@ -153,9 +167,17 @@ function initializeSearchableSelect(wrapperId, apiUrl, onSelectCallback) {
 
     // 2. 검색어 입력 시 (keyup)
     const debouncedSearch = debounce(async () => {
+        wrapper.classList.add(ACTIVE_CLASS); // 검색 결과가 있으면 목록을 보여줌
+        
+        optionsContainer.innerHTML = `
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+        <div class="loading-spinner"></div>
+        </div>
+        `;
+
         const data = await fetchSelectData(apiUrl, textInput.value);
         renderOptions(data);
-        wrapper.classList.add(ACTIVE_CLASS); // 검색 결과가 있으면 목록을 보여줌
+
     }, 300);
     textInput.addEventListener('keyup', debouncedSearch);
 

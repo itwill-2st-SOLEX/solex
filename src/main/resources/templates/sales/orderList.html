@@ -34,7 +34,7 @@
         box-shadow: 0 5px 10px rgba(0,0,0,0.1);
 		}
 
-		.custom-search-select.open .options-container {
+		.custom-search-select.search-select-is-active  .options-container {
 			display: flex;
 			flex-direction: column;
 		}
@@ -55,10 +55,10 @@
 
 		.no-results {
 			flex-grow: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: #888;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			color: #888;
 		}
 		
 		.custom-select-wrapper {
@@ -100,7 +100,7 @@
 			background-color: #fff;
 			max-height: 200px;
 			overflow-y: auto;
-			z-index: 10;
+			z-index: 16;
 			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 		}
 
@@ -159,7 +159,7 @@
 			<div class="modal-dialog modal-dialog-scrollable modal-xl">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title">수주 등록</h5>
+						<h5 class="modal-title" id="myModalTitle">수주 등록</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
