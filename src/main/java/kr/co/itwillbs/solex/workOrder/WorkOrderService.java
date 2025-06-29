@@ -1,14 +1,11 @@
 package kr.co.itwillbs.solex.workOrder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import ch.qos.logback.core.net.SyslogOutputStream;
 
 @Service
 public class WorkOrderService {
@@ -37,8 +34,8 @@ public class WorkOrderService {
 	        item.put("wrk_id", wrkId);
 	        mapper.workProcessInsert(item);
 	    }
-		// 주문테이블 상태값 업테이트
-		 String oddId = (String) prdInfo.get(0).get("oddId");
+		// 주문테이블, 주문 디테일테이블 상태값 업테이트
+		String oddId = (String) prdInfo.get(0).get("oddId");
 		mapper.updateSujuOrderSts(oddId);
 	}
 	

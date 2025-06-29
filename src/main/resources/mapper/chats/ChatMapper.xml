@@ -124,4 +124,10 @@
 	       AND is_read = 'N'
 	       AND leave_status != 2
 	</select>
+	<select id="getMyChatRooms" resultType="String">
+	    SELECT DISTINCT room_id
+	      FROM messenger
+	     WHERE sender_id = #{empNum}
+	        OR receiver_id = #{empNum}
+	</select>
 </mapper>	

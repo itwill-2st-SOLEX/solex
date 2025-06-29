@@ -41,7 +41,6 @@ public class WorkOrderRestController {
 	// 창고 조회
 	@GetMapping("/warehouses/{prdId}")
 	public List<Map<String, Object>> getWarehouses(@PathVariable("prdId") String prdId) {
-		System.out.println("prdId" + prdId);
 		return service.getWarehouses(prdId);
 	}
 	

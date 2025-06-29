@@ -94,7 +94,8 @@
 <!--	수주detail 테이블 상태 변경-->
 	<update id="updateSujuOrderSts">
 		UPDATE suju_order_detail
-	       SET odd_sts = 'odd_sts_03'
+	       SET odd_sts = 'odd_sts_03',
+	       	   odd_mod_date = sysdate + (9/24)
 	     WHERE odd_id = #{oddId}
 	</update>
 <!-- 	창고 조회	 -->
@@ -113,12 +114,11 @@
 		    ON w.whs_id = a.whs_id
 		  LEFT JOIN warehouse_history wh 
 		    ON a.are_id = wh.are_id
-<!-- 		    [TODO] -->
-<!-- 		  LEFT JOIN product p -->
-<!-- 		    ON  -->
+ 		  LEFT JOIN product p 
+ 		    ON a.item_id = p.prd_id
 		 WHERE w.whs_sts = 'whs_sts_01'  -- 가동중
 		   AND a.are_type = 'area_type_02'
-<!-- 		   AND  -->
+ 		   AND p.prd_id = #{prdId} 
 		 GROUP BY w.whs_id, w.whs_nm, w.whs_pc, w.whs_add, w.whs_da,
 			      a.are_id, a.are_nm, a.are_max
 	</select>
