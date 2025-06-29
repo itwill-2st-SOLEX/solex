@@ -1,21 +1,23 @@
 $(function() {
 	console.log("로그인한 사용자 empId:", empId);
+	// 탭 전환 이벤트
 	initTabEvents();
+	// 검색 이벤트
 	initSearchEvent();
+	// 채팅 전송 엔터 이벤트
 	initEnterKeySend();
+	// 나가기 체크박스 이벤트
 	checkboxEvent();
+	// 사원 목록 출력
 	fetchUsersAndRender();
-	unreadCnt();
-
-	// 앱 시작 시 내 모든 채팅방 실시간 구독 시작
+	// 채팅방 실시간 구독 시작
 	connectAllChatRooms();
-	console.log(typeof connectAllChatRooms);
-
+	// 안 읽은 메세지 이벤트
+	unreadCnt();
 	// 채팅방 나가기 버튼 이벤트
 	document.getElementById('singleTrash').addEventListener('click', leaveChatRoom);
 });
 
-// 전역 상태
 let stompClient = null;
 let currentRoomId = null;
 let partnerId = null;
@@ -223,18 +225,14 @@ function openChatroom(name, targetId) {
 			console.error('읽음 처리 실패');
 		}
 	});
-
-	// 기존에 있던 WebSocket 연결 제거 (중복 구독 방지용) - 삭제!  
-	// connectWebSocket(currentRoomId);  ← 이 줄 삭제하세요.
 }
 
-// 전체 방 실시간 구독 연결 함수 (앱 시작 시 1회 실행)
+// 전체 방 실시간 구독 연결
 function connectAllChatRooms() {
 	const socket = new SockJS('/SOLEX/ws');
 	stompClient = Stomp.over(socket);
 
 	stompClient.connect({}, function() {
-		// 서버에서 내가 포함된 모든 채팅방 목록 조회
 		$.ajax({
 			url: '/SOLEX/chats/myRooms',  // 서버에서 내가 포함된 roomId 배열 반환 필요
 			method: 'GET',
@@ -245,11 +243,11 @@ function connectAllChatRooms() {
 				roomIds.forEach(roomId => {
 					stompClient.subscribe(`/topic/chatroom/${roomId}`, function(msg) {
 						const message = JSON.parse(msg.body);
+						debugger;
 						const isMine = String(message.sender) === String(empId);
 
 						const isChatroomHidden = document.getElementById('view-chatroom').classList.contains('hidden');
 
-						// sender, receiver 순서 상관없이 현재 방인지 체크
 						const isCurrentRoom =
 							currentRoomId === `room_${message.sender}_${message.receiver}` ||
 							currentRoomId === `room_${message.receiver}_${message.sender}`;
@@ -258,15 +256,7 @@ function connectAllChatRooms() {
 						const isMessageFromCurrentPartner = String(message.sender) === String(partnerId);
 
 						if (!isChatroomHidden && isCurrentRoom && isMessageFromCurrentPartner) {
-							console.log("SADFADFAFAFAFADS")
-							debugger;
-							// 내가 현재 보고 있는 채팅방에서 온 메시지 → 읽음 처리
-							renderMessage({
-								senderName: isMine ? '나' : message.sender_nm,
-								content: message.content
-							}, isMine, true);
-
-							// 읽음 처리 PATCH 요청 보내기
+							// 읽음 처리
 							$.ajax({
 								url: '/SOLEX/chats',
 								method: 'PATCH',
@@ -277,18 +267,29 @@ function connectAllChatRooms() {
 								}),
 								success: function() {
 									console.log('읽음 처리 완료');
+
+									renderMessage({
+										senderName: isMine ? '나' : message.sender_nm,
+										content: message.content
+									}, isMine, message.isRead);
+
 									unreadCnt();
 								},
 								error: function() {
 									console.error('읽음 처리 실패');
+
+									renderMessage({
+										senderName: isMine ? '나' : message.sender_nm,
+										content: message.content
+									}, isMine, false);
 								}
 							});
 						} else {
-							// 안읽음 표시 및 뱃지
+							// 다른 탭에서 메시지를 받았거나, 현재 안 보고 있을 때
 							renderMessage({
 								senderName: isMine ? '나' : message.sender_nm,
 								content: message.content
-							}, isMine, false);
+							}, isMine, message.isRead);
 
 							showChatBadge();
 							unreadCnt();
@@ -315,7 +316,8 @@ function sendMessage() {
 		receiver: partnerId,
 		content: content,
 		roomId: currentRoomId,
-		type: 'CHAT'
+		type: 'CHAT',
+		isRead: false 
 	};
 
 	stompClient.send('/app/chat.send', {}, JSON.stringify(message));
