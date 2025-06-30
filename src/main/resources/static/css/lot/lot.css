@@ -83,17 +83,3 @@
     border-radius: 15px;
     padding: 10px;
 }
-
-.tab-buttons {
-	display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    margin-top: 10px;
-}
-
-.detail-area .sub-area {
-    display: none;
-}
-.detail-area .sub-area.active {
-    display: block;
-}

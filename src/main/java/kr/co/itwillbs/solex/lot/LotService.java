@@ -1,7 +1,6 @@
 package kr.co.itwillbs.solex.lot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,5 +112,34 @@ public class LotService {
 		
 	    return converted;
 	}
+	
+	// ------------------------------- 상세조회 -------------------------------
+	// 최상위 LOT 상세조회
+	public Map<String, Object> getProductLotDetail(Long prdLotId) {
+        Map<String, Object> data = lotMapper.selectProductLotDetail(prdLotId);
+        data.put("type", "product");
+        return data;
+    }
+
+	// 공정 상세조회
+    public Map<String, Object> getProcessDetail(Long prcLotId) {
+        Map<String, Object> data = lotMapper.selectProcessLotDetail(prcLotId);
+        data.put("type", "process");
+        return data;
+    }
+
+    // 자재 상세조회
+    public Map<String, Object> getMaterialDetail(Long matLotId) {
+        Map<String, Object> data = lotMapper.selectMaterialLotDetail(matLotId);
+        data.put("type", "material");
+        return data;
+    }
+
+    // 설비 상세조회
+    public Map<String, Object> getEquipmentDetail(Long eqpId) {
+        Map<String, Object> data = lotMapper.selectEquipmentDetail(eqpId);
+        data.put("type", "equipment");
+        return data;
+    }
 
 }

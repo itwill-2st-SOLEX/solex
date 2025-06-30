@@ -77,4 +77,73 @@
 		WHERE map.prd_lot_id = #{prdLotId}
 	</select>
 
+	<!-- 최상위 LOT 상세조회 -->
+	<select id="selectProductLotDetail" parameterType="long" resultType="map">
+        SELECT
+            pl.prd_lot_code AS "lotCode",
+		    p.prd_nm AS "productName",
+		    p.prd_code AS "productCode",
+		    cd1.det_nm AS "size",
+		    cd2.det_nm AS "color",
+		    cd3.det_nm AS "type",
+		    cd4.det_nm AS "status",
+		    cd5.det_nm AS "productType",
+		    cd6.det_nm AS "height",
+		    pl.prd_lot_start_date AS "startDate",
+		    pl.prd_lot_end_date AS "endDate"
+        FROM product_lot pl
+        JOIN work_order wo ON pl.wrk_id = wo.wrk_id
+        JOIN suju_order_detail sod ON wo.odd_id = sod.odd_id
+        JOIN product_option po ON sod.opt_id = po.opt_id
+        JOIN product p ON po.prd_id = p.prd_id
+        JOIN code_detail cd1 ON po.opt_size = cd1.det_id
+        JOIN code_detail cd2 ON po.opt_color = cd2.det_id
+        JOIN code_detail cd3 ON p.prd_type = cd3.det_id
+        JOIN code_detail cd4 ON pl.prd_lot_status = cd4.det_id
+        JOIN code_detail cd5 ON p.prd_type = cd5.det_id
+        JOIN code_detail cd6 ON po.opt_height = cd6.det_id
+        WHERE pl.prd_lot_id = #{prdLotId}
+    </select>
+
+	<!-- 공정 상세조회 -->
+    <select id="selectProcessLotDetail" parameterType="long" resultType="map">
+        SELECT
+            pl.prc_lot_id,
+            p.prc_code AS "processCode",
+            p.prc_nm AS "processName",
+            pl.prc_lot_start_date AS "startDate",
+            pl.prc_lot_end_date AS "endDate",
+            pl.erp_nm AS "operatorName",
+            pl.erp_num AS "operatorNum"
+        FROM process_lot pl
+        JOIN process p ON pl.prc_id = p.prc_id
+        WHERE pl.prc_lot_id = #{prcLotId}
+    </select>
+
+	<!-- 자재 상세조회 -->
+    <select id="selectMaterialLotDetail" parameterType="long" resultType="map">
+        SELECT
+            ml.mat_lot_code,
+            m.mat_nm AS "materialName",
+            m.mat_cd AS "materialCode",
+            ml.mat_date AS "date",
+            ml.mat_sort AS "quantity",
+			c.cli_nm AS "clientName",
+			c.CLI_MGR_NAME AS "clientManager",
+			c.CLI_MGR_PHONE AS "managerNumber"
+        FROM material_lot ml
+        JOIN material m ON ml.mat_id = m.mat_id
+        JOIN client c ON m.cli_id = c.cli_id
+        WHERE ml.mat_lot_id = #{matLotId}
+    </select>
+
+	<!-- 설비 상세조회 -->
+    <select id="selectEquipmentDetail" parameterType="long" resultType="map">
+        SELECT
+            e.eqp_name AS "equipmentName",
+            e.eqp_code AS "equipmentCode"
+        FROM equipment e
+        WHERE e.eqp_id = #{eqpId}
+    </select>
+    
 </mapper>

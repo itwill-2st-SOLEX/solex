@@ -68,5 +68,40 @@ public class LotRestController {
 
 		return Collections.emptyList();
 	}
+	
+	@GetMapping("detail")
+	public Map<String, Object> getLotDetail(@RequestParam Map<String, String> param) {
+		
+		String id = param.get("id");
+		
+	    if (id == null) return Collections.emptyMap();
+
+	    // ✅ 공정 항목
+	    if (id.startsWith("prc_")) {
+	        Long prcLotId = Long.parseLong(id.substring(4));
+	        return lotService.getProcessDetail(prcLotId);
+	    }
+
+	    // ✅ 자재 항목
+	    if (id.startsWith("mat_")) {
+	        Long matLotId = Long.parseLong(id.substring(4));
+	        return lotService.getMaterialDetail(matLotId);
+	    }
+
+	    // ✅ 설비 항목
+	    if (id.startsWith("eqp_")) {
+	        Long eqpId = Long.parseLong(id.substring(4));
+	        return lotService.getEquipmentDetail(eqpId);
+	    }
+
+	    // ✅ 최상위 LOT
+	    if (id.startsWith("prd_")) {
+	        Long prdLotId = Long.parseLong(id.substring(4));
+	        return lotService.getProductLotDetail(prdLotId);
+	    }
+
+	    return Collections.emptyMap();
+	}
+
 
 }

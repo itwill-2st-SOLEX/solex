@@ -24,4 +24,16 @@ public interface LotMapper {
 	// 설비리스트
 	List<Map<String, Object>> selectEquipmentNodes(@Param("prdLotId") Long prdLotId);
 	
+	// ------------------------------- 상세조회 -------------------------------
+	// 최상위 LOT 상세조회
+	Map<String, Object> selectProductLotDetail(@Param("prdLotId") Long prdLotId);
+	
+	// 공정 상세조회
+    Map<String, Object> selectProcessLotDetail(@Param("prcLotId") Long prcLotId);
+    
+    // 자재 상세조회
+    Map<String, Object> selectMaterialLotDetail(@Param("matLotId") Long matLotId);
+    
+    // 설비 상세조회
+    Map<String, Object> selectEquipmentDetail(@Param("eqpId") Long eqpId);
 }
