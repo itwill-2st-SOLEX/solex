@@ -59,7 +59,7 @@
 
 /* ------------ prod-grid 내의 PRD_NM 컬럼 셀에만 적용 ------------ */
 .form-control[readonly] {
-/*     background-color: #e9ecef; Bootstrap의 form-control 클래스에 적용 */
+    background-color: #e9ecef; /*Bootstrap의 form-control 클래스에 적용*/
     opacity: 1; /* Bootstrap의 기본값을 유지하거나 오버라이드 */
     border: gray 1px solid;
 }

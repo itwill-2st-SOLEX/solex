@@ -95,7 +95,7 @@ public class ProductsRestController {
 	// 제품 update
 	@PostMapping("/productUpdate")
 	public ResponseEntity<Map<String, String>> editProduct(@RequestBody Map<String, Object> productData) {
-		
+		System.out.println("productData??? " + productData);
 		productsService.editProduct(productData);
 		
 		Map<String, String> response = new java.util.HashMap<>();

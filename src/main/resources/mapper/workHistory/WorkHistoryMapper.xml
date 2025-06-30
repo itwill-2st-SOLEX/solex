@@ -18,7 +18,9 @@
 			   , prd_height
 			   , ord_end_date
 		  FROM vw_suju_summary -- 뷰테이블
-		 WHERE odd_sts = '작업 완료'
+		 WHERE odd_sts in (SELECT det_nm FROM code_detail WHERE det_id between 'odd_sts_06' and 'odd_sts_09')
+		 
+		 
 		 ORDER BY odd_id DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>

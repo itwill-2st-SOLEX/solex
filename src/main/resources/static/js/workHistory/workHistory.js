@@ -22,13 +22,12 @@ $(function() {
 			{ header: '주문 상세 번호', name: 'odd_id', align: 'center' },
 			{ header: '제품코드', name: 'prd_code', align: 'center', filter: 'select' },
 			{ header: '제품명', name: 'prd_nm', align: 'center', filter: 'select' },
-			{ header: '진행현황', name: 'odd_sts', align: 'center', sortable: 'true', className: 'clickable-cell' },
+			{ header: '진행현황', name: 'odd_sts', align: 'center', sortable: 'true'},
 			{ header: '생산수량', name: 'odd_cnt', align: 'center', filter: 'select' },
 			{ header: '제품컬러', name: 'prd_color', align: 'center', filter: 'select' },
 			{ header: '제품 사이즈', name: 'prd_size', align: 'center', filter: 'select' },
 			{ header: '굽 높이', name: 'prd_height', align: 'center', filter: 'select' },
 			{ header: '납품 예정일', name: 'ord_end_date', align: 'center', sortable: 'true' },
-			{ header: '창고 배정', name: 'warehouse_btn', align: 'center' }
 		]
 	});
 
@@ -64,17 +63,6 @@ $(function() {
 
 	grid.on('scrollEnd', () => loadDrafts(currentPage));
 
-	// 진행현황 클릭시 모달 띄움
-	grid.on('click', (ev) => {
-		if (ev.columnName === 'odd_sts') {
-			const rowData = grid.getRow(ev.rowKey);
-			if (rowData.odd_sts === '작업 대기') {
-				openWorkModal(rowData.prd_code, rowData.odd_id, rowData.odd_cnt);
-			} else {
-				alert('작업 대기 상태에서만 작업 지시를 할 수 있습니다.');
-			}
-		}
-	});
 	// 창고배정 버튼 클릭시
 	document.getElementById('grid').addEventListener('click', function(e) {
 		const oddId = e.target.dataset.ordId;

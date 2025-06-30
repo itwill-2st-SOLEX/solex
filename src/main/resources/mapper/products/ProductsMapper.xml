@@ -105,7 +105,7 @@
 			        #{prd_unit},
 			        #{prd_type},
 			        #{prd_comm},
-			        TO_DATE(#{prd_reg_date}, 'YYYY-MM-DD HH24:MI'),
+			        SYSDATE + 9/24 ,
 			        null
 	    )
 	</insert>
@@ -163,19 +163,19 @@
 	   
     
     <!-- 제품 수정, 삭제 기능은 없애기로 함. 6월26일 -->
-<!--     <update id="updateProduct" parameterType="map"> -->
-<!--         UPDATE PRODUCT -->
-<!--         SET -->
-<!--             PRD_NM = #{prd_nm}, -->
-<!--             PRD_PRICE = #{prd_price}, -->
-<!--             PRD_CODE = #{prd_code}, -->
-<!--             PRD_UNIT = #{prd_unit}, -->
-<!--             PRD_TYPE = #{prd_type}, -->
-<!--             PRD_COMM = #{prd_comm}, -->
-<!--             PRD_UP_DATE = TO_DATE(#{prd_up_date}, 'YYYY-MM-DD HH24:MI:SS') -->
-<!--         WHERE -->
-<!--             PRD_ID = #{prd_id} -->
-<!--     </update> -->
+    <update id="updateProduct" parameterType="map">
+        UPDATE PRODUCT
+        SET
+            PRD_NM = #{prd_nm},
+            PRD_PRICE = #{prd_price},
+            PRD_CODE = #{prd_code},
+            PRD_UNIT = #{prd_unit},
+            PRD_TYPE = #{prd_type},
+            PRD_COMM = #{prd_comm},
+            PRD_UP_DATE = SYSDATE + 9/24 
+        WHERE
+            PRD_ID = #{prd_id}
+    </update>
 
 <!--     <delete id="deleteProductOptions" parameterType="string"> -->
 <!--         DELETE FROM PRODUCT_OPTION -->

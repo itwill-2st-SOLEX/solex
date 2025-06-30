@@ -79,17 +79,17 @@ public class ProductsService {
         productsMapper.updateProduct(productData);
 
         // 기존 옵션 모두 삭제 후 재등록
-        String prdIdToUpdate = (String) productData.get("prd_id");
-        productsMapper.deleteProductOptions(prdIdToUpdate);
+//        String prdIdToUpdate = (String) productData.get("prd_id");
+//        productsMapper.deleteProductOptions(prdIdToUpdate);
 
         // 새 옵션 정보 삽입
-        List<Map<String, String>> options = (List<Map<String, String>>) productData.get("options");
-        if (options != null && !options.isEmpty()) {
-            for (Map<String, String> option : options) {
-                option.put("prd_id", prdIdToUpdate);
-                productsMapper.insertProductOption(option);
-            }
-        }
+//        List<Map<String, String>> options = (List<Map<String, String>>) productData.get("options");
+//        if (options != null && !options.isEmpty()) {
+//            for (Map<String, String> option : options) {
+//                option.put("prd_id", prdIdToUpdate);
+//                productsMapper.insertProductOption(option);
+//            }
+//        }
 		
 	}
 

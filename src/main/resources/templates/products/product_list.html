@@ -46,8 +46,8 @@
 									            </div>
 								                <div class="row mb-4">
 								                	<div class="col">
-														<label for="prd_code" class="form-label">제품 코드<span style="color:red">*</span></label>
-														<input type="text" id="prd_code" name="prd_code" class="form-control" placeholder="제품 코드" value="${data.PRD_CODE ? data.PRD_CODE : ''}">
+														<label for="prd_code" class="form-label read_only">제품 코드<span style="color:red">*</span></label>
+														<input type="text" id="prd_code" name="prd_code" class="form-control read_only" placeholder="제품 코드" value="${data.PRD_CODE ? data.PRD_CODE : ''}">
 									                </div>
 									                <div class="col">
 									                    <label for="prd_price" class="form-label">제품 가격<span style="color:red">*</span></label>
@@ -117,8 +117,58 @@
 												<button type="button" class="btn btn-primary btn-sm mt-2 add-single-option-btn" data-color-code="opt_color_01" id="generateCombinationsBtn">
 													옵션 추가
 												</button>
-												<br><br>
-												<div id="optionGroupsContainer" class="mb-3" ></div>
+												<br>
+												<div id="optionTabsWrapper" class="d-none"> <ul class="nav nav-tabs mb-3" id="optionTabs" role="tablist">
+										            <li class="nav-item" role="presentation">
+										                <button class="nav-link active" id="my-options-tab" data-bs-toggle="tab" data-bs-target="#myOptionsContent" type="button" role="tab" aria-controls="myOptionsContent" aria-selected="true">내 옵션</button>
+										            </li>
+										            <li class="nav-item" role="presentation">
+										                <button class="nav-link" id="all-options-tab" data-bs-toggle="tab" data-bs-target="generateCombinationsBtn" type="button" role="tab" aria-controls="allOptionsContent" aria-selected="false">모든 옵션 추가</button>
+										            </li>
+										        </ul>
+										        <div class="tab-content" id="optionTabsContent">
+										            <div class="tab-pane fade show active" id="myOptionsContent" role="tabpanel" aria-labelledby="my-options-tab">
+										                <div id="currentOptionsGridContainer"></div>
+										                <p class="text-muted mt-2">선택된 옵션은 체크 해제가 불가능합니다.</p>
+										            </div>
+										            <div class="tab-pane fade" id="generateCombinationsBtn" role="tabpanel" aria-labelledby="all-options-tab">
+										                <div id="allOptionsGroupsContainer"></div>
+										                 <div class="form-check mt-3">
+										                    <input class="form-check-input" type="checkbox" id="selectAllOptions">
+										                    <label class="form-check-label" for="selectAllOptions">
+										                        모든 옵션 전체 선택/해제
+										                    </label>
+										                </div>
+										            </div>
+										        </div>
+										    </div>
+										    <div id="directOptionContainer"></div>
+												<div>
+													<ul class="nav nav-tabs mb-3" id="optionTabs" role="tablist">
+												        <li class="nav-item" role="presentation">
+												            <button class="nav-link active" id="my-options-tab" data-bs-toggle="tab" data-bs-target="#myOptionsContent" type="button" role="tab" aria-controls="myOptionsContent" aria-selected="true">내 옵션</button>
+												        </li>
+												        <li class="nav-item" role="presentation">
+												            <button class="nav-link" id="all-options-tab" data-bs-toggle="tab" data-bs-target="#allOptionsContent" type="button" role="tab" aria-controls="allOptionsContent" aria-selected="false">모든 옵션 추가</button>
+												        </li>
+												    </ul>
+												    <div class="tab-content" id="optionTabsContent">
+												        <div class="tab-pane fade show active" id="myOptionsContent" role="tabpanel" aria-labelledby="my-options-tab">
+												            <div id="currentOptionsGridContainer"></div>
+												            <p class="text-muted mt-2">선택된 옵션은 체크 해제가 불가능합니다.</p>
+												        </div>
+												        <div class="tab-pane fade" id="allOptionsContent" role="tabpanel" aria-labelledby="all-options-tab">
+												            <div id="optionGroupsContainer"></div>
+												             <div class="form-check mt-3">
+												                <input class="form-check-input" type="checkbox" id="selectAllOptions">
+												                <label class="form-check-label" for="selectAllOptions">
+												                    모든 옵션 전체 선택/해제
+												                </label>
+												            </div>
+												        </div>
+												    </div>
+												
+												</div>
           
 												<!-- 옵션 그룹핑한 테이블 예시 끝 -->
 								        	</div><!-- custom-modal-content 끝 -->

@@ -72,18 +72,19 @@ async function showProductModal(mode, data = null) {
     } else if (mode === 'edit' && data) {
         modalTitle.textContent = '제품 상세정보';
 		
-		// 250626 수정, 삭제기능 안되게 함.
-		const editableElements = document.querySelectorAll('input');
-		editableElements.forEach(element => {
+		// 250626 제품 이름, 가격, 설명만 수정, 옵션은 추가만 가능, 삭제 불가.
+		const editableElements = document.getElementsByClassName('read_only');
+		Array.from(editableElements).forEach(element => {
 		    element.setAttribute('readonly', 'readonly');
 		});
+		
 		const selectElements = document.querySelectorAll('select');
 		selectElements.forEach(select => {
 			select.setAttribute('disabled', 'disabled');
 		});
-		saveProductBtn.style.display='none';
+		saveProductBtn.textContent='수정 완료';
+		saveProductBtn.onclick = () => processProductData('update'); 
 		
-        
 		
         // 모달 필드에 기존 데이터 채우기 (옵션 데이터를 가져오기 전에 미리 채움)
         if (prdIdHiddenInput) prdIdHiddenInput.value = data.PRD_ID;
@@ -104,18 +105,10 @@ async function showProductModal(mode, data = null) {
     const productModal = new bootstrap.Modal(modalEl);
 
 	
-	
-	
-	
-	
-	
-	
-	// 이 리스너 함수는 showProductModal 범위 내에서 정의되어야 `prdProcessDiv`에 접근 가능합니다.
+	// ⭐⭐ 공정 순서 로딩 로직 시작 ⭐⭐
     const processTypeChange = async () => { // 이벤트 객체를 직접 받지 않으므로 `event` 파라미터 제거
         const selectedPrdType = prdTypeSelectElement.value; // 직접 요소에서 값을 가져옴
 		
-        console.log('모달 내 제품 유형 선택:', selectedPrdType);
-
         if (!selectedPrdType) {
             prdProcessDiv.innerHTML = '<p>공정순서를 보시려면 제품 유형을 선택해주세요.</p>';
             return;
@@ -160,11 +153,6 @@ async function showProductModal(mode, data = null) {
     prdTypeSelectElement.addEventListener('change', processTypeChange);
     // 리스너 함수를 요소에 저장하여 나중에 제거할 수 있도록 함
     prdTypeSelectElement._processChangeListener = processTypeChange;
-
-	
-	
-	
-	
 	
 	
     // 해당 select 요소에 'change' 이벤트를 강제로 한번 더 발생시켜야 할 수도 있습니다.
@@ -176,9 +164,6 @@ async function showProductModal(mode, data = null) {
         prdProcessDiv.innerHTML = '<p>공정순서를 보시려면 제품 유형을 선택해주세요.</p>';
     }
     // ⭐⭐ 공정 순서 로딩 로직 끝 ⭐⭐
-	
-	
-	
 	
 	
 	
@@ -381,6 +366,7 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
     }
 }
 
+// 옵션 테이블 생성
 // 각 색상 그룹별 Toast UI Grid 인스턴스를 저장할 Map
 const toastGridInstances = new Map();
 async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
