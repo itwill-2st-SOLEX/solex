@@ -47,13 +47,13 @@
 	<!-- 글 등록 -->
 	<insert id="insertNotice" parameterType="map">
 	    INSERT INTO NOTICE (emp_id, not_tt, not_con, not_reg_date)
-	    VALUES (#{empId}, #{notTt}, #{notCon}, SYSDATE)
+	    VALUES (#{empId}, #{notTt}, #{notCon}, #{notRegDate})
 	</insert>
 	
 	<!--글 변경 -->
 	<update id="updateNotice"  parameterType="map">
 		UPDATE notice
-		SET not_tt=#{notTt}, not_con=#{notCon}
+		SET not_tt=#{notTt}, not_con=#{notCon}, not_reg_date=#{notRegDate}
 		WHERE not_id=#{notId} 
 	</update>
 	

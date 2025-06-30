@@ -27,4 +27,5 @@ public interface ChatMapper {
 	public void deleteChatRoom(@Param("room_id1") String room_id1, @Param("room_id2") String room_id2);
 	// 안읽은 메세지 갯수
 	public int getUnreadMessageCnt(String empId);
+	public List<String> getMyChatRooms(String empNum);
 }

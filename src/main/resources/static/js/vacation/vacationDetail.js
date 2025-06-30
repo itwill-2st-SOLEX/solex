@@ -46,7 +46,7 @@ bindScrollEvent();
 
 //날짜 형식 함수
 //날짜만 넣으면 년-월-일 형식, (날짜, true)하면 년-월-일 오전?오후 시:분 형식으로 출력
-function formatter(date, includeTime = false) {
+function dateFormatter(date, includeTime = false) {
 	const d = new Date(date);
 	
 	//Intl.DateTimeFormat(...).formatToParts() : 날짜를 구성 요소별로 나눠서 배열 형태로 반환
@@ -94,8 +94,8 @@ async function vacationSummary() {
 			empId = data.EMP_ID;
 			
 			document.getElementById('empNm').textContent = data.EMP_NM || '-';
-			document.getElementById('empHire').textContent = formatter(new Date(data.EMP_HIRE))  || '-';
-			document.getElementById('periodEnd').textContent = formatter(new Date(data.PERIOD_END)) || '-';
+			document.getElementById('empHire').textContent = dateFormatter(new Date(data.EMP_HIRE))  || '-';
+			document.getElementById('periodEnd').textContent = dateFormatter(new Date(data.PERIOD_END)) || '-';
 			document.getElementById('daysLeft').textContent = data.DAYS_LEFT != null ? `(D-${data.DAYS_LEFT})` : '';
 			document.getElementById('vacTotal').textContent = data.VAC_TOTAL || 0;
 			document.getElementById('vacUsed').textContent = data.VAC_USED || 0;
@@ -128,8 +128,8 @@ async function vacationDetail(page) {
 			vacTotal: n.VAC_TOTAL,
 			vacUsed: n.VAC_USED,
 			vacRemain: n.VAC_REMAIN,
-            leaStartDate: formatter(new Date(n.LEA_START_DATE))  || '-',
-            leaEndDate: formatter(new Date(n.LEA_END_DATE))  || '-',
+            leaStartDate: dateFormatter(new Date(n.LEA_START_DATE))  || '-',
+            leaEndDate: dateFormatter(new Date(n.LEA_END_DATE))  || '-',
             leaUsedDay: n.LEA_USED_DAY,
             leaCon: n.LEA_CON
         }));

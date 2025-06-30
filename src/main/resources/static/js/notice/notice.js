@@ -52,7 +52,7 @@ bindScrollEvent();
 
 //날짜 형식 함수
 //날짜만 넣으면 년-월-일 형식, (날짜, true)하면 년-월-일 오전?오후 시:분 형식으로 출력
-function formatter(date, includeTime = false) {
+function dateFormatter(date, includeTime = false) {
 	const d = new Date(date);
 	
 	//Intl.DateTimeFormat(...).formatToParts() : 날짜를 구성 요소별로 나눠서 배열 형태로 반환
@@ -116,7 +116,7 @@ async function noticeList(page, keyword = '') {
             empDepNm: n.EMP_DEP_NM  == '공통' ? '-' : n.EMP_DEP_NM,
             empPosNm: n.EMP_POS_NM  == '공통' ? '-' : n.EMP_POS_NM,
             empNm: n.EMP_NM || '-',
-            notRegDate: formatter(new Date(n.NOT_REG_DATE)),
+            notRegDate: dateFormatter(new Date(n.NOT_REG_DATE)),
 			rowNum: totalCount - (page * pageSize + idx) // 역순 번호 계산
         }));
 		
@@ -288,7 +288,7 @@ function showNoticeModal(mode, data = {}) {
                 <ul class="custom-modal-meta">
 					<li><strong>부서명 </strong> <span id="modalDept">${data.EMP_DEP_NM == '공통' ? '-' : data.EMP_DEP_NM}</span></li>
                     <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span> &nbsp; </li>
-                    <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? formatter(data.NOT_REG_DATE, true) : formatter(now)}</span></li>
+                    <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? dateFormatter(data.NOT_REG_DATE, true) : dateFormatter(now)}</span></li>
 					                </ul>
             </div>
             <div class="custom-modal-content" id="modalContent">${content}</div>
