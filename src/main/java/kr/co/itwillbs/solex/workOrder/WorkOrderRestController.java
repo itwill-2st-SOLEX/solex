@@ -47,9 +47,6 @@ public class WorkOrderRestController {
 	// 창고 자재 등록
 	@PostMapping("/warehouses")
 	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo) {
-		System.out.println("prdInfo : " + prdInfo);
 		service.warehousesInsert(prdInfo);
 	}
-	
-	
 }

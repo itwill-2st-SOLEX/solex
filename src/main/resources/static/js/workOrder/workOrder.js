@@ -83,7 +83,6 @@ $(function() {
 		const oddId = e.target.dataset.ordId;
 		const actualCnt = e.target.dataset.oddActualCnt;
 		const odd_actual_cnt = parseInt(actualCnt, 10);
-		console.log('🔢 parseInt 결과:', actualCnt);
 		const optId = e.target.dataset.optId;
 		const prdId = e.target.dataset.prdId;
 
@@ -415,6 +414,8 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 			const modalEl = document.getElementById('AssignWarehouseModal');
 			const modal = bootstrap.Modal.getInstance(modalEl);
 			modal.hide();
+			
+			window.location.reload();
 		},
 		error: function(xhr, status, error) {
 			console.error('🚨 창고 데이터 로딩 실패:', error);
