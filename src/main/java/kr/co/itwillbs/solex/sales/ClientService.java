@@ -29,10 +29,10 @@ public class ClientService {
     @Autowired
     private ClientMapper clientMapper;
 
-//    @Value("${business.api.url}")
+    @Value("${business.api.url}")
     private String apiUrl;
 
-//    @Value("${business.api.secret}")
+    @Value("${business.api.secret}")
     private String serviceKey;
     
     public List<Map<String, Object>> getClientNameList() {

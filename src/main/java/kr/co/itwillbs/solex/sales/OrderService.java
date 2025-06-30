@@ -1,7 +1,9 @@
 package kr.co.itwillbs.solex.sales;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.extern.log4j.Log4j2;
 
 
 
@@ -50,7 +51,6 @@ public class OrderService {
 		// 1) 검색어가 없는 경우
         if (searchKeyword == null) {
             if (count < 1) {
-                // 예: 검색어가 없는경우 + 사원이 거래처 등록을 한적이 없는 경우. 
                 return orderMapper.getSelectTop5PopularClients();
             } else {
                 // 예: 검색어가 없고 + 사원이 거래처 등록을 한번이라도 한 경우
@@ -74,49 +74,31 @@ public class OrderService {
 		return orderMapper.getSearchProductList(searchKeyword);
 	}
 
-	public List<Map<String,Object>> getColors(String prd_cd) {
-		return orderMapper.getColorsByProduct(prd_cd);
+	
+	public List<Map<String, Object>> getOptionsByProduct(String prd_id) {
+		return orderMapper.getOptionsByProduct(prd_id);
 	}
+	
+	
 
-	public List<Map<String, Object>> getSizesByProductAndColor(String prd_cd, String color) {
-		return orderMapper.getSizesByProductAndColor(prd_cd,color);
-	}
-
-
-	public List<Map<String, Object>> getHeightsByProductColorSize(String prd_cd, String color, String size) {
-		return orderMapper.getHeightsByProductColorSize(prd_cd,color,size);
-	}
-	public int getStockCount(String productCode, String color, String size, String height) {
-		return orderMapper.getStockCount(productCode,color,size,height);
-	}
 	
 	@Transactional
-	public List<Map<String, Object>> checkLackingMaterials(Map<String, Object> orderData) {
-		String opt_id = orderMapper.getOptionIdByCombination(orderData);
-		 if (opt_id == null) {
-			throw new RuntimeException("해당 옵션 조합의 상품이 존재하지 않습니다.");
-		}
-		 
-		// 2. 주문 수량 추출
-        int orderCount = Integer.parseInt(orderData.get("ord_cnt").toString());
-        
-		// 3. 자재 부족 계산
-        return orderMapper.getLackingMaterialsWithMine(opt_id, orderCount);
+public int createOrderProcess(Map<String, Object> orderData) {
+    // 1. 주문 테이블 INSERT (기존과 동일)
+    orderMapper.createSujuOrder(orderData);
+    Long orderId = ((BigDecimal) orderData.get("ord_id")).longValue();
 
-	}
-	
-	
-	
-	@Transactional
-	public int createOrderProcess(Map<String, Object> orderData) {
-		String opt_id = orderMapper.getOptionIdByCombination(orderData);
-		
-		// 나중에 여기서 바로 출고라는 결과값이 넘어오묜 그걸 비교해서 sts_00을 나타내는게 어떤가 sts_07로
-		orderData.put("ord_sts", "ord_sts_00"); // 상태값을 '00'로 설정 상태 : 수주등록(검토 느낌s)
-		orderData.put("opt_id", opt_id);
-		// 1. 주문 마스터 테이블에 INSERT
-		return orderMapper.createSujuOrder(orderData); // 이 호출로 orderData에 ord_id가 채워짐
-		
+    List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
+
+    // 2. 각 item에 ord_id와 기본 상태만 추가 (opt_id 조회 로직 전체 삭제)
+    for (Map<String, Object> item : items) {
+        item.put("ord_id", orderId);
+        item.put("odd_sts", "odd_sts_00");
+    }
+
+    // 3. 단순화된 items 리스트를 Mapper로 전달
+    // 이제 XML이 모든 것을 처리합니다.
+    return orderMapper.createSujuOrderDetail(items);		
 		// 수주 상세 등록
 		
 		// 이후 수주 요청 관리에서  밑에 있는 내용들이 실행됨
@@ -156,5 +138,33 @@ public class OrderService {
 		// 업데이트 수주 디테일
 	    
 	}
+
+
+	@Transactional(readOnly = true)
+	public Map<String, Object> getOrderDetail(int ord_id) {
+		// 1. 주문 기본 정보 조회 (첫 번째 DB 호출)
+        Map<String, Object> orderInfo = orderMapper.selectOrderInfoById(ord_id);
+        if (orderInfo == null) {
+            throw new RuntimeException("ID가 " + ord_id + "인 주문을 찾을 수 없습니다.");
+        }
+
+        // 2. 주문 상세 항목 목록 조회 (두 번째 DB 호출)
+        List<Map<String, Object>> orderItems = orderMapper.selectOrderItemsByOrderId(ord_id);
+
+        // 3. 선택 가능한 전체 옵션 목록 조회 (세 번째 DB 호출)
+        //    - 1번에서 조회한 상품 ID(PRODUCT_ID)를 파라미터로 사용합니다.
+        //    - DB에서 대문자로 반환될 수 있으므로 대문자 키로 조회합니다.
+        Object prd_id = orderInfo.get("PRODUCT_ID"); 
+        List<Map<String, Object>> availableOptions = orderMapper.selectAllOptionsByProductId(prd_id);
+
+        // 4. 모든 결과를 하나의 최종 Map에 담아서 반환
+        Map<String, Object> finalResult = new HashMap<>();
+        finalResult.put("orderInfo", orderInfo);
+        finalResult.put("orderItems", orderItems);
+        finalResult.put("availableOptions", availableOptions);
+
+        return finalResult;
+	}
+
 
 }

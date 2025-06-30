@@ -14,8 +14,9 @@
   <select id="selectClients" resultType="map">
      SELECT
             cli_id, biz_reg_no, cli_add, cli_ceo, cli_da,
-            cli_mgr_name, cli_mgr_phone, cli_nm, cli_pc, cli_phone, cli_type
-        FROM client
+            cli_mgr_name, cli_mgr_phone, cli_nm, cli_pc, cli_phone, d.det_nm as cli_type
+        FROM client c
+        left join code_detail d on c.cli_type = d.det_id
         <where>
             <if test="search_term != null and search_term != ''">
                 AND (

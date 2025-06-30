@@ -2,9 +2,9 @@ package kr.co.itwillbs.solex.sales;
 
 //Enum 예시
 public enum ClientType {
- BUYER("구매처"),
- SELLER("판매처"),
- EQUIPMENT("설비");
+ client_cat_01("구매처"),
+ client_cat_02("판매처"),
+ client_cat_03("설비");
 
  private final String label;
 

@@ -4,27 +4,16 @@
 
 <mapper namespace="kr.co.itwillbs.solex.sales.OrderMapper">
   <select id="selectPagedOrderDataAsMap" parameterType="Map" resultType="Map">
-  	SELECT
-    	ord.ord_id,
-        prd.prd_nm,
-        cli.cli_nm,
-        ord.ord_cnt,
-        NVL(ord.ord_add, '') || ' ' || NVL(ord.ord_da, '') AS ORD_ADDRESS,
-        cd.det_nm,
-        TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE
+  	SELECT 
+		ord.ord_id, 
+		cli.cli_nm, 
+		cli.cli_ceo, 
+		NVL(ord.ord_add, '') || ' ' || NVL(ord.ord_da, '') AS ORD_ADDRESS,
+		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE,
+		TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE
     FROM suju_order ord
-    left JOIN client cli ON ord.cli_id = cli.cli_id
-    left JOIN product_option opt ON ord.opt_id = opt.opt_id
-    left JOIN product prd ON prd.prd_cd = opt.prd_cd
-    left JOIN code_detail cd ON ord.ord_sts = cd.det_id
-    <if test="searchKeyword != null and searchKeyword != ''">
-        AND (
-            cli.cli_nm LIKE '%' || #{searchKeyword} || '%' OR  -- 거래처명 검색
-            prd.prd_nm LIKE '%' || #{searchKeyword} || '%' OR  -- 상품명 검색
-            prd.prd_cd LIKE '%' || #{searchKeyword} || '%'     -- 상품코드도 검색에 포함
-        )
-    </if>
-    ORDER BY cd.det_sort asc
+    LEFT JOIN client cli
+    ON cli.cli_id = ord.cli_id
     OFFSET #{offset} ROWS
     FETCH NEXT #{limit} ROWS ONLY
 </select>
@@ -35,7 +24,7 @@
     	cli_nm, cli_id
     FROM client
     <where>
-	  cli_type = 'BUYER'
+	  cli_type = 'client_cat_02'
       <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
       <if test="searchKeyword != null and searchKeyword != ''">
         AND LOWER(cli_nm) LIKE '%' || #{searchKeyword} || '%'
@@ -51,7 +40,7 @@
   <select id="countClientsByEmployeeId" resultType="int">
   	SELECT count(*)
   	FROM client
-  	WHERE emp_id = #{emp_id} and cli_type = 'BUYER' 
+  	WHERE emp_id = #{emp_id} and cli_type = 'client_cat_02'
   </select>
   
   <select id="getSelectClientsByEmployeeId" resultType="Map">
@@ -72,7 +61,7 @@
         FROM client cli 
         JOIN suju_order suju    
         ON cli.cli_id = suju.cli_id
-        WHERE cli.cli_type = 'BUYER'    
+        WHERE cli.cli_type = 'client_cat_02'   
         GROUP BY
             cli.cli_nm,cli.cli_id
         ORDER BY order_count DESC
@@ -82,20 +71,20 @@
    
    <select id="getSelectTop5PopularProducts" resultType="Map">
     SELECT
-    	prd_nm, prd_cd
+    	prd_nm, prd_id
     FROM (
         SELECT
 	        p.prd_nm,
-	        p.prd_cd,
-	        SUM(ord.ord_cnt) AS total_sales
+	        p.prd_id,
+	        SUM(odd.odd_cnt) AS total_sales
 	    FROM
 	        product p 
 	    JOIN
-	        product_option opt ON p.prd_cd = opt.prd_cd 
+	        product_option opt ON p.prd_id = opt.prd_id 
 	    JOIN
-	        suju_order ord ON opt.opt_id = ord.opt_id 
+	        suju_order_detail odd ON opt.opt_id = odd.opt_id 
 	    GROUP BY
-	        p.prd_nm, p.prd_cd
+	        p.prd_nm, p.prd_id
 	    ORDER BY
 	        total_sales DESC
     	)
@@ -105,7 +94,7 @@
    
 	<select id="getSearchProductList" parameterType="Map" resultType="Map">
 	    SELECT
-	    	prd_nm, prd_cd
+	    	prd_nm, prd_id
 	    FROM product
 	    <where>
 	      <!-- searchKeyword 가 있을 때만 WHERE 절 추가 -->
@@ -116,58 +105,32 @@
 	    ORDER BY prd_nm
 	</select>
 
-	<!-- 컬러 -->
-	<select id="getColorsByProduct" resultType="Map">
-		SELECT DISTINCT opt.opt_color, cd.det_nm
-		FROM product_option opt 
-		LEFT JOIN code_detail cd 
-		ON cd.det_id = opt.opt_color
-		WHERE prd_cd = #{prd_cd}
-	</select>
-
-	<!-- 사이즈 -->
-	<select id="getSizesByProductAndColor" resultType="Map">
-		SELECT DISTINCT opt.opt_size , cd.det_nm
+	<select id="getOptionsByProduct" resultType="Map">
+		SELECT
+			opt_id,
+			opt_color,
+			opt_size,
+			opt_height,
+			cd2.det_nm as OPT_COLOR_NM,
+			cd3.det_nm as OPT_SIZE_NM,
+			cd4.det_nm as OPT_HEIGHT_NM
 		FROM product_option opt
-		LEFT JOIN code_detail cd 
-		ON cd.det_id = opt.opt_size
-		WHERE prd_cd = #{prd_cd}
-		AND opt.opt_color = #{opt_color}
+		left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+		left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+		left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
+		WHERE prd_id = #{prd_id}
 	</select>
 	
-	<!-- 사이즈 -->
-	<select id="getHeightsByProductColorSize" resultType="Map">
-		SELECT DISTINCT opt.opt_height , cd.det_nm
-		FROM product_option opt
-		LEFT JOIN code_detail cd 
-		ON cd.det_id = opt.opt_height
-		WHERE prd_cd = #{prd_cd}
-		AND opt.opt_color = #{opt_color}
-		AND opt.opt_size = #{opt_size}
-	</select>
-	
-	<select id="getStockCount" resultType="int">		
-		SELECT stk.stk_cnt
-		FROM  stock stk
-		LEFT JOIN product_option opt
-		ON opt.opt_id = stk.item_id
-		WHERE stk.stk_cat = 'stk_cat_01'
-		AND opt.prd_cd = #{prd_cd}
-		AND opt.opt_color = #{opt_color}
-		AND opt.opt_size = #{opt_size}
-		AND opt.opt_height = #{opt_height}
-	</select>
-	
-	
-	
+	<!-- 옵션 조합으로 옵션 ID 가져오기  부족한 자재 조회할때 쓰임 -->
 	<select id="getOptionIdByCombination" resultType="string">
 		SELECT opt_id
 		FROM product_option
-		WHERE prd_cd = #{prd_cd}
+		WHERE prd_id = #{prd_id}
 		AND opt_color = #{opt_color}
 		AND opt_size = #{opt_size}
 		AND opt_height = #{opt_height}
 	</select>
+	<!-- 옵션 조합으로 옵션 ID 가져오기  부족한 자재 조회할때 쓰임 -->
 
 	<!-- 자재 부족 계산 -->
 	<select id="getLackingMaterialsWithMine" resultType="map">
@@ -182,24 +145,24 @@
 	    SELECT
 	      b.mat_id,
 	      m.mat_nm,
-	      SUM(b.bom_cnt * ord.ord_cnt) AS required_qty_existing,
+	      SUM(b.bom_cnt * odd.odd_cnt) AS required_qty_existing,
 	      (
-	        SELECT bom_cnt * #{ord_cnt}
+	        SELECT bom_cnt * #{odd_cnt}
 	        FROM bom b2
 	        WHERE b2.opt_id = #{opt_id}
 	          AND b2.mat_id = b.mat_id
 	      ) AS required_qty_mine,
-	      SUM(b.bom_cnt * ord.ord_cnt) +
+	      SUM(b.bom_cnt * odd.odd_cnt) +
 	      (
-	        SELECT bom_cnt * #{ord_cnt}
+	        SELECT bom_cnt * #{odd_cnt}
 	        FROM bom b2
 	        WHERE b2.opt_id = #{opt_id}
 	          AND b2.mat_id = b.mat_id
 	      ) AS required_qty_total
-	    FROM suju_order ord
-	    JOIN bom b ON b.opt_id = ord.opt_id
+	    FROM suju_order_detail odd
+	    JOIN bom b ON b.opt_id = odd.opt_id
 	    JOIN material m ON m.mat_id = b.mat_id
-	    WHERE ord.ord_sts IN ('ord_sts_00', 'ord_sts_01', 'ord_sts_02')
+	    WHERE odd.odd_sts IN ('odd_sts_00', 'odd_sts_01', 'odd_sts_02')
 	    GROUP BY b.mat_id, m.mat_nm
 	  ) r
 	  LEFT JOIN stock s ON s.item_id = r.mat_id AND s.stk_cat = 'stk_cat_02'
@@ -208,13 +171,129 @@
 	
   	<!-- 주문 등록 트랜잭션 시작 -->
   	<!-- 1. 수주테이블 등록 -->
-  	<insert id="createSujuOrder" parameterType="map">
-		INSERT INTO suju_order(cli_id, emp_id, ord_reg_date, opt_id, ord_cnt, ord_end_date, ord_sts, ord_pc, ord_add, ord_da, ord_pay, ord_pay_date, ord_mod_date ,isapproval)
-		VALUES(#{cli_id},#{emp_id},SYSDATE,#{opt_id},#{ord_cnt},#{ord_end_date},#{ord_sts},#{ord_pc},#{ord_add},#{ord_da},#{ord_pay},#{ord_pay_date},SYSDATE,'n')
+  	<insert id="createSujuOrder" parameterType="map" keyProperty="ord_id" keyColumn="ord_id" useGeneratedKeys="true">
+		INSERT INTO suju_order(cli_id, emp_id,ord_pay,pay_type, ord_pay_date,ord_reg_date,ord_end_date, ord_pc, ord_add, ord_da,ord_mod_date)
+		VALUES(#{cli_id},#{emp_id},#{ord_pay},#{pay_type},#{ord_pay_date},SYSDATE + 9/24,#{ord_end_date},#{ord_pc},#{ord_add},#{ord_da},SYSDATE + 9/24)
 	</insert>	
 	<!-- 주문 등록 트랜잭션 끝 -->
 
+	<select id="selectOptIdsForItems" parameterType="java.util.List" resultType="map">
+		SELECT
+			opt_id,
+			prd_id,
+			opt_color,
+			opt_size,
+			opt_height
+		FROM
+			product_option
+		WHERE
+			<foreach collection="list" item="item" open="(" close=")" separator="OR">
+				(
+					prd_id = #{item.productCode}
+					AND opt_color = #{item.colorCode}
+					AND opt_size = #{item.sizeCode}
+					AND opt_height = #{item.heightCode}
+				)
+			</foreach>
+	</select>
+	
+	<!-- 2. 수주상세테이블 등록 -->
+	<insert id="createSujuOrderDetail" parameterType="java.util.List">
+    INSERT INTO suju_order_detail (
+        ord_id, 
+        opt_id, 
+        odd_cnt,
+        odd_sts,
+        odd_mod_date,
+        odd_isapproval
+    )
+    <foreach item="item" collection="list" separator="UNION ALL">
+        SELECT
+            #{item.ord_id},
+            (SELECT opt_id from product_option 
+             WHERE prd_id = #{item.productCode} 
+               and opt_color = #{item.colorCode}
+               and opt_size = #{item.sizeCode}
+               and opt_height = #{item.heightCode}),
+            #{item.quantity},
+            #{item.odd_sts},
+            SYSDATE + 9/24,
+            'n'
+        FROM DUAL
+    </foreach>
+</insert>
+	<!-- 주문 등록 트랜잭션 끝 -->
+
+
+<!--  -->
+
+<select id="selectOrderInfoById" parameterType="long" resultType="Map">
+	SELECT
+		ord.ord_id,
+		ord.cli_id         AS client_id,
+		c.cli_nm          AS client_name,
+		-- 주문에 포함된 첫 번째 상품의 정보를 대표로 가져옴
+		(SELECT p.prd_id FROM suju_order_detail sod_sub JOIN product_option po_sub ON sod_sub.opt_id = po_sub.opt_id JOIN product p ON po_sub.prd_id = p.prd_id WHERE sod_sub.ord_id = ord.ord_id AND ROWNUM = 1) AS product_id,
+		(SELECT p.prd_nm FROM suju_order_detail sod_sub JOIN product_option po_sub ON sod_sub.opt_id = po_sub.opt_id JOIN product p ON po_sub.prd_id = p.prd_id WHERE sod_sub.ord_id = ord.ord_id AND ROWNUM = 1) AS product_name,
+        ord.pay_type   AS payment_type,
+        ord.ord_pay        AS payment_amount,
+        TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS delivery_date,
+        TO_CHAR(ord.ord_pay_date, 'YYYY-MM-DD') AS payment_date,
+        ord.ord_pc         AS postal_code,
+        ord.ord_add        AS base_address,
+        ord.ord_da         AS detail_address
+    FROM
+        suju_order ord
+    LEFT JOIN
+        client c ON ord.cli_id = c.cli_id
+    WHERE
+        ord.ord_id = #{ord_id}
+</select>	
+
+
+<select id="selectOrderItemsByOrderId" parameterType="long" resultType="map">
+    SELECT
+        opt.prd_id         AS product_code,
+        p.prd_nm          AS product_name,
+        opt.opt_color      AS color_code,
+        cd2.det_nm        AS color_name,
+        opt.opt_size       AS size_code,
+        cd3.det_nm        AS size_name,
+        opt.opt_height     AS height_code,
+        cd4.det_nm        AS height_name,
+        odd.odd_cnt       AS quantity
+    FROM
+        suju_order_detail odd
+    JOIN
+        product_option opt ON odd.opt_id = opt.opt_id
+    JOIN
+        product p ON opt.prd_id = p.prd_id
+	left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+	left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+	left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
+    WHERE
+        odd.ord_id = #{ord_id}
+</select>
   
+
+<select id="selectAllOptionsByProductId" parameterType="object" resultType="map">
+    SELECT
+        opt.opt_id,
+        opt.prd_id,
+        opt.opt_color,
+		cd2.det_nm as OPT_COLOR_NM,
+        opt.opt_size,
+		cd3.det_nm as OPT_SIZE_NM,
+        opt.opt_height,
+		cd4.det_nm as OPT_HEIGHT_NM
+    FROM
+        product_option opt
+	left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+	left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+	left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
+    WHERE
+        opt.prd_id = #{prd_id}
+</select>
   
   
 </mapper>
