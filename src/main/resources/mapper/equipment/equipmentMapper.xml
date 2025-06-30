@@ -31,7 +31,7 @@
 	</select>
 
 	<select id="getClientList" resultType="Map">
-	SELECT
+	SELECT 
 		cli.cli_id as CLI_ID,
 		cli.cli_nm as CLI_NM
 	FROM client cli
@@ -56,7 +56,8 @@
 			eqp_purchase_date,
 			eqp_installation_date,
 			prc_id,
-			cli_id
+			cli_id,
+			emp_team
 		) VALUES (
 			'EQ' || LPAD(#{eqp_code_num}, 3, '0'),
 			#{eqp_name},
@@ -66,7 +67,8 @@
 			#{eqp_purchase_date},
 			#{eqp_installation_date},
 			#{prc_id},
-			#{cli_id}
+			#{cli_id},
+			#{team_id}
 		)
 	</insert>
 
@@ -80,15 +82,19 @@
 		eqp.eqp_comm as EQP_COMM,
 		eqp.eqp_price as EQP_PRICE,
 		eqp.eqp_sts as EQP_STS,
+		eqp.emp_team as TEAM_ID,
+
 		TO_CHAR(eqp.eqp_purchase_date, 'YYYY-MM-DD') AS EQP_PURCHASE_DATE,
 		TO_CHAR(eqp.eqp_installation_date, 'YYYY-MM-DD') AS EQP_INSTALLATION_DATE,
 		prc.prc_nm as PRC_NM,
 		cli.cli_nm as CLI_NM,
 		cli.cli_id as CLI_ID,
-		prc.prc_id as PRC_ID
+		prc.prc_id as PRC_ID,
+		cd.det_nm as TEAM_NAME
 	FROM equipment eqp
 	left JOIN process prc ON eqp.prc_id = prc.prc_id	
 	left JOIN client cli ON eqp.cli_id = cli.cli_id
+	left join code_detail cd on cd.det_id = eqp.emp_team
 	WHERE eqp.eqp_code = #{eqp_code}
 	</select>
 
@@ -103,6 +109,7 @@
 			eqp_sts = #{eqp_sts},
 			eqp_purchase_date = #{eqp_purchase_date},
 			eqp_installation_date = #{eqp_installation_date},
+			emp_team = #{team_id},
 			prc_id = #{prc_id},
 			cli_id = #{cli_id}
 		WHERE eqp_code = #{eqp_code}
@@ -110,7 +117,20 @@
 
 
 
-	
+	<!-- 팀 조회 -->
+	<select id="getTeam" resultType="Map">
+	select 
+		distinct 
+		e.emp_team_cd as team_cd,
+		d.det_nm as team_nm
+		
+	from process p 
+	left join employee e on e.emp_dep_cd = p.det_id 
+	left join code_detail d on d.det_id = e.emp_team_cd
+	where prc_id = #{processId}
+	and d.det_nm not in ('공통')
+	order by emp_team_cd asc
+	</select>
 	
   
   

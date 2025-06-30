@@ -97,6 +97,15 @@ public class EquipmentRestController {
         }
     }
 
+    @GetMapping("/{processId}/teams") // 
+	public List<Map<String, Object>> getTeam(@PathVariable("processId") int processId) throws Exception {
+		List<Map<String, Object>> list = equipmentService.getTeam(processId);
+		return list; 
+	}
+    
+    
+    
+
 
 
 

@@ -23,7 +23,7 @@
   
   <insert id="createClients"  parameterType="map" >
   	insert into client( emp_id,cli_nm,cli_type,cli_phone,cli_pc,cli_add,cli_da,cli_ceo,cli_reg_date,cli_mgr_name,cli_mgr_phone,biz_reg_no,cli_mod_date) 
-  		        VALUES (#{emp_id},#{cli_nm},#{cli_type},#{cli_phone},#{cli_pc},#{cli_add},#{cli_da},#{cli_ceo},SYSDATE,#{cli_mgr_name},#{cli_mgr_phone},#{biz_reg_no},SYSDATE)
+  		        VALUES (#{emp_id},#{cli_nm},#{cli_type},#{cli_phone},#{cli_pc},#{cli_add},#{cli_da},#{cli_ceo},SYSDATE + 9/24,#{cli_mgr_name},#{cli_mgr_phone},#{biz_reg_no},SYSDATE + 9/24)
   </insert>
   
   <select id="getClientById" parameterType="int" resultType="map">
@@ -45,7 +45,7 @@
         cli_pc = #{cli_pc},
         cli_phone = #{cli_phone},
         cli_type = #{cli_type},
-        cli_mod_date = SYSDATE
+        cli_mod_date = SYSDATE + 9/24
   	 WHERE cli_id = #{cli_id}
   </update>
 

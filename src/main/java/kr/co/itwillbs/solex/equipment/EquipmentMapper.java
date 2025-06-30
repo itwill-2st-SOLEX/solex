@@ -30,6 +30,9 @@ public interface EquipmentMapper {
 	// 설비 수정
 	Integer updateEquipment(Map<String, Object> params);
 
+
+	List<Map<String, Object>> getTeam(int processId);
+
 	// // 주문 상세 조회 쿼리
 	// List<Map<String, Object>> getOrderDetail(@Param("odd_id") String odd_id);
 

@@ -173,7 +173,7 @@
   	<!-- 1. 수주테이블 등록 -->
   	<insert id="createSujuOrder" parameterType="map" keyProperty="ord_id" keyColumn="ord_id" useGeneratedKeys="true">
 		INSERT INTO suju_order(cli_id, emp_id,ord_pay,pay_type, ord_pay_date,ord_reg_date,ord_end_date, ord_pc, ord_add, ord_da,ord_mod_date)
-		VALUES(#{cli_id},#{emp_id},#{ord_pay},#{pay_type},#{ord_pay_date},SYSDATE,#{ord_end_date},#{ord_pc},#{ord_add},#{ord_da},SYSDATE)
+		VALUES(#{cli_id},#{emp_id},#{ord_pay},#{pay_type},#{ord_pay_date},SYSDATE + 9/24,#{ord_end_date},#{ord_pc},#{ord_add},#{ord_da},SYSDATE + 9/24)
 	</insert>	
 	<!-- 주문 등록 트랜잭션 끝 -->
 
@@ -210,15 +210,14 @@
     <foreach item="item" collection="list" separator="UNION ALL">
         SELECT
             #{item.ord_id},
-            -- 각 행마다 서브쿼리를 실행하여 opt_id를 찾습니다.
             (SELECT opt_id from product_option 
              WHERE prd_id = #{item.productCode} 
                and opt_color = #{item.colorCode}
                and opt_size = #{item.sizeCode}
                and opt_height = #{item.heightCode}),
             #{item.quantity},
-            #{item.ord_sts},
-            SYSDATE,
+            #{item.odd_sts},
+            SYSDATE + 9/24,
             'n'
         FROM DUAL
     </foreach>

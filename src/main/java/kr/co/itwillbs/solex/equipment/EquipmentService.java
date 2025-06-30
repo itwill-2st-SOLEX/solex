@@ -58,4 +58,8 @@ public class EquipmentService {
         }
     }
 
+	public List<Map<String, Object>> getTeam(int processId) {
+		return equipmentMapper.getTeam(processId);
+	}
+
 }

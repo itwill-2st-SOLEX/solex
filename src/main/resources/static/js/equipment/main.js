@@ -39,11 +39,16 @@ const grid = new tui.Grid({
 // 3. 초기화 및 이벤트 리스너 설정 (DOM 로드 후)
 // ===================================================================
 document.addEventListener('DOMContentLoaded', async function() {
-    // ★★★ 개선점 2: 페이지 로드 시 필수 데이터를 미리 한 번만 가져옵니다. ★★★
     await initializePage();
 
     // 이벤트 리스너들을 설정합니다.
     setupEventListeners();
+
+
+    document.getElementById('PRC_NM').addEventListener('change', function() {
+      getTeam();
+    });
+    
 });
 
 /**
@@ -99,7 +104,8 @@ async function fetchGridData(page = 0) {
         
         const data = await response.json();
         data.forEach(item => {
-            item.EQP_PRICE = formatNumber(item.EQP_PRICE);
+          item.EQP_PRICE = formatNumber(item.EQP_PRICE);
+          item.EQP_STS = item.EQP_STS === 'y' ? '가동' : '비가동';
         });
 
         if (page === 0) {
@@ -117,7 +123,7 @@ async function fetchGridData(page = 0) {
 }
 
 /**
- * ★★★ 개선점 3: Select Box 옵션 데이터를 한 번만 가져와 전역 변수에 저장 ★★★
+ * Select Box 옵션 데이터를 한 번만 가져와 전역 변수에 저장
  */
 async function fetchFormOptions() {
     try {
@@ -183,7 +189,7 @@ async function openDetailModal(rowData) {
 // ===================================================================
 
 /**
- * ★★★ 신규 함수: 모달의 모든 입력 필드를 초기화합니다. ★★★
+ * 모달의 모든 입력 필드를 초기화합니다.
  */
 function resetModalForm() {
     document.getElementById('EQP_NAME').value = '';
@@ -192,6 +198,14 @@ function resetModalForm() {
     document.getElementById('EQP_INSTALLATION_DATE').value = '';
     document.getElementById('EQP_STS').value = '';
     document.getElementById('EQP_COMM').value = '';
+    const teamSelect = document.getElementById('TEAM_NAME');
+    teamSelect.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.textContent = `-팀을 선택해주세요-`;
+    defaultOption.value = '';
+    defaultOption.selected = true;
+    teamSelect.appendChild(defaultOption);
+    //
 
     // Select box는 reset()으로 기본값이 선택되지 않을 수 있어 수동으로 채웁니다.
     populateSelect('CLI_NM', formSelectOptions.clientList, 'CLI_ID', 'CLI_NM');
@@ -200,7 +214,7 @@ function resetModalForm() {
 }
 
 /**
- * ★★★ 신규 함수: 상세 데이터로 모달 폼을 채웁니다. ★★★
+ * 상세 데이터로 모달 폼을 채웁니다.
  */
 function populateModalForm(data) {
     document.getElementById('EQP_NAME').value = data.EQP_NAME || '';
@@ -209,21 +223,28 @@ function populateModalForm(data) {
     document.getElementById('EQP_INSTALLATION_DATE').value = data.EQP_INSTALLATION_DATE || '';
     document.getElementById('EQP_STS').value = data.EQP_STS || '';
 
-    console.log(data.EQP_PRICE);
     document.getElementById('EQP_PRICE').value = formatNumber(data.EQP_PRICE || 0);
     
-    // ★★★ 버그 수정: ID로 select box 값을 정확하게 설정합니다. ★★★
-    console.log(data.CLI_ID);
-    console.log(data.PRC_ID);
+    // 
     document.getElementById('CLI_NM').value = data.CLI_ID || '';
     document.getElementById('PRC_NM').value = data.PRC_ID || '';
+
+
+    const teamSelect = document.getElementById('TEAM_NAME');
+    teamSelect.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.textContent = data.TEAM_NAME || '';
+    defaultOption.value = data.TEAM_ID || '';
+    teamSelect.appendChild(defaultOption);
+    
 }
 
 /**
- * ★★★ 신규 함수: '등록' 모드에 맞게 모달 버튼을 설정합니다. ★★★
+ * '등록' 모드에 맞게 모달 버튼을 설정합니다.
  */
 function setupModalForCreate() {
     document.getElementById('exampleModalLabel').textContent = '설비 등록'; // 모달 제목 변경
+
     const submitBtn = document.getElementById('submitBtn');
     const newBtn = submitBtn.cloneNode(true); // 이벤트 리스너 제거
     submitBtn.parentNode.replaceChild(newBtn, submitBtn);
@@ -233,7 +254,7 @@ function setupModalForCreate() {
 }
 
 /**
- * ★★★ 신규 함수: '수정' 모드에 맞게 모달 버튼을 설정합니다. ★★★
+ * '수정' 모드에 맞게 모달 버튼을 설정합니다.
  */
 function setupModalForUpdate(eqpCode) {
     document.getElementById('exampleModalLabel').textContent = '설비 정보 수정'; // 모달 제목 변경
@@ -325,6 +346,40 @@ function formatNumber(num) {
   const formatNumber = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return formatNumber;
 }
+
+// 공정에 대한 팀 선택.
+function getTeam() {
+
+  const prcId = document.getElementById('PRC_NM').value;
+  // 공백일때도 return
+  if (!prcId || prcId === '') return;
+
+  fetch(`/SOLEX/equipment/${prcId}/teams`)
+    .then(response => response.json())
+    .then(data => {
+      const teamSelect = document.getElementById('TEAM_NAME');
+      teamSelect.innerHTML = '';
+      const defaultOption = document.createElement('option');
+      defaultOption.textContent = `-팀을 선택해주세요-`;
+      defaultOption.value = '';
+      defaultOption.selected = true;
+      teamSelect.appendChild(defaultOption);
+      data.forEach(team => {
+        const option = document.createElement('option');
+        option.value = team.TEAM_CD;
+        option.textContent = team.TEAM_NM;
+        teamSelect.appendChild(option);
+      });
+    })
+    .catch(error => console.error('팀 데이터 로딩 실패:', error));
+}
+
+
+
+
+
+
+
 
 
 // 폼 유효성 검사
@@ -449,7 +504,9 @@ function getCurrentFormData() {
       eqp_sts: document.getElementById('EQP_STS').value,
       cli_id: Number(document.getElementById('CLI_NM').value),
       prc_id: Number(document.getElementById('PRC_NM').value),
+      team_id: document.getElementById('TEAM_NAME').value,
   };
+  console.log(data);
   return data;
 }
 
@@ -468,8 +525,9 @@ async function updateEquipment(eqpCode) {
       originalEquipmentData.EQP_INSTALLATION_DATE !== currentData.eqp_installation_date ||
       originalEquipmentData.EQP_STS !== currentData.eqp_sts ||
       originalEquipmentData.CLI_ID !== currentData.cli_id ||
-      originalEquipmentData.PRC_ID !== currentData.prc_id;
-
+      originalEquipmentData.PRC_ID !== currentData.prc_id ||
+      originalEquipmentData.TEAM_ID !== currentData.team_id;
+  console.log(currentData);
   if (!isChanged) {
       alert('변경된 내용이 없습니다.');
       return;

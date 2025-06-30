@@ -116,7 +116,7 @@ public int createOrderProcess(Map<String, Object> orderData) {
     // 2. 각 item에 ord_id와 기본 상태만 추가 (opt_id 조회 로직 전체 삭제)
     for (Map<String, Object> item : items) {
         item.put("ord_id", orderId);
-        item.put("ord_sts", "ord_sts_00");
+        item.put("odd_sts", "odd_sts_00");
     }
 
     // 3. 단순화된 items 리스트를 Mapper로 전달
