@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.process.ProcessMapper">
+
+    <!-- 부서명 리스트 조회 API -->
+    <select id="getDepartmentList">
+    	SELECT	DET_ID, DET_NM, DET_YN
+    	FROM	CODE_DETAIL
+    	WHERE	COD_ID = 'dep_mes'
+    	AND		DET_YN = 'y'
+    </select>
+    
+    <!-- 품질검사명 리스트 조회 API -->
+    <select id="getQualityItemList">
+    	SELECT	QUA_ID, QUA_NM, QUA_TYPE
+    	FROM	QUALITY_ITEM
+    	WHERE	QUA_TYPE = 'qua_type_03'
+    </select>
+    
+	<!-- 공정정보 리스트 무한스크롤 -->
+	<select id="selectPagedProcessList" resultType="map">
+	    SELECT
+			p.prc_id,
+			p.PRC_CODE,
+			p.prc_nm,
+			p.prc_des,
+			p.prc_yn,
+			p.qua_id,
+			q.qua_nm,
+			p.det_id,
+			c.det_nm
+		FROM process p
+		JOIN quality_item q ON p.qua_id = q.qua_id
+		JOIN code_detail c ON p.det_id = c.det_id
+		ORDER BY p.prc_id
+		OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
+	</select>
+
+    <select id="selectTotalProcessCount" resultType="int">
+        SELECT COUNT(*) FROM PROCESS
+    </select>
+    
+    <!-- 공정 신규 등록 -->
+    <insert id="insertProcess" parameterType="map">
+	    INSERT INTO PROCESS (
+	        PRC_CODE,
+	        DET_ID,
+	        PRC_NM,
+	        PRC_DES,
+	        PRC_YN,
+	        QUA_ID
+	    ) VALUES (
+	        #{PRC_CODE},
+	        #{DET_NM},
+	        #{PRC_NM},
+	        #{PRC_DES},
+	        #{PRC_YN},
+	        #{QUA_ID}
+	    )
+	</insert>
+    
+    <!-- 공정 기존 수정 -->
+    <update id="updateProcess" parameterType="map">
+	    UPDATE PROCESS
+	    SET
+	        PRC_NM = #{PRC_NM},
+	        PRC_DES = #{PRC_DES},
+	        PRC_YN = #{PRC_YN},
+	        DET_ID = #{DET_NM},  <!-- DET_NM을 가공해서 DET_ID로 썼다면 여기에도 반영 -->
+	        QUA_ID = #{QUA_ID}
+	    WHERE
+	        PRC_CODE = #{PRC_CODE}
+	</update>
+    
+    <!-- 제품유형 리스트 무한스크롤 -->
+    <select id="selectPagedPrdTypeList" resultType="map">
+    	SELECT  DET_ID, DET_NM
+		FROM    CODE_DETAIL
+		WHERE   COD_ID = 'prd_type'
+		AND		DET_YN = 'y'
+		ORDER BY DET_ID
+		OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
+    </select>
+
+	<select id="selectTotalPrdTypeCount">
+		SELECT	COUNT(DET_ID)
+		FROM	CODE_DETAIL
+		WHERE	COD_ID = 'prd_type'
+		AND		DET_YN = 'y'
+	</select>
+	
+	<!-- 유형별 공정순서 조회 -->
+	<select id="getTypeProcessList" resultType="map">
+		SELECT
+            t.pcp_id,
+            t.prd_type,
+            t.prc_id,
+            t.pcp_seq,
+            p.PRC_CODE,
+            p.prc_nm,
+            p.prc_des
+        FROM
+            type_process t
+            JOIN process p ON t.prc_id = p.prc_id
+        WHERE
+            t.prd_type = #{prdType}
+        ORDER BY
+            t.pcp_seq
+	</select>
+	
+	<!-- 공정리스트 조회 -->
+	<select id="selectAllProcesses">
+		SELECT PRC_ID, PRC_CODE, PRC_NM, PRC_DES
+		FROM PROCESS
+		ORDER BY PRC_ID
+	</select>
+	
+	<!-- 공정순서 신규 등록 -->
+	<insert id="insertTypeProcess" parameterType="map">
+	    INSERT INTO TYPE_PROCESS (
+	        PRD_TYPE,
+	        PRC_ID,
+	        PCP_SEQ
+	    ) VALUES (
+	        #{DET_ID},
+	        #{PRC_ID},
+	        #{PCP_SEQ}
+	    )
+	</insert>
+	
+	<!-- 공정순서 기존 수정 -->
+	<update id="updateTypeProcess" parameterType="map">
+	    UPDATE TYPE_PROCESS
+	    SET
+	        PRD_TYPE = #{DET_ID},
+	        PRC_ID = #{PRC_ID},
+	        PCP_SEQ = #{PCP_SEQ}
+	    WHERE
+	        PCP_ID = #{PCP_ID}
+	</update>
+	
+	<!-- 공정순서 삭제 -->
+	<delete id="deleteTypeProcess" parameterType="map">
+	    DELETE FROM TYPE_PROCESS WHERE PCP_ID = #{PCP_ID}
+	</delete>
+	
+	<!-- 공정순서 재정렬 -->
+	<update id="shiftUpSequence" parameterType="map">
+	    UPDATE TYPE_PROCESS
+	    SET PCP_SEQ = PCP_SEQ - 1
+	    WHERE PRD_TYPE = #{DET_ID}
+	      AND PCP_SEQ > #{PCP_SEQ}
+	</update>
+
+</mapper>

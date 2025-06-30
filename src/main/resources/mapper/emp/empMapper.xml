@@ -19,7 +19,7 @@
         #{emp_nm, jdbcType=VARCHAR},
         #{emp_gd, jdbcType=VARCHAR},
         #{emp_birth, jdbcType=DATE},    
-        #{emp_birth, jdbcType=VARCHAR},
+        #{emp_pwd, jdbcType=VARCHAR},
         #{emp_phone, jdbcType=VARCHAR},
         #{emp_email, jdbcType=VARCHAR},
         #{emp_add, jdbcType=VARCHAR},

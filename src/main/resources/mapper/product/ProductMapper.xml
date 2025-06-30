@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.product.ProductMapper">
+	<select id="getProductNameList" resultType="map">
+		SELECT 
+			prd_id as id,
+			prd_nm as name
+		FROM product
+	</select>
+	
+	<select id="findByProductId" resultType="map">
+		SELECT 
+			opt_id as opt_id
+		FROM product_option
+		where prd_id = #{itemId}
+	</select>
+</mapper>

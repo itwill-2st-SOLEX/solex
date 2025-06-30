@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+
+<head>
+	<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+	<title>자재 발주관리</title>
+	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script th:src="@{/js/material_orders/material_orders_main.js}"></script>
+	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+</head>
+
+<body>
+	
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			
+			<h2>자재 발주 목록</h2>
+			<div id="global-checkbox-container">
+			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">자재발주등록</button>
+			 </div>
+			 <div id="grid"></div>
+			 <div class="custom-content">
+			 <div id="grid"></div>
+			</div>
+			</div>
+	<!-- 등록모달창 -->
+		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">자재 발주등록</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			      </div>
+			      <div class="modal-body">	
+			      	
+					        <!-- 여기에 JS가 form을 생성하여 삽입할 예정 -->
+					</div>
+				</div>
+			</div>	
+		</div>
+	</th:block>
+
+
+</body>
+
+</html>

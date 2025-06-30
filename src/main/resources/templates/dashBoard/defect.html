@@ -15,64 +15,79 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			<!-- 본문 영역-->
-			<div class="dashboard-summary">
-				<div class="summary-card pink">
-					<p class="label">오늘 생산량</p>
-					<p class="value" id="todayCount">0</p>
-					<p class="rate up" id="todayRate">+0%</p>
-				</div>
-				<div class="summary-card green">
-					<p class="label">당월 누적 생산</p>
-					<p class="value" id="monthCount">0</p>
-					<p class="rate down" id="monthRate">-0%</p>
-				</div>
-				<div class="summary-card blue">
-					<p class="label">당월 불량률</p>
-					<p class="value" id="defectRate">0%</p>
-					<p class="rate up" id="defectRateTrend">+0%</p>
-				</div>
-			</div>
+			<!-- ✅ 요약 카드 + 최근 생산 완료 -->
+			<div class="custom">
+				<div class="top-row">
+					<div class="dashboard-summary">
+						<div class="summary-card pink">
+							<p class="label">오늘 생산량</p>
+							<p class="value" id="todayCount">0</p>
+							<p class="rate up" id="todayRate">+0%</p>
+						</div>
+						<div class="summary-card green">
+							<p class="label">당월 누적 생산</p>
+							<p class="value" id="monthCount">0</p>
+							<p class="rate down" id="monthRate">-0%</p>
+						</div>
+						<div class="summary-card blue">
+							<p class="label">당월 불량률</p>
+							<p class="value" id="defectRate">0%</p>
+							<p class="rate up" id="defectRateTrend">+0%</p>
+						</div>
+					</div>
 
-			<!-- 📈 생산량 추이 -->
-			<div class="chart-card">
-				<div class="chart-header">
-					<h3>생산량 추이</h3>
-					<div class="chart-toggle">
-						<button class="toggle-btn active" data-type="monthly">월별</button>
-						<button class="toggle-btn" data-type="weekly">주간</button>
-						<button class="toggle-btn" data-type="daily">일별</button>
+
+					<div class="chart-card chart-main">
+						<div class="chart-header">
+							<h3>생산량 추이</h3>
+							<div class="chart-toggle">
+								<button class="toggle-btn active" data-type="monthly">월별</button>
+								<button class="toggle-btn" data-type="weekly">주간</button>
+								<button class="toggle-btn" data-type="daily">일별</button>
+							</div>
+						</div>
+						<div class="chart-container">
+							<canvas id="lineChart"></canvas>
+						</div>
 					</div>
 				</div>
-				<div class="chart-container">
-					<canvas id="lineChart"></canvas>
+
+				<!-- ✅ 생산량 추이 그래프 (top-row 아래 넓게) -->
+				<!-- ✅ 최근 생산 완료된 것들 (세로로 길게) -->
+				<div class="recent-finished-box">
+					<h4>최근 생산 완료된 것들</h4>
+					<ul class="recent-finished-list">
+						<li><strong>릴 케이스 13</strong> <span class="time">2025-06-19
+								13:00 생산 완료</span></li>
+						<li><strong>패킹 지지대</strong> <span class="time">2025-06-19
+								10:20 생산 완료</span></li>
+						<li><strong>기어 커버 A</strong> <span class="time">2025-06-18
+								16:50 생산 완료</span></li>
+						<li><strong>패킹 지지대</strong> <span class="time">2025-06-19
+								10:20 생산 완료</span></li>
+						<li><strong>기어 커버 A</strong> <span class="time">2025-06-18
+								16:50 생산 완료</span></li>
+<!-- 						<li><strong>기어 커버 A</strong> <span class="time">2025-06-18 -->
+<!-- 						16:50 생산 완료</span></li> -->
+								
+					</ul>
 				</div>
 			</div>
-
-			<!-- 📊 테이블 + 도넛 차트 나란히 -->
-			<div class="chart-row">
-				<!-- 최근 생산내역 그리드 -->
-				<div class="chart-card half">
-					<h3>최근 생산 내역</h3>
-					<table class="data-table">
-						<thead>
-							<tr>
-								<th>거래처</th>
-								<th>요청일</th>
-								<th>수량</th>
-								<th>상태</th>
-							</tr>
-						</thead>
-						<tbody id="orderTable">
-							<!-- JS로 행 삽입 -->
-						</tbody>
-					</table>
+			<!-- ✅ 테이블 + 도넛 차트 -->
+			<div class="chart-row-wrap">
+				<div class="chart-left">
+					<div class="chart-cards">
+						<h3>최근 생산 내역</h3>
+<!-- 						JS에서 채움 -->
+						<div id="orderGrid"></div> 
+					</div>
 				</div>
-
-				<!-- 도넛 차트 -->
-				<div class="chart-card half">
-					<h3>2주간 품목 생산 비율</h3>
-					<div class="chart-container">
-						<canvas id="donutChart"></canvas>
+				<div class="chart-right">
+					<div class="chart-table">
+						<h3>2주간 품목 생산 비율</h3>
+						<div class="chart-container">
+							<canvas id="donutChart"></canvas>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.area.AreaMapper">
+  
+	<!-- 단건 INSERT -->
+    <insert id="insertArea" 
+			parameterType="map"
+			useGeneratedKeys="true"
+			keyProperty="are_id"
+			keyColumn="are_id">
+        INSERT INTO area (
+            whs_id,
+            are_nm,
+            are_type,
+            item_id,
+            are_max,
+            are_qty
+        ) VALUES (
+            #{whs_id},
+            #{area_nm},
+            #{area_tp},
+            #{item_id},
+            #{max_cnt},
+            #{qty}
+        )
+    </insert>
+    
+    <insert id="insertDetail" parameterType="map">
+        INSERT INTO area_detail (
+            are_id,
+            item_id,
+            are_det_qty
+        ) VALUES (
+            #{areaId},
+            #{itemId},
+            #{qty}
+        )
+    </insert>
+    
+    <select id="getWarehouseAreaHistory" resultType="map">
+		SELECT wh.whs_his_date AS action_time,
+				wh.whs_his_cnt AS quantity,
+				s.det_nm AS status
+		FROM warehouse_history wh
+		LEFT JOIN code_detail s 
+		ON wh.whs_his_sts = s.det_id
+		WHERE wh.are_id = #{areaId}
+	</select>
+	
+	<select id="selectStockList" resultType="map">
+		SELECT  s.det_nm AS nm, 
+				s.det_id AS code,
+				SUM(ar.are_qty) AS qty, 
+				ar.item_id AS item_id,
+				COALESCE(m.mat_nm , p.prd_nm) AS item_nm, 
+				u.det_nm AS item_unit
+	    FROM area ar
+	    LEFT JOIN code_detail s
+	           ON ar.are_type = s.det_id
+	    LEFT JOIN material m
+	           ON ar.are_type = 'area_type_01'
+	          AND ar.item_id  = m.mat_id
+	    LEFT JOIN product  p
+	           ON ar.are_type = 'area_type_02'
+	          AND ar.item_id  = p.prd_id
+        LEFT   JOIN code_detail  u
+        		ON u.det_id = COALESCE(m.mat_unit, p.prd_unit)
+        GROUP  BY
+	        s.det_nm,
+	        s.det_id,
+	        ar.item_id,
+	        COALESCE(m.mat_nm , p.prd_nm),
+	        u.det_nm
+	</select>
+	
+	<select id="getStockDetail" resultType="map">
+		SELECT  ar.are_nm AS area_nm, 
+				w.whs_nm AS warehouse_nm,
+		        ad.item_id AS item_id, 
+		        ad.are_det_qty AS qty, 
+		        COALESCE(m.mat_nm, pr.prd_nm) AS item_nm,
+		        cd_unit.det_nm       AS item_unit,
+		        cd_color.det_nm AS op_color,     
+		        cd_size.det_nm AS op_size,       
+		        cd_height.det_nm AS op_height  
+		FROM        area         ar
+		JOIN        area_detail  ad
+		       ON   ad.are_id   = ar.are_id          
+		LEFT JOIN   warehouse	w    
+		    ON w.whs_id = ar.whs_id   
+		LEFT JOIN   material     m                       
+		       ON   ar.are_type = 'area_type_01'          
+		      AND   ad.item_id  = m.mat_id
+		LEFT JOIN   product         pr
+		       ON   ar.are_type = 'area_type_02'
+		      AND   ar.item_id  = pr.prd_id
+		LEFT JOIN   product_option      po                        
+		       ON   ar.are_type = 'area_type_02'         
+		      AND   ad.item_id  = po.opt_id
+		LEFT JOIN   code_detail     cd_unit
+		           ON cd_unit.det_id = COALESCE(m.mat_unit , pr.prd_unit)
+		LEFT JOIN   code_detail     cd_color  ON cd_color.det_id  = po.opt_color
+		LEFT JOIN   code_detail     cd_size   ON cd_size.det_id   = po.opt_size
+		LEFT JOIN   code_detail     cd_height ON cd_height.det_id = po.opt_height
+		WHERE  ar.item_id = #{itemId}                           
+			AND  ar.are_type = #{type} 
+	</select>
+</mapper>

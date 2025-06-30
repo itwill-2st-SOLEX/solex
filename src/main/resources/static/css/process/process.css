@@ -1,0 +1,58 @@
+@charset "UTF-8";
+
+.content-area {
+	padding: 20px;
+}
+
+#type-tab {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    gap: 15px;
+}
+
+.process-area {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.type-list-area {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+	width: 30%;
+	height: auto;
+}
+
+.typeProcess-area {
+	display: flex;
+    flex-direction: column;
+    gap: 15px;
+	width: 70%;
+	height: auto;
+}
+
+.title-area {
+	display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.sub-title {
+	font-size: 24px;
+	font-weight: bold;
+}
+
+.btn-area {
+	display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+/* 선택된 셀 강조 스타일 */
+.cell-error {
+	border: 2px solid red !important;
+	background-color: #ffe6e6;
+}
