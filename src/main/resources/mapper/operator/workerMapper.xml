@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.itwillbs.solex.operator.WorkerMapper">	
+
+  	<!-- 현재 작업중인 공정 정보 가져오기 -->
+  	<select id="getWorkerSummary">
+		SELECT *
+		FROM (         
+		SELECT
+			my_emp.emp_id,
+			my_emp.emp_num,
+			my_emp.emp_nm,
+		    my_emp.emp_dep_nm || ' ' || my_emp.emp_team_nm AS dep_nm,		
+			
+		    vs.prd_code,			
+		    vs.prd_nm,				
+		    vs.prd_color || ' / ' || vs.prd_size || 'mm / ' || vs.prd_height || 'ea' AS prd_option,
+		    
+		    wp.wpo_id,			
+			wp.wrk_id, 			
+		    wp.wpo_ocount,		
+			wp.wpo_jcount,		
+			wp.wpo_end_date,
+			wp.wpo_status,
+			<!--화면 표시 우선순위: 현재 작업중이 1순위,
+				현재 작업중인 내용이 없으면 최근에 완료한 작업 표시-->	
+	        ROW_NUMBER() OVER (
+	            PARTITION BY my_emp.emp_id 
+	            ORDER BY 
+	                CASE 
+	                    WHEN wp.wpo_status = 'wpo_sts_02' THEN 1
+	                    WHEN wp.wpo_status = 'wpo_sts_03' THEN 2
+	                    ELSE 99
+	                END,
+	                wp.wpo_end_date DESC NULLS LAST
+	        ) AS rn	
+		FROM
+		    (
+		        SELECT e.emp_id, e.emp_num, e.emp_nm, e.emp_dep_nm, e.emp_team_nm, emp.emp_dep_cd, emp.emp_team_cd
+		        FROM VIEW_EMPLOYEE e
+		            JOIN EMPLOYEE emp ON e.emp_id = emp.emp_id
+		        WHERE e.emp_id = #{empId}
+		    ) my_emp
+				LEFT JOIN work_process wp 
+				    ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
+				LEFT JOIN work_order wo 
+				    ON wp.wrk_id = wo.wrk_id
+				JOIN process p 
+				    ON wo.prc_id = p.prc_id 
+				    AND p.det_id = my_emp.emp_dep_cd
+				LEFT JOIN vw_suju_summary vs 
+		    ON wo.odd_id = vs.odd_id
+		   )
+		WHERE rn = 1
+  	</select>
+  	
+  	<!-- 작업보고 실적 입력하기-->
+  	<insert id="insertWorkCount" useGeneratedKeys="true" keyProperty="wreId">
+  		INSERT INTO work_report(wpo_id, emp_id, wre_jcount, wre_date, wre_memo)
+  		VALUES (#{wpoId}, #{empId}, #{wreJcount}, #{wreDate}, #{wreMemo})
+  	</insert>
+  	
+  	<!-- 실적 보고 목록 표시하기-->
+  	<select id="getWorkerList">
+  		SELECT wre_id, wpo_id, wre_jcount, wre_date, wre_memo
+  		FROM work_report
+  		WHERE emp_id=#{empId} AND wpo_id=#{wpoId}
+  		ORDER BY wre_id desc
+  		<!--OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY-->
+  	</select>
+  	
+  	<!--메모 변경하기-->
+  	<update id="updateWorkerMemo">
+  		UPDATE work_report
+  		SET wre_memo=#{newMemo}, wre_date=#{wreDate}
+  		WHERE wre_id = #{wreId}
+  	</update>
+  	
+  </mapper>
+
+	
+	
+	

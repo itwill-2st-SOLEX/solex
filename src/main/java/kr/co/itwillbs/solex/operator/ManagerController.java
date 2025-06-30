@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.notice;
+package kr.co.itwillbs.solex.operator;
 
 import java.util.Map;
 
@@ -18,19 +18,16 @@ import jakarta.servlet.http.HttpSession;
 
 
 @Controller
-@RequestMapping("/notice")
-public class NoticeController {
+@RequestMapping("/operator")
+public class ManagerController {
 
-	@Autowired
-	private NoticeService noticeService;
-	
-	Long empId = 11L;
+	Long empId = 26L;
 
 
-    // 공지사항 페이지로 단순 이동
-    @GetMapping("")
-    public String getNoticePage() {
-        return "notice/noticeList";
+    // 작업목록 페이지로 단순 이동
+    @GetMapping("/manager")
+    public String getManagerPage() {
+        return "operator/manager";
     }
     
 
