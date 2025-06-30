@@ -7,7 +7,18 @@
   flex-direction: column;
   width: 965px;
 }
-
+.popluar{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+input[type="date"] {
+	height: 25px;
+	width: 139px;
+}
+.dates{
+	display: flex;
+}
 /* === 요약 카드들 === */
 .dashboard-summary {
   display: flex;
@@ -31,10 +42,18 @@
   transition: transform 0.2s;
 }
 
-.summary-card:hover {
-  transform: translateY(-4px);
+.prd-card {
+	display: block;
+ transition: transform 0.2s;
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+ cursor: pointer !important;
 }
-
+.summary-card:hover, .prd-card:hover {
+  transform: translateY(-3px);
+}
+.prd-card * {
+  cursor: inherit;
+}
 .summary-card .label {
   font-size: 14px;
   color: #6c757d;

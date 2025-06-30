@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.dashboard.DashBoardMapper">
+<!-- 	주문 요청현황 -->
+	<select id="getOrderStatus" resultType="map">
+		SELECT cli_nm
+			   , prd_nm
+			   , prd_color
+			   , prd_size
+			   , prd_height
+			   , odd_cnt
+			   , odd_sts
+			   , ord_reg_date
+		  FROM vw_suju_summary
+		 WHERE odd_isapproval = 'y'
+		 ORDER BY ord_reg_date DESC
+		 FETCH FIRST 20 ROWS ONLY
+	</select>
+<!-- 	최근 생산 완료된 제품들 -->
+	<select id="getPrdCompleted" resultType="map">
+		SELECT prd_nm
+			   , prd_color
+			   , prd_size
+			   , prd_height
+			   , odd_sts
+			   , ord_mod_date
+		  FROM vw_suju_summary
+		 WHERE odd_sts IN (
+			  '작업 완료',
+			  '출고 대기(공장 > 창고)',
+			  '창고 대기',
+			  '출고 검사',
+			  '출고 완료'
+		 )
+		   AND odd_isapproval = 'y'
+		 ORDER BY ord_mod_date DESC
+		 FETCH FIRST 20 ROWS ONLY 
+	</select>
+<!-- 	전일 생산량 -->
+	<select id="getYesterdayCnt" resultType="int">
+		SELECT SUM(odd_actual_cnt) AS yesterCnt
+		  FROM suju_order_detail
+		 WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 1)
+		   AND odd_isapproval = 'y'
+	</select>
+<!-- 	전일 생산율 -->
+	<select id="getYesterdayRate" resultType="int">
+		SELECT  
+			CASE
+			    WHEN before.qty = 0 THEN NULL
+			    ELSE ROUND(((yester.qty - before.qty) / before.qty) * 100, 0)
+			  END AS rate
+		  FROM 
+				(SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		   		   FROM suju_order_detail
+		   		  WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 1)
+		   			-- AND odd_isapproval = 'y'
+		   		) yester,
+		  		(SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		   		   FROM suju_order_detail
+		   		  WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 2)
+		   			-- AND odd_isapproval = 'y'
+		   		) before
+	</select>
+<!-- 	당월 누적 생산 -->
+	<select id="getMonthCnt" resultType="int">
+		SELECT SUM(odd_actual_cnt) AS monthCnt
+		  FROM suju_order_detail
+		-- WHERE odd_isapproval = 'y'
+	       WHERE TRUNC(odd_mod_date) BETWEEN TRUNC(SYSDATE, 'MM') AND TRUNC(SYSDATE)
+	</select>
+	
+	<select id="getMonthRate" resultType="int">
+		 SELECT  
+		    CASE
+		      WHEN prev.qty = 0 THEN NULL
+		      ELSE ROUND(((curr.qty - prev.qty) / prev.qty) * 100, 0)
+		    END AS rate
+		  FROM 
+		    (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		       FROM suju_order_detail
+		      WHERE odd_mod_date &gt;= TRUNC(SYSDATE, 'MM')
+		    ) curr,
+		    (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		       FROM suju_order_detail
+		      WHERE odd_mod_date &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
+		        AND odd_mod_date &lt; TRUNC(SYSDATE, 'MM')
+		    ) prev
+	</select>
+<!-- 	[TODO] -->
+	<select id="getDefectCnt" resultType="int">
+		SELECT *
+		  FROM suju_order_detail
+	</select>
+	
+
+</mapper>	

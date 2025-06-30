@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 @Controller
-@RequestMapping("/defect")
-public class DefectController {
+@RequestMapping("/dashboard")
+public class DashBoardController {
 	@GetMapping("")
 	public String defectMain() {
 		return "dashBoard/defect";
