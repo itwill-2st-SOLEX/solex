@@ -1,14 +1,11 @@
 package kr.co.itwillbs.solex.workOrder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import ch.qos.logback.core.net.SyslogOutputStream;
 
 @Service
 public class WorkOrderService {
@@ -23,6 +20,8 @@ public class WorkOrderService {
 	
 	// 해당 제품코드 등록 모달 조회
 	public List<Map<String, Object>> getProcessTeam(String prdCd) {
+		System.out.println(mapper.ProcessTeam(prdCd));
+		System.out.println("prdCd" + prdCd);
 		return mapper.ProcessTeam(prdCd);
 	}
 	
@@ -35,8 +34,8 @@ public class WorkOrderService {
 	        item.put("wrk_id", wrkId);
 	        mapper.workProcessInsert(item);
 	    }
-		// 주문테이블 상태값 업테이트
-		 String oddId = (String) prdInfo.get(0).get("oddId");
+		// 주문테이블, 주문 디테일테이블 상태값 업테이트
+		String oddId = (String) prdInfo.get(0).get("oddId");
 		mapper.updateSujuOrderSts(oddId);
 	}
 	
@@ -48,9 +47,15 @@ public class WorkOrderService {
 	// 창고 자재 등록
 	@Transactional
 	public void warehousesInsert(Map<String, Object> prdInfo) {
-		prdInfo.put("whs_his_date", LocalDateTime.now());
+		// 1. 창고 이력 insert
 		mapper.warehousesInsert(prdInfo);
+		// 2. 재고 원장 insert
 		mapper.stockUpdate(prdInfo);
+		// 3.구역 update
 		mapper.areaUpdate(prdInfo);
+		// 4. 구역 디테일 update
+		mapper.areaDetailUpdate(prdInfo);
+		// 5. 수주 detail update
+		mapper.sujuDetailUpdate(prdInfo);
 	}
 }

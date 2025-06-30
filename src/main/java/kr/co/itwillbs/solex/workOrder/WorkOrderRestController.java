@@ -41,17 +41,12 @@ public class WorkOrderRestController {
 	// 창고 조회
 	@GetMapping("/warehouses/{prdId}")
 	public List<Map<String, Object>> getWarehouses(@PathVariable("prdId") String prdId) {
-		System.out.println("prdId" + prdId);
-		System.out.println(service.getWarehouses(prdId));
 		return service.getWarehouses(prdId);
 	}
 	
 	// 창고 자재 등록
 	@PostMapping("/warehouses")
 	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo) {
-		System.out.println("prdInfo : " + prdInfo);
-		//		service.warehousesInsert(prdInfo);
+		service.warehousesInsert(prdInfo);
 	}
-	
-	
 }

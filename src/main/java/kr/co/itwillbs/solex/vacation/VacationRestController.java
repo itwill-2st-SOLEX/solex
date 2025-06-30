@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/vacation/api")
-public class RestVacationController {
+public class VacationRestController {
 
 
 	@Autowired

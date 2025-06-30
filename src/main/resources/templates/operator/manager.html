@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/operator/operator.css}" />
+<style>
+</style>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<h2>작업현황</h2>
+		
+			<div class="custom-summary">
+				<div class="summary-card">
+					<p class="summary-label">공정코드</p>
+					<p class="summary-value" id="prcCode"></p>
+				</div>
+				<div class="summary-card">
+					<p class="summary-label">공정명</p>
+					<p class="summary-value" id="prcName"></p>
+				</div>
+				<div class="summary-card">
+					<p class="summary-label">담당부서</p>
+					<p class="summary-value highlight" id="empName"></p>
+				</div>
+				<div class="summary-card">
+					<p class="summary-label">품질검사항목</p>
+					<p class="summary-value" id="prcTest"></p>
+				</div>
+			</div>
+		
+			<div id="monthNav" class="d-flex justify-content-center align-items-center my-3">
+			    <button id="prevMonthBtn" class="btn btn-link px-2">
+			        <i class="menu-icon tf-icons bx bx-caret-left"></i>
+			    </button>
+
+			    <h4 id="monthLabel" class="m-0 mx-3 fw-bold">2025년&nbsp;6월</h4>
+
+			    <button id="nextMonthBtn" class="btn btn-link px-2">
+			        <i class="menu-icon tf-icons bx bx-caret-right"></i>
+			    </button>
+			</div>
+			
+			<div id="grid"></div>
+		</div>
+		
+		<!-- Modal -->
+		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
+		  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel">생산실적조회</h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+			  <!-- 모달 내용 표시 -->
+		      <div class="modal-body big-box" id="showModal"></div>
+			  <!-- 모달 버튼 표시 -->
+		      <div class="modal-footer" id="modalFooter"> </div>
+		  </div>
+		</div>
+		</div>
+		
+		
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+		<script th:src="@{/js/operator/manager.js}"></script>
+		
+	</th:block>
+	
+	
+</body>
+</html>

@@ -1,16 +1,23 @@
 $(function() {
 	console.log("로그인한 사용자 empId:", empId);
+	// 탭 전환 이벤트
 	initTabEvents();
+	// 검색 이벤트
 	initSearchEvent();
+	// 채팅 전송 엔터 이벤트
 	initEnterKeySend();
+	// 나가기 체크박스 이벤트
 	checkboxEvent();
+	// 사원 목록 출력
 	fetchUsersAndRender();
+	// 채팅방 실시간 구독 시작
+	connectAllChatRooms();
+	// 안 읽은 메세지 이벤트
 	unreadCnt();
-	// 채팅방 나가기
+	// 채팅방 나가기 버튼 이벤트
 	document.getElementById('singleTrash').addEventListener('click', leaveChatRoom);
 });
 
-// 전역 상태
 let stompClient = null;
 let currentRoomId = null;
 let partnerId = null;
@@ -181,6 +188,7 @@ function openChatroom(name, targetId) {
 	document.getElementById('view-chatroom').classList.remove('hidden');
 	document.getElementById('chatMessages').innerHTML = '';
 
+	// 이전 메시지 불러오기
 	$.ajax({
 		url: `/SOLEX/chats/history/${partnerId}`,
 		method: 'GET',
@@ -200,6 +208,7 @@ function openChatroom(name, targetId) {
 		}
 	});
 
+	// 읽음 처리 PATCH 요청
 	$.ajax({
 		url: '/SOLEX/chats',
 		method: 'PATCH',
@@ -216,34 +225,80 @@ function openChatroom(name, targetId) {
 			console.error('읽음 처리 실패');
 		}
 	});
-
-	connectWebSocket(currentRoomId);
 }
 
-// 웹소켓 연결
-function connectWebSocket(roomId) {
-	if (stompClient !== null) {
-		stompClient.disconnect();
-	}
-
+// 전체 방 실시간 구독 연결
+function connectAllChatRooms() {
 	const socket = new SockJS('/SOLEX/ws');
 	stompClient = Stomp.over(socket);
 
 	stompClient.connect({}, function() {
-		stompClient.subscribe(`/topic/chatroom/${roomId}`, function(msg) {
-			const message = JSON.parse(msg.body);
-			const isMine = String(message.sender) === String(empId);
+		$.ajax({
+			url: '/SOLEX/chats/myRooms',  // 서버에서 내가 포함된 roomId 배열 반환 필요
+			method: 'GET',
+			success: function(roomIds) {
+				if (!Array.isArray(roomIds)) return;
 
-			renderMessage({
-				senderName: isMine ? '나' : message.sender_nm,
-				content: message.content
-			}, isMine);
+				// 각 방마다 구독 설정
+				roomIds.forEach(roomId => {
+					stompClient.subscribe(`/topic/chatroom/${roomId}`, function(msg) {
+						const message = JSON.parse(msg.body);
+						debugger;
+						const isMine = String(message.sender) === String(empId);
 
-			const isChatroomHidden = document.getElementById('view-chatroom').classList.contains('hidden');
-			const isOtherRoom = currentRoomId !== `room_${message.sender}_${message.receiver}`
+						const isChatroomHidden = document.getElementById('view-chatroom').classList.contains('hidden');
 
-			if (isChatroomHidden || isOtherRoom) {
-				showChatBadge();
+						const isCurrentRoom =
+							currentRoomId === `room_${message.sender}_${message.receiver}` ||
+							currentRoomId === `room_${message.receiver}_${message.sender}`;
+
+						// 메시지 보낸 사람이 현재 보고 있는 채팅 상대인지 체크
+						const isMessageFromCurrentPartner = String(message.sender) === String(partnerId);
+
+						if (!isChatroomHidden && isCurrentRoom && isMessageFromCurrentPartner) {
+							// 읽음 처리
+							$.ajax({
+								url: '/SOLEX/chats',
+								method: 'PATCH',
+								contentType: 'application/json',
+								data: JSON.stringify({
+									roomId: currentRoomId,
+									empId: empId
+								}),
+								success: function() {
+									console.log('읽음 처리 완료');
+
+									renderMessage({
+										senderName: isMine ? '나' : message.sender_nm,
+										content: message.content
+									}, isMine, message.isRead);
+
+									unreadCnt();
+								},
+								error: function() {
+									console.error('읽음 처리 실패');
+
+									renderMessage({
+										senderName: isMine ? '나' : message.sender_nm,
+										content: message.content
+									}, isMine, false);
+								}
+							});
+						} else {
+							// 다른 탭에서 메시지를 받았거나, 현재 안 보고 있을 때
+							renderMessage({
+								senderName: isMine ? '나' : message.sender_nm,
+								content: message.content
+							}, isMine, message.isRead);
+
+							showChatBadge();
+							unreadCnt();
+						}
+					});
+				});
+			},
+			error: function() {
+				console.error('내 채팅방 목록 가져오기 실패');
 			}
 		});
 	});
@@ -261,7 +316,8 @@ function sendMessage() {
 		receiver: partnerId,
 		content: content,
 		roomId: currentRoomId,
-		type: 'CHAT'
+		type: 'CHAT',
+		isRead: false 
 	};
 
 	stompClient.send('/app/chat.send', {}, JSON.stringify(message));
@@ -281,11 +337,14 @@ function renderMessage(message, isMine, isRead) {
 
 	msgDiv.textContent = message.content;
 	readStatusDiv.textContent = isRead ? '' : '안읽음';
+	debugger;
 
 	if (isMine) {
+		// 내가 보낸 메시지는 읽음 상태가 왼쪽에 먼저
 		wrapper.appendChild(readStatusDiv);
 		wrapper.appendChild(msgDiv);
 	} else {
+		// 상대 메시지는 메시지 본문 먼저, 그 다음 읽음 상태
 		wrapper.appendChild(msgDiv);
 		wrapper.appendChild(readStatusDiv);
 	}
@@ -294,18 +353,19 @@ function renderMessage(message, isMine, isRead) {
 	chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// 뱃지
+// 뱃지 표시
 function showChatBadge() {
 	const badge = document.getElementById('chat-badge');
 	if (badge) badge.classList.remove('hidden');
 }
 
+// 뱃지 숨김
 function hideChatBadge() {
 	const badge = document.getElementById('chat-badge');
 	if (badge) badge.classList.add('hidden');
 }
 
-// 체크박스 동기화
+// 체크박스 동기화 이벤트 등록
 function checkboxEvent() {
 	const masterCheck = document.getElementById('masterCheck');
 
@@ -354,10 +414,10 @@ function leaveChatRoom() {
 				}
 			},
 			error: function() {
-				console.error(`${partnerId}번 채팅방 삭제 실패`);
+				console.error(`${partnerId}번 채팅방 삭제`);
 			}
 		});
-	});
+	})
 }
 // 안읽은 메세지 갯수
 function unreadCnt() {
@@ -373,7 +433,7 @@ function unreadCnt() {
 				badge.classList.add('hidden');
 			}
 			// 헤더 배지 업데이트
-			updateHeaderBadge(count);
+			//			updateHeaderBadge(count);
 		},
 		error: function() {
 			console.error('안읽은 메시지 수 불러오기 실패');

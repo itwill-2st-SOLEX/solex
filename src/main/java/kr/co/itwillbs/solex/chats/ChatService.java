@@ -80,4 +80,8 @@ public class ChatService {
 		return mapper.getUnreadMessageCnt(empId);
 	}
 
+	public List<String> getMyChatRooms(String empNum) {
+		return mapper.getMyChatRooms(empNum);
+	}
+
 }
