@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<title>SOLEX</title>
+<!-- 개별페이지 전용 스타일시트 영역 -->
+	<th:block layout:fragment="style">
+		<link rel="stylesheet" th:href="@{/css/purchaseOrders/style.css}" />
+	</th:block>
+	
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="container-xxl flex-grow-1 container-p-y" style="background-color: transparent; padding-left: 0; padding-right: 0;">
+			<div class="row">
+				<div class="col-xxl-12 mb-6">
+					<div class="card">
+						<div class="d-flex align-items-start row">
+							<div class="col-sm-12">
+								<div class="card-body">
+									<h5 class="card-title mb-4">발주 관리</h5>
+									<button type="button" class="btn custom-btn-blue mb-3 float-end"
+										style="width:10%;min-width:120px;" id="openPurchaseModalBtn"  data-action="create" >발주 등록</button>
+									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+	            </div>
+			</div>
+        </div>
+		
+	<!-- 배경 + 스피너 컨테이너 -->
+	<div id="loadingOverlay" style="display:none;">
+	  <div class="spinner-border text-primary" role="status">
+	    <span class="visually-hidden">Loading...</span>
+	  </div>
+	</div>
+
+	
+	<div class="modal fade" id="myModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="myModalTitle">발주 등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="orderRegisterForm">
+						<div class="row mb-2">
+							<div class="col">
+								<label for="client-search-input" class="form-label">거래처명 <span
+										class="text-danger">*</span></label>
+								<div id="client-select-box" class="custom-search-select" data-type="client">
+									<input type="text" id="client-search-input"
+										class="form-control select-search-input" placeholder="거래처를 선택하거나 검색하세요."
+										autocomplete="off">
+									<input type="hidden" id="selected_client_id" name="cli_id">
+									<div class="options-container"></div>
+								</div>
+							</div>
+							<div class="col">
+								<label for="product-search-input" class="form-label">제품명 <span
+										class="text-danger">*</span></label>
+								<div id="product-select-box" class="custom-search-select" data-type="product">
+									<input type="text" id="product-search-input"
+										class="form-control select-search-input" placeholder="제품명을 선택하거나 검색하세요."
+										autocomplete="off">
+									<input type="hidden" id="selected_product_id" name="prd_id">
+									<div class="options-container"></div>
+								</div>
+							</div>
+						</div>
+						<div class="row mb-2">
+							<div class="col">
+								<label for="pay_type" class="form-label">결제 방식 <span
+										class="text-danger">*</span></label>
+								<select id="pay_type" name="pay_type" class="form-select">
+									<option value="">결제 방식을 선택하세요.</option>
+									<option value="현금">현금</option>
+									<option value="카드">카드</option>
+								</select>
+							</div>
+							<div class="col">
+								<label for="odd_pay" class="form-label">결제 금액 <span
+										class="text-danger">*</span></label>
+								<input type="text" id="odd_pay" name="odd_pay" class="form-control"
+									placeholder="결제 금액 입력하세요.">
+							</div>
+							<div class="col">
+								<label for="odd_end_date" class="form-label">납품 요청일 <span
+										class="text-danger">*</span></label>
+								<input class="form-control" type="date" name="odd_end_date" id="odd_end_date">
+							</div>
+							<div class="col">
+								<label for="odd_pay_date" class="form-label">결제 예정일 <span
+										class="text-danger">*</span></label>
+								<input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date">
+							</div>
+						</div>
+						<div class="row mb-2">
+							<div class="col">
+								<label class="form-label">색상 <span class="text-danger">*</span></label>
+								<div class="custom-select-wrapper" id="colorCustomSelectWrapper">
+									<div class="select-box"><input type="text" class="form-control"
+											placeholder="색상을 선택하세요" readonly></div>
+									<div class="options-container"></div>
+								</div>
+								<input type="hidden" id="opt_color" name="opt_color">
+							</div>
+							<div class="col">
+								<label class="form-label">사이즈 <span class="text-danger">*</span></label>
+								<div class="custom-select-wrapper" id="sizeCustomSelectWrapper">
+									<div class="select-box"><input type="text" class="form-control"
+											placeholder="사이즈를 선택하세요" readonly></div>
+									<div class="options-container"></div>
+								</div>
+								<input type="hidden" id="opt_size" name="opt_size">
+							</div>
+							<div class="col">
+								<label class="form-label">굽 높이 <span class="text-danger">*</span></label>
+								<div class="custom-select-wrapper" id="heightCustomSelectWrapper">
+									<div class="select-box"><input type="text" class="form-control"
+											placeholder="굽 높이를 선택하세요" readonly></div>
+									<div class="options-container"></div>
+								</div>
+								<input type="hidden" id="opt_height" name="opt_height">
+							</div>
+							<div class="col">
+								<div class="d-flex align-items-center pt-2 mt-4 justify-content-around">
+									<button type="button" id="addRowBtn"
+										class="btn custom-btn-blue me-2">추가</button>
+									<button type="button" id="resetOptionFormsBtn"
+										class="btn btn-light">초기화</button>
+								</div>
+							</div>
+						</div>
+						<div class="row mb-1">
+							<div class="col">
+								<label class="form-label">배송지 주소 <span class="text-danger">*</span></label>
+								<div class="input-group">
+									<input type="text" id="cli_pc" name="cli_pc" class="form-control" readonly
+										placeholder="우편번호">
+								</div>
+							</div>
+							<div class="col">
+								<div style="margin-top: 1.4rem;">
+									<button type="button" class="btn btn-primary" id="findPostCodeBtn">우편번호
+										찾기</button>
+								</div>
+							</div>
+
+
+
+
+						</div>
+						<div class="row mb-4">
+							<div class="col"><input type="text" id="cli_add" name="cli_add" class="form-control"
+									readonly placeholder="기본주소"></div>
+							<div class="col"><input type="text" id="cli_da" name="cli_da" class="form-control"
+									placeholder="상세주소"></div>
+						</div>
+						<div class="mb-3 d-flex justify-content-end">
+							<button type="button" class="btn btn-danger me-2" id="deleteSelectedRowsBtn">선택 항목
+								삭제</button>
+							<button type="button" class="btn btn-light" id="resetItemsBtn">주문 초기화</button>
+						</div>
+						<div id="innerGrid"></div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+					<button type="button" class="btn btn-primary" id="submitBtn">등록</button>
+				</div>
+			</div>
+		</div>
+	</div>
+			
+	</th:block>
+	
+	<th:block layout:fragment="script">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+		<!-- sweetalert2 JS -->
+		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+		<script th:src="@{/js/purchaseOrders/main.js}"></script>
+	</th:block>
+	
+</body>
+</html>

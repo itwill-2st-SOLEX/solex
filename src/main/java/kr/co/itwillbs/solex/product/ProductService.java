@@ -17,4 +17,8 @@ public class ProductService {
 		return productMapper.getProductNameList();
 	}
 
+	public List<Map<String, Object>> getProductOptions(String prd_id) {
+		return productMapper.getProductOptions(prd_id);
+	}
+
 }

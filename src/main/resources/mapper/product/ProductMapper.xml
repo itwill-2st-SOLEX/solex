@@ -16,4 +16,21 @@
 		FROM product_option
 		where prd_id = #{itemId}
 	</select>
+
+	<select id="getProductOptions" resultType="map">
+		SELECT 
+			opt_id as opt_id,
+			opt_color as opt_color,
+			opt_size as opt_size,
+			opt_height as opt_height,
+			cd2.det_nm as OPT_COLOR_NM,
+			cd3.det_nm as OPT_SIZE_NM,
+			cd4.det_nm as OPT_HEIGHT_NM
+		FROM product_option p
+		JOIN code_detail cd2 ON p.opt_color = cd2.det_id
+		JOIN code_detail cd3 ON p.opt_size = cd3.det_id
+		JOIN code_detail cd4 ON p.opt_height = cd4.det_id
+		where p.prd_id = #{prd_id}
+	</select>
+
 </mapper>
