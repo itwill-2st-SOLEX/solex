@@ -106,7 +106,11 @@ function formatLotDetailHtml(data) {
 	} else if (type === 'equipment') {
 		html += `<div><strong>설비명:</strong> ${data.equipmentName}</div>`;
 		html += `<div><strong>설비코드:</strong> ${data.equipmentCode}</div>`;
-		html += `<div><strong>사용시간:</strong> ${data.usageHours}h</div>`;
+		html += `<div><strong>거래처명:</strong> ${data.clientName}</div>`;
+		html += `<div><strong>거래처 담당자:</strong> ${data.clientManager}</div>`;
+		html += `<div><strong>담당자 연락처:</strong> ${data.managerNumber}</div>`;
+		html += `<div><strong>사용공정:</strong> ${data.useProcessName}</div>`;
+		html += `<div><strong>공정코드:</strong> ${data.useProcessCode}</div>`;
 	}
 
 	return html;

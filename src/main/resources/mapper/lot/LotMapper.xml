@@ -141,8 +141,16 @@
     <select id="selectEquipmentDetail" parameterType="long" resultType="map">
         SELECT
             e.eqp_name AS "equipmentName",
-            e.eqp_code AS "equipmentCode"
+            e.eqp_code AS "equipmentCode",
+            c.cli_nm AS "clientName",
+			c.CLI_MGR_NAME AS "clientManager",
+			c.CLI_MGR_PHONE AS "managerNumber",
+			p.prc_nm AS "useProcessName",
+			p.prc_code AS "useProcessCode"
         FROM equipment e
+        JOIN client c ON e.cli_id = c.cli_id
+        JOIN process_lot pl ON e.eqp_id = pl.eqp_id
+        JOIN process p ON pl.prc_id = p.prc_id
         WHERE e.eqp_id = #{eqpId}
     </select>
     
