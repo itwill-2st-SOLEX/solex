@@ -9,7 +9,7 @@
 <title>SOLEX</title>
 <!-- 개별페이지 전용 스타일시트 영역 -->
 <th:block layout:fragment="style">
-	<link rel="stylesheet" th:href="@{/css/orderrequest/style.css}" />
+	<link rel="stylesheet" th:href="@{/css/equipment/style.css}" />
 	<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.css" rel="stylesheet">
 		<!-- sweetalert2 CSS -->
 		<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
@@ -32,7 +32,9 @@
 						<div class="d-flex align-items-start row">
 							<div class="col-sm-12">
 								<div class="card-body">
-									<h5 class="card-title mb-4">수주 요청 관리</h5>
+									<h5 class="card-title mb-4">설비 정보</h5>
+									<button type="button" class="btn custom-btn-blue mb-3 float-end"
+										style="width:10%;min-width:120px;" id="openEquipmentModalBtn">설비 등록</button>
 									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
 								</div>
 							</div>
@@ -54,75 +56,84 @@
 	    <div class="modal-dialog modal-lg">
 	        <div class="modal-content" id="modalContentContainer">
 	        	<div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">수주 요청 상세</h5>
+            <h5 class="modal-title" id="exampleModalLabel">설비 등록</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             <div class="row mb-3">
                  <div class="col">
-			        <label for="CLI_NM" class="form-label">거래처명</label>
+			        <label for="CLI_NM" class="form-label">제조사</label>
 			        <div>
-			            <input type="text" id="CLI_NM" name="CLI_NM" min="0" class="form-control" value="" disabled>
+			            <select class="form-select" id="CLI_NM" aria-label="Default select example">
+							<option selected="">-제조사를 선택해주세요-</option>
+						  </select>
 			        </div>
 			    </div>
                 <div class="col">
-			        <label for="PRD_NM" class="form-label">제품명</label>
+			        <label for="PRC_NM" class="form-label">공정</label>
 			        <div>
-			            <input type="text" id="PRD_NM" name="PRD_NM" min="0" class="form-control" value="" disabled>
+			            <select class="form-select" id="PRC_NM" aria-label="Default select example">
+							<option selected="">-공정을 선택해주세요-</option>
+						</select>
 			        </div>
 			    </div>
             </div>
 			<div class="row mb-3">
 				<div class="col">
-		            <label for="OPT_COLOR" class="form-label">색상</label>
-		            <div class="d-flex align-items-center">
-		                <input type="text" id="OPT_COLOR"  class="form-control" value="" disabled>
+		            <label for="TEAM_NAME" class="form-label">팀</label>
+		            <div>
+						<select class="form-select" id="TEAM_NAME" aria-label="Default select example">
+							<option selected="">-팀을 선택해주세요-</option>
+						</select>
 		            </div>
 				</div>
 				<div class="col">
-		            <label for="OPT_SIZE" class="form-label">사이즈</label>
-		            <div class="d-flex align-items-center">
-		                <input type="text" id="OPT_SIZE"  class="form-control" value="" disabled>	
-		            </div>
+		            <label for="EQP_STS" class="form-label">설비 상태</label>
+		            <div>
+			            <select class="form-select" id="EQP_STS" aria-label="Default select example">
+							<option value="">-설비 상태를 선택해주세요-</option>
+							<option value="n">비활성화</option>
+							<option value="y">활성화</option>
+						</select>
+			        </div>
 				</div>
 	        </div>
 			<div class="row mb-3">
 				<div class="col">
-		            <label for="OPT_HEIGHT" class="form-label">굽 높이</label>
-		            <div class="d-flex align-items-center">
-		                <input type="text" id="OPT_HEIGHT" class="form-control" value="" disabled>
-		            </div>
+					<label for="EQP_NAME" class="form-label">설비 명</label>
+					<div class="d-flex align-items-center">
+						<input type="text" id="EQP_NAME" name="EQP_NAME" placeholder="설비 명을 입력해주세요." class="form-control" value="">
+					</div>
 				</div>
 				<div class="col">
-		            <label for="STK_CNT" class="form-label">제품 재고량</label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="text" value="" id="STK_CNT" disabled>
-		            </div>
+					<label for="EQP_PRICE" class="form-label">설비 가격</label>
+					<div class="d-flex align-items-center">
+						<input type="text" id="EQP_PRICE" name="EQP_PRICE" placeholder="설비 가격을 입력해주세요." class="form-control" value="">	
+					</div>
 				</div>
-	        </div>
-            
+			</div>
 			<div class="row mb-3">
 				<div class="col">
-		            <label for="ODD_CNT" class="form-label">주문 수량</label>
+		            <label for="EQP_PURCHASE_DATE" class="form-label">구입일</label>
 		            <div class="d-flex align-items-center">
-		                <input type="text" id="ODD_CNT" name="ODD_CNT" class="form-control" value="" disabled>
+		                <input class="form-control" type="date" id="EQP_PURCHASE_DATE">
 		            </div>
 				</div>
 				<div class="col">
-		            <label for="ORD_END_DATE" class="form-label">납품 요청일</label>
+		            <label for="EQP_INSTALLATION_DATE" class="form-label">설치일</label>
 		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" value="" name ="ORD_END_DATE" id="ORD_END_DATE"  disabled>
+		                <input class="form-control" type="date" id="EQP_INSTALLATION_DATE">
 		            </div>
 				</div>
 	        </div>
+
             <div class="mb-3">	
-				<label class="form-label">원자재 재고량</label>
-				<div id="MATERIAL_CNT" class="form-control" style="height: 150px; overflow-y: auto; background-color: #e9ecef;"></div>
+				<label for="EQP_COMM" class="form-label">설비 설명</label>
+				<textarea class="form-control" id="EQP_COMM" name="EQP_COMM" rows="5"></textarea>
 			</div>
         </div>
         <div class="modal-footer">
-			<button type="button" class="btn btn-secondary" id="rejectBtn">반려</button>
-            <button type="button" class="btn btn-primary" id="submitBtn">승인</button>
+            <button type="button" class="btn btn-primary" id="submitBtn">등록</button>
         </div>
 	        </div>
 	    </div>
@@ -136,7 +147,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 	    <script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.40/dist/virtual-select.min.js"></script>
-		<script th:src="@{/js/orderrequest/main.js}"></script>
+		<script th:src="@{/js/equipment/main.js}"></script>
 	</th:block>
 	
 </body>
