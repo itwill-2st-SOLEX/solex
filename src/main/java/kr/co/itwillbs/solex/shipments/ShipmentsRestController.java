@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.purchaseOrders;
+package kr.co.itwillbs.solex.shipments;
 
 import java.util.List;
 import java.util.Map;
@@ -16,11 +16,11 @@ import org.springframework.http.ResponseEntity;
 
 
 @RestController
-@RequestMapping("/purchase-orders")
-public class PurchaseOrdersRestController {
+@RequestMapping("/shipments")
+public class ShipmentsRestController {
 
 	@Autowired
-	PurchaseOrdersService orderRequestsService;
+	ShipmentsService orderRequestsService;
 	
 	@GetMapping("/data") // 
 	public List<Map<String, Object>> getPagedGridData(

@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.purchaseOrders;
+package kr.co.itwillbs.solex.shipments;
 
 
 import org.springframework.stereotype.Controller;
@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 @Controller
-@RequestMapping("/purchase-orders")
-public class PurchaseOrdersController {	
+@RequestMapping("/shipments")
+public class ShipmentsController {	
 	@GetMapping
 	public String orderRequestsList(){
-        return "purchaseOrders/list"; 
+        return "shipments/list"; 
     }
 }

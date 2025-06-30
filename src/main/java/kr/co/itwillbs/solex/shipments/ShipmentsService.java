@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.purchaseOrders;
+package kr.co.itwillbs.solex.shipments;
 
 import java.util.List;
 import java.util.Map;
@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PurchaseOrdersService {
+public class ShipmentsService {
 
     @Autowired
-    private PurchaseOrdersMapper orderRequestsMapper;
+    private ShipmentsMapper orderRequestsMapper;
 	
 	public List<Map<String, Object>> getPagedGridDataAsMap(int page, int pageSize) {
 		int offset = page * pageSize;

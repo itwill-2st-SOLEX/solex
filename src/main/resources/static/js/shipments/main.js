@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   createInnerGrid();
   document.getElementById("openPurchaseModalBtn").addEventListener("click", openPurchaseModal);
   document.getElementById("addRowBtn").addEventListener("click", addRowBtn);
+  document.getElementById("findPostCodeBtn").addEventListener("click", findPostCode);
 
   document.addEventListener("click", (e) => {
     // 2. 다중 선택 셀렉트 박스(색상/사이즈/굽) 닫기
@@ -514,4 +515,38 @@ function resetOptionForms() {
       document.getElementById(`opt_${type}`).value = "";
     }
   });
+}
+
+function findPostCode() { new daum.Postcode({ oncomplete: function(data) {
+  document.getElementById("cli_pc").value = data.zonecode;
+  document.getElementById("cli_add").value = data.roadAddress;
+  document.getElementById("cli_da").focus();
+}}).open(); }
+
+
+
+async function submitForm() {
+  if (!validateFinalForm()) return;
+  const gridData = INNER_TUI_GRID_INSTANCE.getData();
+  const finalPayload = {
+    cli_id: document.getElementById('selected_client_id').value,
+    prd_id: document.getElementById('selected_product_id').value,
+    pay_type: document.getElementById('pay_type')?.value,
+    ord_pay: unformatWithComma(document.getElementById('odd_pay')?.value),
+    ord_end_date: document.getElementById('odd_end_date')?.value,
+    ord_pay_date: document.getElementById('odd_pay_date')?.value,
+    ord_pc: document.getElementById('cli_pc')?.value,
+    ord_add: document.getElementById('cli_add')?.value,
+    ord_da: document.getElementById('cli_da')?.value,
+    items: gridData.map(row => ({...row, quantity: unformatWithComma(row.quantity)}))
+  };
+  try {
+    const response = await fetch('/SOLEX/purchase-orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalPayload) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message || `서버 오류`);
+    alert(result.message || '성공적으로 처리되었습니다.');
+    location.reload();
+  } catch (error) {
+    alert(`오류: ${error.message}`);
+  }
 }
