@@ -53,9 +53,9 @@ async function showProductModal(mode, data = null) {
 
     // 옵션 요소 버튼 로직 --- 시작
     const generateCombinationsBtn = document.getElementById('generateCombinationsBtn');
-    // NOTE: generateCombinationsBtn.onclick = generateAndDisplayCombinations;
-    // 이 줄은 'new' 모드에서 제거되었습니다. 탭 클릭이 이를 트리거할 것입니다.
-    // 'edit' 모드에서는 이 버튼이 비활성화되고 텍스트가 변경됩니다.
+    if (generateCombinationsBtn) { // 버튼 요소가 존재하는지 먼저 확인
+        generateCombinationsBtn.onclick = generateAndDisplayCombinations;
+    }
     // 옵션 요소 버튼 로직 --- 끝
 
     // 공통 필드 설정 및 로드 (모달이 열리기 전 미리 처리)
@@ -63,12 +63,7 @@ async function showProductModal(mode, data = null) {
         modalTitle.textContent = '새 제품 등록';
         saveProductBtn.textContent = '등록 완료';
         saveProductBtn.onclick = () => processProductData('register'); 
-        if (generateCombinationsBtn) {
-            generateCombinationsBtn.textContent = '옵션 등록';
-            generateCombinationsBtn.removeAttribute('disabled'); // 새 제품에 대해 활성화 상태 보장
-            // generateCombinationsBtn에 대한 클릭 이벤트는 이제 탭 변경 이벤트에 의해 처리됩니다.
-            // 이 특정 요청의 경우, 탭이 디스플레이를 트리거할 것입니다.
-        }
+        if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 등록';
         if (prdRegDateElement) prdRegDateElement.value = getNowForOracle(); 
         
         await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit');
@@ -171,47 +166,14 @@ async function showProductModal(mode, data = null) {
     // ⭐⭐ 공정 순서 로딩 로직 끝 ⭐⭐
 	
 	
-    // "모든 옵션 추가" 탭에 대한 탭 이벤트 리스너
-    const allOptionsTabBtn = document.getElementById('all-options-tab');
-    if (allOptionsTabBtn) {
-        // 탭 콘텐츠가 표시된 후에 실행되도록 Bootstrap의 `shown.bs.tab` 이벤트를 사용합니다.
-        allOptionsTabBtn.addEventListener('shown.bs.tab', async () => {
-            console.log("모든 옵션 추가 탭이 활성화되었습니다.");
-            // 탭이 표시될 때 generateAndDisplayCombinations를 호출합니다.
-            // 'new' 모드에서는 초기에 데이터가 null이므로 isAutoLoad는 false가 됩니다.
-            // 'edit' 모드에서는 기존 제품 옵션을 미리 선택하기 위한 데이터가 포함될 수 있습니다.
-            if (mode === 'new') {
-                await generateAndDisplayCombinations(false, []); // 새 제품의 경우, 미리 선택할 기존 데이터 없음
-            } else if (mode === 'edit' && data) {
-                // 편집 모드인 경우, 기존 제품 옵션을 가져와 generateAndDisplayCombinations로 전달합니다.
-                let productOptions = [];
-                try {
-                    const response = await fetch(`/SOLEX/products/api/productOptions?prdId=${data.PRD_ID}`);
-                    if (!response.ok) {
-                        throw new Error('제품 옵션을 불러오는 데 실패했습니다.');
-                    }
-                    const result = await response.json();
-                    if (result.data) {
-                        productOptions = result.data;
-                    }
-                } catch (error) {
-                    console.error("제품 옵션 로드 오류 (탭 활성화 시):", error);
-                    alert("제품 옵션을 불러오는 중 오류가 발생했습니다.");
-                    productOptions = [];
-                }
-                await generateAndDisplayCombinations(true, productOptions); // isAutoLoad를 true로 설정하여 기존 옵션 표시
-            }
-        });
-    }
-
+	
     // 모달이 완전히 표시된 후에만 옵션 그리드를 로드합니다.
     modalEl.addEventListener('shown.bs.modal', async () => {
-        // 'my-options-tab'에 초기 로딩이 필요한 경우
-        // 'edit' 모드의 경우, 기존 제품 옵션을 'myOptionsContent'에 로드합니다.
         if (mode === 'edit' && data) {
             let productOptions = [];
             try {
 				// 1. 제품 옵션 목록 불러오기
+                // await을 사용하여 productOptions를 동기적으로 기다립니다.
                 const response = await fetch(`/SOLEX/products/api/productOptions?prdId=${data.PRD_ID}`);
                 if (!response.ok) {
                     throw new Error('제품 옵션을 불러오는 데 실패했습니다.');
@@ -224,71 +186,55 @@ async function showProductModal(mode, data = null) {
 				// 2. 총 옵션 개수 불러오기 (새로운 fetch 요청 추가)
 				console.log('result ? ' + JSON.stringify(result)); // result.opt_count
 				console.log('result.opt_count ? ' + JSON.stringify(result.opt_count)); // result.opt_count
-
-                // ⭐ generateCombinationsBtn을 숨기고, '내 옵션' 탭에 건수 표시 ⭐
-                const myOptionsTab = document.getElementById('my-options-tab');
-                if (myOptionsTab) {
-                    // 탭 버튼의 텍스트를 '내 옵션 (XX건)' 형식으로 업데이트합니다.
-                    myOptionsTab.textContent = `내 옵션 (${result.opt_count}건)`;
-                }
-                const generateCombinationsBtn = document.getElementById('generateCombinationsBtn');
-                if (generateCombinationsBtn) {
-                    generateCombinationsBtn.style.display = 'none'; // 버튼을 숨깁니다.
-                    // generateCombinationsBtn.setAttribute('disabled', 'true'); // 이 줄은 이제 필요 없습니다.
-                }
+				
+				if (generateCombinationsBtn) generateCombinationsBtn.textContent = '옵션 총 ' + result.opt_count + '건';
+				generateCombinationsBtn.setAttribute('disabled', 'true');
             } catch (error) {
                 console.error("제품 옵션 로드 오류:", error);
                 alert("제품 옵션을 불러오는 중 오류가 발생했습니다.");
                 productOptions = []; // 오류 발생 시에도 빈 배열로 진행
             }
             console.log('productOptions for grid:', productOptions);
-			// --- TUI Grid 로직 시작 (myOptionsContent용) ---
-           	const currentOptionsGridContainer = document.getElementById('currentOptionsGridContainer');
-            if (currentOptionsGridContainer) {
-                currentOptionsGridContainer.innerHTML = ''; // 이전 콘텐츠 지우기
-                const grid = new tui.Grid({
-                   el: currentOptionsGridContainer, 
-                   data: productOptions,     
-                   scrollX: false,
-                   scrollY: false,
-                   columns: [
-                       {
-                           header: '색상', 
-                           name: 'COLORNAME',
-						   align: 'center',
-						   sortable: true ,
-                           filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
-                       },
-                       {
-                           header: '사이즈',
-                           name: 'SIZENAME',
-                           align: 'center',
-						   sortable: true ,
-                           filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
-                       },
-                       {
-                           header: '높이',
-                           name: 'HEIGHTNAME',
-                           align: 'center',
-						   sortable: true ,
-                           filter: { type: 'number', showApplyBtn: true, showClearBtn: true }
-                       }
-                       
-                   ],
-                   summary: { // 요약 정보를 표시하고 싶다면 추가
+			// --- TUI Grid 로직 시작 ---
+           	// 1. TUI Grid 인스턴스 생성
+           	const grid = new tui.Grid({
+               el: optionGroupsContainer, // Grid를 렌더링할 HTML 요소
+               data: productOptions,     // 서버에서 가져온 옵션 데이터
+               scrollX: false,
+               scrollY: false,
+               columns: [
+                   {
+                       header: '색상', 
+                       name: 'COLORNAME',
+					   align: 'center',
+					   sortable: true ,
+                       filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
+                   },
+                   {
+                       header: '사이즈',
+                       name: 'SIZENAME',
+                       align: 'center',
+					   sortable: true ,
+                       filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
+                   },
+                   {
+                       header: '높이',
+                       name: 'HEIGHTNAME',
+                       align: 'center',
+					   sortable: true ,
+                       filter: { type: 'number', showApplyBtn: true, showClearBtn: true }
                    }
-               });
-            }
+                   
+               ],
+               summary: { // 요약 정보를 표시하고 싶다면 추가
+               }
+           });
         } else if (mode === 'new') {
-            // 'new' 모드에서는 'myOptionsContent'가 비어있거나 메시지를 표시해야 합니다.
-            const currentOptionsGridContainer = document.getElementById('currentOptionsGridContainer');
-            if (currentOptionsGridContainer) {
-                currentOptionsGridContainer.innerHTML = '<p class="text-muted">아직 등록된 옵션이 없습니다. "모든 옵션 추가" 탭에서 옵션을 선택해주세요.</p>';
-            }
-            // 새 제품의 경우, 'allOptionsContent'에 미리 선택할 기존 데이터는 아직 없습니다.
-            // 탭 리스너가 'allOptionsContent'에 대해 generateAndDisplayCombinations 호출을 처리할 것입니다.
+            // 'new' 모드에서도 옵션 그리드를 초기화해야 한다면 여기에 호출
+            // 예를 들어, 빈 상태의 그리드를 보여주고 싶을 때
+            generateAndDisplayCombinations(false, []); // isAutoLoad는 false, 빈 데이터 전달
         }
-    }, { once: true }); // 이 이벤트 리스너는 모달 자체를 위한 것으로, 한 번 표시되면 실행됩니다.
+    }, { once: true }); // 이 이벤트 리스너는 모달이 보여질 때 한 번만 실행되도록 설정
 
     // 모달이 완전히 닫혔을 때 페이지를 새로고침하는 이벤트 리스너를 등록
     modalEl.addEventListener('hidden.bs.modal', function () {
@@ -442,12 +388,12 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
     const allSizes = (await allSizesResponse.json()).data;
     const allHeights = (await allHeightsResponse.json()).data;
 
-    const optionGroupsContainer = document.getElementById('allOptionsGroupsContainer');
+    const optionGroupsContainer = document.getElementById('optionGroupsContainer');
     if (!optionGroupsContainer) {
         alert("옵션 그룹 영역이 없습니다.");
         return;
     }
-    optionGroupsContainer.innerHTML = ''; // 탭의 기존 콘텐츠 지우기
+    optionGroupsContainer.innerHTML = '';
 
     const groupedCombinations = new Map();
 
@@ -477,7 +423,7 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
                         opt.OPT_SIZE === sizeCode &&
                         opt.OPT_HEIGHT === heightCode
                     );
-                } else if (isAutoLoad && data) { // 이 경우는 단일 제품 옵션에 해당하며, `generateAndDisplayCombinations`와는 덜 일반적입니다.
+                } else if (isAutoLoad && data) {
                     isSelected = (
                         data.OPT_COLOR === colorCode &&
                         data.OPT_SIZE === sizeCode &&
@@ -515,15 +461,7 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
             rowHeaders: ['checkbox'],
             rowKey: (row) => `${row.colorCode}-${row.sizeCode}-${row.heightCode}`,
             rowClass: (row) => {
-				// 'edit' 모드이고, 이 행이 원래 선택된 옵션인 경우 'disabled-option-row' 클래스를 추가합니다.
-		        if (isAutoLoad && row.isSelected) {
-		            return 'selected-row highlighted-row disabled-option-row';
-		        }
-		        // 다른 선택된 행 (새로 선택된 행 등)
-		        else if (row.isSelected) {
-		            return 'selected-row highlighted-row';
-		        }
-		        return '';
+                return row.isSelected ? 'selected-row highlighted-row' : '';
             },
             columns: [
                 { header: '색상', name: 'colorName', sortable: true, align: 'center' },
@@ -534,7 +472,7 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
 
         colorGroup.combinations.forEach((combo, index) => {
             if (combo.isSelected) {
-                grid.check(index); // 체크박스도 체크
+                grid.check(index); // checkbox도 체크
             }
         });
 
@@ -545,23 +483,10 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
             updateOverallSelectAllCheckbox();
         });
         grid.on('uncheck', ev => {
-            const rowData = grid.getRow(ev.rowKey);
-            // 'edit' 모드이고, 해당 행이 원래 선택된 옵션인 경우 해제를 방지
-            if (isAutoLoad && rowData && rowData.isSelected) {
-                grid.check(ev.rowKey); // 즉시 다시 체크
-                alert('이미 등록된 옵션은 체크 해제할 수 없습니다.'); // 사용자에게 알림
-                return; // 추가적인 uncheck 이벤트 처리 중단
-            }
             updateOverallSelectAllCheckbox();
         });
         grid.on('click', ev => {
             if (ev.columnName === 'actions' && ev.target.classList.contains('delete-option-btn')) {
-                const rowData = grid.getRow(ev.rowKey);
-                // 'edit' 모드이고, 해당 행이 원래 선택된 옵션인 경우 삭제를 방지
-                if (isAutoLoad && rowData && rowData.isSelected) {
-                    alert('이미 등록된 옵션은 삭제할 수 없습니다.');
-                    return;
-                }
                 grid.removeRow(ev.rowKey);
                 updateOverallSelectAllCheckbox();
             }
@@ -575,23 +500,7 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
         overallSelectAllOptions.onclick = (e) => {
             const isChecked = e.target.checked;
             toastGridInstances.forEach(grid => {
-                if (isChecked) {
-                    grid.checkAll();
-                } else {
-                    // 전체 해제 시, isAutoLoad (편집 모드)이고 isSelected 된 옵션은 해제되지 않도록 함
-                    if (isAutoLoad) {
-                        grid.getRowCount().forEach(rowIndex => {
-                            const rowData = grid.getRow(rowIndex);
-                            if (!rowData.isSelected) { // 원래 선택되지 않았던 행만 해제
-                                grid.uncheck(rowIndex);
-                            } else {
-                                grid.check(rowIndex); // 원래 선택된 행은 다시 체크 유지
-                            }
-                        });
-                    } else {
-                        grid.uncheckAll();
-                    }
-                }
+                isChecked ? grid.checkAll() : grid.uncheckAll();
             });
         };
     }
@@ -600,21 +509,8 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
         if (!overallSelectAllOptions) return;
         let allChecked = true;
         toastGridInstances.forEach(grid => {
-            // isAutoLoad (편집 모드)인 경우, 원래 선택된 옵션은 체크되어야 전체 선택으로 간주
-            const totalRows = grid.getRowCount();
-            const checkedRows = grid.getCheckedRows().length;
-            const initiallySelectedRows = grid.getData().filter(row => row.isSelected).length;
-
-            if (isAutoLoad) {
-                // 이미 선택된 옵션은 항상 체크되어 있어야 하고, 나머지 옵션 중 하나라도 체크되지 않았다면 전체 선택 아님
-                if (checkedRows < totalRows) {
-                    allChecked = false;
-                }
-            } else {
-                // 신규 등록 모드에서는 모든 행이 체크되어야 전체 선택
-                if (checkedRows !== totalRows) {
-                    allChecked = false;
-                }
+            if (grid.getCheckedRows().length !== grid.getRowCount()) {
+                allChecked = false;
             }
         });
         overallSelectAllOptions.checked = allChecked;
@@ -732,6 +628,9 @@ async function processProductData(mode) {
         alert(`네트워크 오류 또는 서버 응답 오류가 발생했습니다: ${error.message}`);
     }
 }
+
+
+
 
 
 
