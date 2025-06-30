@@ -58,7 +58,7 @@ bindScrollEvent();
 
 //날짜 형식 함수
 //날짜만 넣으면 년-월-일 형식, (날짜, true)하면 년-월-일 오전?오후 시:분 형식으로 출력
-function formatter(date, includeTime = false) {
+function dateFormatter(date, includeTime = false) {
 	const d = new Date(date);
 	
 	//Intl.DateTimeFormat(...).formatToParts() : 날짜를 구성 요소별로 나눠서 배열 형태로 반환
@@ -119,7 +119,7 @@ async function vacationList(page, keyword = '') {
 			empId: n.EMP_ID,
 			empNum: n.EMP_NUM,
 			empNm: n.EMP_NM,
-			empHire: formatter(new Date(n.EMP_HIRE))  || '-',
+			empHire: dateFormatter(new Date(n.EMP_HIRE))  || '-',
 			vacTotal: n.VAC_TOTAL,
             vacUsed: n.VAC_USED,
             vacRemain: n.VAC_REMAIN,
@@ -127,7 +127,7 @@ async function vacationList(page, keyword = '') {
 			empDepNm: n.EMP_DEP_NM  == '공통' ? '-' : n.EMP_DEP_NM,
 			empTeamNm: n.EMP_TEAM_NM  == '공통' ? '-' : n.EMP_TEAM_NM,
 			empPosNm: n.EMP_POS_NM,
-			periodEnd: formatter(new Date(n.PERIOD_END)),
+			periodEnd: dateFormatter(new Date(n.PERIOD_END)),
         }));
 		
 		//첫 페이지면 초기화 후 새로 보여줌
@@ -161,7 +161,7 @@ function searchVacation() {
 function formatPeriodEnd(dateString, daysLeft) {
     if (!dateString) return '-';
 
-    const formattedDate = formatter(new Date(dateString));
+    const formattedDate = dateFormatter(new Date(dateString));
     
     if (daysLeft != null) {
         return `${formattedDate} (D-${daysLeft})`;

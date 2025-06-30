@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface VacationMapper {
 	
 	// 내 휴가 현황 요약
-	Map<String, Object> getVacationSummary(Long empId);
+	Map<String, Object> getVacationSummary(Map map);
 	
 	// 내 휴가 사용 개수 계산하기
 	int getVacationCount(Long empId);

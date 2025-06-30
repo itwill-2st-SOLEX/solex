@@ -15,10 +15,10 @@
 	         , e.emp_dep_cd
 	         , e.emp_cat_cd
 	         , e.emp_team_cd
-	         , ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12)) as w1
-	         , ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1) as w2
-	         , ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) - 1) + 1) as w3
-	         , ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(SYSDATE, e.emp_hire) / 12) + 1)) as w4
+	         , ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12)) as w1
+	         , ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12) - 1) as w2
+	         , ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12) - 1) + 1) as w3
+	         , ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12) + 1)) as w4
 	    FROM EMPLOYEE e
 		)
 	</sql>
@@ -28,19 +28,19 @@
 	 <include refid="empWith"/>
 		SELECT e.emp_id, e.emp_nm, e.emp_hire, v.vac_total, v.vac_used,
 		       v.vac_total - v.vac_used AS vac_remain,
-		      	CASE WHEN w1 > SYSDATE
+		      	CASE WHEN w1 > #{sysdate}
 	                 THEN w2
 	                 ELSE w1
 	            END AS period_start,
 	            
-	            CASE WHEN w1 > SYSDATE
+	            CASE WHEN w1 > #{sysdate}
 	                 THEN w3-1
 	                 ELSE w4-1
 	            END AS period_end,
 	            
-	            CASE WHEN w1 > SYSDATE
-	                 THEN TRUNC(w3 - SYSDATE)
-	                 ELSE TRUNC(w4 - SYSDATE)
+	            CASE WHEN w1 > #{sysdate}
+	                 THEN TRUNC(w3 -#{sysdate})
+	                 ELSE TRUNC(w4 - #{sysdate})
 	            END AS days_left 
 		  FROM emp e
 		  JOIN vacation v 
@@ -78,9 +78,9 @@
        		   v.vac_total, v.vac_used, v.vac_total - v.vac_used AS vac_remain,
        		   ve.emp_cat_nm, ve.emp_dep_nm, ve.emp_team_nm, ve.emp_pos_nm,
 	           CASE
-	               WHEN w1 > SYSDATE
-	               THEN w3 - 1
-	               ELSE w4 - 1
+	               WHEN w1 > TO_DATE(#{sysdate}, 'YYYY-MM-DD')
+	               THEN w3 - INTERVAL '1' DAY
+     			   ELSE w4 - INTERVAL '1' DAY
 	           END AS period_end
 		FROM emp e
 		 		LEFT JOIN vacation v  ON e.emp_id = v.emp_id

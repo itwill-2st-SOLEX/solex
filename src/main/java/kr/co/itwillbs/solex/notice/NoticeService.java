@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.notice;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +33,13 @@ public class NoticeService {
 
 	//글 등록
 	public int insertNotice(Map<String, Object> param) {
-
+		param.put("notRegDate", LocalDateTime.now());
         return noticeMapper.insertNotice(param);
     }
 
 	//글 변경
 	public int updateNotice(Map<String, Object> param) {
+		param.put("notRegDate", LocalDateTime.now());
 		return noticeMapper.updateNotice(param);
 	}
 
