@@ -70,10 +70,10 @@
 }
 
 .sub-area {
-	min-height: 490px;
-	max-height: 490px;
+	height: 490px; /* 원하는 고정 높이로 설정 */
+	overflow-y: auto;
 	border: 1px solid #ccc;
-	padding: 10px;
+	padding: 8px;
 }
 
 .lotDetail-area {

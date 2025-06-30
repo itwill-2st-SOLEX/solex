@@ -21,62 +21,97 @@ public class LotService {
         return list;
     }
 	
-	// 트리구조 조회
-	public List<Map<String, Object>> getFilteredProductLots(String id, String lotCode, String lotStatus, String prdType) {
+	// 완제품 LOT
+	public List<Map<String, Object>> getFilteredProductLots(String lotCode, String lotStatus, String prdType) {
 		
-		if (id != null && id.trim().isEmpty()) id = null;
-		if (lotCode != null && lotCode.trim().isEmpty()) lotCode = null;
-	    if (lotStatus != null && lotStatus.trim().isEmpty()) lotStatus = null;
-	    if (prdType != null && prdType.trim().isEmpty()) prdType = null;
-	    
-        if (id == null) {
-        	// 최상위 LOT 목록 조회
-        	List<Map<String, Object>> rawList = lotMapper.getFilteredProductLots(lotCode, lotStatus, prdType);
-        	
-            List<Map<String, Object>> converted = new ArrayList<>();
-            for (Map<String, Object> row : rawList) {
-                Map<String, Object> newRow = new HashMap<>();
-                newRow.put("id", row.get("ID"));
-                newRow.put("text", row.get("TEXT"));
-                newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
-                converted.add(newRow);
-            }
-            
-            return converted;
-        } else if (id.startsWith("prd_")) {
-        	// 하위 공정 LOT 조회
-            int prdLotId = Integer.parseInt(id.replace("prd_", ""));
-            
-            List<Map<String, Object>> rawList = lotMapper.selectProcessLotNodes(prdLotId);
-            
-            List<Map<String, Object>> converted = new ArrayList<>();
-            for (Map<String, Object> row : rawList) {
-                Map<String, Object> newRow = new HashMap<>();
-                newRow.put("id", row.get("ID"));
-                newRow.put("text", row.get("TEXT"));
-                newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
-                converted.add(newRow);
-            }
-            
-            return converted;
-        } else if (id.startsWith("prc_")) {
-        	// 최하위 자재 / 설비 LOT 조회
-            int prcLotId = Integer.parseInt(id.replace("prc_", ""));
-            
-            List<Map<String, Object>> rawList = lotMapper.selectMaterialAndEquipmentNodes(prcLotId);
-            
-            List<Map<String, Object>> converted = new ArrayList<>();
-            for (Map<String, Object> row : rawList) {
-                Map<String, Object> newRow = new HashMap<>();
-                newRow.put("id", row.get("ID"));
-                newRow.put("text", row.get("TEXT"));
-                newRow.put("children", false);
-                converted.add(newRow);
-            }
-            
-            return converted;
+		List<Map<String, Object>> rawList = lotMapper.selectFilteredProductLots(lotCode, lotStatus, prdType);
+		
+		List<Map<String, Object>> converted = new ArrayList<>();
+		for (Map<String, Object> row : rawList) {
+            Map<String, Object> newRow = new HashMap<>();
+            newRow.put("id", row.get("ID"));
+            newRow.put("text", row.get("TEXT"));
+            newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
+            converted.add(newRow);
         }
-        return Collections.emptyList();
-    }
+		
+	    return converted;
+	}
+
+	// 하위 LOT (공정리스트, 자재리스트, 설비리스트)
+	public List<Map<String, Object>> getLotNodeCategories(Long prdLotId) {
+	    List<Map<String, Object>> children = new ArrayList<>();
+
+	    children.add(Map.of(
+	        "id", "prd_" + prdLotId + "_prc",
+	        "text", "공정",
+	        "children", true
+	    ));
+
+	    children.add(Map.of(
+	        "id", "prd_" + prdLotId + "_mat",
+	        "text", "자재",
+	        "children", true
+	    ));
+
+	    children.add(Map.of(
+	        "id", "prd_" + prdLotId + "_eqp",
+	        "text", "설비",
+	        "children", true
+	    ));
+	    
+	    return children;
+	}
+
+	// 공정리스트
+	public List<Map<String, Object>> getProcessNodes(Long prdLotId) {
+		
+		List<Map<String, Object>> rawList = lotMapper.selectProcessNodes(prdLotId);
+		
+		List<Map<String, Object>> converted = new ArrayList<>();
+		for (Map<String, Object> row : rawList) {
+            Map<String, Object> newRow = new HashMap<>();
+            newRow.put("id", row.get("ID"));
+            newRow.put("text", row.get("TEXT"));
+            newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
+            converted.add(newRow);
+        }
+		
+	    return converted;
+	}
+
+	// 자재리스트
+	public List<Map<String, Object>> getMaterialNodes(Long prdLotId) {
+		
+		List<Map<String, Object>> rawList = lotMapper.selectMaterialNodes(prdLotId);
+				
+		List<Map<String, Object>> converted = new ArrayList<>();
+		for (Map<String, Object> row : rawList) {
+            Map<String, Object> newRow = new HashMap<>();
+            newRow.put("id", row.get("ID"));
+            newRow.put("text", row.get("TEXT"));
+            newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
+            converted.add(newRow);
+        }
+		
+	    return converted;
+	}
+
+	// 설비리스트
+	public List<Map<String, Object>> getEquipmentNodes(Long prdLotId) {
+		
+		List<Map<String, Object>> rawList = lotMapper.selectEquipmentNodes(prdLotId);
+		
+		List<Map<String, Object>> converted = new ArrayList<>();
+		for (Map<String, Object> row : rawList) {
+            Map<String, Object> newRow = new HashMap<>();
+            newRow.put("id", row.get("ID"));
+            newRow.put("text", row.get("TEXT"));
+            newRow.put("children", ((Number) row.get("CHILDREN")).intValue() > 0); // boolean으로 변환
+            converted.add(newRow);
+        }
+		
+	    return converted;
+	}
 
 }

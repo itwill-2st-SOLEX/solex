@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadFilteredLotTree() {
-	const keyword = $('#searchInput').val();
+	const keyword = $('#searchInput').val().trim();
 	const status = $('#productTypeSelect').val();
 	const type = $('#productCategorySelect').val();
 
@@ -47,7 +47,7 @@ function loadFilteredLotTree() {
 		    },
 			'data': function(node, callback) {
 				const parentId = node.id === '#' ? null : node.id;
-				const baseParams = {
+				const params = {
 					id: parentId,
 					lotCode: keyword,
 					lotStatus: status,
@@ -55,7 +55,7 @@ function loadFilteredLotTree() {
 				};
 				$.ajax({
 					url: '/SOLEX/lot/list',
-					data: baseParams,
+					data: params,
 					success: function(data) {
 						callback.call(this, data);
 					}
