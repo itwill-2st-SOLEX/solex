@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.mypage.MypageMapper">
+	
+<!-- 	개인정보 가져오기  -->
+	<select id="getEmpData" resultType="map">
+		SELECT 
+			e.emp_num as "empNum",
+			e.emp_id as "empId",
+			e.emp_nm as "empNm",
+			e.emp_gd as "empGd",
+			TO_CHAR(e.emp_birth,'YYYY-MM-DD') as "empBirth",
+			e.emp_phone as "empPhone",
+			e.emp_email as "empEmail",
+			e.emp_pc as "empPc",
+			e.emp_add as "empAdd",
+			e.emp_da as "empDa",
+			TO_CHAR(e.emp_hire,'YYYY-MM-DD') as "empHire",
+			cat.det_nm  AS empCatCd,
+	        pos.det_nm  AS empPosCd,
+	        dep.det_nm  AS empDepCd,
+	        team.det_nm AS empTeamCd
+		FROM employee e
+		LEFT JOIN code_detail cat ON cat.det_id = e.emp_cat_cd
+		LEFT JOIN code_detail pos ON pos.det_id = e.emp_pos_cd
+		LEFT JOIN code_detail dep ON dep.det_id = e.emp_dep_cd
+		LEFT JOIN code_detail team ON team.det_id = e.emp_team_cd
+		WHERE e.emp_num = #{emp_num}
+	</select>
+	
+	<update id="personalDataModify">
+		UPDATE employee
+		SET 
+		emp_nm = #{emp_nm},
+		emp_phone = #{emp_phone},
+		emp_email = #{emp_email},
+		emp_pc = #{emp_pc},
+		emp_add = #{emp_add},
+		emp_da = #{emp_da}
+		WHERE emp_num = #{emp_num}
+	</update>
+</mapper>

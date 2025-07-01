@@ -97,9 +97,7 @@ document.addEventListener('DOMContentLoaded', function(){
 		   const empPhoneInput = document.getElementById('emp_phone');
 		   if (empPhoneInput) {
 		          empPhoneInput.value = fullPhone;
-	      } else {
-	          console.warn("경고: 'emp_phone' ID를 가진 숨겨진 전화번호 필드를 찾을 수 없습니다. 폼에 추가해 주세요.");
-	      }
+	      } 
 		  
 		  const email1 = document.getElementById('emp_email1')?.value || ''; // email 병합
 		  	   const email2 = document.getElementById('emp_email2')?.value || '';
@@ -107,9 +105,7 @@ document.addEventListener('DOMContentLoaded', function(){
 		  	   const empEmailInput = document.getElementById('emp_email');
 		  	   if (empEmailInput) {
 		  	       empEmailInput.value = fullEmail;
-		  	   } else {
-		  	        console.warn("경고: 'emp_email' ID를 가진 숨겨진 이메일 필드를 찾을 수 없습니다. 폼에 추가해 주세요.");
-		  	   }
+		  	   } 
 		  	   return true; // 이 함수는 값을 조합하는 역할만 하고, 유효성 검사는 각 버튼의 이벤트 리스너에서 수행합니다.
 		  	}
 			
@@ -125,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 		// 등록 모달 열기
 		async function openModal(empData = null) {
-			console.log('>>> openModal 호출, empData:', empData); // 이 로그를 확인하세요!
 		    const modalElement = document.getElementById('exampleModal');
 		    const modal = new bootstrap.Modal(modalElement);
 		    const modalBody = modalElement.querySelector('.modal-body');
@@ -236,17 +231,11 @@ document.addEventListener('DOMContentLoaded', function(){
 			div6.className = 'mb-3';
 
 			div6.innerHTML = `
-
 			  <label>연락처</label>
-
 			  <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
-
 			  <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
-
 			  <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required><br>
-
 			  <input type="hidden" name="emp_phone" id="emp_phone">
-
 			`;
 
 			form.appendChild(div6);
@@ -260,21 +249,15 @@ document.addEventListener('DOMContentLoaded', function(){
 			div7.className = 'mb-3';
 
 			div7.innerHTML = `
-
 			  <label>이메일</label>
-
 			  <input type="text" id="emp_email1" class="form-control d-inline-block w-25" required> @
-
 			  <input type="text" id="emp_email2" class="form-control d-inline-block w-25" required><br>
-
 			  <input type="hidden" name="emp_email" id="emp_email">
-
 			`;
 
 			form.appendChild(div7);
 
 			
-
 			// ===== 주소 =====
 
 			let div8 = document.createElement('div');
@@ -282,24 +265,15 @@ document.addEventListener('DOMContentLoaded', function(){
 			div8.className = 'mb-3';
 
 			div8.innerHTML = `
-
 			  <label>주소</label><br>
-
 			  <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
-
 			  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-
 			  <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
-
 			  <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1" placeholder="상세주소" required>
-
 			  <input type="text" id="sample6_extraAddress" placeholder="참고항목">
-				
 			`;
 
 			form.appendChild(div8);
-
-			
 
 			// ===== 버튼 =====
 
@@ -308,13 +282,11 @@ document.addEventListener('DOMContentLoaded', function(){
 			footerDiv.className = 'modal-footer';
 
 			footerDiv.innerHTML = `
-			
 			  <button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn" style="${empData ? 'display:none;' : ''}">등록</button>
 			  <button type="button" class="btn custom-btn-blue btn-warning" id="modifyBtn" style="${empData ? '' : 'display:none;'}">수정</button>
 			  <button type="reset" class="btn btn-secondary" id="resetBtn" style="${empData ? 'display:none;' : ''}">초기화</button>
 
 			  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-
 			`;
 
 			form.appendChild(footerDiv);
@@ -441,11 +413,8 @@ document.addEventListener('DOMContentLoaded', function(){
 					        // 수정 시 반드시 필요한 사원 번호
 					        if (empData && empData.EMP_NUM) {
 					            payload.emp_num = empData.EMP_NUM;
-					        } else {
-					            alert('수정할 직원의 고유 번호(사번)를 찾을 수 없습니다.');
-					            return;
-					        }
-
+							}
+							
 					        // 폼에서 변경될 수 있는 필드들을 payload에 추가 (모두 포함)
 					        payload.empCatCd = formData.get('empCatCd');
 					        payload.empDepCd = formData.get('empDepCd');
