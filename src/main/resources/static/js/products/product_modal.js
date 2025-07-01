@@ -53,10 +53,6 @@ async function showProductModal(mode, data = null) {
 
     // 옵션 요소 버튼 로직 --- 시작
     const generateCombinationsBtn = document.getElementById('generateCombinationsBtn');
-    // NOTE: generateCombinationsBtn.onclick = generateAndDisplayCombinations;
-    // 이 줄은 'new' 모드에서 제거되었습니다. 탭 클릭이 이를 트리거할 것입니다.
-    // 'edit' 모드에서는 이 버튼이 비활성화되고 텍스트가 변경됩니다.
-    // 옵션 요소 버튼 로직 --- 끝
 
     // 공통 필드 설정 및 로드 (모달이 열리기 전 미리 처리)
     if (mode === 'new') {
@@ -484,11 +480,12 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
                         data.OPT_HEIGHT === heightCode
                     );
                 }
-
-                groupedCombinations.get(colorCode).combinations.push({
-                    colorCode, colorName, sizeCode, sizeName, heightCode, heightName,
-                    isSelected
-                });
+				if (!isSelected) {
+	                groupedCombinations.get(colorCode).combinations.push({
+	                    colorCode, colorName, sizeCode, sizeName, heightCode, heightName,
+	                    isSelected
+	                });
+				}
             });
         });
     });
@@ -662,12 +659,6 @@ async function processProductData(mode) {
 	                opt_color: row.colorCode, 
 	                opt_size: row.sizeCode,
 	                opt_height: row.heightCode,
-	                // 재고(stock)와 가격(price) 컬럼이 그리드에 추가되어 있다면 여기서 함께 수집
-                    // 만약 그리드에 재고/가격 입력 필드가 있다면, 해당 필드의 값을 가져와야 합니다.
-                    // 현재 formatter에 delete 버튼만 있으므로, stock/price는 별도 입력 필드에서 가져오거나,
-                    // 그리드에 editable cell로 추가되어야 합니다. (이 부분은 추후 구현 필요)
-	                opt_stock: row.stock ? Number(row.stock) : 0, // 그리드에 stock 컬럼이 있다면
-	                opt_price: row.price ? Number(row.price) : 0 // 그리드에 price 컬럼이 있다면
 	            });
 	        });
 		});

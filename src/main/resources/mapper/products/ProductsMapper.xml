@@ -176,6 +176,16 @@
         WHERE
             PRD_ID = #{prd_id}
     </update>
+    
+    <select id="countExistingOption" parameterType="map" resultType="int">
+	    SELECT COUNT(*)
+	      FROM PRODUCT_OPTION
+	     WHERE prd_id = #{prd_id}
+	       AND opt_color = #{opt_color}
+	       AND opt_size = #{opt_size}
+	       AND opt_height = #{opt_height}
+	</select>
+	    
 
 <!--     <delete id="deleteProductOptions" parameterType="string"> -->
 <!--         DELETE FROM PRODUCT_OPTION -->

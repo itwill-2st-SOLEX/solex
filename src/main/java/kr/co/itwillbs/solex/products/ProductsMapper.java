@@ -35,6 +35,8 @@ public interface ProductsMapper {
 	void deleteProductOptions(String prdIdToUpdate);
 
 	int selectOptionTotalCount(String prdId);
+
+	int countExistingOption(Map<String, String> option);
 	
 	
 	
