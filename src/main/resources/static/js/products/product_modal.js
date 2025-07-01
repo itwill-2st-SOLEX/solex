@@ -103,7 +103,7 @@ async function showProductModal(mode, data = null) {
 		await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
     }
 
-    const modalEl = document.getElementById('exampleModal');
+    const modalEl = document.getElementById('productModal');
     const productModal = new bootstrap.Modal(modalEl);
 
 	
@@ -713,7 +713,7 @@ async function processProductData(mode) {
         if (response.ok) {
             alert(result.message);
             // 모달 닫기
-            const modalEl = document.getElementById('exampleModal');
+            const modalEl = document.getElementById('productModal');
             const productModal = bootstrap.Modal.getInstance(modalEl); // 현재 열린 모달 인스턴스 가져오기
             if (productModal) {
                 productModal.hide(); // 모달 숨기기 -> 'hidden.bs.modal' 이벤트가 발동하여 페이지 새로고침
