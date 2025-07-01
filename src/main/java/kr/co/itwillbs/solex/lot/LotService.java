@@ -145,18 +145,9 @@ public class LotService {
     }
     
     // ---------------- Insert ----------------
-    public void createProductLot(Long wrkId) {
-        Map<String, Object> lotData = lotMapper.getProductInfoByWrkId(wrkId);
-
-        // lot 코드 생성 (예: 날짜 + 시퀀스)
-        String lotCode = generateLotCode();
-        lotData.put("lotCode", lotCode);
-
-        lotMapper.insertProductLot(lotData);
-    }
-
-    private String generateLotCode() {
-        return "LOT" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+    public void insertProductLot(Map<String, Object> param) {
+    	System.out.println("param : " + param);
+        lotMapper.insertProductLot(param);
     }
 
 }

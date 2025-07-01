@@ -180,4 +180,23 @@
         WHERE e.eqp_id = #{eqpId}
     </select>
     
+    <!-- SAVE -->
+    <insert id="insertProductLot" parameterType="map">
+	    INSERT INTO product_lot (
+	        prd_lot_code,
+	        odd_id,
+	        prd_lot_start_date,
+	        prd_lot_end_date,
+	        prd_lot_sort,
+	        prd_lot_status
+	    ) VALUES (
+	        #{param.prd_lot_code},
+	        #{param.odd_id},
+	        #{param.prd_lot_start_date},
+	        #{param.prd_lot_end_date},
+	        #{param.prd_lot_sort},
+	        #{param.prd_lot_status}
+	    )
+	</insert>
+    
 </mapper>

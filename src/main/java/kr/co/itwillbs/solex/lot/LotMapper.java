@@ -38,6 +38,5 @@ public interface LotMapper {
     Map<String, Object> selectEquipmentDetail(@Param("eqpId") Long eqpId);
     
     // ---------------- Insert ----------------
-    Map<String, Object> getProductInfoByWrkId(Long wrkId);
-    int insertProductLot(Map<String, Object> data);
+    void insertProductLot(@Param("param") Map<String, Object> param);
 }

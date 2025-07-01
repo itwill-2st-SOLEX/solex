@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("lot")
@@ -108,16 +109,16 @@ public class LotRestController {
 	}
 	
 	// ---------------- Insert ----------------
-	@PostMapping("/insert/product")
-    public ResponseEntity<?> insertProductLot(@RequestParam Long wrkId) {
-        try {
-        	lotService.createProductLot(wrkId);
-            return ResponseEntity.ok("저장 성공");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("저장 실패: " + e.getMessage());
-        }
-    }
+	@PostMapping("/product/save")
+	public ResponseEntity<?> saveProductLot(@RequestBody Map<String, Object> param) {
+	    try {
+	        lotService.insertProductLot(param);
+	        return ResponseEntity.ok("저장 완료");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("저장 실패");
+	    }
+	}
 
 
 }
