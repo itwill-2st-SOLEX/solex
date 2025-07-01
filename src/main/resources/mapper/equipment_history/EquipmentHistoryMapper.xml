@@ -4,4 +4,16 @@
 
 <mapper namespace="kr.co.itwillbs.solex.equipment_history.EquipmentHistoryMapper">
 
+	<select id="equipmentHistoryMapper" resultType="map">
+  		SELECT  e.eqp_id   AS id, 
+		  		e.eqp_code AS cd, 
+		  		e.eqp_name AS nm
+		FROM    equipment e
+		WHERE   EXISTS ( SELECT 1
+		                 FROM   equipment_history eh
+		                 WHERE  eh.eqp_id = e.eqp_id )
+		ORDER BY e.eqp_id DESC
+  		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+   </select>
+
 </mapper>

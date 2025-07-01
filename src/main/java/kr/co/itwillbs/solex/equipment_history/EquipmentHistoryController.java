@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
-@RequestMapping("/equipment_his")
+@RequestMapping("/equipment_history")
 public class EquipmentHistoryController {
 	
-	@GetMapping("")
+	@GetMapping("/page")
 	public String getMethodName() {
 		
-		return "equipment_his/equipment_his_main";
+		return "equipmenthistory/equipmentHistoryDrafts";
 	}
 	
 }
