@@ -109,7 +109,7 @@
 				'출고 검사',
 				'출고 완료'
 		 )
-		  AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= TRUNC(SYSDATE, 'IW') - 28
+		  AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
 		  <if test="prdCode != null and prdCode != ''">
 		    AND PRD_CODE = #{prdCode}
 		  </if>
@@ -119,7 +119,7 @@
 	
 <!-- 	생산량 추이 - 주간 -->
 	<select id="selectWeeklyTrend" resultType="map">
-		SELECT TO_CHAR(ODD_MOD_DATE, 'YYYY-MM-DD') AS label,
+		SELECT TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM-DD') AS label,
 		       SUM(ODD_ACTUAL_CNT) AS total_cnt
 		  FROM vw_suju_summary
 	 	 WHERE ODD_STS IN (
@@ -133,7 +133,7 @@
 		  <if test="prdCode != null and prdCode != ''">
 		    AND PRD_CODE = #{prdCode}
 		  </if>
-		 GROUP BY TO_CHAR(ODD_MOD_DATE, 'YYYY-MM-DD')
+		 GROUP BY TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM-DD')
 		 ORDER BY label
 	</select>
 	
