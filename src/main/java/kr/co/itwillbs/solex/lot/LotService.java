@@ -1,6 +1,8 @@
 package kr.co.itwillbs.solex.lot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +119,6 @@ public class LotService {
 	// 최상위 LOT 상세조회
 	public Map<String, Object> getProductLotDetail(Long prdLotId) {
         Map<String, Object> data = lotMapper.selectProductLotDetail(prdLotId);
-        System.out.println("data : " + data);
         data.put("type", "product");
         return data;
     }
@@ -141,6 +142,21 @@ public class LotService {
         Map<String, Object> data = lotMapper.selectEquipmentDetail(eqpId);
         data.put("type", "equipment");
         return data;
+    }
+    
+    // ---------------- Insert ----------------
+    public void createProductLot(Long wrkId) {
+        Map<String, Object> lotData = lotMapper.getProductInfoByWrkId(wrkId);
+
+        // lot 코드 생성 (예: 날짜 + 시퀀스)
+        String lotCode = generateLotCode();
+        lotData.put("lotCode", lotCode);
+
+        lotMapper.insertProductLot(lotData);
+    }
+
+    private String generateLotCode() {
+        return "LOT" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
     }
 
 }

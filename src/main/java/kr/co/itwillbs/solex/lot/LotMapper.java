@@ -36,4 +36,8 @@ public interface LotMapper {
     
     // 설비 상세조회
     Map<String, Object> selectEquipmentDetail(@Param("eqpId") Long eqpId);
+    
+    // ---------------- Insert ----------------
+    Map<String, Object> getProductInfoByWrkId(Long wrkId);
+    int insertProductLot(Map<String, Object> data);
 }

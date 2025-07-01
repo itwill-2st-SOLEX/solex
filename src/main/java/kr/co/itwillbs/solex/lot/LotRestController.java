@@ -9,7 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("lot")
@@ -69,6 +72,7 @@ public class LotRestController {
 		return Collections.emptyList();
 	}
 	
+	// LOT 상세조회
 	@GetMapping("detail")
 	public Map<String, Object> getLotDetail(@RequestParam Map<String, String> param) {
 		
@@ -102,6 +106,18 @@ public class LotRestController {
 
 	    return Collections.emptyMap();
 	}
+	
+	// ---------------- Insert ----------------
+	@PostMapping("/insert/product")
+    public ResponseEntity<?> insertProductLot(@RequestParam Long wrkId) {
+        try {
+        	lotService.createProductLot(wrkId);
+            return ResponseEntity.ok("저장 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("저장 실패: " + e.getMessage());
+        }
+    }
 
 
 }
