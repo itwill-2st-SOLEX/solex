@@ -1,48 +1,54 @@
 $(function() {
+	//현재 페이지
 	let currentPage = 0;
+	
+	//무한스크롤 보일 행 수 
 	const pageSize = 20;
 
+	// tui 그리드 가져오기 
 	const grid = new tui.Grid({
 		el: document.getElementById('grid'),
 		bodyHeight: 500,
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '설비 번호', name: 'eq_id', align: 'center' },
-			{ header: '설비 코드', name: 'eq_cd', sortable: 'true' , align: 'center'},
-			{ header: '설비 명', name: 'eq_nm', sortable: 'true' , align: 'center'}					
+			{ header: '설비 번호', name: 'eqp_id', align: 'center' },
+			{ header: '설비 코드', name: 'eqp_code', sortable: 'true' , align: 'center'},
+			{ header: '설비명', name: 'eqp_name', sortable: 'true' , align: 'center'}					
 		]
-	});
+	}); //0701 완 
 	
-	async function loadDrafts(page) {
-		try {
-			const response = await fetch(`/SOLEX/equipment_history?page=${page}&size=${pageSize}`);
+	//설비수리이력 목록 조회
+	async function equipmentList(page) {
+			const response = await fetch(`/SOLEX/equipmenthistory/equipmenthistoryList?page=${page}&size=${pageSize}`);
 			const rawData = await response.json();
 			const data = rawData.map((row, idx) => ({
-				eq_id : page * pageSize + idx + 1,
-				eq_cd: row.CD,
-				eq_nm: row.NM
+				eqp_id : page * pageSize + idx + 1, // id값 = 그냥 목록 순서 값 자동증가
+				eqp_code: row.EQP_CODE,
+				eqp_name: row.EQP_NAME
 			}));
+			
+			//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
 			page === 0 ? grid.resetData(data) : grid.appendRows(data);
+			
+			//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
 			currentPage++;
-
+			
+			//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
 			if (data.length < pageSize) grid.off("scrollEnd");
-		} catch (error) {
-			console.error('창고 목록 조회 실패:', error);
-		}
 	}
 
-	loadDrafts(currentPage);
+	equipmentList(currentPage);
 
-	grid.on('scrollEnd', () => loadDrafts(currentPage));
+	grid.on('scrollEnd', () => equipmentList(currentPage));
 
-	grid.on('click', (ev) => {
-		if (ev.columnName === 'stk_id') {
-			const rowData = grid.getRow(ev.rowKey);
-			const code = rowData.code;
-			openDetailModal(rowData, code);       
-		}
-	});
+//	grid.on('click', (ev) => {
+//		if (ev.columnName === 'stk_id') {
+//			const rowData = grid.getRow(ev.rowKey);
+//			const code = rowData.code;
+//			openDetailModal(rowData, code);       
+//		}
+//	});
 	
 	const STOCK_TITLES = {
 	  area_type_01: '자재 재고',
@@ -89,139 +95,139 @@ $(function() {
 
 	let stockGrid = null;
 			
-	async function openDetailModal(row, code) {
-	
-		// 모달 타이틀
-		  $('#detailModalLabel').text(STOCK_TITLES[code]);
-
-		  /* 1) stockGrid 정리 & 새로 만들기 */
-		  if (stockGrid) {               // 이전에 만들었던 그리드가 있으면
-		    stockGrid.destroy();         // DOM·이벤트 메모리 해제
-		  }
-		  stockGrid = new tui.Grid({
-		    el: document.getElementById('stockGrid'),
-		    bodyHeight: 400,
-		    scrollY: true,
-		    data: [],
-		    columns: STOCK_COLUMNS[code],
-		  });
-
-		  /* 2) 데이터 조회 */
-		  try {
-		    const list = await fetchJson(
-		      `/SOLEX/stock/${row.item_id}?type=${code}`
-		    );
-
-		    const data = list.map((item, idx) => ({
-		      // 공통 필드
-		      item_nm     : item.ITEM_NM,
-		      warehouse_nm: item.WAREHOUSE_NM,
-		      area_nm     : item.AREA_NM,
-		      qty         : item.QTY,
-		      item_unit   : item.ITEM_UNIT,
-		      op_color    : item.OP_COLOR,   // 자재일 땐 undefined → 자동으로 공백
-		      op_size     : item.OP_SIZE,
-		      op_height   : item.OP_HEIGHT,
-
-		      // 타입별 번호 필드
-		      mat_num     : code === 'area_type_01' ? idx + 1 : undefined,
-		      prd_num     : code === 'area_type_02' ? idx + 1 : undefined,
-		    }));
-
-		    stockGrid.resetData(data);
-		  } catch (e) {
-		    console.error('재고 내역 조회 실패', e);
-		    stockGrid.resetData([]);
-		  }
-
-		  /* 3) 모달 오픈 & 그리드 레이아웃 갱신 */
-		  const modalEl = document.getElementById('detailModal');
-		  const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-		  modalEl.addEventListener('shown.bs.modal', function handle() {
-		    stockGrid.refreshLayout();
-		    modalEl.removeEventListener('shown.bs.modal', handle);
-		  });
-
-		  modal.show();
-	
-	}		
+//	async function openDetailModal(row, code) {
+//	
+//		// 모달 타이틀
+//		  $('#detailModalLabel').text(STOCK_TITLES[code]);
+//
+//		  /* 1) stockGrid 정리 & 새로 만들기 */
+//		  if (stockGrid) {               // 이전에 만들었던 그리드가 있으면
+//		    stockGrid.destroy();         // DOM·이벤트 메모리 해제
+//		  }
+//		  stockGrid = new tui.Grid({
+//		    el: document.getElementById('stockGrid'),
+//		    bodyHeight: 400,
+//		    scrollY: true,
+//		    data: [],
+//		    columns: STOCK_COLUMNS[code],
+//		  });
+//
+//		  /* 2) 데이터 조회 */
+//		  try {
+//		    const list = await fetchJson(
+//		      `/SOLEX/stock/${row.item_id}?type=${code}`
+//		    );
+//
+//		    const data = list.map((item, idx) => ({
+//		      // 공통 필드
+//		      item_nm     : item.ITEM_NM,
+//		      warehouse_nm: item.WAREHOUSE_NM,
+//		      area_nm     : item.AREA_NM,
+//		      qty         : item.QTY,
+//		      item_unit   : item.ITEM_UNIT,
+//		      op_color    : item.OP_COLOR,   // 자재일 땐 undefined → 자동으로 공백
+//		      op_size     : item.OP_SIZE,
+//		      op_height   : item.OP_HEIGHT,
+//
+//		      // 타입별 번호 필드
+//		      mat_num     : code === 'area_type_01' ? idx + 1 : undefined,
+//		      prd_num     : code === 'area_type_02' ? idx + 1 : undefined,
+//		    }));
+//
+//		    stockGrid.resetData(data);
+//		  } catch (e) {
+//		    console.error('재고 내역 조회 실패', e);
+//		    stockGrid.resetData([]);
+//		  }
+//
+//		  /* 3) 모달 오픈 & 그리드 레이아웃 갱신 */
+//		  const modalEl = document.getElementById('detailModal');
+//		  const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
+//
+//		  modalEl.addEventListener('shown.bs.modal', function handle() {
+//		    stockGrid.refreshLayout();
+//		    modalEl.removeEventListener('shown.bs.modal', handle);
+//		  });
+//
+//		  modal.show();
+//	
+//	}		
 			
 		
 });
 
-		
-//로그인한 사원정보 넣어주기
-function fillEmployeeInfo() {
-	$.ajax({
-		url: '/SOLEX/approval/employee/info',
-		type: 'GET',
-		dataType: 'json',
-		success: function(data) {
-			$('#docEmp_id').val(data.EMP_ID).prop('disabled', true);
-			$('#docEmp_nm').val(data.EMP_NM).prop('disabled', true);
-			$('#docdept_nm').val(data.EMP_DEP_NM).prop('disabled', true);
-			$('#docdept_team').val(data.EMP_TEAM_NM).prop('disabled', true);
-			$('#docdept_position').val(data.EMP_POS_NM).prop('disabled', true);
-		},
-		error: function() {
-			alert('사원 정보를 불러오지 못했습니다.');
-		}
-	});
-}
-
-
-// 날짜 추출하기
-function attachDateRangeChange() {
-	const input = document.getElementById('dateRange');
-	if (!input) return;
-	input.removeEventListener('change', onDateRangeChange);
-	input.addEventListener('change', onDateRangeChange);
-}
-
-function onDateRangeChange() {
-	const [startDate, endDate] = this.value.split(' to ');
-	document.getElementById('startDate').value = startDate || '';
-	document.getElementById('endDate').value = endDate || '';
-}
-
-// 주소 
-function sample6_execDaumPostcode() {
-	new daum.Postcode({
-	    oncomplete: function(data) {
-	        // 주소 변수
-	        var addr = ''; // 주소
-	        var extraAddr = ''; // 참고항목
-	
-	        // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
-	        if (data.userSelectedType === 'R') { // 도로명 주소
-	            addr = data.roadAddress;
-	        } else { // 지번 주소
-	            addr = data.jibunAddress;
-	        }
-	
-	        // 참고항목
-	        if(data.userSelectedType === 'R'){
-	            if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-	                extraAddr += data.bname;
-	            }
-	            if(data.buildingName !== '' && data.apartment === 'Y'){
-	                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-	            }
-	            if(extraAddr !== ''){
-	                extraAddr = ' (' + extraAddr + ')';
-	            }
-	            document.getElementById("sample6_extraAddress").value = extraAddr;
-	        } else {
-	            document.getElementById("sample6_extraAddress").value = '';
-	        }
-	
-	        // 우편번호와 주소 정보를 해당 필드에 넣는다.
-	        document.getElementById('sample6_postcode').value = data.zonecode;
-	        document.getElementById("sample6_address").value = addr;
-	
-	        // 상세주소 입력칸으로 포커스 이동
-	        document.getElementById("sample6_detailAddress").focus();
-	    }
-	}).open();
-}
+//		
+////로그인한 사원정보 넣어주기
+//function fillEmployeeInfo() {
+//	$.ajax({
+//		url: '/SOLEX/approval/employee/info',
+//		type: 'GET',
+//		dataType: 'json',
+//		success: function(data) {
+//			$('#docEmp_id').val(data.EMP_ID).prop('disabled', true);
+//			$('#docEmp_nm').val(data.EMP_NM).prop('disabled', true);
+//			$('#docdept_nm').val(data.EMP_DEP_NM).prop('disabled', true);
+//			$('#docdept_team').val(data.EMP_TEAM_NM).prop('disabled', true);
+//			$('#docdept_position').val(data.EMP_POS_NM).prop('disabled', true);
+//		},
+//		error: function() {
+//			alert('사원 정보를 불러오지 못했습니다.');
+//		}
+//	});
+//}
+//
+//
+//// 날짜 추출하기
+//function attachDateRangeChange() {
+//	const input = document.getElementById('dateRange');
+//	if (!input) return;
+//	input.removeEventListener('change', onDateRangeChange);
+//	input.addEventListener('change', onDateRangeChange);
+//}
+//
+//function onDateRangeChange() {
+//	const [startDate, endDate] = this.value.split(' to ');
+//	document.getElementById('startDate').value = startDate || '';
+//	document.getElementById('endDate').value = endDate || '';
+//}
+//
+//// 주소 
+//function sample6_execDaumPostcode() {
+//	new daum.Postcode({
+//	    oncomplete: function(data) {
+//	        // 주소 변수
+//	        var addr = ''; // 주소
+//	        var extraAddr = ''; // 참고항목
+//	
+//	        // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+//	        if (data.userSelectedType === 'R') { // 도로명 주소
+//	            addr = data.roadAddress;
+//	        } else { // 지번 주소
+//	            addr = data.jibunAddress;
+//	        }
+//	
+//	        // 참고항목
+//	        if(data.userSelectedType === 'R'){
+//	            if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+//	                extraAddr += data.bname;
+//	            }
+//	            if(data.buildingName !== '' && data.apartment === 'Y'){
+//	                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+//	            }
+//	            if(extraAddr !== ''){
+//	                extraAddr = ' (' + extraAddr + ')';
+//	            }
+//	            document.getElementById("sample6_extraAddress").value = extraAddr;
+//	        } else {
+//	            document.getElementById("sample6_extraAddress").value = '';
+//	        }
+//	
+//	        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+//	        document.getElementById('sample6_postcode').value = data.zonecode;
+//	        document.getElementById("sample6_address").value = addr;
+//	
+//	        // 상세주소 입력칸으로 포커스 이동
+//	        document.getElementById("sample6_detailAddress").focus();
+//	    }
+//	}).open();
+//}
