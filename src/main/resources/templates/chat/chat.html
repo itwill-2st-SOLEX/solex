@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>SOLEX 메신저</title>
+<link rel="icon" type="image/x-icon"
+	href="./assets/img/favicon/favicon.ico" />
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+	rel="stylesheet" />
+<link rel="stylesheet" href="./css/chat/chat.css" />
+</head>
+<body>
+	<div class="messenger-popup">
+		<!-- 사이드 메뉴 -->
+		<div class="sidebar">
+			<div class="icon active" id="tab-users">
+				<i class="menu-icon tf-icons bx bx-group"></i>
+			</div>
+			<div class="icon" id="tab-chats">
+				<i class="menu-icon tf-icons bx bx-message-rounded"></i>
+				<!-- 안읽은거 표시 갯수 -->
+				<span class="badge hidden" id="chat-badge"></span>
+			</div>
+		</div>
+
+		<!-- 메인 콘텐츠 -->
+		<div class="main-content">
+			<!-- 인사 목록 -->
+			<div class="view" id="view-users">
+				<h3>사원 목록</h3>
+				<!-- 				검색기능 -->
+				<div class="search-box">
+					<i class="bx bx-search search-icon"></i> <input type="text"
+						id="userSearchInput" placeholder="사원 이름 또는 부서 검색" />
+				</div>
+				<ul class="list" id="user-list">
+					<!-- JS로 사원 목록 채워짐 -->
+				</ul>
+			</div>
+
+			<!-- 대화 목록 -->
+			<div class="view hidden" id="view-chats">
+				<h3>채팅</h3>
+				<div class="delete">
+				<input type="checkbox" id="masterCheck">
+					<i id="singleTrash" class="menu-icon tf-icons bx bx-trash"></i>
+				</div>
+				<ul class="list" id="chat-list">
+					<!-- JS로 대화 목록 채워짐 -->
+				</ul>
+			</div>
+
+			<!-- 채팅방 -->
+			<div class="view hidden" id="view-chatroom">
+				<div class="chat-header" id="chatHeader">사용자</div>
+				<div class="chat-messages" id="chatMessages"></div>
+				<div class="chat-input">
+					<input type="text" id="chatInput" placeholder="메시지를 입력하세요..." />
+					<button onclick="sendMessage()">전송</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		  const empId = /*[[${session.empNum}]]*/ "";
+		/*]]>*/
+	</script>
+	<script src="./js/chat/chat.js"></script>
+</body>
+</html>

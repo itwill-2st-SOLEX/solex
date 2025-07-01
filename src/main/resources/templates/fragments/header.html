@@ -1,106 +1,306 @@
-<th:block xmlns:th="http://www.thymeleaf.org"
-		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-		layout:fragment="header">
-  <div class="costom-inner">
-    <nav
-            class="costom-nav layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
-            id="layout-navbar">
-            <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
-              <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
-                <i class="icon-base bx bx-menu icon-md"></i>
-              </a>
-            </div>
+<th:block xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:fragment="header">
+	<div class="costom-inner">
+		<nav class="costom-nav layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
+			id="layout-navbar">
+			<div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
+				<a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+					<i class="icon-base bx bx-menu icon-md"></i>
+				</a>
+			</div>
 
-            <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
-              <!-- Search -->
-              <div class="navbar-nav align-items-center me-auto">
-                <div class="nav-item d-flex align-items-center">
-                  <span class="w-px-22 h-px-22"><i class="icon-base bx bx-search icon-md"></i></span>
-                  <input
-                    type="text"
-                    class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none"
-                    placeholder="Search..."
-                    aria-label="Search..." />
-                </div>
-              </div>
-              <!-- /Search -->
+			<div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
+				<!-- Search -->
+				<div class="navbar-nav align-items-center me-auto">
+					<div class="nav-item d-flex align-items-center">
+						<span class="w-px-22 h-px-22"><i class="icon-base bx bx-search icon-md"></i></span>
+						<input type="text" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none"
+							placeholder="Search..." aria-label="Search..." />
+					</div>
+				</div>
+				<!-- /Search -->
 
-              <ul class="navbar-nav flex-row align-items-center ms-md-auto">
-                <!-- Place this tag where you want the button to render. -->
-                <li class="nav-item lh-1 me-4">
-                  <a
-                    class="github-button"
-                    href="https://github.com/themeselection/sneat-bootstrap-html-admin-template-free"
-                    data-icon="octicon-star"
-                    data-size="large"
-                    data-show-count="true"
-                    aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"
-                    >Star</a
-                  >
-                </li>
+				<ul class="navbar-nav flex-row align-items-center ms-md-auto">
+					<!-- 메신저 -->
+					<li class="me-4">
+						<a class="dropdown-item" href="#" onclick="openMessengerPopup(event)">
+							<span class="d-flex align-items-center align-middle position-relative">
+								<i class="menu-icon tf-icons bx bx-message-rounded" style="font-size: 1.6rem;"></i>
+<!--								<span id="header-chat-badge" class="badgerounded-pill bg-danger position-absolute"-->
+<!--									style="font-size: 0.6rem; min-width: 1rem; height: 1rem;-->
+<!--					                   top: 75%; right: 56px; transform: translate(50%, -50%);"> -->
+<!--								</span>-->
 
-                <!-- User -->
-                <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                  <a
-                    class="nav-link dropdown-toggle hide-arrow p-0"
-                    href="javascript:void(0);"
-                    data-bs-toggle="dropdown">
-                    <div class="avatar avatar-online">
-                      <img th:src="@{/assets/img/avatars/1.png}" alt class="w-px-40 h-auto rounded-circle" />
-                    </div>
-                  </a>
-                  <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <div class="d-flex">
-                          <div class="flex-shrink-0 me-3">
-                            <div class="avatar avatar-online">
-                              <img th:src="@{/assets/img/avatars/1.png}" alt class="w-px-40 h-auto rounded-circle" />
-                            </div>
-                          </div>
-                          <div class="flex-grow-1">
-                            <h6 class="mb-0">John Doe</h6>
-                            <small class="text-body-secondary">Admin</small>
-                          </div>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <div class="dropdown-divider my-1"></div>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="icon-base bx bx-user icon-md me-3"></i><span>My Profile</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="icon-base bx bx-cog icon-md me-3"></i><span>Settings</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <span class="d-flex align-items-center align-middle">
-                          <i class="flex-shrink-0 icon-base bx bx-credit-card icon-md me-3"></i
-                          ><span class="flex-grow-1 align-middle">Billing Plan</span>
-                          <span class="flex-shrink-0 badge rounded-pill bg-danger">4</span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <div class="dropdown-divider my-1"></div>
-                    </li>
-                    <li>
-                      <a href="#" class="dropdown-item" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
-                        <i class="icon-base bx bx-power-off icon-md me-3"></i><span>Log Out</span>
-                      </a>
-                    </li>
-                    <form id="logoutForm" action="/SOLEX/logout" method="post" style="display:none;"></form>
-                  </ul>
-                </li>
-                <!--/ User -->
-              </ul>
-            </div>
-          </nav>
-  </div>
+								<span class="flex-grow-1 align-middle ms-2">메신저</span>
+							</span>
+						</a>
+					</li>
+					</span>
+					</a>
+					</li>
+
+					<!-- User -->
+					<li class="nav-item navbar-dropdown dropdown-user dropdown">
+						<a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
+							data-bs-toggle="dropdown">
+							<div class="avatar avatar-online">
+								<img th:src="@{/assets/img/avatars/1.png}" alt class="w-px-40 h-auto rounded-circle" />
+							</div>
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end">
+							<li>
+								<a class="dropdown-item" href="#">
+									<div class="d-flex">
+										<div class="flex-shrink-0 me-3">
+											<div class="avatar avatar-online">
+												<img th:src="@{/assets/img/avatars/1.png}" alt
+													class="w-px-40 h-auto rounded-circle" />
+											</div>
+										</div>
+										<div class="flex-grow-1">
+											<h6 class="mb-0">John Doe</h6>
+											<small class="text-body-secondary">Admin</small>
+										</div>
+									</div>
+								</a>
+							</li>
+							<li>
+								<div class="dropdown-divider my-1"></div>
+							</li>
+							<li>
+								<a class="dropdown-item" href="#" onclick="openMypagePopup(event)"> 
+									<i class="icon-base bx bx-user icon-md me-3"></i><span>My Page</span>
+								</a>
+							</li>
+							<li>
+								<a class="dropdown-item" href="#">
+									<i class="icon-base bx bx-cog icon-md me-3"></i><span>Settings</span>
+								</a>
+							</li>
+							<li>
+								<div class="dropdown-divider my-1"></div>
+							</li>
+							<li>
+								<a href="#" class="dropdown-item"
+									onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+									<i class="icon-base bx bx-power-off icon-md me-3"></i><span>로그아웃</span>
+								</a>
+							</li>
+							<form id="logoutForm" action="/SOLEX/logout" method="post" style="display:none;"></form>
+						</ul>
+					</li>
+					<!--/ User -->
+				</ul>
+			</div>
+		</nav>
+	</div>
+	
+<!-- ✨ Mypage 모달창 띄우기 위해  -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" aria-hidden="true">
+	  <div class="modal-dialog modal-lg">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">마이페이지</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+	      <!-- JS에서 이 부분을 채움 -->
+	      <div class="modal-body"></div>
+	    </div>
+	  </div>
+	</div>
+					
+	<script>
+		function openMessengerPopup(event) {
+			event.preventDefault();
+			const popup = window.open('/SOLEX/chats', 'MessengerWindow', 'width=500,height=700,left=100,top=100');
+			if (!popup || popup.closed) {
+				alert('팝업 차단 해제해주세요!');
+			} else {
+				popup.focus();
+			}
+		}
+		
+		//마이페이지 누르면 로그인 한 사원의 마이페이지 모달 열리게 
+		async function openMypagePopup(event) {
+			event.preventDefault();
+			
+			const response = await fetch(`/SOLEX/mypage/empData`);
+			const empData = await response.json();
+			openModal(empData);
+		}
+		
+		//마이페이지 모달창 내부
+		async function openModal(empData){
+			
+			const modalElement = document.getElementById('exampleModal');
+			const modal = new bootstrap.Modal(modalElement);
+			const modalBody = modalElement.querySelector('.modal-body');
+			modalBody.innerHTML = '';
+			
+			// 2️⃣ 매핑 함수: 코드가 없거나 매핑이 안 돼 있으면 원본 그대로 리턴
+			const labelOf = (codeKey, codeValue) => CODE_LABEL[codeKey]?.[codeValue] ?? codeValue;
+			
+			const {
+			 	empNm      = '',
+			 	empPc      = '',
+			 	empAdd     = '',
+			    empDa      = '',
+			    empEmail   = '',
+			    empPhone   = '',
+			    empHire    = '',
+			    empBirth   = '',
+			    empGd      = 'M',
+			    EMPPOSCD   = '',
+			    EMPCATCD   = '',
+			    EMPDEPCD   = '',
+			    EMPTEAMCD   = ''
+			} = empData;
+				  
+			// 핸드폰·이메일 분리(필요하면)
+			const [hp1 = '', hp2 = '', hp3 = ''] = empPhone.split('-');
+			const [em1 = '', em2 = '']           = empEmail.split('@');	  
+				  
+			const form = document.createElement('form');
+			form.id = 'mypageForm';
+			form.innerHTML = `
+				<div class="modal-body big-box">
+					<div class="row mb-3">
+						<div class="col">
+						<label>사진</label>
+						  <input type="file" class="form-control d-inline-block" name="emp_img" required><br>
+						  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
+						</div>	
+						<div class="col">
+					  	  <label>이름</label>
+						  <input type="text" class="form-control d-inline-block" name="emp_nm" value="${empNm}" required><br>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+						<label>직급</label>
+						  <input type="text" class="form-control d-inline-block" name="emp_pos_cd" value ="${EMPPOSCD}" readonly><br>
+						</div>	
+						<div class="col">
+					  	  <label>사원</label>
+						  <input type="text" class="form-control d-inline-block" name="emp_cat_cd" value="${EMPCATCD}" readonly><br>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+						<label>부서</label>
+						  <input type="text" class="form-control d-inline-block" name="emp_dep_cd" value="${EMPDEPCD}" readonly><br>
+						</div>	
+						<div class="col">
+					  	  <label>팀</label>
+						  <input type="text" class="form-control d-inline-block" name="emp_team_cd" value="${EMPTEAMCD}" readonly><br>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+						  <label>입사일</label>
+						  <input type="text" class="form-control d-inline-block" name="emp_hire" value="${empHire}" readonly><br>
+						</div>
+						<div class="col">
+					  	  <label>생년월일</label>
+						  <input type="text" class="form-control d-inline-block" name="emp_birth" id="emp_birth" pattern="\\d{6}" value="${empBirth}" readonly>
+						  <input type="hidden" name="emp_pw" id="emp_pw"><br>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+					  	  <label>연락처</label>
+						  <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" value="${hp1}" required> -
+						  <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" value="${hp2}" required> -
+						  <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" value="${hp3}" required><br>
+						  <input type="hidden" name="emp_phone" id="emp_phone">
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+						   <label>이메일</label>
+						   <input type="text" id="emp_email1" class="form-control d-inline-block w-25" value="${em1}" required> @
+						   <input type="text" id="emp_email2" class="form-control d-inline-block w-25" value="${em2}" required><br>
+						   <input type="hidden" name="emp_email" id="emp_email">
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+						    <label>주소</label><br>
+						   <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" value="${empPc}" required>
+						   <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+						   <input type="text" id="sample6_address" name="emp_add" class="form-control" value="${empAdd}" required><br>
+						   <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1" value="${empDa}" required><br>
+						</div>
+					</div>
+					<div class="modal-footer">
+					   <button type="button" class="btn custom-btn-blue btn-warning" id="modifyBtn" >수정</button>
+					</div>
+				</div>
+			`;
+				
+			modalBody.appendChild(form); // 최종 폼 삽입
+				
+			modal.show();
+		
+		    // 수정 버튼
+		    modalBody.querySelector('#modifyBtn').onclick = async () => {
+				/* 1️⃣ 먼저 병합해서 input value를 갱신 */
+				const fullPhone = [
+				    document.getElementById('emp_phone1')?.value || '',
+				    document.getElementById('emp_phone2')?.value || '',
+				    document.getElementById('emp_phone3')?.value || ''
+				].join('-');
+				document.getElementById('emp_phone').value = fullPhone;
+	
+				const fullEmail = [
+				    document.getElementById('emp_email1')?.value || '',
+				    document.getElementById('emp_email2')?.value || ''
+		  		].join('@');
+		  		document.getElementById('emp_email').value = fullEmail;
+	
+				/* 2️⃣ 값이 채워진 뒤에 FormData를 다시 생성 */
+				const form = document.getElementById('mypageForm');
+				const formData = new FormData(form);
+	
+				/* 3️⃣ payload를 만들 때는 formData 또는 직접 변수 사용  */
+				const payload = {
+				    emp_nm   : formData.get('emp_nm'),
+				    emp_phone: fullPhone,                           // ← 직접 변수 사용
+				    emp_email: fullEmail,                           // ← 직접 변수 사용
+				    emp_pc   : formData.get('emp_pc'),
+				    emp_add  : formData.get('emp_add'),
+				    emp_da   : formData.get('emp_da')
+		  		};
+	
+				console.log('payload', payload);  // 모든 값이 채워졌는지 확인
+				
+				try {
+		            const response = await fetch('/SOLEX/mypage/personalDataModify', {
+				    	method : 'PUT',
+				   		headers: { 'Content-Type': 'application/json' },
+				    	body   : JSON.stringify(payload)
+					});
+
+		            alert(`수정 완료`);
+		            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+		            modalInstance.hide();
+		        } catch (error) {
+		            alert('수정 실패');
+		        }	
+	  	
+			}
+		}
+		
+		
+		/*
+		document.addEventListener('DOMContentLoaded', function () {
+		    // chat.js가 먼저 로드되어서 unreadCnt 함수가 정의되어 있어야 함
+		    if (typeof unreadCnt === 'function') {
+		      unreadCnt();
+		    } else {
+		      console.warn('unreadCnt 함수가 정의되어 있지 않습니다.');
+		    }
+		  });
+		  */
+	</script>
 </th:block>

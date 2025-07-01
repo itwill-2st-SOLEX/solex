@@ -314,20 +314,15 @@
 
               <ul class="menu-sub side-div">
                 <li class="menu-item">
-                  <a href="/SOLEX/production" class="menu-link">
+                  <a href="/SOLEX/dashboard" class="menu-link">
                     <div class="text-truncate" data-i18n="Without menu">당월생산량</div>
                   </a>
                 </li>
-                <li class="menu-item">
-                  <a href="/SOLEX/defect" class="menu-link">
-                    <div class="text-truncate" data-i18n="Without menu">당월분량현황</div>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="/SOLEX" class="menu-link">
-                    <div class="text-truncate" data-i18n="Without navbar">자재발주</div>
-                  </a>
-                </li>
+<!--                 <li class="menu-item"> -->
+<!--                   <a href="/SOLEX/defect" class="menu-link"> -->
+<!--                     <div class="text-truncate" data-i18n="Without menu">당월분량현황</div> -->
+<!--                   </a> -->
+<!--                 </li> -->
               </ul>
             </li>
             
@@ -345,6 +340,33 @@
                 <a href="/SOLEX/code" class="text-truncate" data-i18n="Dashboards" style="color:#384551;">공통코드</a>
               </div>
             </li>
+            
+            <div class="bar menu-item"></div>
+            
+            <!-- 현장사원페이지 -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle operator-side">
+                <div class="menu-link">
+	                <i class="menu-icon tf-icons bx bx-user-check"></i>
+	                <div class="text-truncate" data-i18n="Dashboards">현장작업자</div>
+                </div>
+              </a>
+
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/operator/manager" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">작업현황</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/operator/worker" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">실적등록</div>
+                  </a>
+                </li>
+                
+              </ul>
+            </li>
           </ul>
+          
         </aside>
 </th:block>

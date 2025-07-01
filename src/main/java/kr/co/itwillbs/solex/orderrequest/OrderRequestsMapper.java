@@ -16,6 +16,18 @@ public interface OrderRequestsMapper {
 	);
 
 	// 주문 상세 조회 쿼리
-	List<Map<String, Object>> selectOrderDetail(@Param("prd_id") int prd_id);
+	List<Map<String, Object>> getOrderDetail(@Param("odd_id") String odd_id);
+
+
+	// 승인시 동작되는 쿼리 //
+	// 재고 조회 쿼리
+	List<String> checkStock(Map<String, Object> params);
+
+	// 재고 차감 쿼리
+	Integer updateStock(Map<String, Object> params);
+
+	// 주문 상태 변경 쿼리
+	Integer updateOrderStatus(Map<String, Object> params);
+	// 승인시 동작되는 쿼리 //
 
 }

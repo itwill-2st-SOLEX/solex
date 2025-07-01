@@ -16,15 +16,15 @@
 			   , prd_size
 			   , prd_height
 			   , ord_end_date
+			   , odd_actual_cnt
 		  FROM vw_suju_summary -- 뷰테이블
 		 WHERE odd_sts IN (
-			 '작업 대기',
-			 '작업중',
-			 '작업 완료',
-			 '출고 대기(공장 > 창고)',
-			 '창고 대기',
-			 '출고 대기(창고 > 거래처)'
+			 	'작업 대기',
+			 	'작업중',
+			 	'작업 완료',
+			 '출고 대기(공장 > 창고)'
 		 )
+		   AND odd_isapproval = 'y'
 		 ORDER BY odd_id DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
@@ -81,17 +81,25 @@
 		) VALUES (#{wrk_id},    
 				  #{teamCode},
 				  #{stepSeq},
-				  #{oddCnt},
-				  DEFAULT
+				  ROUND(#{oddCnt} + #{oddCnt} * 0.05),
+				 <choose>
+		            <when test="stepSeq == 1">
+		                'wpo_sts_01'
+		            </when>
+		            <otherwise>
+		                'wpo_sts_00'
+		            </otherwise>
+		        </choose>
 		)
 	</insert>
 <!--	수주detail 테이블 상태 변경-->
 	<update id="updateSujuOrderSts">
 		UPDATE suju_order_detail
-	       SET odd_sts = 'odd_sts_03'
+	       SET odd_sts = 'odd_sts_03',
+	       	   odd_mod_date = sysdate + (9/24)
 	     WHERE odd_id = #{oddId}
 	</update>
-	
+<!-- 	창고 조회	 -->
 	<select id="getWarehouses" resultType="map">
 		SELECT w.whs_id  -- 창고 ID
 			   , w.whs_nm  -- 창고명
@@ -101,23 +109,21 @@
 		       , a.are_id  -- 구역 ID
 		       , a.are_nm  -- 구역명
 		       , a.are_max  -- 최대수량
-		       , SUM(NVL(a.are_cnt, 0)) AS are_cnt -- 현재수량
+		       , SUM(NVL(a.are_qty, 0)) AS are_cnt -- 현재수량
 		  FROM warehouse w
 		  JOIN area a 
 		    ON w.whs_id = a.whs_id
 		  LEFT JOIN warehouse_history wh 
 		    ON a.are_id = wh.are_id
-<!-- 		    [TODO] -->
-<!-- 		  LEFT JOIN product p -->
-<!-- 		    ON  -->
+ 		  LEFT JOIN product p 
+ 		    ON a.item_id = p.prd_id
 		 WHERE w.whs_sts = 'whs_sts_01'  -- 가동중
 		   AND a.are_type = 'area_type_02'
-		   AND 
+ 		   AND p.prd_id = #{prdId} 
 		 GROUP BY w.whs_id, w.whs_nm, w.whs_pc, w.whs_add, w.whs_da,
 			      a.are_id, a.are_nm, a.are_max
 	</select>
-	
-<!-- 	창고 자재 등록 -->
+<!-- 	창고 이력 등록 -->
 	<insert id="warehousesInsert">
 		INSERT INTO warehouse_history (are_id,
 				    				   whs_his_sts,
@@ -126,20 +132,42 @@
 		) VALUES (#{areaId},    
 				  'whs_his_sts_01',
 				  #{assignQty},
-				  #{whs_his_date}
+				  SYSDATE + (9/24)
 		)
 	</insert>
 <!-- 	재고 테이블 업데이트-->
-	<update id="stockUpdate">
-		UPDATE stock
-		   SET stk_cnt = stk_cnt + #{assignQty}
-		 WHERE item_id = #{optId}
-		   AND stk_cat = 'stk_cat_01'
-	</update>
+	<insert id="stockUpdate">
+		INSERT INTO stock_ledger (item_id,
+								  warehouse_id,
+								  are_id,
+								  inbound_at,
+								  initial_cnt,
+								  remaining_cnt
+		) values (#{optId},
+				  #{warehouseId},
+				  #{areaId},
+				  SYSDATE + (9/24),
+				  #{assignQty}, 
+				  #{assignQty}
+		)
+	</insert>
 <!-- 	구역 테이블 -->
 	<update id="areaUpdate">
 		UPDATE area
-		   SET are_cnt  = are_cnt + #{assignQty}
+		   SET are_qty = are_qty + #{assignQty}
 		 WHERE are_id = #{areaId}
+	</update>
+<!-- 	구역 디테일 update -->
+	<update id="areaDetailUpdate">
+			UPDATE area_detail
+			   SET are_det_qty = are_det_qty + #{assignQty}
+			 WHERE item_id = #{optId}
+			   AND are_id = #{areaId}
+	</update>
+<!-- 	 5. 수주 detail update -->
+	<update id="sujuDetailUpdate">
+			UPDATE suju_order_detail
+			   SET odd_sts = 'odd_sts_06'
+			 WHERE odd_id = #{oddId}
 	</update>
 </mapper>

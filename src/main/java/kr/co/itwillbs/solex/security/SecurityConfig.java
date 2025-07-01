@@ -26,9 +26,16 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/login")
+                .failureUrl("/auth/login?error=true")
                 .usernameParameter("emp_num")
                 .passwordParameter("emp_pw")
-                .defaultSuccessUrl("/", true)            // 로그인 성공 시 이동할 페이지
+                .successHandler((request, response, authentication) -> {
+                    String empId = authentication.getName();
+                    request.getSession().setAttribute("empId", empId);
+                    System.out.println("empId" + empId);
+
+                    response.sendRedirect("/SOLEX");
+                })
                 .permitAll()
             )
             .logout(logout -> logout

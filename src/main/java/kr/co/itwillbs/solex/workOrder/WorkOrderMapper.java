@@ -20,9 +20,15 @@ public interface WorkOrderMapper {
 	void updateSujuOrderSts(String oddId);
 	// 창고 조회
 	List<Map<String, Object>> getWarehouses(String prdId);
-	//창고 자재 등록
+	// 창고 자재 등록
+	// 1. 창고 이력 insert
 	void warehousesInsert(Map<String, Object> prdInfo);
+	// 2. 재고 원장 insert
 	void stockUpdate(Map<String, Object> prdInfo);
+	// 3.구역 update
 	void areaUpdate(Map<String, Object> prdInfo);
-	void ledgerInsert(Map<String, Object> prdInfo);
+	// 4. 구역 디테일 update
+	void areaDetailUpdate(Map<String, Object> prdInfo);
+	//  5. 수주 detail update
+	void sujuDetailUpdate(Map<String, Object> prdInfo);
 }

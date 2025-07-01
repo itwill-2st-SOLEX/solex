@@ -18,6 +18,7 @@
 			mat_lmd_date as "matLmdDate",
 			mat_comm as "matComm"
 		FROM material_orders
+		ORDER BY mat_ord_id
 	</select>
 	
 	<select id="getMaterialOrderList" resultType="map">
@@ -32,6 +33,7 @@
 			TO_CHAR(mat_lmd_date, 'yyyy-MM-dd') as "matLmdDate",
 			mat_comm as "matComm"
 		FROM material_orders
+		ORDER BY mat_ord_id
 	</select>
 	
 <!-- 	자재발주 등록 -->
@@ -48,17 +50,76 @@
 		)
 	</insert>
 	
-<!-- 	자재 id 가져오기 selectbox -->
+<!-- 	자재 id 가져오기 select_box -->
 	<select id="getMatId" resultType="map">
 		SELECT mat_id, mat_nm
 		FROM material
 	</select>
 	
 <!-- 	창고 목록 가져오기 -->
-	<select id="getWarehouseAndArea">
-		SELECT whs_id, whs_nm
-		FROM warehouse
+	<select id="getWarehouse" resultType="map">
+		SELECT w.whs_id, w.whs_nm
+		FROM warehouse w LEFT OUTER JOIN area a
+		ON w.whs_id = a.whs_id
+		WHERE a.item_id = #{matId}
+		GROUP BY w.whs_id, w.whs_nm
 	</select>
 	
+<!-- 	창고 구역 목록 가져오기 -->
+	<select id="getArea" resultType="map">
+		SELECT a.are_id, a.are_nm
+		FROM area a
+		WHERE a.whs_id = #{whsId} AND a.item_id = #{matId}
+	</select>
 	
+<!-- 	승인 버튼 누르면 insert - 창고이력 warehouse_history -->
+	<insert id="matAppWareHis" parameterType="map">
+		INSERT INTO warehouse_history
+		(are_id, whs_his_sts, whs_his_cnt, whs_his_date) 
+		VALUES (#{are_id}, 
+		'whs_his_sts_01', 
+		#{whs_his_cnt}, 
+		SYSDATE
+		)
+	</insert>
+	
+<!-- 	승인 버튼 누르면 update - 구역 디테일 AreaDetail -->
+	<update id="matAppAreaDetail" parameterType="map">
+		UPDATE area_detail 
+		SET are_det_qty = are_det_qty + #{whs_his_cnt}
+		WHERE item_id = #{mat_id}
+		AND are_id = #{are_id}
+	</update>
+	
+<!-- 	승인 버튼 누르면 update - 구역 Area -->
+	<update id="matAppArea" parameterType="map">
+		UPDATE area 
+		SET are_qty = #{whs_his_cnt}
+		WHERE are_id = #{are_id}
+	</update>
+	
+<!-- 	승인 버튼 누르면 update - stock_ledger -->
+	<insert id="matAppStockLeger">
+		INSERT INTO stock_ledger(item_id, warehouse_id, are_id, inbound_at, initial_cnt, remaining_cnt)
+		VALUES (
+			#{mat_id},
+			#{whs_id},
+			#{are_id},
+			SYSDATE,
+			#{whs_his_cnt},
+			#{whs_his_cnt}
+		)
+	</insert>
+	
+	<update id="updateApproval" parameterType="map">
+		UPDATE material_orders
+		SET mat_ord_sts = 'mat_ord_sts_01'
+		WHERE mat_ord_id = #{mat_ord_id}
+	</update>
+	
+	<update id="updateDeny" parameterType="map">
+		UPDATE material_orders
+		SET mat_ord_sts = 'mat_ord_sts_02'
+		WHERE mat_ord_id = #{mat_ord_id}
+	</update>
 </mapper>

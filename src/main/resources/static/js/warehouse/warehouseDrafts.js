@@ -8,7 +8,7 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '창고 번호', name: 'whs_id' },
+			{ header: '창고 번호', name: 'whs_id', align: 'center' },
 			{ header: '창고 이름', name: 'whs_nm', sortable: 'true' },
 			{ header: '위치', name: 'whs_full_adr', sortable: 'true' },
 			{ header: '구역 개수', name: 'are_cnt' },
@@ -175,8 +175,8 @@ $(function() {
 	let   areaCount = 0;                    // 현재 구역 개수
 	const $areaContainer = $("#areaContainer");
 
-	/* 캐시: { material: [...], product: [...] } */
-	const cache   = { material: null, product: null };
+	/* 캐시: { area_type_01: [...], area_type_02: [...] } */
+	const cache   = { area_type_01: null, area_type_02: null };
 	let   loading = false;                 // 중복 요청 방지
 
 	/* ───────────────── 구역 행 생성 ───────────────── */
@@ -192,8 +192,8 @@ $(function() {
 	        <div class="col-3">
 	          <select class="form-select form-select-sm area-type" required>
 	            <option value="" disabled selected>구역 구분</option>
-	            <option value="material" data-code="area_type_01">자재</option>
-	            <option value="product" data-code="area_type_02">제품</option>
+	            <option value="area_type_01" data-code="area_type_01">자재</option>
+	            <option value="area_type_02" data-code="area_type_02">제품</option>
 	          </select>
 	        </div>
 
@@ -253,8 +253,8 @@ $(function() {
 				fetch("/SOLEX/product")
 			]);
 			if (!matRes.ok || !prodRes.ok) throw new Error();
-			cache.material = await matRes.json();  // [{ID, NAME}, ...]
-			cache.product  = await prodRes.json();
+			cache["area_type_01"] = await matRes.json();  // [{ID, NAME}, ...]
+			cache["area_type_02"]  = await prodRes.json();
 	    } catch (e) {
 	      console.error("품목 목록 로드 실패", e);
 	      alert("품목 목록을 불러오지 못했습니다.");
@@ -265,7 +265,7 @@ $(function() {
 
 	  /* ───────────────── 구분 선택 → 캐시에서 옵션 채우기 ───────────────── */
 	$areaContainer.on("change", ".area-type", function () {
-		const type  = $(this).val();                       // material | product
+		const type  = $(this).val();                       
 	    const list  = cache[type] || [];                   // 캐시된 배열
 	    const $item = $(this).closest(".area-row")
 	                         .find(".area-item")
