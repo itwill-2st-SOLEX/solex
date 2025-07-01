@@ -22,7 +22,7 @@ $(function() {
 			const rawData = await response.json();
 			const data = rawData.map((row, idx) => ({
 				stk_id : page * pageSize + idx + 1,
-				code: row.code,
+				code: row.CODE,
 				stk_type: row.NM,
 				stk_nm: row.ITEM_NM,
 				item_id: row.ITEM_ID,
@@ -58,23 +58,23 @@ $(function() {
 	/* ② 코드 → tui.Grid 컬럼 배열 */
 	const STOCK_COLUMNS = {
 	  area_type_01: [                     // 자재
-	    { header: '번호',    name: 'lot',  align: 'center', width: 100 },
-	    { header: '자재명', name: 'name', align: 'center', sortable: true },
-		{ header: '창고명', name: 'qty',  align: 'right' },
-		{ header: '구역명', name: 'qty',  align: 'right' },
+	    { header: '번호',    name: 'mat_num',  align: 'center', width: 100 },
+	    { header: '자재명', name: 'item_nm', align: 'center', sortable: true },
+		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
+		{ header: '구역명', name: 'area_nm',  align: 'right' },
 	    { header: '재고량', name: 'qty',  align: 'right' },
-		{ header: '단위',   name: 'unit', align: 'center', width: 70 }
+		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
 	  ],
 	  area_type_02: [                     // 제품
-		{ header: '번호',    name: 'lot',  align: 'center', width: 100 },
-	    { header: '제품명', name: 'name', align: 'center', sortable: true },
-		{ header: '색깔', name: 'qty',  align: 'right' },
-	    { header: '사이즈', name: 'qty',  align: 'right' },
-		{ header: '굽', name: 'qty',  align: 'right' },
-		{ header: '창고명', name: 'qty',  align: 'right' },
-		{ header: '구역명', name: 'qty',  align: 'right' },
+		{ header: '번호',    name: 'prd_num',  align: 'center', width: 100 },
+	    { header: '제품명', name: 'item_nm', align: 'center', sortable: true },
+		{ header: '색깔', name: 'op_color',  align: 'right' },
+	    { header: '사이즈', name: 'op_size',  align: 'right' },
+		{ header: '굽', name: 'op_height',  align: 'right' },
+		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
+		{ header: '구역명', name: 'area_nm',  align: 'right' },
 	    { header: '재고량', name: 'qty',  align: 'right' },
-		{ header: '단위',   name: 'unit', align: 'center', width: 70 }
+		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
 	  ]
 	};
 	
@@ -97,31 +97,41 @@ $(function() {
 			
 	async function openDetailModal(row, code) {
 	
-		$('#detailModalLabel').text(STOCK_TITLES[code]);
-		
-		stockGrid = new tui.Grid({
-		      el         : document.getElementById('stockGrid'),
-		      bodyHeight : 400,
-		      scrollY    : true,
-		      rowHeaders : ['rowNum'],
-		      columns    : STOCK_COLUMNS[code],   // 첫 타입의 컬럼으로
-		      data       : []                     // 초기 빈 데이터
-		});
-		
-		try {
+		// 모달 타이틀
+		  $('#detailModalLabel').text(STOCK_TITLES[code]);
+
+		  /* 1) stockGrid 정리 & 새로 만들기 */
+		  if (stockGrid) {               // 이전에 만들었던 그리드가 있으면
+		    stockGrid.destroy();         // DOM·이벤트 메모리 해제
+		  }
+		  stockGrid = new tui.Grid({
+		    el: document.getElementById('stockGrid'),
+		    bodyHeight: 400,
+		    scrollY: true,
+		    data: [],
+		    columns: STOCK_COLUMNS[code],
+		  });
+
+		  /* 2) 데이터 조회 */
+		  try {
 		    const list = await fetchJson(
-		      `/SOLEX/stock/${row.item_id}?type=${code}`, []
+		      `/SOLEX/stock/${row.item_id}?type=${code}`
 		    );
 
-		    // API 응답을 컬럼에 맞게 매핑
-		    const data = list.map(item => ({
-		      lot   : item.LOT,
-		      name  : item.MAT_NM,
-		      unit  : item.MAT_UNIT,
-		      qty   : item.QTY,
+		    const data = list.map((item, idx) => ({
+		      // 공통 필드
+		      item_nm     : item.ITEM_NM,
+		      warehouse_nm: item.WAREHOUSE_NM,
+		      area_nm     : item.AREA_NM,
+		      qty         : item.QTY,
+		      item_unit   : item.ITEM_UNIT,
+		      op_color    : item.OP_COLOR,   // 자재일 땐 undefined → 자동으로 공백
+		      op_size     : item.OP_SIZE,
+		      op_height   : item.OP_HEIGHT,
 
-		      model : item.PRD_MODEL,
-		      option: item.PRD_OPTION
+		      // 타입별 번호 필드
+		      mat_num     : code === 'area_type_01' ? idx + 1 : undefined,
+		      prd_num     : code === 'area_type_02' ? idx + 1 : undefined,
 		    }));
 
 		    stockGrid.resetData(data);
@@ -129,15 +139,16 @@ $(function() {
 		    console.error('재고 내역 조회 실패', e);
 		    stockGrid.resetData([]);
 		  }
-		  
+
+		  /* 3) 모달 오픈 & 그리드 레이아웃 갱신 */
 		  const modalEl = document.getElementById('detailModal');
 		  const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
-			
+
 		  modalEl.addEventListener('shown.bs.modal', function handle() {
-		  	stockGrid.refreshLayout();          // 스크롤·열 너비 재계산
-			modalEl.removeEventListener('shown.bs.modal', handle);
+		    stockGrid.refreshLayout();
+		    modalEl.removeEventListener('shown.bs.modal', handle);
 		  });
-			
+
 		  modal.show();
 	
 	}		
