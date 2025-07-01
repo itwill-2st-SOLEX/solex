@@ -22,9 +22,9 @@
 						<div class="d-flex align-items-start row">
 							<div class="col-sm-12">
 								<div class="card-body">
-									<h5 class="card-title mb-4">발주 관리</h5>
+									<h5 class="card-title mb-4">출고 관리</h5>
 									<button type="button" class="btn custom-btn-blue mb-3 float-end"
-										style="width:10%;min-width:120px;" id="openPurchaseModalBtn"  data-action="create" >발주 등록</button>
+										style="width:10%;min-width:120px;" id="openPurchaseModalBtn"  data-action="create" >출고 등록</button>
 									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
 								</div>
 							</div>
@@ -47,130 +47,90 @@
 		<div class="modal-dialog modal-dialog-scrollable modal-xl">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="myModalTitle">발주 등록</h5>
+					<h5 class="modal-title" id="myModalTitle">출고 등록</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
-					<form id="orderRegisterForm">
-						<div class="row mb-2">
-							<div class="col">
-								<label for="client-search-input" class="form-label">거래처명 <span
-										class="text-danger">*</span></label>
-								<div id="client-select-box" class="custom-search-select" data-type="client">
-									<input type="text" id="client-search-input"
-										class="form-control select-search-input" placeholder="거래처를 선택하거나 검색하세요."
-										autocomplete="off">
-									<input type="hidden" id="selected_client_id" name="cli_id">
-									<div class="options-container"></div>
+					<div class="container-fluid">
+						<div id="shipmentRegisterForm">
+							<div class="form-grid-layout">
+								<div class="area-header">
+									<div class="row">
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label for="client-search-input" class="form-label">거래처명 <span class="text-danger">*</span></label>
+												<div id="client-select-box" class="custom-search-select">
+													<input type="text" id="client-search-input" class="form-control select-search-input" placeholder="거래처를 선택하거나 검색하세요.">
+													<input type="hidden" id="selected_client_id" name="cli_id">
+													<div class="options-container"></div>
+												</div>
+											</div>
+										</div>
+										<div class="col-sm-6">
+											<div class="form-group">
+												<label for="product-search-input" class="form-label">제품명</label>
+												<div id="product-select-box" data-action="product" class="custom-search-select">
+													<input type="text" id="product-search-input" class="form-control select-search-input" placeholder="제품을 선택하거나 검색하세요.">
+													<input type="hidden" id="selected_product_id" name="prd_id">
+													<div class="options-container"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+				
+								<div class="form-group area-payment-method">
+									<label for="pay_type" class="form-label">결제 방식 <span class="text-danger">*</span></label>
+									<select id="pay_type" name="pay_type" class="form-select">
+										<option value="">결제 방식을 선택하세요.</option>
+										<option value="현금">현금</option>
+										<option value="카드">카드</option>
+									</select>
+								</div>
+								<div class="form-group area-payment-amount">
+									<label for="ord_pay" class="form-label">결제 금액 <span class="text-danger">*</span></label>
+									<input type="text" id="ord_pay" name="ord_pay" class="form-control" placeholder="결제 금액 입력하세요.">
+								</div>
+								
+								<div class="form-group area-delivery-date">
+									<label for="ord_end_date" class="form-label">납품 요청일 <span class="text-danger">*</span></label>
+									<input class="form-control" type="date" name="ord_end_date" id="ord_end_date">
+								</div>
+								<div class="form-group area-payment-due-date">
+									<label for="ord_pay_date" class="form-label">결제 예정일 <span class="text-danger">*</span></label>
+									<input class="form-control" type="date" id="ord_pay_date" name="ord_pay_date">
+								</div>
+								
+								<div class="form-group area-address">
+									 <label class="form-label">배송지 주소 <span class="text-danger">*</span></label>
+									 <div class="input-group mb-1">
+										<input type="text" id="cli_pc" name="cli_pc" class="form-control" readonly placeholder="우편번호">
+										<button type="button" class="btn custom-btn-blue" id="findPostCodeBtn">찾기</button>
+									 </div>
+									 <input type="text" id="cli_add" name="cli_add" class="form-control mb-1" readonly placeholder="기본주소">
+									 <input type="text" id="cli_da" name="cli_da" class="form-control" placeholder="상세주소">
+								</div>
+				
+								<div class="form-group area-options-list">
+									<div class="shippable-options-wrapper">
+										<label class="form-label">출고 가능 제품</label>
+										<div id="shippableOptionsList" class="stock-list-box">
+											<p class="text-muted p-3">상단에서 제품을 먼저 검색해주세요.</p>
+										</div>
+									</div>
+									<div class="d-flex mt-2 gap-2">
+										<button type="button" id="addSelectedStockBtn" class="btn custom-btn-blue w-100" data-action="add">선택 항목 추가</button>
+										<button type="button" onclick="resetOptionForms()" class="btn btn-light w-100" data-action="reset">초기화</button>
+									</div>
 								</div>
 							</div>
-							<div class="col">
-								<label for="product-search-input" class="form-label">제품명 <span
-										class="text-danger">*</span></label>
-								<div id="product-select-box" class="custom-search-select" data-type="product">
-									<input type="text" id="product-search-input"
-										class="form-control select-search-input" placeholder="제품명을 선택하거나 검색하세요."
-										autocomplete="off">
-									<input type="hidden" id="selected_product_id" name="prd_id">
-									<div class="options-container"></div>
-								</div>
+				
+							<div class="d-flex justify-content-end mt-4 mb-2">
+								<button type="button" class="btn btn-danger" id="deleteSelectedRowsBtn">선택 항목 삭제</button>
 							</div>
+							<div id="innerGrid"></div>
 						</div>
-						<div class="row mb-2">
-							<div class="col">
-								<label for="pay_type" class="form-label">결제 방식 <span
-										class="text-danger">*</span></label>
-								<select id="pay_type" name="pay_type" class="form-select">
-									<option value="">결제 방식을 선택하세요.</option>
-									<option value="현금">현금</option>
-									<option value="카드">카드</option>
-								</select>
-							</div>
-							<div class="col">
-								<label for="odd_pay" class="form-label">결제 금액 <span
-										class="text-danger">*</span></label>
-								<input type="text" id="odd_pay" name="odd_pay" class="form-control"
-									placeholder="결제 금액 입력하세요.">
-							</div>
-							<div class="col">
-								<label for="odd_end_date" class="form-label">납품 요청일 <span
-										class="text-danger">*</span></label>
-								<input class="form-control" type="date" name="odd_end_date" id="odd_end_date">
-							</div>
-							<div class="col">
-								<label for="odd_pay_date" class="form-label">결제 예정일 <span
-										class="text-danger">*</span></label>
-								<input class="form-control" type="date" id="odd_pay_date" name="odd_pay_date">
-							</div>
-						</div>
-						<div class="row mb-2">
-							<div class="col">
-								<label class="form-label">색상 <span class="text-danger">*</span></label>
-								<div class="custom-select-wrapper" id="colorCustomSelectWrapper">
-									<div class="select-box"><input type="text" class="form-control"
-											placeholder="색상을 선택하세요" readonly></div>
-									<div class="options-container"></div>
-								</div>
-								<input type="hidden" id="opt_color" name="opt_color">
-							</div>
-							<div class="col">
-								<label class="form-label">사이즈 <span class="text-danger">*</span></label>
-								<div class="custom-select-wrapper" id="sizeCustomSelectWrapper">
-									<div class="select-box"><input type="text" class="form-control"
-											placeholder="사이즈를 선택하세요" readonly></div>
-									<div class="options-container"></div>
-								</div>
-								<input type="hidden" id="opt_size" name="opt_size">
-							</div>
-							<div class="col">
-								<label class="form-label">굽 높이 <span class="text-danger">*</span></label>
-								<div class="custom-select-wrapper" id="heightCustomSelectWrapper">
-									<div class="select-box"><input type="text" class="form-control"
-											placeholder="굽 높이를 선택하세요" readonly></div>
-									<div class="options-container"></div>
-								</div>
-								<input type="hidden" id="opt_height" name="opt_height">
-							</div>
-							<div class="col">
-								<div class="d-flex align-items-center pt-2 mt-4 justify-content-around">
-									<button type="button" id="addRowBtn"
-										class="btn custom-btn-blue">추가</button>
-									
-								</div>
-							</div>
-						</div>
-						<div class="row mb-1">
-							<div class="col">
-								<label class="form-label">배송지 주소 <span class="text-danger">*</span></label>
-								<div class="input-group">
-									<input type="text" id="cli_pc" name="cli_pc" class="form-control" readonly
-										placeholder="우편번호">
-								</div>
-							</div>
-							<div class="col">
-								<div style="margin-top: 1.4rem;">
-									<button type="button" class="btn btn-primary" id="findPostCodeBtn">우편번호
-										찾기</button>
-								</div>
-							</div>
-
-
-
-
-						</div>
-						<div class="row mb-4">
-							<div class="col"><input type="text" id="cli_add" name="cli_add" class="form-control"
-									readonly placeholder="기본주소"></div>
-							<div class="col"><input type="text" id="cli_da" name="cli_da" class="form-control"
-									placeholder="상세주소"></div>
-						</div>
-						<div class="mb-3 d-flex justify-content-end">
-							<button type="button" class="btn btn-danger me-2" id="deleteSelectedRowsBtn">선택 항목
-								삭제</button>
-							<button type="button" class="btn btn-light" id="resetItemsBtn">주문 초기화</button>
-						</div>
-						<div id="innerGrid"></div>
-					</form>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>

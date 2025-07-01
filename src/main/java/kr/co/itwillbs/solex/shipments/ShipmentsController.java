@@ -13,4 +13,6 @@ public class ShipmentsController {
 	public String orderRequestsList(){
         return "shipments/list"; 
     }
+
+    
 }

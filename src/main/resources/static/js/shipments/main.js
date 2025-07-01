@@ -37,46 +37,28 @@ function createInnerGrid() {
   gridContainer.innerHTML = '';
   INNER_TUI_GRID_INSTANCE = new tui.Grid({
       el: gridContainer, rowHeaders: ['checkbox'], bodyHeight: 200, scrollX: false,
+      // 크기 자동 조정
       columns: [
-          { header: '상품명', name: 'productName', minWidth: 207, align: 'center' },
-          { header: '색상', name: 'colorName', minWidth: 207, align: 'center' },
-          { header: '사이즈', name: 'sizeName', minWidth: 207, align: 'center' },
-          { header: '굽높이', name: 'heightName', minWidth: 207, align: 'center' },
-          { header: '수량', name: 'quantity', editor: 'text', minWidth: 207, align: 'right' },
+          { header: '상품명', name: 'productName', minWidth: 194, align: 'center' },
+          { header: '색상', name: 'colorName', minWidth: 194, align: 'center' },
+          { header: '사이즈', name: 'sizeName', minWidth: 194, align: 'center' },
+          { header: '굽높이', name: 'heightName', minWidth: 194, align: 'center' },
+          { header: '수량', name: 'quantity', editor: 'text', minWidth: 192, align: 'right' },
           { name: 'productCode', hidden: true }, { name: 'colorCode', hidden: true },
           { name: 'sizeCode', hidden: true }, { name: 'heightCode', hidden: true },
       ],
   });
 }
 
+
 // 3. DOM 로드 후 실행될 코드
 document.addEventListener("DOMContentLoaded", async function () {
   createInnerGrid();
   document.getElementById("openPurchaseModalBtn").addEventListener("click", openPurchaseModal);
-  document.getElementById("addRowBtn").addEventListener("click", addRowBtn);
   document.getElementById("findPostCodeBtn").addEventListener("click", findPostCode);
+  document.getElementById("addSelectedStockBtn").addEventListener("click", addRowToInnerGrid);
 
-  document.addEventListener("click", (e) => {
-    // 2. 다중 선택 셀렉트 박스(색상/사이즈/굽) 닫기
-    const selectBox = e.target.closest(".custom-select-wrapper .select-box");
-    if (selectBox) {
-      const wrapper = selectBox.closest(".custom-select-wrapper");
-      wrapper.classList.toggle("open");
-      document
-        .querySelectorAll(".custom-select-wrapper.open")
-        .forEach((openWrapper) => {
-          if (openWrapper !== wrapper) openWrapper.classList.remove("open");
-        });
-    }
-    // 클릭한 위치가 .custom-select-wrapper 내부가 아닐 때만 실행
-    if (!e.target.closest(".custom-select-wrapper")) {
-      document
-        .querySelectorAll(".custom-select-wrapper.open")
-        .forEach((select) => {
-          select.classList.remove("open");
-        });
-    }
-  });
+  setupInteractiveList("shippableOptionsList");
 
   // 초기 그리드 데이터 로드 (페이지 로드 시)
   fetchGridData(currentPage); // 초기 페이지와 (비어있는) 검색어 전달
@@ -110,11 +92,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       const oddId = target.dataset.ordId;
       const action = target.dataset.action; // data-action 값을 가져옴
 
-      console.log(`[버튼 클릭] 주문 ID: ${oddId}, 액션: ${action}`);
 
       if (action === "create") {
         // 작업 지시용 모달 열기
-        console.log("openPurchaseModal");
         openPurchaseModal();
       }
       //  else if (action === 'request') {
@@ -147,7 +127,6 @@ async function fetchGridData(page = currentPage) {
 
     // 3. 응답 데이터를 JSON으로 파싱
     const data = await response.json();
-    console.log(data);
 
     data.map((item) => {
       if (item.PRODUCTION_STATUS == "생산 가능") {
@@ -174,7 +153,6 @@ async function fetchGridData(page = currentPage) {
       hasMoreData = true; // 더 불러올 데이터가 있을 가능성 (전역 변수)
     }
   } catch (error) {
-    console.error("그리드 데이터 로딩 중 오류 발생:", error);
     hasMoreData = false; // 오류 발생 시에는 더 이상 데이터를 로드하지 않음 (전역 변수)
   } finally {
     isLoading = false; // 로딩 완료 플래그 해제 (전역 변수)
@@ -254,7 +232,8 @@ function initializeSearchableSelect(wrapperId, apiUrl) {
   }, 300);
   textInput.addEventListener("keyup", debouncedSearch);
   // 이 컴포넌트의 타입을 가져옵니다 ('client' 또는 'product')
-  const componentType = wrapper.dataset.type;
+  const componentType = wrapper.dataset.action;
+  
 
   // 3. 옵션 아이템 선택 시 (mousedown 사용으로 안정성 확보)
   optionsContainer.addEventListener("mousedown", (e) => {
@@ -267,13 +246,10 @@ function initializeSearchableSelect(wrapperId, apiUrl) {
       textInput.value = label;
       hiddenInput.value = value;
 
-      if (componentType === "client") {
-      } else if (componentType === "product") {
-        console.log(value, label);
+      if (componentType === "product") {
         selectProductCd = value;
         selectProductNm = label;
-        console.log(selectProductCd, selectProductNm);
-        getOptionsData(value);  
+        getProductOptionsData(value);
       }
 
       wrapper.classList.remove(ACTIVE_CLASS); // 선택 후 드롭다운 닫기
@@ -330,7 +306,7 @@ async function fetchSelectData(url, keyword = "") {
 }
 
 // 옵션 데이터 가져오기
-async function getOptionsData(value) {
+async function getProductOptionsData(value) {
   const response = await fetch(`/SOLEX/product/options/${value}`);
 
   if (!response.ok) {
@@ -343,178 +319,82 @@ async function getOptionsData(value) {
   loadAllProductOptions(data);
 }
 
-// 모든 옵션 데이터 로드
 async function loadAllProductOptions(data) {
-  let optionsData;
-  if (typeof data === "string" || typeof data === "number") {
-    if (!data) {
-      resetOrderStep("color");
+  const optionsListBox = document.getElementById("shippableOptionsList");
+
+  if (!data || data.length === 0) {
+      optionsListBox.innerHTML = `<li class="text-muted p-3">해당 제품의 출고 가능 재고가 없습니다.</li>`;
       return;
-    }
-    try {
-      optionsData = await (await fetch(`/SOLEX/orders/product/${data}`)).json();
-    } catch (error) {
-      resetOrderStep("color");
-      return;
-    }
-  } else if (Array.isArray(data)) {
-    optionsData = data;
-  } else {
-    resetOrderStep("color");
-    return;
   }
-  originalOptionsData = optionsData || [];
-  const unique = { colors: new Map(), sizes: new Map(), heights: new Map() };
-  originalOptionsData.forEach((opt) => {
-    if (opt.OPT_COLOR && opt.OPT_COLOR_NM)
-      unique.colors.set(opt.OPT_COLOR, opt.OPT_COLOR_NM);
-    if (opt.OPT_SIZE && opt.OPT_SIZE_NM)
-      unique.sizes.set(opt.OPT_SIZE, opt.OPT_SIZE_NM);
-    if (opt.OPT_HEIGHT && opt.OPT_HEIGHT_NM)
-      unique.heights.set(opt.OPT_HEIGHT, opt.OPT_HEIGHT_NM);
-  });
-  const optionConfigs = {
-    color: { data: Array.from(unique.colors), multi: true },
-    size: {
-      data: Array.from(unique.sizes).sort((a, b) => +a[1] - +b[1]),
-      multi: true,
-    },
-    height: {
-      data: Array.from(unique.heights).sort((a, b) => +a[1] - +b[1]),
-      multi: true,
-    },
-  };
-  for (const [type, { data: configData, multi }] of Object.entries(
-    optionConfigs
-  )) {
-    const wrapper = document.getElementById(`${type}CustomSelectWrapper`);
-    const container = wrapper?.querySelector(".options-container");
-    if (container) {
-      container.innerHTML = configData
-        .map(
-          ([value, label]) =>
-            `<div class="option" data-value="${value}">${label}</div>`
-        )
-        .join("");
-      initializeCustomSelect(wrapper.id, multi);
-    }
-  }
+
+  const optionsHtml = data.map(item => {
+      const optionFullName = `${item.OPT_COLOR_NM} / ${item.OPT_SIZE_NM} / ${item.OPT_HEIGHT_NM}`;
+      
+      // ▼▼▼ item 객체 전체를 JSON 문자열로 바꿔서 data-item-json 속성에 저장 ▼▼▼
+      return `
+          <li class="stock-item" data-item-json='${JSON.stringify(item)}'>
+              <div class="form-check">
+                  <input class="form-check-input stock-item-checkbox" type="checkbox" style="margin-top: 10px;" value="${item.OPT_ID}" id="stock_opt_${item.OPT_ID}">
+                  <label class="form-check-label stock-item-info" for="stock_opt_${item.OPT_ID}">
+                      ${item.PRD_NM} <br>
+                      <small class="text-muted">${optionFullName}</small>
+                  </label>
+              </div>
+              <span class="stock-item-qty">${item.TOTAL_QUANTITY}개</span>
+          </li>
+      `;
+  }).join('');
+
+  optionsListBox.innerHTML = optionsHtml;
 }
 
-// 다중 선택 셀렉트 박스 초기화
-function initializeCustomSelect(wrapperId, isMultiSelect) {
-  const wrapper = document.getElementById(wrapperId);
-  if (!wrapper) return;
-  const optionsContainer = wrapper.querySelector(".options-container");
-  const input = wrapper.querySelector(".select-box input");
-  const hiddenInput = document.getElementById(
-    `opt_${wrapperId.replace("CustomSelectWrapper", "")}`
-  );
-  const selectedValues = new Set(hiddenInput.value.split(",").filter(Boolean));
-  optionsContainer.querySelectorAll(".option").forEach((option) => {
-    option.onclick = (e) => {
-      e.stopPropagation();
-      const value = option.getAttribute("data-value");
-      if (isMultiSelect) {
-        option.classList.toggle("selected");
-        if (selectedValues.has(value)) selectedValues.delete(value);
-        else selectedValues.add(value);
-      }
-      updateDisplayValue(input, hiddenInput, selectedValues, optionsContainer);
-    };
-    if (selectedValues.has(option.dataset.value))
-      option.classList.add("selected");
-  });
-  updateDisplayValue(input, hiddenInput, selectedValues, optionsContainer);
-}
-
-// 다중 선택 셀렉트 박스의 선택된 값을 화면에 표시하는 함수
-function updateDisplayValue(input,hiddenInput,selectedValues,optionsContainer) {
-  const labels = Array.from(selectedValues)
-    .map(
-      (val) =>
-        optionsContainer.querySelector(`.option[data-value="${val}"]`)
-          ?.textContent || ""
-    )
-    .filter(Boolean);
-  let displayText = "";
-  if (labels.length === 1) displayText = labels[0];
-  else if (labels.length > 1)
-    displayText = `${labels[0]} 외 ${labels.length - 1}개`;
-  input.value = displayText;
-  if (hiddenInput) hiddenInput.value = Array.from(selectedValues).join(",");
-}
-
-function addRowBtn() {
-  addRowToInnerGrid();
-}
 
 function addRowToInnerGrid() {
-  const getSelected = (id) =>
-    document.getElementById(id)?.value.split(",").filter(Boolean);
-  const selected = {
-    colors: getSelected("opt_color"),
-    sizes: getSelected("opt_size"),
-    heights: getSelected("opt_height"),
-  };
+  const selectedCheckboxes = document.querySelectorAll('.stock-item-checkbox:checked');
 
-  if (!selectProductCd) {
-    alert("먼저 상품을 선택해주세요.");
-    return;
-  }
-  if ( selected.colors.length * selected.sizes.length * selected.heights.length === 0 ) {
-    alert("색상, 사이즈, 굽높이를 각각 하나 이상 선택해주세요.");
-    return;
-  }
-  const validCombinations = originalOptionsData.filter(
-    (opt) =>
-      selected.colors.includes(opt.OPT_COLOR) &&
-      selected.sizes.includes(opt.OPT_SIZE) &&
-      selected.heights.includes(opt.OPT_HEIGHT)
-  );
-  if (validCombinations.length === 0) {
-    alert("선택하신 옵션에 해당하는 유효한 제품 조합이 없습니다.");
-    return;
-  }
+  // ▼▼▼ dataset.itemJson을 읽고 JSON.parse로 원래 객체로 되돌림 ▼▼▼
+  const itemsToAdd = Array.from(selectedCheckboxes).map(checkbox => {
+      const stockItem = checkbox.closest('.stock-item');
+      // li 태그에 저장된 JSON 문자열을 다시 자바스크립트 객체로 변환
+      return JSON.parse(stockItem.dataset.itemJson);
+  });
+
   const existingRows = INNER_TUI_GRID_INSTANCE.getData();
   let addedCount = 0;
-  validCombinations.forEach((item) => {
-    const isDuplicate = existingRows.some((row) =>
-      row.productCode === selectProductCd && row.colorCode === item.OPT_COLOR && row.sizeCode === item.OPT_SIZE && row.heightCode === item.OPT_HEIGHT);
-    if (!isDuplicate) {
-      INNER_TUI_GRID_INSTANCE.appendRow({
-        productName: selectProductNm,
-        productCode: selectProductCd,
-        colorName: item.OPT_COLOR_NM,
-        colorCode: item.OPT_COLOR,
-        sizeName: item.OPT_SIZE_NM,
-        sizeCode: item.OPT_SIZE,
-        heightName: item.OPT_HEIGHT_NM,
-        heightCode: item.OPT_HEIGHT,
-        quantity: 1,
-      });
-      console.log(INNER_TUI_GRID_INSTANCE.getData());
-      addedCount++;
-      INNER_TUI_GRID_INSTANCE.refreshLayout();
-    }
+
+  itemsToAdd.forEach((item) => {
+      // 이제 item 객체에는 OPT_ID, PRD_NM 등 모든 데이터가 포함되어 있습니다.
+      const isDuplicate = existingRows.some(row => row.optionCode === item.OPT_ID);
+
+      if (!isDuplicate) {
+          INNER_TUI_GRID_INSTANCE.appendRow({
+              productName: item.PRD_NM,
+              optionCode:  item.OPT_ID,
+              colorName:   item.OPT_COLOR_NM,
+              sizeName:    item.OPT_SIZE_NM,
+              heightName:  item.OPT_HEIGHT_NM,
+              quantity:    1,
+          });
+          addedCount++;
+      }
   });
-  if (addedCount < validCombinations.length)
-    alert(`${validCombinations.length - addedCount}개의 항목은 이미 목록에 존재하여 추가되지 않았습니다.`);
+
+  INNER_TUI_GRID_INSTANCE.refreshLayout();
+
+  if (addedCount < itemsToAdd.length) {
+      alert(`${itemsToAdd.length - addedCount}개의 항목은 이미 목록에 존재하여 추가되지 않았습니다.`);
+  }
   resetOptionForms();
 }
 
-// 옵션 폼 초기화
+// 옵션 폼 초기화 (수정)
 function resetOptionForms() {
+  // 보이는 입력창 초기화
   document.getElementById("product-search-input").value = "";
-
-  ["color", "size", "height"].forEach((type) => {
-    const wrapper = document.getElementById(`${type}CustomSelectWrapper`);
-    if (wrapper) {
-      wrapper.querySelector(".select-box input").value = "";
-      wrapper.querySelector(".options-container").innerHTML = "";
-      document.getElementById(`opt_${type}`).value = "";
-    }
-  });
+  // 숨겨진 ID 값 초기화 (추가)
+  document.getElementById("selected_product_id").value = "";
+  // 옵션 목록 초기화
+  document.getElementById("shippableOptionsList").innerHTML = "<p class='text-muted p-3'>상단에서 제품을 먼저 검색해주세요.</p>";
 }
 
 function findPostCode() { new daum.Postcode({ oncomplete: function(data) {
@@ -522,6 +402,28 @@ function findPostCode() { new daum.Postcode({ oncomplete: function(data) {
   document.getElementById("cli_add").value = data.roadAddress;
   document.getElementById("cli_da").focus();
 }}).open(); }
+
+function setupInteractiveList(containerId) {
+  const listContainer = document.getElementById(containerId);
+  if (!listContainer) return;
+
+  listContainer.addEventListener("click", function (e) {
+      // 1. 클릭된 지점에서 가장 가까운 .stock-item을 찾습니다.
+      const stockItem = e.target.closest(".stock-item");
+      if (!stockItem) return;
+
+      // 2. 해당 .stock-item 안의 체크박스를 찾습니다.
+      const checkbox = stockItem.querySelector(".stock-item-checkbox");
+      if (!checkbox) return;
+
+      // 3. 체크박스나 라벨을 직접 클릭한 경우는 브라우저 기본 동작에 맡깁니다.
+      const targetTagName = e.target.tagName.toUpperCase();
+      if (targetTagName !== 'INPUT' && targetTagName !== 'LABEL' && !e.target.closest('label')) {
+          // 4. 그 외의 영역을 클릭했을 때 체크박스 상태를 반전시킵니다.
+          checkbox.checked = !checkbox.checked;
+      }
+  });
+}
 
 
 

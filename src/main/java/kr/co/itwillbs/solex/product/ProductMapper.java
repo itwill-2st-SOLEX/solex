@@ -14,6 +14,6 @@ public interface ProductMapper {
 
 	List<Map<String, Object>> findByProductId(Long itemId);
 
-	List<Map<String, Object>> getProductOptions(@Param("prd_id") String prd_id);
+	List<Map<String, Object>> findAvailableProductOptionsByProductId(@Param("prd_id") String prd_id);
 
 }
