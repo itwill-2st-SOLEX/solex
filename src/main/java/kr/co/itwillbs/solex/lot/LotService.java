@@ -117,6 +117,7 @@ public class LotService {
 	// 최상위 LOT 상세조회
 	public Map<String, Object> getProductLotDetail(Long prdLotId) {
         Map<String, Object> data = lotMapper.selectProductLotDetail(prdLotId);
+        System.out.println("data : " + data);
         data.put("type", "product");
         return data;
     }

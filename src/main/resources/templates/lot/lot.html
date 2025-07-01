@@ -55,7 +55,185 @@
 						<div class="detail-area">
 							<div class="sub-area">
 								<div id="lotDetail">
-									LOT 상세
+									<!-- 최상위 LOT 상세 -->
+									<div id="detail-product" class="detail-section" style="display: none;">
+										<div class="detail-card">
+											<div class="single">
+												<p><strong>LOT 코드</strong></p>
+												<span id="lotCode" class="lotCode"></span>
+											</div>
+											<div class="single">
+												<p><strong>작업지시자</strong></p>
+												<span id="orderName"></span>
+												<span id="orderNum"></span>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>제품명</strong></p>
+													<span id="productName"></span>
+													<p><strong>제품코드</strong></p>
+													<span id="productCode"></span>
+													<p><strong>제품유형</strong></p>
+													<span id="productType"></span>
+												</div>
+												<div class="single">
+													<p><strong>사이즈</strong></p>
+													<span id="size"></span>
+													<p><strong>색상</strong></p>
+													<span id="color"></span>
+													<p><strong>굽 높이</strong></p>
+													<span id="height"></span>
+												</div>
+											</div>
+											<div class="single">
+												<p><strong>생산상태</strong></p>
+												<span id="status"></span>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>시작일자</strong></p>
+													<span id="startDate"></span>
+												</div>
+												<div class="single">
+													<p><strong>종료일자</strong></p>
+													<span id="endDate"></span>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- 공정 LOT 상세 -->
+									<div id="detail-process" class="detail-section" style="display: none;">
+										<div class="detail-card">
+											<div class="half">
+												<div class="single">
+													<p><strong>공정명</strong></p>
+													<span id="processName"></span>
+													<p><strong>공정코드</strong></p>
+													<span id="processCode"></span>
+												</div>
+												<div class="single">
+													<p><strong>공정장</strong></p>
+													<span id="operatorName"></span>
+													<p><strong>공정장 사번</strong></p>
+													<span id="operatorNum"></span>
+												</div>
+											</div>
+											<div class="half">
+												<div class="single">	
+													<p><strong>작업시작일</strong></p>
+													<span id="processStartDate"></span>
+												</div>
+												<div class="single">	
+													<p><strong>작업종료일</strong></p>
+													<span id="processEndDate"></span>
+												</div>
+											</div>
+											<div class="half">
+												<div class="single">	
+													<p><strong>생산수량</strong></p>
+													<span id="successCount"></span>
+												</div>
+												<div class="single">	
+													<p><strong>불량수량</strong></p>
+													<span id="failCount"></span>
+												</div>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>설비명</strong></p>
+													<span id="usedEquipmentName"></span>
+												</div>
+												<div class="single">
+													<p><strong>설비코드</strong></p>
+													<span id="usedEquipmentCode"></span>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+									<!-- 자재 LOT 상세 -->
+									<div id="detail-material" class="detail-section" style="display: none;">
+										<div class="detail-card">
+											<div class="single">
+												<p><strong>LOT 코드</strong></p>
+												<span id="materialLot" class="lotCode"></span>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>자재명</strong></p>
+													<span id="materialName"></span>
+												</div>
+												<div class="single">
+													<p><strong>자재코드</strong></p>
+													<span id="materialCode"></span>
+												</div>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>투입일</strong></p>
+													<span id="materialDate"></span>
+												</div>
+												<div class="single">
+													<p><strong>투입수량</strong></p>
+													<span id="materialCount"></span>
+												</div>
+											</div>
+											<div class="single">
+												<p><strong>거래처</strong></p>
+												<span id="materialPartner"></span>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>담당자</strong></p>
+													<span id="materialManager"></span>
+												</div>
+												<div class="single">
+													<p><strong>연락처</strong></p>
+													<span id="materialPhone"></span>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+									<!-- 설비 LOT 상세 -->
+									<div id="detail-equipment" class="detail-section" style="display: none;">
+										<div class="detail-card">
+											<div class="half">
+												<div class="single">
+													<p><strong>설비명</strong></p>
+													<span id="equipmentName"></span>
+												</div>
+												<div class="single">
+													<p><strong>설비코드</strong></p>
+													<span id="equipmentCode"></span>
+												</div>
+											</div>
+											<div class="single">
+												<p><strong>거래처</strong></p>
+												<span id="equipmentPartner"></span>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>담당자</strong></p>
+													<span id="equipmentManager"></span>
+												</div>
+												<div class="single">
+													<p><strong>연락처</strong></p>
+													<span id="equipmentPhone"></span>
+												</div>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>사용공정명</strong></p>
+													<span id="usedProcessName"></span>
+												</div>
+												<div class="single">
+													<p><strong>사용공정코드</strong></p>
+													<span id="usedProcessCode"></span>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>

@@ -60,9 +60,8 @@
 }
 
 .title-area {
-    height: 70px;
+    height: 50px;
     padding: 10px;
-    margin-bottom: 15px;
 }
 
 .sub-title {
@@ -70,7 +69,7 @@
 }
 
 .sub-area {
-	height: 490px; /* 원하는 고정 높이로 설정 */
+	height: 520px;
 	overflow-y: auto;
 	border: 1px solid #ccc;
 	padding: 8px;
@@ -82,4 +81,43 @@
     border: 2px solid #f2f2f2;
     border-radius: 15px;
     padding: 10px;
+}
+
+.detail-section {
+  background-color: #fdfdfd;
+  margin-bottom: 10px;
+}
+
+.detail-card {
+	padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-card p {
+	margin: 0px;
+}
+
+.detail-card span {
+	margin: 0px;
+	padding-left: 20px;
+}
+
+.half {
+	display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.single {
+    width: 40%;
+	display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.lotCode {
+	width: 170%;
 }

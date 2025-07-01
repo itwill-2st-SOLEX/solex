@@ -4,37 +4,14 @@ document.addEventListener('DOMContentLoaded', function() {
 	loadSelectBox('#productCategorySelect', '/SOLEX/lot/productType/list', '제품 유형');
 	loadSelectBox('#productTypeSelect', '/SOLEX/lot/lotStatus/list', '생산 상태');
 	loadFilteredLotTree();
-	
+
 	// Enter 키로 검색
 	$('#searchInput').on('keydown', function(e) {
-	    if (e.keyCode === 13) {
-	        loadFilteredLotTree();
-	    }
-	});
-	
-	// 행 클릭 시 상세조회
-	$('#lotTree').on('select_node.jstree', function (e, data) {
-		const nodeId = data.node.id;
-		
-		// 중간 분기 노드는 조회하지 않음
-		if (
-			nodeId.endsWith('_prc') ||
-			nodeId.endsWith('_mat') ||
-			nodeId.endsWith('_eqp')
-		) {
-			return;
+		if (e.keyCode === 13) {
+			loadFilteredLotTree();
 		}
-
-		$.ajax({
-			url: '/SOLEX/lot/detail',
-			data: { id: nodeId },
-			success: function (detailData) {
-				const html = formatLotDetailHtml(detailData);
-				$('#lotDetail').html(html);
-			}
-		});
 	});
-	
+
 });
 
 // LOT계층 트리구조 생성
@@ -48,9 +25,9 @@ function loadFilteredLotTree() {
 	$('#lotTree').jstree({
 		'core': {
 			'themes': {
-		      'dots': false,
-			  'icons': false
-		    },
+				'dots': false,
+				'icons': false
+			},
 			'data': function(node, callback) {
 				const parentId = node.id === '#' ? null : node.id;
 				const params = {
@@ -68,52 +45,94 @@ function loadFilteredLotTree() {
 				});
 			}
 		}
+	}).on('select_node.jstree', function(e, data) {	// 행 클릭 시 상세조회
+		const nodeId = data.node.id;
+
+		if (
+			nodeId.endsWith('_prc') ||
+			nodeId.endsWith('_mat') ||
+			nodeId.endsWith('_eqp')
+		) {
+			return;
+		}
+
+		$.ajax({
+			url: '/SOLEX/lot/detail',
+			data: { id: nodeId },
+			success: function(detailData) {
+				const html = showLotDetail(detailData);
+				$('#lotDetail').html(html);
+			}
+		});
 	});
-	
+
 }
 
 // 각 항목별 상세조회
-function formatLotDetailHtml(data) {
-	const type = data.type; // 'product', 'process', 'material', 'equipment'
-	let html = '';
+function showLotDetail(data) {
+	const type = data.type;
+
+	// 모든 섹션 숨김
+	document.querySelectorAll('.detail-section').forEach(el => el.style.display = 'none');
 
 	if (type === 'product') {
-		html += `<div><strong>LOT 코드:</strong> ${data.lotCode}</div>`;
-		html += `<div><strong>제품명:</strong> ${data.productName}</div>`;
-		html += `<div><strong>제품코드:</strong> ${data.productCode}</div>`;
-		html += `<div><strong>제품유형:</strong> ${data.productType}</div>`;
-		html += `<div><strong>사이즈:</strong> ${data.size}</div>`;
-		html += `<div><strong>색상:</strong> ${data.color}</div>`;
-		html += `<div><strong>굽 높이:</strong> ${data.height}</div>`;
-		html += `<div><strong>생산상태:</strong> ${data.status}</div>`;
-		html += `<div><strong>생산시작일자:</strong> ${data.startDate}</div>`;
-		html += `<div><strong>생산종료일자:</strong> ${data.endDate}</div>`;
+		document.getElementById('detail-product').style.display = 'block';
+		document.getElementById('lotCode').textContent = data.lotCode;
+		document.getElementById('orderName').textContent = data.orderName;
+		document.getElementById('orderNum').textContent = data.orderNum;
+		document.getElementById('productName').textContent = data.productName;
+		document.getElementById('productCode').textContent = data.productCode;
+		document.getElementById('productType').textContent = data.productType;
+		document.getElementById('size').textContent = data.size;
+		document.getElementById('color').textContent = data.color;
+		document.getElementById('height').textContent = data.height;
+		document.getElementById('status').textContent = data.status;
+		document.getElementById('startDate').textContent = formatDate(data.startDate);
+		document.getElementById('endDate').textContent = formatDate(data.endDate);
 	} else if (type === 'process') {
-		html += `<div><strong>공정명:</strong> ${data.processName}</div>`;
-		html += `<div><strong>공정코드:</strong> ${data.processCode}</div>`;
-		html += `<div><strong>시작일:</strong> ${data.startDate}</div>`;
-		html += `<div><strong>종료일:</strong> ${data.endDate}</div>`;
-		html += `<div><strong>담당자명:</strong> ${data.operatorName}</div>`;
-		html += `<div><strong>담당자 사번:</strong> ${data.operatorNum}</div>`;
+		document.getElementById('detail-process').style.display = 'block';
+		document.getElementById('processName').textContent = data.processName;
+		document.getElementById('processCode').textContent = data.processCode;
+		document.getElementById('operatorName').textContent = data.operatorName;
+		document.getElementById('operatorNum').textContent = data.operatorNum;
+		document.getElementById('processStartDate').textContent = formatDate(data.processStartDate);
+		document.getElementById('processEndDate').textContent = formatDate(data.processEndDate);
+		document.getElementById('successCount').textContent = data.successCount;
+		document.getElementById('failCount').textContent = data.failCount;
+		document.getElementById('usedEquipmentName').textContent = data.usedEquipmentName;
+		document.getElementById('usedEquipmentCode').textContent = data.usedEquipmentCode;
 	} else if (type === 'material') {
-		html += `<div><strong>자재명:</strong> ${data.materialName}</div>`;
-		html += `<div><strong>자재코드:</strong> ${data.materialCode}</div>`;
-		html += `<div><strong>투입수량:</strong> ${data.quantity}</div>`;
-		html += `<div><strong>투입일:</strong> ${data.date}</div>`;
-		html += `<div><strong>거래처명:</strong> ${data.clientName}</div>`;
-		html += `<div><strong>거래처 담당자:</strong> ${data.clientManager}</div>`;
-		html += `<div><strong>담당자 연락처:</strong> ${data.managerNumber}</div>`;
+		document.getElementById('detail-material').style.display = 'block';
+		document.getElementById('materialLot').textContent = data.materialLot;
+		document.getElementById('materialName').textContent = data.materialName;
+		document.getElementById('materialCode').textContent = data.materialCode;
+		document.getElementById('materialCount').textContent = data.materialCount;
+		document.getElementById('materialDate').textContent = formatDate(data.materialDate);
+		document.getElementById('materialPartner').textContent = data.materialPartner;
+		document.getElementById('materialManager').textContent = data.materialManager;
+		document.getElementById('materialPhone').textContent = data.materialPhone;
 	} else if (type === 'equipment') {
-		html += `<div><strong>설비명:</strong> ${data.equipmentName}</div>`;
-		html += `<div><strong>설비코드:</strong> ${data.equipmentCode}</div>`;
-		html += `<div><strong>거래처명:</strong> ${data.clientName}</div>`;
-		html += `<div><strong>거래처 담당자:</strong> ${data.clientManager}</div>`;
-		html += `<div><strong>담당자 연락처:</strong> ${data.managerNumber}</div>`;
-		html += `<div><strong>사용공정:</strong> ${data.useProcessName}</div>`;
-		html += `<div><strong>공정코드:</strong> ${data.useProcessCode}</div>`;
+		document.getElementById('detail-equipment').style.display = 'block';
+		document.getElementById('equipmentName').textContent = data.equipmentName;
+		document.getElementById('equipmentCode').textContent = data.equipmentCode;
+		document.getElementById('equipmentPartner').textContent = data.equipmentPartner;
+		document.getElementById('equipmentManager').textContent = data.equipmentManager;
+		document.getElementById('equipmentPhone').textContent = data.equipmentPhone;
+		document.getElementById('usedProcessName').textContent = data.usedProcessName;
+		document.getElementById('usedProcessCode').textContent = data.usedProcessCode;
 	}
 
-	return html;
+}
+
+// 날짜 포맷터
+function formatDate(dateString) {
+	if (!dateString) return '';
+	const date = new Date(dateString);
+	if (isNaN(date.getTime())) return ''; // 유효하지 않은 날짜일 경우
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
 }
 
 // 셀렉트 박스 초기화

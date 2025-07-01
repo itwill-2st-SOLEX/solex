@@ -19,7 +19,7 @@
 	<select id="selectFilteredProductLots" resultType="map">
 		SELECT 
 			'prd_' || pl.prd_lot_id AS id,
-			pl.prd_lot_code || ' - ' || cd.det_nm || ' (' || cd2.det_nm || ')' AS text,
+			pl.prd_lot_code || ' ' || cd.det_nm || ' (' || cd2.det_nm || ')' AS text,
 			1 AS children
 		FROM product_lot pl
 		JOIN work_order wo ON pl.wrk_id = wo.wrk_id
@@ -81,6 +81,8 @@
 	<select id="selectProductLotDetail" parameterType="long" resultType="map">
         SELECT
             pl.prd_lot_code AS "lotCode",
+            e.emp_nm AS "orderName",
+            e.emp_num AS "orderNum",
 		    p.prd_nm AS "productName",
 		    p.prd_code AS "productCode",
 		    cd1.det_nm AS "size",
@@ -102,35 +104,55 @@
         JOIN code_detail cd4 ON pl.prd_lot_status = cd4.det_id
         JOIN code_detail cd5 ON p.prd_type = cd5.det_id
         JOIN code_detail cd6 ON po.opt_height = cd6.det_id
+        JOIN employee e ON wo.wrk_ord_empId = e.emp_id
         WHERE pl.prd_lot_id = #{prdLotId}
     </select>
 
 	<!-- 공정 상세조회 -->
     <select id="selectProcessLotDetail" parameterType="long" resultType="map">
         SELECT
-            pl.prc_lot_id,
-            p.prc_code AS "processCode",
-            p.prc_nm AS "processName",
-            pl.prc_lot_start_date AS "startDate",
-            pl.prc_lot_end_date AS "endDate",
-            pl.erp_nm AS "operatorName",
-            pl.erp_num AS "operatorNum"
-        FROM process_lot pl
-        JOIN process p ON pl.prc_id = p.prc_id
-        WHERE pl.prc_lot_id = #{prcLotId}
+		    pl.prc_lot_id,
+		    prc.prc_nm AS "processName",
+		    prc.prc_code AS "processCode",
+		    pl.erp_nm AS "operatorName",
+		    pl.erp_num AS "operatorNum",
+		    pl.prc_lot_start_date AS "processStartDate",
+		    pl.prc_lot_end_date AS "processEndDate",
+		    wp.wpo_jcount AS "successCount",
+		    NVL(qh.qhi_bcount, 0) AS "failCount",
+		    e.eqp_name AS "usedEquipmentName",
+		    e.eqp_code AS "usedEquipmentCode"
+		FROM process_lot pl
+		JOIN product_lot pl2 ON pl.prd_lot_id = pl2.prd_lot_id
+		JOIN work_order wo ON pl2.wrk_id = wo.wrk_id
+		JOIN process prc ON pl.prc_id = prc.prc_id
+		JOIN equipment e ON pl.eqp_id = e.eqp_id
+		LEFT JOIN work_process wp 
+		    ON wp.wrk_id = wo.wrk_id
+		   AND wp.wpo_id = (
+		       SELECT MIN(wpo_sub.wpo_id)
+		       FROM work_process wpo_sub
+		       WHERE wpo_sub.wrk_id = wo.wrk_id
+		   )
+		LEFT JOIN (
+		    SELECT qhi.qhi_target_id, SUM(qhi.qhi_bcount) AS qhi_bcount
+		    FROM quality_history qhi
+		    GROUP BY qhi.qhi_target_id
+		) qh ON wp.wpo_id = qh.qhi_target_id
+		WHERE pl.prc_lot_id = #{prcLotId}
     </select>
 
 	<!-- 자재 상세조회 -->
     <select id="selectMaterialLotDetail" parameterType="long" resultType="map">
         SELECT
-            ml.mat_lot_code,
+            ml.mat_lot_code AS "materialLot",
             m.mat_nm AS "materialName",
             m.mat_cd AS "materialCode",
-            ml.mat_date AS "date",
-            ml.mat_sort AS "quantity",
-			c.cli_nm AS "clientName",
-			c.CLI_MGR_NAME AS "clientManager",
-			c.CLI_MGR_PHONE AS "managerNumber"
+            ml.mat_sort AS "materialCount",
+            ml.mat_date AS "materialDate",
+			c.cli_nm AS "materialPartner",
+			c.CLI_MGR_NAME AS "materialManager",
+			c.CLI_MGR_PHONE AS "materialPhone"
         FROM material_lot ml
         JOIN material m ON ml.mat_id = m.mat_id
         JOIN client c ON m.cli_id = c.cli_id
@@ -140,13 +162,14 @@
 	<!-- 설비 상세조회 -->
     <select id="selectEquipmentDetail" parameterType="long" resultType="map">
         SELECT
+        	DISTINCT
             e.eqp_name AS "equipmentName",
             e.eqp_code AS "equipmentCode",
-            c.cli_nm AS "clientName",
-			c.CLI_MGR_NAME AS "clientManager",
-			c.CLI_MGR_PHONE AS "managerNumber",
-			p.prc_nm AS "useProcessName",
-			p.prc_code AS "useProcessCode"
+            c.cli_nm AS "equipmentPartner",
+			c.CLI_MGR_NAME AS "equipmentManager",
+			c.CLI_MGR_PHONE AS "equipmentPhone",
+			p.prc_nm AS "usedProcessName",
+			p.prc_code AS "usedProcessCode"
         FROM equipment e
         JOIN client c ON e.cli_id = c.cli_id
         JOIN process_lot pl ON e.eqp_id = pl.eqp_id
