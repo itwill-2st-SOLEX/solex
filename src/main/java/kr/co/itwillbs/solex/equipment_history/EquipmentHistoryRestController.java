@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/equipment_history")
+@RequestMapping("/equipmenthistory")
 public class EquipmentHistoryRestController {
 	
 	@Autowired
@@ -20,7 +20,15 @@ public class EquipmentHistoryRestController {
 	public List<Map<String, Object>> getEquipmentHistory(@RequestParam("page") int page, @RequestParam("size") int size) throws Exception {
         
 		int offset = page * size;
-		
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~page:" + page + " size: " + size + " offset = " + offset);
 		return equipmentHistoryService.getEquipmentHistory(offset, size);
     }
+	
+	//설비수리이력 목록조회
+	@GetMapping("/equipmenthistoryList")
+	public List<Map<String, Object>> equipmenthistoryList() {
+		
+		return equipmentHistoryService.equipmenthistoryList();
+	}
+	
 }
