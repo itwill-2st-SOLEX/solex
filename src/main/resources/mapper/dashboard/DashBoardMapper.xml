@@ -27,7 +27,7 @@
 			   , prd_size
 			   , prd_height
 			   , odd_sts
-			   , ord_mod_date
+			   , odd_mod_date
 		  FROM vw_suju_summary
 		 WHERE odd_sts IN (
 			  '작업 완료',
@@ -37,7 +37,7 @@
 			  '출고 완료'
 		 )
 		   AND odd_isapproval = 'y'
-		 ORDER BY ord_mod_date DESC
+		 ORDER BY odd_mod_date DESC
 		 FETCH FIRST 20 ROWS ONLY 
 	</select>
 <!-- 	전일 생산량 -->
@@ -99,29 +99,41 @@
 	
 <!-- 	생산량 추이 - 월간 -->
 	<select id="selectMonthlyTrend" resultType="map">
-		SELECT TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'IYYY-IW') AS label,
+		SELECT TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM') AS label,
 		       SUM(ODD_ACTUAL_CNT) AS total_cnt
 		 FROM vw_suju_summary
-		WHERE ODD_STS = '작업 완료'
-		  AND TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS') >= TRUNC(SYSDATE, 'IW') - 28
+		WHERE ODD_STS IN (
+			 	'작업 완료',
+				'출고 대기(공장 > 창고)',
+				'창고 대기',
+				'출고 검사',
+				'출고 완료'
+		 )
+		  AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= TRUNC(SYSDATE, 'IW') - 28
 		  <if test="prdCode != null and prdCode != ''">
 		    AND PRD_CODE = #{prdCode}
 		  </if>
-		GROUP BY TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'IYYY-IW')
+		GROUP BY TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM')
 		ORDER BY label
 	</select>
 	
 <!-- 	생산량 추이 - 주간 -->
 	<select id="selectWeeklyTrend" resultType="map">
-		SELECT TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS label,
+		SELECT TO_CHAR(ODD_MOD_DATE, 'YYYY-MM-DD') AS label,
 		       SUM(ODD_ACTUAL_CNT) AS total_cnt
 		  FROM vw_suju_summary
-	 	 WHERE ODD_STS = '작업 완료'
-		   AND TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS') >= TRUNC(SYSDATE) - 6
+	 	 WHERE ODD_STS IN (
+			 	'작업 완료',
+				'출고 대기(공장 > 창고)',
+				'창고 대기',
+				'출고 검사',
+				'출고 완료'
+		 )
+		   AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= TRUNC(SYSDATE) - 6
 		  <if test="prdCode != null and prdCode != ''">
 		    AND PRD_CODE = #{prdCode}
 		  </if>
-		 GROUP BY TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD')
+		 GROUP BY TO_CHAR(ODD_MOD_DATE, 'YYYY-MM-DD')
 		 ORDER BY label
 	</select>
 	

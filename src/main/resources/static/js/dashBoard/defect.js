@@ -84,6 +84,7 @@ async function dashboardSummary() {
 		console.error('🚨 요약 카드 데이터 불러오기 실패:', err);
 	}
 }
+
 // 생산량 추이 그래프
 async function fetchLineChartData(type, prdCode = null, prdNm = null) {
 	const url = new URL('/SOLEX/dashboard/productions/trend', window.location.origin);
@@ -95,7 +96,6 @@ async function fetchLineChartData(type, prdCode = null, prdNm = null) {
 		const response = await fetch(url);
 		if (!response.ok) throw new Error('서버 응답 실패');
 		const json = await response.json();
-		debugger;
 
 		let labels = json.map(item => item.LABEL);
 		let data = json.map(item => item.TOTAL_CNT);
@@ -149,11 +149,12 @@ async function recentFinishedList() {
 			li.className = 'prd-card';
 			li.innerHTML = `
 		    <strong>${item.PRD_NM}, ${item.PRD_COLOR} ${item.PRD_SIZE} ${item.PRD_HEIGHT}cm</strong>
-		    <span class="time">${item.ORD_MOD_DATE} ${item.ODD_STS}</span>
+		    <span class="time">${item.ODD_MOD_DATE} ${item.ODD_STS}</span>
 		  `;
 			// 해당 제품의 PRD_CODE로 데이터 갱신
 			li.addEventListener('click', () => {
-				updateLineChart('monthly', item.PRD_CODE, item.PRD_NM);
+				let activeType = $('.toggle-btn.active').data('type') || 'monthly';
+				updateLineChart(activeType, item.PRD_CODE, item.PRD_NM);
 			});
 
 			container.appendChild(li);
@@ -233,8 +234,8 @@ async function renderDonutChart(startDate, endDate) {
 		}
 
 		// 데이터 있을 때
-		const labels = data.map(item => `${item.PRD_NM}\n(${item.PRD_CODE})`);
-		const values = data.map(item => item.ORDER_COUNT);
+		let labels = data.map(item => `${item.PRD_NM}\n(${item.PRD_CODE})`);
+		let values = data.map(item => item.ORDER_COUNT);
 
 		if (donutChart) donutChart.destroy();
 

@@ -41,7 +41,6 @@ public class DashBoardService {
 			default:
 				throw new IllegalArgumentException("지원하지 않는 type: " + type);
 		}
-	
 	}
 	// 주문 요청현황
 	public List<Map<String, Object>> getOrderStatus() {

@@ -43,6 +43,7 @@ public class DashBoardRestController {
 														@RequestParam(value = "prdCode", required = false) String prdCode) {
 		System.out.println(type);
 		System.out.println(prdCode);
+		System.out.println(service.getProductionTrend(type, prdCode));
 		return service.getProductionTrend(type, prdCode);
 	}
 	
