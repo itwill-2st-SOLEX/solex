@@ -30,8 +30,9 @@ public class SecurityConfig {
                 .usernameParameter("emp_num")
                 .passwordParameter("emp_pw")
                 .successHandler((request, response, authentication) -> {
-                    String empNum = authentication.getName();
-                    request.getSession().setAttribute("empNum", empNum);
+                    String empId = authentication.getName();
+                    request.getSession().setAttribute("empId", empId);
+                    System.out.println("empId" + empId);
 
                     response.sendRedirect("/SOLEX");
                 })

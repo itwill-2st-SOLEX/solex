@@ -8,6 +8,19 @@
   width: 965px;
 }
 
+input[type="date"] {
+	height: 32px;
+	width: 139px;
+}
+.dates{
+	display: flex;
+	padding-bottom: 24px;
+}
+#filterBtn {
+	margin-left: 22px;
+    height: 33px;
+    cursor: pointer;
+}
 /* === 요약 카드들 === */
 .dashboard-summary {
   display: flex;
@@ -31,10 +44,18 @@
   transition: transform 0.2s;
 }
 
-.summary-card:hover {
-  transform: translateY(-4px);
+.prd-card {
+	display: block;
+ transition: transform 0.2s;
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+ cursor: pointer !important;
 }
-
+.summary-card:hover, .prd-card:hover {
+  transform: translateY(-3px);
+}
+.prd-card * {
+  cursor: inherit;
+}
 .summary-card .label {
   font-size: 14px;
   color: #6c757d;

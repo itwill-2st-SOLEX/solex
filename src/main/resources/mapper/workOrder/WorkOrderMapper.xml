@@ -19,11 +19,12 @@
 			   , odd_actual_cnt
 		  FROM vw_suju_summary -- 뷰테이블
 		 WHERE odd_sts IN (
-			 '작업 대기',
-			 '작업중',
-			 '작업 완료',
+			 	'작업 대기',
+			 	'작업중',
+			 	'작업 완료',
 			 '출고 대기(공장 > 창고)'
 		 )
+		   AND odd_isapproval = 'y'
 		 ORDER BY odd_id DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
