@@ -17,7 +17,7 @@ public interface DashBoardMapper {
 	// 당월 누적 생산율
 	Integer getMonthRate();
 	// 당월 불량율
-	Integer getDefectCnt();
+	Double getDefectCnt();
 	// 생산량 추이 - 월간
 	List<Map<String, Object>> selectMonthlyTrend(@Param("prdCode") String prdCode);
 	// 생산량 추이 - 주간

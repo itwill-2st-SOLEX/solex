@@ -91,10 +91,12 @@
 		        AND odd_mod_date &lt; TRUNC(SYSDATE, 'MM')
 		    ) prev
 	</select>
-<!-- 	[TODO] -->
-	<select id="getDefectCnt" resultType="int">
-		SELECT *
+	<select id="getDefectCnt" resultType="double">
+		SELECT ROUND(
+		        (SUM(NVL(odd_bcount, 0)) / SUM(NVL(odd_actual_cnt, 0))) * 100, 1
+			   ) AS defect_rate
 		  FROM suju_order_detail
+		 WHERE TO_CHAR(odd_mod_date, 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM')
 	</select>
 	
 <!-- 	생산량 추이 - 월간 -->

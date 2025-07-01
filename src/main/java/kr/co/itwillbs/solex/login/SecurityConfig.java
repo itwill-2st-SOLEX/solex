@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.security;
+package kr.co.itwillbs.solex.login;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

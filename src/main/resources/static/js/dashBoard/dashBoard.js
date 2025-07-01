@@ -5,8 +5,6 @@ $(function() {
 	recentFinishedList();
 	// 페이지 맨 위 3개 요약카드
 	dashboardSummary();
-	// ✅ 숫자 지표 카드 설정
-	$('#defectRate').text('2.29%');
 
 	// 인기 품목 도넛차트
 	let today = new Date();
@@ -77,9 +75,8 @@ async function dashboardSummary() {
 		document.getElementById('monthCount').textContent = (data.monthCnt ?? 0).toLocaleString();
 		document.getElementById('monthRate').textContent =
 			monthRate === null ? '–' : `${monthRate > 0 ? '+' : ''}${monthRate}%`;
-
-		//		document.getElementById('defectRate').textContent = (data.defectRate ?? 0) + '%';
-		//		document.getElementById('defectRateTrend').textContent = formatRate(data.defectRateTrend);
+ 
+		document.getElementById('defectRate').textContent = (data.defectRate ?? 0) + '%';
 	} catch (err) {
 		console.error('🚨 요약 카드 데이터 불러오기 실패:', err);
 	}

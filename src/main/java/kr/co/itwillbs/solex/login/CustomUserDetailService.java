@@ -1,4 +1,4 @@
- package kr.co.itwillbs.solex.security;
+ package kr.co.itwillbs.solex.login;
 
 import java.util.Map;
 
@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.User;
-import kr.co.itwillbs.solex.login.LoginMapper;
 
 
 @Service

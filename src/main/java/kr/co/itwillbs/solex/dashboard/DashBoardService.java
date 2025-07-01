@@ -28,7 +28,7 @@ public class DashBoardService {
 		return mapper.getMonthRate();
 	}
 	// 당월 불량율
-	public Integer getDefectCnt() {
+	public Double getDefectCnt() {
 		return mapper.getDefectCnt();
 	}
 	// 생산량 추이
