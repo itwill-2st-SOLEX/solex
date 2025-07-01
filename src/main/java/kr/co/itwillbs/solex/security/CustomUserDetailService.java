@@ -29,13 +29,14 @@ public class CustomUserDetailService implements UserDetailsService {
         if (userMap == null) {
             throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + empNum);
         }
-
-        String empNumFromDb = (String) userMap.get("EMP_NUM");
+        
+        String empId = String.valueOf(userMap.get("EMP_ID"));
         String password = (String) userMap.get("EMP_PW");
         String role = (String) userMap.get("EMP_POS_CD");
+        
 
         return User.builder()
-                .username(empNumFromDb)
+                .username(empId)
                 .password(password)
                 .roles(convertToRole(role))
                 .build();

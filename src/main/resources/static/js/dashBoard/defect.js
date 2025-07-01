@@ -5,16 +5,37 @@ $(function() {
 	recentFinishedList();
 	// 페이지 맨 위 3개 요약카드
 	dashboardSummary();
-	// 인기 품목
-	renderDonutChart();
 	// ✅ 숫자 지표 카드 설정
 	$('#defectRate').text('2.29%');
 
-	// ✅ 생산량 추이 꺾은선 그래프 (Chart.js)
+	// 인기 품목 도넛차트
+	let today = new Date();
+	let oneMonthAgo = new Date();
+	oneMonthAgo.setMonth(today.getMonth() - 1);
+
+	document.getElementById('startDate').value = oneMonthAgo.toISOString().split('T')[0];
+	document.getElementById('endDate').value = today.toISOString().split('T')[0];
+
+	// 기본값 도넛차트
+	renderDonutChart(oneMonthAgo, today);
+
+	// 조회 버튼 클릭시 함수 호출
+	document.getElementById('filterBtn').addEventListener('click', () => {
+		const start = new Date(document.getElementById('startDate').value);
+		const end = new Date(document.getElementById('endDate').value);
+
+		if (start > end) {
+			alert('시작일이 종료일보다 늦을 수 없습니다.');
+			return;
+		}
+		renderDonutChart(start, end);
+	});
+
+	// 생산량 추이 초기화
 	const lineCtx = document.getElementById('lineChart').getContext('2d');
-	let lineChart = new Chart(lineCtx, {
+	window.lineChart = new Chart(lineCtx, {
 		type: 'line',
-		data: getLineChartData('monthly'),
+		data: { labels: [], datasets: [] },
 		options: {
 			responsive: true,
 			maintainAspectRatio: false,
@@ -27,70 +48,15 @@ $(function() {
 		}
 	});
 
-	// ✅ 토글 버튼 이벤트
+	// 페이지 로드 시 전체 생산량 추이 표시
+	updateLineChart('monthly');
+
+	// 월별 주간별 그래프 변경
 	$('.toggle-btn').on('click', function() {
 		$('.toggle-btn').removeClass('active');
 		$(this).addClass('active');
 		const type = $(this).data('type');
-		lineChart.data = getLineChartData(type);
-		lineChart.update();
-	});
-
-	// ✅ 꺾은선 그래프 데이터 함수
-	function getLineChartData(type) {
-		const base = {
-			labels: [],
-			datasets: [{
-				label: '생산량',
-				data: [],
-				borderColor: '#4e73df',
-				backgroundColor: '#4e73df',
-				fill: false,
-				pointBackgroundColor: '#fff',
-				pointBorderColor: '#4e73df',
-				pointRadius: 5,
-				pointHoverRadius: 7
-			}]
-		};
-
-		if (type === 'monthly') {
-			base.labels = ['1월', '2월', '3월', '4월', '5월', '6월'];
-			base.datasets[0].data = [1000, 1200, 980, 1250, 1320, 1450];
-		} else if (type === 'weekly') {
-			base.labels = ['1주', '2주', '3주', '4주'];
-			base.datasets[0].data = [310, 450, 380, 390];
-		} else if (type === 'daily') {
-			base.labels = ['월', '화', '수', '목', '금', '토', '일'];
-			base.datasets[0].data = [50, 60, 55, 70, 65, 40, 30];
-		}
-
-		return base;
-	}
-
-	// ✅ 도넛 차트 (품목별 비율)
-	new Chart(document.getElementById('donutChart'), {
-		type: 'doughnut',
-		data: {
-			labels: ['Segment A', 'Segment B', 'Segment C'],
-			datasets: [{
-				data: [45, 35, 20],
-				backgroundColor: ['#36b9cc', '#1cc88a', '#f6c23e'],
-				hoverOffset: 12
-			}]
-		},
-		options: {
-			responsive: true,
-			maintainAspectRatio: false,
-			plugins: {
-				legend: {
-					position: 'bottom',
-					labels: {
-						boxWidth: 14,
-						padding: 12
-					}
-				}
-			}
-		}
+		updateLineChart(type);
 	});
 });
 
@@ -114,12 +80,88 @@ async function dashboardSummary() {
 
 		//		document.getElementById('defectRate').textContent = (data.defectRate ?? 0) + '%';
 		//		document.getElementById('defectRateTrend').textContent = formatRate(data.defectRateTrend);
-		debugger;
 	} catch (err) {
 		console.error('🚨 요약 카드 데이터 불러오기 실패:', err);
 	}
 }
+// 생산량 추이 그래프
+async function fetchLineChartData(type, prdCode = null, prdNm = null) {
+	const url = new URL('/SOLEX/dashboard/productions/trend', window.location.origin);
+	url.searchParams.append('type', type);
 
+	if (prdCode) url.searchParams.append('prdCode', prdCode);
+
+	try {
+		const response = await fetch(url);
+		if (!response.ok) throw new Error('서버 응답 실패');
+		const json = await response.json();
+		debugger;
+
+		let labels = json.map(item => item.LABEL);
+		let data = json.map(item => item.TOTAL_CNT);
+
+		return {
+			labels: labels,
+			datasets: [{
+				label: prdNm ? `${prdNm } 생산량` : '전체 생산량',
+				data: data,
+				borderColor: '#4e73df',
+				backgroundColor: '#4e73df',
+				fill: false,
+				pointBackgroundColor: '#fff',
+				pointBorderColor: '#4e73df',
+				pointRadius: 5,
+				pointHoverRadius: 7
+			}]
+		};
+	} catch (err) {
+		console.error('📉 꺾은선 그래프 데이터 로딩 실패:', err);
+		return {
+			labels: [],
+			datasets: [{
+				label: '생산량',
+				data: [],
+				borderColor: '#ccc'
+			}]
+		};
+	}
+}
+// 그래프 갱신하는 함수
+async function updateLineChart(type, prdCode = null, prdNm) {
+	const newData = await fetchLineChartData(type, prdCode, prdNm);
+	lineChart.data = newData;
+	lineChart.update();
+}
+
+// 최근 생산 완료된 제품들
+async function recentFinishedList() {
+	try {
+		const response = await fetch('/SOLEX/dashboard/completed');
+		if (!response.ok) throw new Error('서버 응답 실패');
+
+		const data = await response.json();
+
+		const container = document.querySelector('.recent-finished-list');
+		container.innerHTML = '';
+
+		data.forEach(item => {
+			const li = document.createElement('li');
+			li.className = 'prd-card';
+			li.innerHTML = `
+		    <strong>${item.PRD_NM}, ${item.PRD_COLOR} ${item.PRD_SIZE} ${item.PRD_HEIGHT}cm</strong>
+		    <span class="time">${item.ORD_MOD_DATE} ${item.ODD_STS}</span>
+		  `;
+			// 해당 제품의 PRD_CODE로 데이터 갱신
+			li.addEventListener('click', () => {
+				updateLineChart('monthly', item.PRD_CODE, item.PRD_NM);
+			});
+
+			container.appendChild(li);
+		});
+	} catch (err) {
+		console.error('🚨 최근 생산 완료 리스트 불러오기 실패:', err);
+	}
+}
 // 주문 요청현황
 async function recentOrderGrid() {
 	const grid = new tui.Grid({
@@ -161,66 +203,69 @@ async function recentOrderGrid() {
 	}
 }
 
-// 최근 생산 완료된 제품들
-async function recentFinishedList() {
+let donutChart;
+
+// 인기 품목 도넛차트
+async function renderDonutChart(startDate, endDate) {
 	try {
-		const response = await fetch('/SOLEX/dashboard/completed');
+		const params = new URLSearchParams({
+			startDate: startDate.toISOString().split('T')[0],
+			endDate: endDate.toISOString().split('T')[0]
+		});
+
+		const response = await fetch(`/SOLEX/dashboard/popular?${params}`);
 		if (!response.ok) throw new Error('서버 응답 실패');
 
 		const data = await response.json();
 
-		const container = document.querySelector('.recent-finished-list');
-		container.innerHTML = '';
+		const noDataMessage = document.getElementById('noDataMessage');
+		const chartCanvas = document.getElementById('donutChart');
 
-		data.forEach(item => {
-			const li = `
-				<li class="prd-card">
-					<strong>${item.PRD_NM}, ${item.PRD_COLOR} ${item.PRD_SIZE} ${item.PRD_HEIGHT}cm</strong>
-					<span class="time">${item.ORD_MOD_DATE} ${item.ODD_STS}</span>
-				</li>
-			`;
-			container.insertAdjacentHTML('beforeend', li);
+		// 데이터 없을 때
+		if (!data || data.length === 0) {
+			if (donutChart) {
+				donutChart.destroy(); // 기존 차트 제거
+				donutChart = null;
+			}
+			chartCanvas.style.display = "none";
+			noDataMessage.style.display = "block";
+			return;
+		}
+
+		// 데이터 있을 때
+		const labels = data.map(item => `${item.PRD_NM}\n(${item.PRD_CODE})`);
+		const values = data.map(item => item.ORDER_COUNT);
+
+		if (donutChart) donutChart.destroy();
+
+		chartCanvas.style.display = "block";
+		noDataMessage.style.display = "none";
+
+		donutChart = new Chart(chartCanvas, {
+			type: 'doughnut',
+			data: {
+				labels: labels,
+				datasets: [{
+					data: values,
+					backgroundColor: ['#36b9cc', '#1cc88a', '#f6c23e', '#e74a3b', '#858796'],
+					hoverOffset: 12
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: {
+							boxWidth: 14,
+							padding: 12
+						}
+					}
+				}
+			}
 		});
 	} catch (err) {
-		console.error('🚨 최근 생산 완료 리스트 불러오기 실패:', err);
+		console.error('🚨 도넛 차트 로딩 오류:', err);
 	}
 }
-
-//async function renderDonutChart() {
-//	try {
-//		const response = await fetch('/SOLEX/dashboard/popularItems');
-//		if (!response.ok) throw new Error('서버 응답 실패');
-//
-//		const data = await response.json(); // [{ label: 'A', value: 100 }, ...] 형태라고 가정
-//
-//		const labels = data.map(item => item.label);
-//		const values = data.map(item => item.value);
-//
-//		new Chart(document.getElementById('donutChart'), {
-//			type: 'doughnut',
-//			data: {
-//				labels: labels,
-//				datasets: [{
-//					data: values,
-//					backgroundColor: ['#36b9cc', '#1cc88a', '#f6c23e', '#e74a3b', '#858796'],
-//					hoverOffset: 12
-//				}]
-//			},
-//			options: {
-//				responsive: true,
-//				maintainAspectRatio: false,
-//				plugins: {
-//					legend: {
-//						position: 'bottom',
-//						labels: {
-//							boxWidth: 14,
-//							padding: 12
-//						}
-//					}
-//				}
-//			}
-//		});
-//	} catch (error) {
-//		console.error('🚨 도넛 차트 데이터 로딩 실패:', error);
-//	}
-//}

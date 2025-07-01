@@ -7,17 +7,19 @@
   flex-direction: column;
   width: 965px;
 }
-.popluar{
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
+
 input[type="date"] {
-	height: 25px;
+	height: 32px;
 	width: 139px;
 }
 .dates{
 	display: flex;
+	padding-bottom: 24px;
+}
+#filterBtn {
+	margin-left: 22px;
+    height: 33px;
+    cursor: pointer;
 }
 /* === 요약 카드들 === */
 .dashboard-summary {

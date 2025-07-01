@@ -22,6 +22,7 @@
 <!-- 	최근 생산 완료된 제품들 -->
 	<select id="getPrdCompleted" resultType="map">
 		SELECT prd_nm
+			   , prd_code
 			   , prd_color
 			   , prd_size
 			   , prd_height
@@ -96,5 +97,46 @@
 		  FROM suju_order_detail
 	</select>
 	
+<!-- 	생산량 추이 - 월간 -->
+	<select id="selectMonthlyTrend" resultType="map">
+		SELECT TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'IYYY-IW') AS label,
+		       SUM(ODD_ACTUAL_CNT) AS total_cnt
+		 FROM vw_suju_summary
+		WHERE ODD_STS = '작업 완료'
+		  AND TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS') >= TRUNC(SYSDATE, 'IW') - 28
+		  <if test="prdCode != null and prdCode != ''">
+		    AND PRD_CODE = #{prdCode}
+		  </if>
+		GROUP BY TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'IYYY-IW')
+		ORDER BY label
+	</select>
+	
+<!-- 	생산량 추이 - 주간 -->
+	<select id="selectWeeklyTrend" resultType="map">
+		SELECT TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD') AS label,
+		       SUM(ODD_ACTUAL_CNT) AS total_cnt
+		  FROM vw_suju_summary
+	 	 WHERE ODD_STS = '작업 완료'
+		   AND TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS') >= TRUNC(SYSDATE) - 6
+		  <if test="prdCode != null and prdCode != ''">
+		    AND PRD_CODE = #{prdCode}
+		  </if>
+		 GROUP BY TO_CHAR(TO_DATE(ORD_MOD_DATE, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD')
+		 ORDER BY label
+	</select>
+	
+<!-- 	 인기 품목 도넛 차트  -->
+	<select id="getPopluarPrds" resultType="map">
+		SELECT prd_code,
+			   prd_nm,
+			   COUNT(DISTINCT odd_id) AS order_count
+		  FROM vw_suju_summary
+		 WHERE TO_DATE(ord_reg_date, 'YYYY-MM-DD HH24:MI:SS')
+	   BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		   AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+		 GROUP BY prd_code, prd_nm
+		 ORDER BY order_count DESC
+		  FETCH FIRST 5 ROWS ONLY
+	</select>
 
 </mapper>	

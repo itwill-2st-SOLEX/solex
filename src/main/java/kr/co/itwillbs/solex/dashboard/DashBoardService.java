@@ -31,6 +31,18 @@ public class DashBoardService {
 	public Integer getDefectCnt() {
 		return mapper.getDefectCnt();
 	}
+	// 생산량 추이
+	public List<Map<String, Object>> getProductionTrend(String type, String prdCode) {
+		switch (type) {
+			case "monthly":
+				return mapper.selectMonthlyTrend(prdCode);
+			case "weekly":
+				return mapper.selectWeeklyTrend(prdCode);
+			default:
+				throw new IllegalArgumentException("지원하지 않는 type: " + type);
+		}
+	
+	}
 	// 주문 요청현황
 	public List<Map<String, Object>> getOrderStatus() {
 		return mapper.getOrderStatus();
@@ -40,8 +52,8 @@ public class DashBoardService {
 	public List<Map<String, Object>> getPrdCompleted() {
 		return mapper.getPrdCompleted();
 	}
-	
-	
-	
-
+	// 인기 품목 도넛차트
+	public List<Map<String, Object>> getPopluarPrds(String startDate, String endDate) {
+		return mapper.getPopluarPrds(startDate, endDate);
+	}
 }
