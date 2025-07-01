@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<!-- Toast UI Calendar CSS -->
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+<link rel="stylesheet" th:href="@{/css/main/style.css}" />
+
+<!-- Toast UI Calendar JS -->
+<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
+<script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+
+
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+		<!-- 여기서 부터 작성하시면 됩니다  -->
+			<!-- 본문 영역-->
+			<div class="custom-content">
+
+			    <!-- ───────── box1 : 공지·매출·인기상품 ───────── -->
+			    <div class="box1 d-flex gap-3 mb-4">
+			      <!-- 공지사항 -->
+			      <section class="panel notice flex-grow-1">
+			        <h5 class="panel-title">📢 최근 공지</h5>
+			        <ul id="noticeList" class="panel-list"><!-- li 동적 삽입 --></ul>
+			      </section>
+			
+			      <!-- 이번 달 매출 -->
+			      <section class="panel price flex-grow-1">
+			        <h5 class="panel-title">💰 이번 달 매출</h5>
+			        <div id="monthlySales" class="price-value">‑</div>
+			        <div id="salesPeriod" class="price-sub"></div>
+			      </section>
+			
+			      <!-- 인기 판매품목 -->
+			      <section class="panel product flex-grow-1">
+			        <h5 class="panel-title">🔥 인기 상품</h5>
+			        <ol id="popularProducts" class="panel-list number"><!-- li 동적 삽입 --></ol>
+			      </section>
+			    </div>
+			
+			    <!-- ───────── box2 : 달력 + (결재·즐겨찾기) ───────── -->
+			    <div class="box2 d-flex gap-3">
+			      <!-- 달력 -->
+			      <section class="panel calendar flex-grow-1">
+			        <header class="calendar-header">
+			          <nav class="calendar-nav">
+						  <button class="btn-nav today">Today</button>
+						  <button class="btn-nav prev">←</button>
+						  <button class="btn-nav next">→</button>
+						  <span class="nav-range navbar--range"></span>
+						</nav>
+			        </header>
+			        <main id="app" class="calendar-area"><!-- Calendar 붙는 곳 --></main>
+			      </section>
+			
+			      <!-- 결재·즐겨찾기 세로 스택 -->
+			      <div class="box2Side d-flex flex-column gap-3" style="width:28%;">
+			        <section class="panel approval flex-fill">
+			          <h5 class="panel-title">📝 결재 목록</h5>
+			          <ul id="approvalList" class="panel-list"><!-- li 동적 삽입 --></ul>
+			        </section>
+			
+			        <section class="panel favorites flex-fill">
+			          <h5 class="panel-title">⭐ 즐겨찾기</h5>
+			          <ul id="favoriteMenus" class="panel-list"><!-- li 동적 삽입 --></ul>
+			        </section>
+			      </div>
+			    </div><!-- /box2 -->
+			
+			  </div><!-- /custom-content -->
+			</div><!-- /custom-body -->
+		
+		<script th:src="@{/js/main/script.js}"></script>
+	</th:block>
+	
+	
+	
+</body>
+</html>
