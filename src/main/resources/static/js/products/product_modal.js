@@ -60,7 +60,8 @@ async function showProductModal(mode, data = null) {
         saveProductBtn.textContent = '등록 완료';
         saveProductBtn.onclick = () => processProductData('register'); 
         if (generateCombinationsBtn) {
-            generateCombinationsBtn.textContent = '옵션 등록';
+//            generateCombinationsBtn.textContent = '옵션 등록';
+			generateCombinationsBtn.style.display='none';
             generateCombinationsBtn.removeAttribute('disabled'); // 새 제품에 대해 활성화 상태 보장
             // generateCombinationsBtn에 대한 클릭 이벤트는 이제 탭 변경 이벤트에 의해 처리됩니다.
             // 이 특정 요청의 경우, 탭이 디스플레이를 트리거할 것입니다.
@@ -638,11 +639,15 @@ async function processProductData(mode) {
 
     // 2. 유효성 검사 (변경 없음)
     if (!prdNm) { alert("제품명을 입력해주세요."); return; }
-    if (!prdPrice || isNaN(prdPrice) || Number(prdPrice) <= 0) { alert("제품 가격을 올바르게 입력해주세요."); return; }
     if (!prdCode) { alert("제품 코드를 입력해주세요."); return; }
-    if (!prdUnit) { alert("제품 단위를 선택해주세요."); return; }
+	const prdCodePattern = /^[A-Z]{4}$/;
+	if (!prdCodePattern.test(prdCode)) {
+	    alert("제품 코드는 대문자 4글자로 입력해주세요.");
+	    return;
+	}
+    if (!prdPrice || isNaN(prdPrice) || Number(prdPrice) <= 0) { alert("제품 가격을 올바르게 입력해주세요."); return; }
     if (!prdType) { alert("제품 유형을 선택해주세요."); return; }
-    if (!prdComm) { alert("제품 설명을 입력해주세요."); return; }
+    if (!prdUnit) { alert("제품 단위를 선택해주세요."); return; }
     console.log("기본 필드 유효성 검사 통과.");
 
     // ⭐ 3. 선택된 옵션 조합 수집

@@ -47,7 +47,9 @@
 								                <div class="row mb-4">
 								                	<div class="col">
 														<label for="prd_code" class="form-label read_only">제품 코드<span style="color:red">*</span></label>
-														<input type="text" id="prd_code" name="prd_code" class="form-control read_only" placeholder="제품 코드" value="${data.PRD_CODE ? data.PRD_CODE : ''}">
+														<input type="text" id="prd_code" name="prd_code" class="form-control read_only" placeholder="제품 코드" 
+																value="${data.PRD_CODE ? data.PRD_CODE : ''}"
+																maxlength="4">
 									                </div>
 									                <div class="col">
 									                    <label for="prd_price" class="form-label">제품 가격<span style="color:red">*</span></label>
@@ -76,13 +78,13 @@
 										        </div>
 												<div class="row mb-4">
 													<div class="col">
-														<label for="prd_comm" class="form-label">제품 설명<span style="color:red">*</span></label>
+														<label for="prd_comm" class="form-label">제품 설명</label>
 														<input type="text" id="prd_comm" name="prd_comm" class="form-control" placeholder="제품설명" value="${data.PRD_COMM ? data.PRD_COMM : ''}">
 												    </div>
 												</div>
 												<div class="row mb-4">
 										        	<div class="col">
-										            	<label for="prd_reg_date" class="form-label">제품 등록일<span style="color:red">*</span></label>
+										            	<label for="prd_reg_date" class="form-label">제품 등록일</label>
 														<br>
 														<!-- 사용자에게 보여줄 날짜 -->
 														<input type="text" id="prd_reg_date" class="form-control" placeholder="제품 등록일"

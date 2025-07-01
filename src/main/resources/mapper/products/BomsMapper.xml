@@ -47,7 +47,7 @@
 	                , #{bom.BOM_CNT}
 	                , #{bom.BOM_UNIT}
 	                , #{bom.BOM_COMM}
-	                , SYSDATE)
+	                , SYSDATE + 9/24 )
 	    </foreach>
 	    SELECT 1 FROM DUAL
 	</insert>
@@ -73,7 +73,23 @@
            target.BOM_CNT = src.BOM_CNT,       
            target.BOM_UNIT = src.BOM_UNIT,     
            target.BOM_COMM = src.BOM_COMM,     
-           target.BOM_MOD_DATE = SYSDATE       
+           target.BOM_MOD_DATE = SYSDATE + 9/24
+  WHEN NOT MATCHED THEN -- BOM_ID가 일치하지 않으면 (새로운 데이터 추가)
+    INSERT (
+     	   OPT_ID
+     	 , MAT_ID
+     	 , BOM_CNT
+     	 , BOM_UNIT
+     	 , BOM_COMM
+     	 , BOM_REG_DATE)
+    VALUES (
+           src.OPT_ID
+         , src.MAT_ID
+         , src.BOM_CNT
+         , src.BOM_UNIT
+         , src.BOM_COMM
+         , SYSDATE + 9/24
+    )                  
     </update>
 	<!-- 원자재 목록 -->
 	<select id="selectMaterialList" parameterType="map">
