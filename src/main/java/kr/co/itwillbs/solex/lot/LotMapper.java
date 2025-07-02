@@ -38,5 +38,17 @@ public interface LotMapper {
     Map<String, Object> selectEquipmentDetail(@Param("eqpId") Long eqpId);
     
     // ---------------- Insert ----------------
-    void insertProductLot(@Param("param") Map<String, Object> param);
+    // 1. 제품 + 옵션 정보 조회
+    Map<String, Object> selectLotInsertInfo(@Param("oddId") Long oddId);
+    // 2. product_lot insert
+    void insertProductLot(Map<String, Object> param);
+    // 3. insert 이후 prd_lot_id 조회
+    Long selectPrdLotId(Map<String, Object> lotInfo);
+    // 4. 작업지시 리스트 조회
+    List<Map<String, Object>> selectWorkOrdersByOddId(@Param("oddId") Long oddId);
+    // 5. process_lot insert
+    void insertProcessLot(Map<String, Object> param);
+    // // 6. 매핑 insert
+    void insertProductProcessMapping(Map<String, Object> param);
+
 }

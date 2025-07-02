@@ -11,43 +11,30 @@ document.addEventListener('DOMContentLoaded', function() {
 			loadFilteredLotTree();
 		}
 	});
-	
+
 	// 저장 테스트
-	document.getElementById('saveLotBtn').addEventListener('click', () => {
-	    const prdLotCode = document.getElementById('prdLotCode').value;
-	    const oddId = document.getElementById('oddId').value;
-	    const prdLotStatus = document.getElementById('prdLotStatus').value;
-	    const startDate = document.getElementById('startDate').value;
-	    const endDate = document.getElementById('endDate').value;
-	    const sort = document.getElementById('sort').value;
+	document.getElementById('lotSaveBtn').addEventListener('click', () => {
+		const oddId = document.getElementById('oddId').value;
 
-	    const data = {
-	        prd_lot_code: prdLotCode,
-	        odd_id: oddId,
-	        prd_lot_status: prdLotStatus,
-	        prd_lot_start_date: startDate,
-	        prd_lot_end_date: endDate,
-	        prd_lot_sort: sort
-	    };
-
-	    fetch('/SOLEX/lot/product/save', {
-	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json'
-	        },
-	        body: JSON.stringify(data)
-	    })
-	    .then(res => {
-	        if (!res.ok) throw new Error('저장 실패');
-	        return res.text();
-	    })
-	    .then(result => {
-	        alert('저장 완료: ' + result);
-	    })
-	    .catch(err => {
-	        console.error(err);
-	        alert('오류 발생: ' + err.message);
-	    });
+		debugger;
+		fetch('/SOLEX/lot/product/save', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ oddId: Number(oddId) })
+		})
+		.then(res => res.json())
+		.then(data => {
+			if (data.success) {
+				alert('✅ 저장 성공!');
+			} else {
+				console.error('⚠ 서버 오류:', data.message);
+				alert('❌ 저장 실패: ' + data.message);
+			}
+		})
+		.catch(err => {
+			console.error('❌ 예외 발생:', err);
+			alert('요청 처리 중 오류 발생: ' + err.message);
+		});
 	});
 
 });

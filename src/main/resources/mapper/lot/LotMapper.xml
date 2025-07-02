@@ -181,22 +181,89 @@
     </select>
     
     <!-- SAVE -->
-    <insert id="insertProductLot" parameterType="map">
-	    INSERT INTO product_lot (
-	        prd_lot_code,
-	        odd_id,
-	        prd_lot_start_date,
-	        prd_lot_end_date,
-	        prd_lot_sort,
-	        prd_lot_status
-	    ) VALUES (
-	        #{param.prd_lot_code},
-	        #{param.odd_id},
-	        #{param.prd_lot_start_date},
-	        #{param.prd_lot_end_date},
-	        #{param.prd_lot_sort},
-	        #{param.prd_lot_status}
-	    )
-	</insert>
+    <!-- ✅ 제품 LOT 생성에 필요한 정보 조회 -->
+    <select id="selectLotInsertInfo" parameterType="long" resultType="map">
+        SELECT
+            #{oddId} AS "odd_id",
+            'LOT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || p.prd_code || '-' || cd1.det_nm || '-' || cd2.det_nm || '-' || LPAD(ROWNUM, 3, '0') AS "prd_lot_code",
+            SYSDATE AS "prd_lot_start_date",
+            'lot_status_02' AS "prd_lot_status",
+            1 AS "prd_lot_sort"
+        FROM suju_order_detail sod
+        JOIN product_option po ON sod.opt_id = po.opt_id
+        JOIN product p ON po.prd_id = p.prd_id
+        JOIN code_detail cd1 ON po.opt_size = cd1.det_id
+        JOIN code_detail cd2 ON po.opt_color = cd2.det_id
+        WHERE sod.odd_id = #{oddId}
+        AND ROWNUM = 1
+    </select>
+
+    <!-- ✅ product_lot insert -->
+    <insert id="insertProductLot" parameterType="map" useGeneratedKeys="true" keyProperty="prdLotId">
+        INSERT INTO product_lot (
+            prd_lot_code,
+            odd_id,
+            prd_lot_start_date,
+            prd_lot_sort,
+            prd_lot_status
+        ) VALUES (
+            #{prd_lot_code},
+            #{odd_id},
+            #{prd_lot_start_date},
+            #{prd_lot_sort},
+            #{prd_lot_status}
+        )
+    </insert>
+    
+    <!-- ✅ product_lot select -->
+    <select id="selectPrdLotId" parameterType="map">
+    	SELECT	prd_lot_id as "prd_lot_id"
+    	from	product_lot
+    	where	odd_id = #{odd_id}
+    	and		prd_lot_sort = #{prd_lot_sort}
+    </select>
+
+    <!-- ✅ odd_id로 work_order 조회 -->
+    <select id="selectWorkOrdersByOddId" parameterType="long" resultType="map">
+        SELECT	wo.wrk_id as "wrk_id",
+        		wo.prc_id as "prc_id",
+        		wo.wrk_ord_empId AS "wrk_ord_empId"
+        FROM work_order wo
+        WHERE wo.odd_id = #{oddId}
+    </select>
+
+    <!-- ✅ process_lot insert -->
+    <insert id="insertProcessLot" parameterType="map" useGeneratedKeys="true" keyProperty="prcLotId">
+        INSERT INTO process_lot (
+            prd_lot_id,
+            prc_id,
+            erp_nm,
+            erp_num,
+            prc_lot_start_date,
+            prc_lot_end_date,
+            prc_lot_status,
+            eqp_id
+        ) VALUES (
+            #{prdLotId},
+            #{prc_id},
+            (SELECT emp_nm FROM employee WHERE emp_id = #{wrk_ord_empId}),
+            (SELECT emp_num FROM employee WHERE emp_id = #{wrk_ord_empId}),
+            NULL,
+            NULL,
+            NULL,
+            NULL
+        )
+    </insert>
+
+    <!-- ✅ prdLot_processLot_mapping insert -->
+    <insert id="insertProductProcessMapping" parameterType="map">
+        INSERT INTO prdLot_processLot_mapping (
+            prd_lot_id,
+            prc_lot_id
+        ) VALUES (
+            #{prdLotId},
+            #{prcLotId}
+        )
+    </insert>
     
 </mapper>

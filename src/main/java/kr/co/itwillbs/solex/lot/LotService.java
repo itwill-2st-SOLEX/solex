@@ -145,9 +145,35 @@ public class LotService {
     }
     
     // ---------------- Insert ----------------
-    public void insertProductLot(Map<String, Object> param) {
-    	System.out.println("param : " + param);
-        lotMapper.insertProductLot(param);
+    public void insertLotCascade(Long oddId) {
+        // 1. 제품 + 옵션 정보 조회
+        Map<String, Object> lotInfo = lotMapper.selectLotInsertInfo(oddId);
+
+        // 2. product_lot insert
+        lotMapper.insertProductLot(lotInfo);
+        
+        // 3. insert 이후 prd_lot_id 조회
+        Long prdLotId = lotMapper.selectPrdLotId(lotInfo);
+        System.out.println("prdLotId : " + prdLotId);
+        if (prdLotId == null) return;
+
+        // 4. 작업지시 리스트 조회
+        List<Map<String, Object>> workOrders = lotMapper.selectWorkOrdersByOddId(oddId);
+        System.out.println("workOrders : " + workOrders);
+
+        for (Map<String, Object> wrk : workOrders) {
+            wrk.put("prdLotId", prdLotId);
+            System.out.println("wrk : " + wrk);
+            // 5. process_lot insert
+            lotMapper.insertProcessLot(wrk);
+            Long prcLotId = Long.valueOf(wrk.get("prcLotId").toString());
+
+            // 6. 매핑 insert
+            Map<String, Object> mapping = new HashMap<>();
+            mapping.put("prdLotId", prdLotId);
+            mapping.put("prcLotId", prcLotId);
+            lotMapper.insertProductProcessMapping(mapping);
+        }
     }
 
 }

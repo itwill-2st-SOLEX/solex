@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -110,14 +111,11 @@ public class LotRestController {
 	
 	// ---------------- Insert ----------------
 	@PostMapping("/product/save")
-	public ResponseEntity<?> saveProductLot(@RequestBody Map<String, Object> param) {
-	    try {
-	        lotService.insertProductLot(param);
-	        return ResponseEntity.ok("저장 완료");
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("저장 실패");
-	    }
+	public Map<String, Object> insertAllLotByOddId(@RequestBody Map<String, Object> param) {
+        Long oddId = Long.valueOf(param.get("oddId").toString());
+        lotService.insertLotCascade(oddId);
+        
+        return Map.of("success", true);
 	}
 
 
