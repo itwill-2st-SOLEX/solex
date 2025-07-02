@@ -115,67 +115,73 @@ $(function() {
 		modal.show();
 	}		
 	
-	/* ───────────────── 모달 열릴 때 제품, 자재 목록 캐싱 ───────────────── */
-	$('#equipmentHistoryModal').on('show.bs.modal', async () => {
-		if ((cache.material && cache.product) || loading) return; // 이미 캐시됐거나 로딩 중
-	    loading = true;
-	    try {
-			const [matRes, prodRes] = await Promise.all([
-				fetch("/SOLEX/material"),
-				fetch("/SOLEX/product")
-			]);
-			if (!matRes.ok || !prodRes.ok) throw new Error();
-			cache["area_type_01"] = await matRes.json();  // [{ID, NAME}, ...]
-			cache["area_type_02"]  = await prodRes.json();
-	    } catch (e) {
-	      console.error("품목 목록 로드 실패", e);
-	      alert("품목 목록을 불러오지 못했습니다.");
-	    } finally {
-	      loading = false;
-	    }
-	});
-	
-	/* ── 설비 수리이력 등록 ─────────────────────────────────── */
-	$('#submitWarehouse').on('click', async function () {
-		// 1) 모달 안의 값 읽기
-		const $modal     = $('#equipmentHistoryModal');
-		const eqpName    = $.trim($modal.find('#ephName').val());          // 설비명
-		const startDate  = $.trim($modal.find('input[name="eqh_start"]').val());
-		const endDate    = $.trim($modal.find('input[name="eqh_end"]').val());
+	async function loadEquipmentOptions() {
+	  const $sel = $('#eqhName');
 
-	  // 2) 기본 검증
-	  if (!eqpName)          { alert('설비명을 입력하세요.'); return; }
-	  if (!startDate || !endDate) { alert('수리 시작·종료일을 입력하세요.'); return; }
-	  if (new Date(startDate) > new Date(endDate)) {
-	    alert('시작일이 종료일보다 늦을 수 없습니다.');
-	    return;
-	  }
-
-	  // 3) 컨트롤러로 보낼 데이터 구성
-	  const payload = {
-	    eqpName   : eqpName,
-	    startDate : startDate,
-	    endDate   : endDate
-	  };
+	  // 이미 한 번 불러왔으면 재요청 생략
+	  if ($sel.data('loaded')) return;
 
 	  try {
-	    const res = await fetch('/SOLEX/equipmenthistory', {   // ← 컨트롤러 URL에 맞게 조정
-	      method  : 'POST',
-	      headers : { 'Content-Type': 'application/json' },
-	      body    : JSON.stringify(payload)
+	    const list = await fetchJson('/SOLEX/equipment/name', []);
+
+	    list.forEach(eqp => {
+	      $('<option>', {
+	        value: eqp.ID,                // 실제 값 
+	        text : eqp.NM      // 사용자에게 보이는 글자
+	      }).appendTo($sel);
 	    });
 
-	    if (!res.ok) throw new Error(`응답 코드: ${res.status}`);
-
-	    // 4) 성공 처리: 모달 닫기 + 목록 새로고침
-	    alert('수리이력이 등록되었습니다.');
-	    $modal.modal('hide');
-
-	    currentPage = 0;            // 첫 페이지부터 다시 로드
-	    equipmentList(currentPage); // 목록 다시 불러오기
+	    $sel.data('loaded', true);      // 플래그
 	  } catch (err) {
-	    console.error('수리이력 등록 실패', err);
-	    alert('등록 중 오류가 발생했습니다.');
+	    console.error('설비 목록 로드 실패', err);
+	    alert('설비 목록을 불러오지 못했습니다.');
 	  }
-	});
+	}
+	
+	/* 모달이 열릴 때 한 번만 호출 */
+	$('#equipmentHistoryModal').on('show.bs.modal', loadEquipmentOptions);
+	
+	/* ── 설비 수리이력 등록 ─────────────────────────────────── */
+	$('#submitEquipmentHistory').on('click', async function () {
+		const $modal    = $('#equipmentHistoryModal');
+	  	const eqpId     = $modal.find('#eqhName').val();           // 선택한 설비 ID
+	  	const startDate = $.trim($modal.find('input[name="eqh_start"]').val());
+	  	const endDate   = $.trim($modal.find('input[name="eqh_end"]').val());
+		const reason    = $.trim($modal.find('#eqhReason').val()); // ★ 수리 사유
+
+	  	/* --- 검증 --- */
+	  	if (!eqpId)            { alert('설비를 선택하세요.'); return; }
+	  	if (!startDate || !endDate) { alert('수리 시작·종료일을 입력하세요.'); return; }
+	  	if (new Date(startDate) > new Date(endDate)) {
+	    	alert('시작일이 종료일보다 늦을 수 없습니다.');
+	    	return;
+	  	}
+
+	  	/* --- 서버로 전송할 데이터 --- */
+	  	const payload = {
+	    	eqpId     : eqpId,
+	    	startDate : startDate,
+	    	endDate   : endDate,
+			reason    : reason
+	  	};
+
+	  	try {
+	    	const res = await fetch('/SOLEX/equipmenthistory', {  // ← POST 엔드포인트
+	  			method  : 'POST',
+	      		headers : { 'Content-Type': 'application/json' },
+	      		body    : JSON.stringify(payload)
+	    	});
+	    	if (!res.ok) throw new Error(`에러러러러러러`);
+
+	    	alert('수리이력이 등록되었습니다.');
+	    	$modal.modal('hide');
+
+	    	// 목록 새로고침
+	    	currentPage = 0;
+	    	equipmentList(currentPage);
+	  		} catch (err) {
+	    		console.error('수리이력 등록 실패', err);
+	    		alert('등록 중 오류가 발생했습니다.');
+	  		}
+		});
 });

@@ -25,4 +25,18 @@
 		WHERE   eh.eqp_id = #{eqpId}
 		ORDER BY eh.eqp_his_start_date 
 	</select>
+	
+	<insert id="registerEquipmentHistory">
+		INSERT INTO equipment_history(
+			eqp_id,
+			eqp_his_start_date, 
+			eqp_his_end_date,
+			eqp_his_reason
+		) VALUES (
+			#{eqpId, jdbcType=NUMERIC},
+			TO_DATE(#{startDate}, 'YYYY-MM-DD HH24:MI'),
+			TO_DATE(#{endDate}, 'YYYY-MM-DD HH24:MI'),
+			#{reason, jdbcType=VARCHAR}
+		)
+	</insert>
 </mapper>
