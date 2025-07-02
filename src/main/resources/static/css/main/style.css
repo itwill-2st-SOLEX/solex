@@ -103,7 +103,7 @@
 
 /* Calendar 실제 영역 높이 확보 */
 .calendar-area,
-#app,
+#calendar,
 .toastui-calendar-root,
 .toastui-calendar-layout {
   width: 100%;
