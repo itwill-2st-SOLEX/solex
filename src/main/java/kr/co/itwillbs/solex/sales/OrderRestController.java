@@ -1,6 +1,5 @@
 package kr.co.itwillbs.solex.sales;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.log4j.Log4j2;
-
 
 
 @RestController
@@ -64,87 +61,63 @@ public class OrderRestController {
         int emp_id = 2000;
         
         List<Map<String, Object>> list = orderService.getSearchProductList(searchKeyword);
-        
         return list;
     }
 	
 	
 	
-	@GetMapping("/prd_cd/{prd_cd}")
-	public List<Map<String, Object>> getColorsByProduct(@PathVariable(name = "prd_cd") String prd_cd) {
-		return orderService.getColors(prd_cd);
+	@GetMapping("/product/{prd_id}")
+	public List<Map<String, Object>> getOptionsByProduct(@PathVariable(name = "prd_id") String prd_id) {
+		List<Map<String, Object>> list = orderService.getOptionsByProduct(prd_id);
+		return list;
 	}
-	@GetMapping("/prd_cd/{prd_cd}/color/{color}")
-	public List<Map<String, Object>> getSizesByProductColor(@PathVariable(name = "prd_cd") String prd_cd,@PathVariable(name = "color") String color) {
-		return orderService.getSizesByProductAndColor(prd_cd,color);
-	}
-	
-	@GetMapping("/prd_cd/{prd_cd}/color/{color}/size/{size}")
-	public List<Map<String, Object>> getHeightsByProductColorSize(
-			@PathVariable(name = "prd_cd") String prd_cd,
-			@PathVariable(name = "color") String color,
-			@PathVariable(name = "size") String size
-			) {
-		return orderService.getHeightsByProductColorSize(prd_cd,color,size);
-	}
-	@GetMapping("/prd_cd/{prd_cd}/color/{color}/size/{size}/height/{height}")
-	public int getStockCount(
-			@PathVariable(name = "prd_cd") String prd_cd,
-			@PathVariable(name = "color") String color,
-			@PathVariable(name = "size") String size,
-			@PathVariable(name = "height") String height
-			) {
-		int count = orderService.getStockCount(prd_cd,color,size,height);
-		
-		return count;
-	}
-	
-	@PostMapping("/check-stock")
-    public List<Map<String, Object>> checkStock(@RequestBody Map<String, Object> orderData) {
-		List<Map<String ,Object>> result = orderService.checkLackingMaterials(orderData);
-		
-        return result;
-    }
+
+
+
 	
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Map<String, Object> param, HttpSession session) {
-		
-		session.setAttribute("emp_id", "201");
-		String emp_id = (String) session.getAttribute("emp_id");		
+		String emp_id = (String) session.getAttribute("empId");		
 		
 		 // 화이트리스트 방식으로 안전한 Map 생성
 	    Map<String, Object> safe = new HashMap<>();
-	    safe.put("cli_id",       param.get("cli_id"));     // JS에서 보낸 키 이름에 맞춰 가져오기
-	    safe.put("prd_cd",       param.get("prd_cd"));
-	    safe.put("ord_cnt",      param.get("ord_cnt"));
-	    safe.put("ord_pay",      param.get("odd_pay"));
-	    safe.put("ord_end_date", param.get("odd_end_date"));
-	    safe.put("ord_pay_date", param.get("odd_pay_date"));
-	    safe.put("ord_pc",       param.get("odd_pc"));
-	    safe.put("ord_add",       param.get("odd_add"));
-	    safe.put("ord_da",       param.get("odd_da"));
-	    
-	    safe.put("opt_color",       param.get("opt_color"));
-	    safe.put("opt_size",       param.get("opt_size"));
-	    safe.put("opt_height",       param.get("opt_height"));
-		safe.put("stk_cn",       param.get("stk_cn"));
-	    
 	    safe.put("emp_id",       emp_id);
+	    safe.put("cli_id",       param.get("cli_id"));     // JS에서 보낸 키 이름에 맞춰 가져오기
+		safe.put("pay_type",       param.get("pay_type"));     // JS에서 보낸 키 이름에 맞춰 가져오기
+	    
+	    safe.put("ord_pay",      param.get("ord_pay"));
+	    safe.put("ord_end_date", param.get("ord_end_date"));
+	    safe.put("ord_pay_date", param.get("ord_pay_date"));
+		
+	    safe.put("ord_pc",       param.get("ord_pc"));
+	    safe.put("ord_add",       param.get("ord_add"));
+	    safe.put("ord_da",       param.get("ord_da"));
+	    safe.put("items",       param.get("items"));
+	    
+
+	    
 	    
 	    
 	    
 	    int rows = orderService.createOrderProcess(safe); 
 		Map<String, Object> response = new HashMap<>();
 
-		if (rows == 1) { 
+		if (rows >= 1) { 
 		    response.put("status", "OK"); 
-		    response.put("message", "거래처 등록 완료");
+		    response.put("message", "수주 등록 완료");
 		    return ResponseEntity.ok(response); 
-		} else { 
+		} else { 	
 		    response.put("status", "ERROR"); 
-		    response.put("message", "거래처 생성 실패");
+		    response.put("message", "수주 등록 실패");
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
 	}
+
+	@GetMapping("/{ord_id}")
+	public Map<String, Object> getOrderDetail(@PathVariable("ord_id") int ord_id) {
+		Map<String, Object> orderData = orderService.getOrderDetail(ord_id);
+		return orderData;
+	}
+
 	
 }

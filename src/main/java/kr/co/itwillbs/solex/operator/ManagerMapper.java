@@ -67,6 +67,9 @@ public interface ManagerMapper {
 	
 		//>> 마지막 공정에서 수주 디테일 테이블 업데이트
 	int updateSujuDetail(Map map);
+		
+		//>> 수주 히스토리에 마지막 공정이 완료된 후 히스토리 추가
+	int insertSujuHistory(Map amp);
 	
 	// 작업별 사원 생산량 리스트
 	List<Map<String, Object>> selectWorkerList(Map map);

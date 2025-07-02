@@ -1,0 +1,131 @@
+/* ─── 기본 변수 & 패널 공통 ─── */
+:root {
+  --panel-bg: #ffffff;
+  --panel-border: #e2e5ec;
+  --panel-radius: 12px;
+  --panel-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+  --gap: 1rem;
+  --text-muted: #6c757d;
+  --brand: #2d7efc;
+}
+
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;         /* flex 아이템 높이 계산용 */
+}
+
+/* 제목 */
+.panel-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: .75rem;
+  white-space: nowrap;
+}
+
+/* 리스트 */
+.panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  /* font-size: . NineFive Five timesSeven;   0.95rem 까지 쓰면 Korean fix*??? ignore */
+}
+.panel-list li {
+  margin-bottom: .4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.panel-list.number { counter-reset: rank; }
+.panel-list.number li::before {
+  counter-increment: rank;
+  content: counter(rank) ". ";
+  color: var(--brand);
+}
+
+/* 매출액 전용 */
+.price-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.price-sub {
+  font-size: .85rem;
+  color: var(--text-muted);
+}
+
+/* ─── Box 레이아웃 ─── */
+.custom-content { display: flex; flex-direction: column; gap: var(--gap); }
+
+.box1 { /* 3‑분할 */
+  display: flex;
+  gap: var(--gap);
+  height: 200px;
+}
+
+.box1 .notice  { flex: 0 0 41%; }  /* 넓게 */
+.box1 .price   { flex: 0 0 27%; }
+.box1 .product { flex: 0 0 27%; }
+
+.box2 { /* 달력 + 사이드 */
+  display: flex;
+  gap: var(--gap);
+}
+
+/* ─── Calendar ─── */
+.calendar { padding: 0; }
+.calendar-header {
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.btn-nav {
+  background: #f1f3f6;
+  border: 0;
+  border-radius: 20px;
+  padding: .35rem .8rem;
+  font-size: .85rem;
+  cursor: pointer;
+}
+.btn-nav:hover { background: #e3e7ec; }
+.nav-range { font-weight: 600; }
+
+/* Calendar 실제 영역 높이 확보 */
+.calendar-area,
+#calendar,
+.toastui-calendar-root,
+.toastui-calendar-layout {
+  width: 100%;
+  min-height: 500px;   /* 필요 시 조정 */
+}
+
+/* close 버튼을 Date‑Picker 위로 올리기 */
+.toastui-calendar-popup-close {
+  position: relative;
+  z-index: 11000;   /* date‑picker 기본 z‑index 10040 보다 크게 */
+}
+
+/* 팝업 폼에서 Location 입력 필드를 완전히 숨김 */
+.tui-calendar-form-item.tui-calendar-form-item-location {
+    display: none !important;
+}
+
+
+/* ─── 반응형 (≤ LG) ─── */
+@media (max-width: 992px) {
+  .box1 { flex-direction: column; height: auto; }
+  .box2 { flex-direction: column; }
+  .box2Side { width: 100% !important; flex-direction: row; }
+  .box2Side .panel { flex: 1 1 0; }
+}

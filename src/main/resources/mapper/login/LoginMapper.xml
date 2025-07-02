@@ -5,7 +5,7 @@
 <mapper namespace="kr.co.itwillbs.solex.login.LoginMapper">
 <!-- 	사번에 맞는 암호화 비번 들고오기  -->
 	<select id="findByEmpNum" parameterType="string" resultType="map">
-		SELECT emp_num, emp_pw, emp_pos_cd
+		SELECT emp_id, emp_pw, emp_pos_cd
 		FROM employee
 		WHERE emp_num = #{empNum}
 	</select>

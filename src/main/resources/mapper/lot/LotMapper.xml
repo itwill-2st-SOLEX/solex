@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.lot.LotMapper">
+
+	<!-- 제품유형 / LOT상태 리스트 조회 -->
+	<select id="selectDetailCodeListByCodId" resultType="map">
+		SELECT
+		DET_ID,
+		DET_NM
+		FROM CODE_DETAIL
+		WHERE COD_ID = #{codId}
+		AND	  DET_YN = 'y'
+		ORDER BY DET_SORT
+	</select>
+
+	<!-- 완제품 -->
+	<select id="selectFilteredProductLots" resultType="map">
+		SELECT 
+			'prd_' || pl.prd_lot_id AS id,
+			pl.prd_lot_code || ' ' || cd.det_nm || ' (' || cd2.det_nm || ')' AS text,
+			1 AS children
+		FROM product_lot pl
+		JOIN suju_order_detail sd ON pl.odd_id = sd.odd_id
+		JOIN product_option po ON sd.opt_id = po.opt_id
+		JOIN product p ON po.prd_id = p.prd_id
+		JOIN code_detail cd ON p.prd_type = cd.det_id
+		JOIN code_detail cd2 ON pl.prd_lot_status = cd2.det_id
+		<where>
+			<if test="lotCode != null and lotCode != ''">
+				AND pl.prd_lot_code LIKE '%' || #{lotCode} || '%'
+			</if>
+			<if test="lotStatus != null and lotStatus != ''">
+				AND pl.prd_lot_status = #{lotStatus}
+			</if>
+			<if test="prdType != null and prdType != ''">
+		 		AND cd.det_id = #{prdType}
+		 	</if>
+		 </where>
+	</select>
+	
+	<!-- 공정리스트 -->
+	<select id="selectProcessNodes" resultType="map">
+		SELECT
+		    'prc_' || pl.prc_lot_id AS id,
+		    prc.prc_nm || ' / ' || prc.prc_code AS text,
+		    0 AS children
+		FROM process_lot pl
+		JOIN prdLot_processLot_mapping map ON pl.prc_lot_id = map.prc_lot_id
+		JOIN process prc ON pl.prc_id = prc.prc_id
+		WHERE map.prd_lot_id = #{prdLotId}
+	</select>
+	
+	<!-- 자재리스트 -->
+	<select id="selectMaterialNodes" resultType="map">
+		SELECT 
+			'mat_' || ml.mat_lot_id AS id,
+			m.mat_nm || ' (' || m.mat_cd || ')' AS text,
+			0 AS children
+		FROM prdLot_matLot_mapping pmm
+		JOIN material_lot ml ON pmm.mat_lot_id = ml.mat_lot_id
+		JOIN material m ON ml.mat_id = m.mat_id
+		WHERE pmm.prd_lot_id = #{prdLotId}
+	</select>
+	
+	<!-- 설비리스트 -->
+	<select id="selectEquipmentNodes" resultType="map">
+		SELECT DISTINCT
+			'eqp_' || eq.eqp_id AS id,
+			eq.eqp_name || ' / ' || eq.eqp_code AS text,
+			0 AS children
+		FROM process_lot pl
+		JOIN equipment eq ON pl.eqp_id = eq.eqp_id
+		JOIN prdLot_processLot_mapping map ON pl.prc_lot_id = map.prc_lot_id
+		WHERE map.prd_lot_id = #{prdLotId}
+	</select>
+
+	<!-- 최상위 LOT 상세조회 -->
+	<select id="selectProductLotDetail" parameterType="long" resultType="map">
+	    SELECT
+	        pl.prd_lot_code AS "lotCode",
+	        e.emp_nm AS "orderName",
+	        e.emp_num AS "orderNum",
+	        p.prd_nm AS "productName",
+	        p.prd_code AS "productCode",
+	        cd1.det_nm AS "size",
+	        cd2.det_nm AS "color",
+	        cd3.det_nm AS "type",
+	        cd4.det_nm AS "status",
+	        cd5.det_nm AS "productType",
+	        cd6.det_nm AS "height",
+	        pl.prd_lot_start_date AS "startDate",
+	        pl.prd_lot_end_date AS "endDate"
+	    FROM product_lot pl
+	    JOIN suju_order_detail sod ON pl.odd_id = sod.odd_id
+	    JOIN product_option po ON sod.opt_id = po.opt_id
+	    JOIN product p ON po.prd_id = p.prd_id
+	    JOIN code_detail cd1 ON po.opt_size = cd1.det_id
+	    JOIN code_detail cd2 ON po.opt_color = cd2.det_id
+	    JOIN code_detail cd3 ON p.prd_type = cd3.det_id
+	    JOIN code_detail cd4 ON pl.prd_lot_status = cd4.det_id
+	    JOIN code_detail cd5 ON p.prd_type = cd5.det_id
+	    JOIN code_detail cd6 ON po.opt_height = cd6.det_id
+	    JOIN work_order wo ON sod.odd_id = wo.odd_id
+	    JOIN employee e ON wo.wrk_ord_empId = e.emp_id
+	    WHERE pl.prd_lot_id = #{prdLotId}
+	</select>
+
+	<!-- 공정 상세조회 -->
+    <select id="selectProcessLotDetail" parameterType="long" resultType="map">
+	    SELECT * FROM (
+	        SELECT
+	            pl.prc_lot_id,
+	            prc.prc_nm AS "processName",
+	            prc.prc_code AS "processCode",
+	            pl.erp_nm AS "operatorName",
+	            pl.erp_num AS "operatorNum",
+	            pl.prc_lot_start_date AS "processStartDate",
+	            pl.prc_lot_end_date AS "processEndDate",
+	            wp.wpo_jcount AS "successCount",
+	            NVL(qh.qhi_bcount, 0) AS "failCount",
+	            e.eqp_name AS "usedEquipmentName",
+	            e.eqp_code AS "usedEquipmentCode"
+	        FROM process_lot pl
+	        JOIN product_lot pl2 ON pl.prd_lot_id = pl2.prd_lot_id
+	        JOIN suju_order_detail sod ON pl2.odd_id = sod.odd_id
+	        JOIN work_order wo ON sod.odd_id = wo.odd_id
+	        JOIN process prc ON pl.prc_id = prc.prc_id
+	        JOIN equipment e ON pl.eqp_id = e.eqp_id
+	        LEFT JOIN work_process wp 
+	            ON wp.wrk_id = wo.wrk_id
+	           AND wp.wpo_id = (
+	               SELECT MIN(wpo_sub.wpo_id)
+	               FROM work_process wpo_sub
+	               WHERE wpo_sub.wrk_id = wo.wrk_id
+	           )
+	        LEFT JOIN (
+	            SELECT qhi.qhi_target_id, SUM(qhi.qhi_bcount) AS qhi_bcount
+	            FROM quality_history qhi
+	            GROUP BY qhi.qhi_target_id
+	        ) qh ON wp.wpo_id = qh.qhi_target_id
+	        WHERE pl.prc_lot_id = #{prcLotId}
+	    )
+	    WHERE ROWNUM = 1
+	</select>
+
+	<!-- 자재 상세조회 -->
+    <select id="selectMaterialLotDetail" parameterType="long" resultType="map">
+        SELECT
+            ml.mat_lot_code AS "materialLot",
+            m.mat_nm AS "materialName",
+            m.mat_cd AS "materialCode",
+            ml.mat_sort AS "materialCount",
+            ml.mat_date AS "materialDate",
+			c.cli_nm AS "materialPartner",
+			c.CLI_MGR_NAME AS "materialManager",
+			c.CLI_MGR_PHONE AS "materialPhone"
+        FROM material_lot ml
+        JOIN material m ON ml.mat_id = m.mat_id
+        JOIN client c ON m.cli_id = c.cli_id
+        WHERE ml.mat_lot_id = #{matLotId}
+    </select>
+
+	<!-- 설비 상세조회 -->
+    <select id="selectEquipmentDetail" parameterType="long" resultType="map">
+        SELECT
+        	DISTINCT
+            e.eqp_name AS "equipmentName",
+            e.eqp_code AS "equipmentCode",
+            c.cli_nm AS "equipmentPartner",
+		c.CLI_MGR_NAME AS "equipmentManager",
+		c.CLI_MGR_PHONE AS "equipmentPhone",
+		p.prc_nm AS "usedProcessName",
+		p.prc_code AS "usedProcessCode"
+        FROM equipment e
+        JOIN client c ON e.cli_id = c.cli_id
+        JOIN process_lot pl ON e.eqp_id = pl.eqp_id
+        JOIN process p ON pl.prc_id = p.prc_id
+        WHERE e.eqp_id = #{eqpId}
+    </select>
+    
+    <!-- SAVE -->
+    <!-- ✅ 제품 LOT 생성에 필요한 정보 조회 -->
+    <select id="selectLotInsertInfo" parameterType="long" resultType="map">
+        SELECT
+            #{oddId} AS "odd_id",
+            'LOT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || p.prd_code || '-' || cd1.det_nm || '-' || cd2.det_nm || '-' || LPAD(ROWNUM, 3, '0') AS "prd_lot_code",
+            SYSDATE AS "prd_lot_start_date",
+            'lot_status_02' AS "prd_lot_status",
+            1 AS "prd_lot_sort"
+        FROM suju_order_detail sod
+        JOIN product_option po ON sod.opt_id = po.opt_id
+        JOIN product p ON po.prd_id = p.prd_id
+        JOIN code_detail cd1 ON po.opt_size = cd1.det_id
+        JOIN code_detail cd2 ON po.opt_color = cd2.det_id
+        WHERE sod.odd_id = #{oddId}
+        AND ROWNUM = 1
+    </select>
+
+    <!-- ✅ product_lot insert -->
+    <insert id="insertProductLot" parameterType="map" useGeneratedKeys="true" keyProperty="prdLotId">
+        INSERT INTO product_lot (
+            prd_lot_code,
+            odd_id,
+            prd_lot_start_date,
+            prd_lot_sort,
+            prd_lot_status
+        ) VALUES (
+            #{prd_lot_code},
+            #{odd_id},
+            #{prd_lot_start_date},
+            #{prd_lot_sort},
+            #{prd_lot_status}
+        )
+    </insert>
+    
+    <!-- ✅ product_lot select -->
+    <select id="selectPrdLotId" parameterType="map">
+    	SELECT	prd_lot_id as "prd_lot_id"
+    	from	product_lot
+    	where	odd_id = #{odd_id}
+    	and		prd_lot_sort = #{prd_lot_sort}
+    </select>
+
+    <!-- ✅ odd_id로 work_order 조회 -->
+    <select id="selectWorkOrdersByOddId" parameterType="long" resultType="map">
+        SELECT	wo.wrk_id as "wrk_id",
+        		wo.prc_id as "prc_id",
+        		wo.wrk_ord_empId AS "wrk_ord_empId"
+        FROM work_order wo
+        WHERE wo.odd_id = #{oddId}
+    </select>
+
+    <!-- ✅ process_lot insert -->
+    <insert id="insertProcessLot" parameterType="map" useGeneratedKeys="true" keyProperty="prcLotId">
+        INSERT INTO process_lot (
+            prd_lot_id,
+            prc_id,
+            erp_nm,
+            erp_num,
+            prc_lot_start_date,
+            prc_lot_end_date,
+            prc_lot_status,
+            eqp_id
+        ) VALUES (
+            #{prdLotId},
+            #{prc_id},
+            (SELECT emp_nm FROM employee WHERE emp_id = #{wrk_ord_empId}),
+            (SELECT emp_num FROM employee WHERE emp_id = #{wrk_ord_empId}),
+            NULL,
+            NULL,
+            NULL,
+            NULL
+        )
+    </insert>
+
+    <!-- ✅ prdLot_processLot_mapping insert -->
+    <insert id="insertProductProcessMapping" parameterType="map">
+        INSERT INTO prdLot_processLot_mapping (
+            prd_lot_id,
+            prc_lot_id
+        ) VALUES (
+            #{prdLotId},
+            #{prcLotId}
+        )
+    </insert>
+    
+</mapper>
