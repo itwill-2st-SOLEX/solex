@@ -40,7 +40,7 @@
     </insert>
     
     <select id="getWarehouseAreaHistory" resultType="map">
-		SELECT wh.whs_his_date AS action_time,
+		SELECT TO_CHAR(wh.whs_his_date, 'YYYY-MM-DD HH24:MI:SS') AS action_time,
 				wh.whs_his_cnt AS quantity,
 				s.det_nm AS status
 		FROM warehouse_history wh

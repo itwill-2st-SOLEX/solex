@@ -25,28 +25,14 @@ public class QualityRestController {
 	
 	// 재고 리스트
     @GetMapping("")
-    public List<Map<String, Object>> getStockList(@RequestParam("page") int page, @RequestParam("size") int size) {
+    public List<Map<String, Object>> getQualityList(@RequestParam("page") int page, @RequestParam("size") int size) {
     	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
     	Long loginEmpId = 2L;
     	
     	int offset = page * size;
 		System.out.println("page:" + page + "size: " + size);
     	
-    	List<Map<String, Object>> listMap = qualityService.getQualityList(offset, size);
-    	return listMap;
+		return qualityService.getQualityList(offset, size);
     }
-    
-//    // 재고 상세보기
-//    @GetMapping("/{itemId}")
-//    public List<Map<String, Object>> getStockDetail(@PathVariable("itemId") String itemId, @RequestParam("type") String type) {
-//    	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-//    	Long loginEmpId = 2L;
-//    	
-//    	System.out.println("ddddddddddddddddddddddddddddddddddddddddddddddd");
-//    	System.out.println(itemId);
-//    	System.out.println(type);
-//    	
-//    	return qualityService.getStockDetail(itemId, type, loginEmpId);
-//    }
   	
 }

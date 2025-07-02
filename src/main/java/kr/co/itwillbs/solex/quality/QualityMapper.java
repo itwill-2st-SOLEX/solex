@@ -9,6 +9,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface QualityMapper {
 
-	List<Map<String, Object>> getQualityList(int offset, int size);
+	List<Map<String, Object>> getQualityList(@Param("offset") int offset, @Param("size") int size);
 
 }

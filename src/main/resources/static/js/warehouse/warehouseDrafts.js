@@ -8,12 +8,12 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '창고 번호', name: 'whs_id', align: 'center' },
-			{ header: '창고 이름', name: 'whs_nm', sortable: 'true' },
-			{ header: '위치', name: 'whs_full_adr', sortable: 'true' },
-			{ header: '구역 개수', name: 'are_cnt' },
-			{ header: '담당자 이름(사번)', name: 'emp_nm_id' },
-			{ header: '상태', name: 'whs_sts' }						
+			{ header: '창고 번호', name: 'whs_id', align: 'center' , width:90},
+			{ header: '창고명', name: 'whs_nm', sortable: 'true' , align: 'center'  },
+			{ header: '주소', name: 'whs_full_adr', sortable: 'true' , align: 'center', width:390 },
+			{ header: '구역 수', name: 'are_cnt', align: 'center' , width:90},
+			{ header: '담당자 이름(사번)', name: 'emp_nm_id', align: 'center'  },
+			{ header: '상태', name: 'whs_sts', align: 'center'  }						
 		]
 	});
 	
@@ -119,12 +119,13 @@ $(function() {
 	  	el: document.getElementById('historyGrid'),
 	  	bodyHeight: 300,
 	  	scrollY: true,
-	      	data: [],
-	      	columns: [
-	  	        { header: '변동일시', name: 'actionTime', sortable: true, width: 160 },
-	  	        { header: '구분',     name: 'inOut',       width: 70, align: 'center' },
-	  	        { header: '수량',     name: 'qty',         align: 'right', width: 80 }
-	      	]
+		autoWidth: true,
+      	data: [],
+      	columns: [
+  	        { header: '변동일시', name: 'actionTime', align: 'center' },
+  	        { header: '구분',     name: 'inOut', sortable: 'true' , align: 'center', width:150 },
+  	        { header: '수량',     name: 'qty', align: 'center' , width:150 }
+      	]
 	  });
 
 	  try {

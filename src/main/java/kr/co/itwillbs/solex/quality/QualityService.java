@@ -26,8 +26,4 @@ public class QualityService {
 		return qualityMapper.getQualityList(offset, size);
 	}
 
-//	public List<Map<String, Object>> getStockDetail(String itemId, String type, Long loginEmpId) {
-//        return qualityMapper.getStockDetail(Integer.parseInt(itemId), type);
-//	}
-
 }
