@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.products.BomsMapper">
+    <select id="selectTotalBomCount" resultType="int">
+    	SELECT COUNT(*) 
+    	  FROM bom
+    	 WHERE opt_id = #{opt_id}
+    </select> 
+    
+    
+    <!-- bom 무한스크롤 -->
+	<select id="selectBomList" resultType="java.util.Map">
+		 SELECT	
+		        b.BOM_ID, 
+				b.OPT_ID, -- 옵션
+				m.MAT_NM, -- 원자재 이름
+				m.MAT_ID, -- 원자재 ID
+				b.BOM_CNT, -- 소모량
+				b.BOM_UNIT, -- 단위
+				b.BOM_COMM, -- 설명
+				b.BOM_REG_DATE, -- 등록일
+				b.BOM_MOD_DATE -- 수정일
+						       
+		   FROM	bom b
+		   JOIN material m on m.MAT_ID = b.MAT_ID
+		  WHERE	opt_id = #{opt_id}
+		 OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+	</select>
+	
+	<insert id="insertBomInfo" parameterType="map">
+	    INSERT ALL
+	    <foreach collection="list" item="bom">
+	        INTO BOM (
+	        	      OPT_ID
+	        	    , MAT_ID
+	        	    , BOM_CNT
+	        	    , BOM_UNIT
+	        	    , BOM_COMM
+	        		, BOM_REG_DATE
+	        		, BOM_MOD_DATE
+	        	   )
+	        VALUES (
+	                  #{bom.OPT_ID}
+	                , #{bom.MAT_ID}
+	                , #{bom.BOM_CNT}
+	                , #{bom.BOM_UNIT}
+	                , #{bom.BOM_COMM}
+	                , SYSDATE + 9/24 
+	                , SYSDATE + 9/24 )
+	    </foreach>
+	    SELECT 1 FROM DUAL
+	</insert>
+	
+	<!-- BOM 기존 행 수정 -->
+	<update id="updateBomInfo" parameterType="map">
+    MERGE INTO BOM 
+        target USING (
+        <foreach collection="list" item="bom" separator="UNION ALL">
+          SELECT
+                 #{bom.BOM_ID} AS BOM_ID,        
+                 #{bom.OPT_ID} AS OPT_ID,        
+                 #{bom.MAT_ID} AS MAT_ID,        
+                 #{bom.BOM_CNT} AS BOM_CNT,      
+                 #{bom.BOM_UNIT} AS BOM_UNIT,    
+                 #{bom.BOM_COMM} AS BOM_COMM
+            FROM DUAL
+        </foreach>
+    ) src
+        ON (target.BOM_ID = src.BOM_ID)            
+      WHEN MATCHED THEN
+    UPDATE SET
+           target.BOM_CNT = src.BOM_CNT,       
+           target.BOM_UNIT = src.BOM_UNIT,     
+           target.BOM_COMM = src.BOM_COMM,     
+           target.BOM_MOD_DATE = SYSDATE + 9/24
+  WHEN NOT MATCHED THEN -- BOM_ID가 일치하지 않으면 (새로운 데이터 추가)
+    INSERT (
+     	   OPT_ID
+     	 , MAT_ID
+     	 , BOM_CNT
+     	 , BOM_UNIT
+     	 , BOM_COMM
+     	 , BOM_REG_DATE
+     	 , BOM_MOD_DATE)
+    VALUES (
+           src.OPT_ID
+         , src.MAT_ID
+         , src.BOM_CNT
+         , src.BOM_UNIT
+         , src.BOM_COMM
+         , SYSDATE + 9/24
+         , SYSDATE + 9/24
+    )                  
+    </update>
+	<!-- 원자재 목록 -->
+	<select id="selectMaterialList" parameterType="map">
+	SELECT
+			m.MAT_ID,
+			m.MAT_CD,
+			m.MAT_NM,
+			-- m.MAT_UNIT,
+			cd.DET_NM as MAT_UNIT,
+			m.MAT_COMM 
+	   FROM MATERIAL m
+	   JOIN CODE_DETAIL cd
+	 	 ON m.MAT_UNIT = cd.DET_ID
+	  
+	 WHERE mat_is_active = UPPER('y')
+	</select>
+	
+	<delete id="deleteBom" parameterType="java.util.List">
+        DELETE FROM BOM
+        WHERE BOM_ID IN
+        <foreach collection="bomIds" item="bomId" open="(" separator="," close=")">
+            #{bomId}
+        </foreach>
+    </delete>
+</mapper>	

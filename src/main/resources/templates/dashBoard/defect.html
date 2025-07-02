@@ -7,29 +7,29 @@
 <!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
 <!-- <meta charset="UTF-8"> -->
 <title>SOLEX</title>
-<link rel="stylesheet" th:href="@{/css/dashBoard/defect.css}" />
+<link rel="stylesheet" th:href="@{/css/dashBoard/dashBoard.css}" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
-			<!-- ✅ 요약 카드 + 최근 생산 완료 -->
+			<!-- 요약 카드 + 최근 생산 완료 -->
 			<div class="custom">
 				<div class="top-row">
 					<div class="dashboard-summary">
 						<div class="summary-card pink">
-							<p class="label">전일 생산량</p>
+							<p id="yesterdayLabel" class="label">전일 생산량</p>
 							<p class="value" id="yesterdayCount"></p>
 							<p class="rate up" id="yesterdayRate"></p>
 						</div>
 						<div class="summary-card green">
-							<p class="label">당월 누적 생산</p>
+							<p id="monthLabel" class="label">당월 누적 생산</p>
 							<p class="value" id="monthCount"></p>
 							<p class="rate down" id="monthRate"></p>
 						</div>
 						<div class="summary-card blue">
-							<p class="label">당월 불량률</p>
+							<p id="defectLabel" class="label">당월 불량률</p>
 							<p class="value" id="defectRate"></p>
 						</div>
 					</div>
@@ -49,14 +49,14 @@
 					</div>
 				</div>
 
-				<!-- ✅ 최근 생산 완료된 것들 (세로로 길게) -->
+				<!-- 최근 생산 완료된 것들 (세로로 길게) -->
 				<div class="recent-finished-box">
 					<h4>최근 생산 완료된 제품들</h4>
 					<ul class="recent-finished-list">
 					</ul>
 				</div>
 			</div>
-			<!-- ✅ 테이블 + 도넛 차트 -->
+			<!-- 테이블 + 도넛 차트 -->
 			<div class="chart-row-wrap">
 				<div class="chart-left">
 					<div class="chart-cards">
@@ -89,7 +89,7 @@
 		</div>
 	</th:block>
 	<th:block layout:fragment="script">
-		<script th:src="@{/js/dashBoard/defect.js}"></script>
+		<script th:src="@{/js/dashBoard/dashBoard.js}"></script>
 	</th:block>
 
 </body>

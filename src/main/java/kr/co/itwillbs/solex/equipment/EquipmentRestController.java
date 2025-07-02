@@ -79,7 +79,6 @@ public class EquipmentRestController {
             // 서비스 메소드 호출 (리턴값이 없으므로 변수에 담지 않음)
             params.put("eqp_code", eqp_code);
 
-
             equipmentService.updateEquipment(params);
             
             // 예외가 발생하지 않고 여기까지 왔다면 성공한 것.

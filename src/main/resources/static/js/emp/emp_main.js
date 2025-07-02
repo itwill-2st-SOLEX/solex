@@ -41,9 +41,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			grid.uncheckAll();
 		}
 	});
-	
 
-	
 	// 사원 목록 조회 
 	async function loadDrafts(page) { //page번호를 인자로 받아 사원목록을 불러옴 (30개당 한페이지)
 			try {
@@ -108,16 +106,6 @@ document.addEventListener('DOMContentLoaded', function(){
 		  	   } 
 		  	   return true; // 이 함수는 값을 조합하는 역할만 하고, 유효성 검사는 각 버튼의 이벤트 리스너에서 수행합니다.
 		  	}
-			
-////			//이미지 보여주기
-//			document.getElementById('emp_img').addEventListener('change', function(event) {
-//			  const [file] = event.target.files;
-//			  if (file) {
-//			    const preview = document.getElementById('emp_img_preview');
-//			    preview.src = URL.createObjectURL(file);
-//			    preview.style.display = 'block';
-//			  }
-//			});
 
 		// 등록 모달 열기
 		async function openModal(empData = null) {
@@ -131,29 +119,26 @@ document.addEventListener('DOMContentLoaded', function(){
 
 			// 폼 생성 후에 select 박스에 옵션을 추가해야함 
 			const form = document.createElement('form');
-			form.setAttribute('id', 'joinForm');
-			form.setAttribute('method', 'post');
-			form.setAttribute('enctype', 'multipart/form-data'); // 이미지
+			form.id = 'joinForm'
 			
 			
+			form.innerHTML = `
+				<div class="modal-body big-box">
+				  				<div class="row mb-3">
+				  					<div class="col">
+									  <label>사진</label>
+									  <input type="file" class="form-control d-inline-block w-25" name="emp_img" required><br>
+									  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
+								   </div>	
+								   <div class="col">
+				`
 			// ===== 사진 =====
 			let div0 = document.createElement('div');
 			div0.className = 'mb-3';
 			div0.innerHTML = `
-			  <label>사진</label>
-			  <input type="file" class="form-control d-inline-block w-25" name="emp_img" required><br>
-			  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
 			`;
 			form.appendChild(div0);
 			
-			// ===== 사번 =====
-//			let div1 = document.createElement('div');
-//			div1.className = 'mb-3';
-//			div1.innerHTML = `
-//			  <label>사번</label>
-//			  <input type="text" class="form-control d-inline-block w-25" name="emp_num" required><br>
-//			`;
-//			form.appendChild(div1);
 
 			// ===== 이름 =====
 			let div2 = document.createElement('div');

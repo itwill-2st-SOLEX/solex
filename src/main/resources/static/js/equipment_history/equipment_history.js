@@ -20,10 +20,10 @@ $(function() {
 	
 	//설비수리이력 목록 조회
 	async function equipmentList(page) {
-			const response = await fetch(`/SOLEX/equipmenthistory/equipmenthistoryList?page=${page}&size=${pageSize}`);
+			const response = await fetch(`/SOLEX/equipmenthistory?page=${page}&size=${pageSize}`);
 			const rawData = await response.json();
 			const data = rawData.map((row, idx) => ({
-				eqp_id : page * pageSize + idx + 1, // id값 = 그냥 목록 순서 값 자동증가
+				eqp_id : row.EQP_ID, // id값 = 그냥 목록 순서 값 자동증가
 				eqp_code: row.EQP_CODE,
 				eqp_name: row.EQP_NAME
 			}));
@@ -41,6 +41,11 @@ $(function() {
 	equipmentList(currentPage);
 
 	grid.on('scrollEnd', () => equipmentList(currentPage));
+	
+	
+	//이력 등록 버튼누르면 모달창 뜨도록
+	document.getElementById('RegisterModalBtn').addEventListener('click', () => openModal('register'));
+	
 
 //	grid.on('click', (ev) => {
 //		if (ev.columnName === 'stk_id') {
@@ -50,50 +55,52 @@ $(function() {
 //		}
 //	});
 	
-	const STOCK_TITLES = {
-	  area_type_01: '자재 재고',
-	  area_type_02: '제품 재고'
-	};
+//	const STOCK_TITLES = {
+	
+	
+//	  area_type_01: '자재 재고',
+//	  area_type_02: '제품 재고'
+//	};
 
 	/* ② 코드 → tui.Grid 컬럼 배열 */
-	const STOCK_COLUMNS = {
-	  area_type_01: [                     // 자재
-	    { header: '번호',    name: 'mat_num',  align: 'center', width: 100 },
-	    { header: '자재명', name: 'item_nm', align: 'center', sortable: true },
-		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
-		{ header: '구역명', name: 'area_nm',  align: 'right' },
-	    { header: '재고량', name: 'qty',  align: 'right' },
-		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
-	  ],
-	  area_type_02: [                     // 제품
-		{ header: '번호',    name: 'prd_num',  align: 'center', width: 100 },
-	    { header: '제품명', name: 'item_nm', align: 'center', sortable: true },
-		{ header: '색깔', name: 'op_color',  align: 'right' },
-	    { header: '사이즈', name: 'op_size',  align: 'right' },
-		{ header: '굽', name: 'op_height',  align: 'right' },
-		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
-		{ header: '구역명', name: 'area_nm',  align: 'right' },
-	    { header: '재고량', name: 'qty',  align: 'right' },
-		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
-	  ]
-	};
+//	const STOCK_COLUMNS = {
+//	  area_type_01: [                     // 자재
+//	    { header: '번호',    name: 'mat_num',  align: 'center', width: 100 },
+//	    { header: '자재명', name: 'item_nm', align: 'center', sortable: true },
+//		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
+//		{ header: '구역명', name: 'area_nm',  align: 'right' },
+//	    { header: '재고량', name: 'qty',  align: 'right' },
+//		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
+//	  ],
+//	  area_type_02: [                     // 제품
+//		{ header: '번호',    name: 'prd_num',  align: 'center', width: 100 },
+//	    { header: '제품명', name: 'item_nm', align: 'center', sortable: true },
+//		{ header: '색깔', name: 'op_color',  align: 'right' },
+//	    { header: '사이즈', name: 'op_size',  align: 'right' },
+//		{ header: '굽', name: 'op_height',  align: 'right' },
+//		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
+//		{ header: '구역명', name: 'area_nm',  align: 'right' },
+//	    { header: '재고량', name: 'qty',  align: 'right' },
+//		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
+//	  ]
+//	};
 	
 	/**  공통: JSON 응답(fetch) ― 바디가 없으면 기본값 반환 */
-	async function fetchJson(url, defaultValue = null) {
-	  const res = await fetch(url);
+//	async function fetchJson(url, defaultValue = null) {
+//	  const res = await fetch(url);
+//
+//	  // 204 No Content 같이 바디가 없는 성공 응답
+//	  if (res.status === 204) return defaultValue;
+//
+//	  if (!res.ok) throw new Error(`${url} 오류`);
+//
+//	  const text = await res.text();       // 바로 json() 하지 말고 text() 로 읽음
+//	  if (!text) return defaultValue;      // Content-Length: 0 인 경우
+//
+//	  return JSON.parse(text);
+//	}
 
-	  // 204 No Content 같이 바디가 없는 성공 응답
-	  if (res.status === 204) return defaultValue;
-
-	  if (!res.ok) throw new Error(`${url} 오류`);
-
-	  const text = await res.text();       // 바로 json() 하지 말고 text() 로 읽음
-	  if (!text) return defaultValue;      // Content-Length: 0 인 경우
-
-	  return JSON.parse(text);
-	}
-
-	let stockGrid = null;
+//	let stockGrid = null;
 			
 //	async function openDetailModal(row, code) {
 //	

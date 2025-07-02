@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Toast UI Grid 체크 강조</title>
+  <link rel="stylesheet" href="https://uicdn.toast.com/tui-grid/latest/tui-grid.css" />
+  <style>
+    .tui-grid-row-checked .tui-grid-cell {
+	  background-color: red !important;
+	}
+    body {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>체크한 행 강조</h2>
+  <div id="grid"></div>
+
+  <script src="https://uicdn.toast.com/tui-grid/latest/tui-grid.js"></script>
+  <script>
+    const grid = new tui.Grid({
+      el: document.getElementById('grid'),
+      data: [
+        { id: 1, name: '상품 A', price: 10000 },
+        { id: 2, name: '상품 B', price: 20000 },
+        { id: 3, name: '상품 C', price: 30000 },
+        { id: 4, name: '상품 D', price: 40000 }
+      ],
+      rowHeaders: ['checkbox'],
+      columns: [
+        { header: 'ID', name: 'id' },
+        { header: '상품명', name: 'name' },
+        { header: '가격', name: 'price', formatter: ({ value }) => value.toLocaleString() + '원' }
+      ],
+      rowClass: (row) => {
+   	    return row._attributes.checked ? 'highlighted-row' : '';
+   	  },
+      scrollX: false,
+      scrollY: false
+    });
+
+    function applyRowHighlight() {
+    	  const checkedKeys = grid.getCheckedRowKeys() || [];
+    	  console.log(checkedKeys);
+    	  const rows = document.querySelectorAll('tr.tui-grid-row-odd, tr.tui-grid-row-even');
+//     	  console.log(rows);
+    	  
+    	  rows.forEach((el, i) => {
+    		  console.log(el);  
+    	    if (checkedKeys.includes(i)) {
+    	      el.classList.add('highlighted-row');
+    	    } else {
+    	      el.classList.remove('highlighted-row');
+    	    }
+    	  });
+   	}
+
+
+    grid.on('check', applyRowHighlight);
+    grid.on('uncheck', applyRowHighlight);
+    grid.on('checkAll', applyRowHighlight);
+    grid.on('uncheckAll', applyRowHighlight);
+
+    // 초기 렌더링 후 한 번 실행
+    applyRowHighlight();
+  </script>
+</body>
+</html>

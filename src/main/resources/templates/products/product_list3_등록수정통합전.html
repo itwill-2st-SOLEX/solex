@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<title>SOLEX</title>
+
+<link rel="stylesheet" th:href="@{/css/products/products.css}">
+
+</head>
+<body>
+	<th:block layout:fragment="content">
+		<!-- 콘텐츠 영역 -->
+		<div class="custom-body content-area container-xxl flex-grow-1 container-p-y">
+		
+			<!-- 제품 영역 -->
+			<div id="prod-area" class="product">
+				<h3 class="p-title">제품 List</h3>
+				
+				<!-- 컨트롤 영역 -->
+				<div class="controll-area">
+					<div class="btn-area">
+<!-- 						<button type="button" class="btn custom-btn-blue float-end" data-bs-toggle="modal" data-bs-target="#exampleModal" id="writeProductBtn"> -->
+<!-- 							제품 추가 -->
+<!-- 						</button> -->
+							<button type="button" class="btn custom-btn-blue float-end" id="writeProductBtn">제품 추가</button>
+						
+						<!-- Modal -->
+						<div class="modal fade" id="exampleModal" tabindex="-1"	aria-labelledby="exampleModalLabel" aria-hidden="true">
+							<div class="modal-dialog modal-dialog-scrollable modal-lg">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="modalTitleText"></h5> 
+		        						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<!-- 모달 내용 표시 -->
+									<div class="modal-body big-box" id="showProductModal"></div>
+									<!-- 모달 버튼 표시 -->
+									<div class="modal-footer" id="productModalFooter">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 그리드 영역 -->
+				<div class="grid-area">
+					<div id="prod-grid"></div>
+					<div class="modal-body big-box" id="showModal"></div>
+				</div>
+			</div>
+			<!-- BOM 영역 -->
+			<div id="bom-area" class="product">
+				<h3 class="p-title">BOM List</h3>
+				
+				<!-- 컨트롤 영역 -->
+				<div class="controll-area">
+					<div class="btn-area">
+						<div class="btn-area">
+						<button type="button" class="btn custom-btn-blue float-end" data-bs-toggle="modal" data-bs-target="#exampleModal" id="bom-add">
+							BOM 추가
+						</button>
+						
+						<!-- Modal -->
+						<div class="modal fade" id="exampleModal" tabindex="-1"	aria-labelledby="exampleModalLabel" aria-hidden="true">
+							<div class="modal-dialog modal-dialog-scrollable modal-lg">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title">BOM 등록</h5>
+		        						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<!-- 모달 내용 표시 -->
+									<div class="modal-body big-box" id="showProductModal"></div>
+									<!-- 모달 버튼 표시 -->
+									<div class="modal-footer">
+<!-- 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button> -->
+<!-- 										<button type="submit" id="submitApproval"class="btn custom-btn-blue">등록</button> -->
+									</div>
+								</div>
+							</div>
+						</div>
+<!-- 						<button id="prod-delete" class="btn btn-danger delete-btn">삭제</button> -->
+						</div>
+					</div>
+				</div>
+				<!-- 그리드 영역 -->
+				<div class="grid-area">
+					<div id="bom-grid"></div>
+				</div>
+			</div>
+		</div>
+	</th:block>
+	
+	<th:block layout:fragment="script">
+		<script th:src="@{/js/products/product_list.js}"></script>
+		<script th:src="@{/js/products/product_modal.js}"></script>
+		<script th:src="@{/js/products/bom_list.js}"></script>
+	</th:block>
+</body>
+</html>
