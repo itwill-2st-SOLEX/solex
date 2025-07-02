@@ -119,23 +119,18 @@ document.addEventListener('DOMContentLoaded', function(){
 
 			// 폼 생성 후에 select 박스에 옵션을 추가해야함 
 			const form = document.createElement('form');
-			form.id = 'joinForm'
+			form.setAttribute('id', 'joinForm');
+			form.setAttribute('method', 'post');
+			form.setAttribute('enctype', 'multipart/form-data'); // 이미지
 			
 			
-			form.innerHTML = `
-				<div class="modal-body big-box">
-				  				<div class="row mb-3">
-				  					<div class="col">
-									  <label>사진</label>
-									  <input type="file" class="form-control d-inline-block w-25" name="emp_img" required><br>
-									  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
-								   </div>	
-								   <div class="col">
-				`
 			// ===== 사진 =====
 			let div0 = document.createElement('div');
 			div0.className = 'mb-3';
 			div0.innerHTML = `
+			  <label>사진</label>
+			  <input type="file" class="form-control d-inline-block w-25" name="emp_img" required><br>
+			  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
 			`;
 			form.appendChild(div0);
 			
