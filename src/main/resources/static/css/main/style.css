@@ -116,6 +116,12 @@
   z-index: 11000;   /* date‑picker 기본 z‑index 10040 보다 크게 */
 }
 
+/* 팝업 폼에서 Location 입력 필드를 완전히 숨김 */
+.tui-calendar-form-item.tui-calendar-form-item-location {
+    display: none !important;
+}
+
+
 /* ─── 반응형 (≤ LG) ─── */
 @media (max-width: 992px) {
   .box1 { flex-direction: column; height: auto; }

@@ -6,18 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
         useDetailPopup: true,
         //calendars     : [{ id:'todo', name:'To‑Do', backgroundColor:'#ffbb3b' }],
 		template: {
-		    popupIsAllday:       () => '종일 일정',
-		    popupStateFree:      () => '🟢 개인',
-		    popupStateBusy:      () => '🔴 전체',
-		    titlePlaceholder:    () => '제목을 입력하세요',
-		    locationPlaceholder: () => '장소를 입력하세요',
-		    startDatePlaceholder:() => '시작',
-		    endDatePlaceholder:  () => '종료',
-		    popupSave:           () => '저장',
-		    popupUpdate:         () => '수정',
-		    // 디테일 팝업 타이틀을 굵게 + 색상
-		    popupDetailTitle: ({ title }) =>
-		      `<strong style="color:#2d7efc">${title}</strong>`
+            popupIsAllday:       () => '종일 일정',
+            // 이 부분을 원래대로 돌려놓거나 원하는 텍스트를 넣으세요.
+            // 이렇게 해야 팝업 상단의 select box가 보입니다.
+            popupStateFree:      () => '🟢 개인',
+            popupStateBusy:      () => '🔴 전체',
+            titlePlaceholder:    () => '제목을 입력하세요',
+            // locationPlaceholder는 CSS로 숨기므로 여기서 비워도 되지만,
+            // 필드 자체가 사라지므로 이 템플릿의 영향은 적습니다.
+            locationPlaceholder: () => '',
+            startDatePlaceholder:() => '시작',
+            endDatePlaceholder:  () => '종료',
+            popupSave:           () => '저장',
+            popupUpdate:         () => '수정',
+            popupDetailLocation: () => '', // 디테일 팝업에서도 location을 숨기려면 이 템플릿도 빈 문자열로.
+            // 디테일 팝업 타이틀을 굵게 + 색상
+            popupDetailTitle: ({ title }) =>
+              `<strong style="color:#2d7efc">${title}</strong>`
 		  }
     });
 

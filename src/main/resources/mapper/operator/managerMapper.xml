@@ -260,6 +260,12 @@
                WHERE wp.wpo_id = #{wpoId}
       )
      </update>
+     	
+	<!-- 	>> 수주 히스토리에 마지막 공정이 완료된 후 히스토리 추가 -->
+	<insert id="insertSujuHistory">
+		INSERT iNTO suju_history
+		VALUES(#{oddId}, 'odd_sts_04', #{oddModDate}, #{empID})
+	</insert>
   	
   	<!-- 그리드에서 현황 클릭했을 때 사원 작업 현황 표시하기 -->
   	  	
