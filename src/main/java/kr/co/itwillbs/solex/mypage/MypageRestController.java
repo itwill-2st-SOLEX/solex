@@ -26,9 +26,9 @@ public class MypageRestController {
 	@GetMapping("/empData")
 	public Map<String, Object> getEmpData(HttpSession session) {
 		
-		String empNum = (String) session.getAttribute("empNum");
-		System.out.println("empNUm = " + empNum);
-		Map<String, Object> empData = mypageService.getEmpData(empNum); 
+		String empId = (String) session.getAttribute("empId");
+		System.out.println("empId = " + empId);
+		Map<String, Object> empData = mypageService.getEmpData(empId); 
 		System.out.println("@@@@@@@@@@@@@@@ " + empData);
 		return empData;
 	}
@@ -36,8 +36,8 @@ public class MypageRestController {
 	//마이페이지 수정 
 	@PutMapping("/personalDataModify")
 	public void putMethodName(@RequestBody Map<String, Object> personalModifyMap, HttpSession session) {
-		String empNum = (String) session.getAttribute("empNum");
-		personalModifyMap.put("emp_num", empNum);
+		String empId = (String) session.getAttribute("empId");
+		personalModifyMap.put("empId", empId);
 		System.out.println("personalModify = " + personalModifyMap);
 		mypageService.personalDataModify(personalModifyMap);
 	}
