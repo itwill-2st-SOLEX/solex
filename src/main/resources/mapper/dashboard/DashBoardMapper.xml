@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.dashboard.DashBoardMapper">
+<!-- 	주문 요청현황 -->
+	<select id="getOrderStatus" resultType="map">
+		SELECT cli_nm
+			   , prd_nm
+			   , prd_color
+			   , prd_size
+			   , prd_height
+			   , odd_cnt
+			   , odd_sts
+			   , ord_reg_date
+		  FROM vw_suju_summary
+		 WHERE odd_isapproval = 'y'
+		 ORDER BY ord_reg_date DESC
+		 FETCH FIRST 20 ROWS ONLY
+	</select>
+<!-- 	최근 생산 완료된 제품들 -->
+	<select id="getPrdCompleted" resultType="map">
+		SELECT prd_nm
+			   , prd_code
+			   , prd_color
+			   , prd_size
+			   , prd_height
+			   , odd_sts
+			   , odd_mod_date
+		  FROM vw_suju_summary
+		 WHERE odd_sts IN (
+			  '작업 완료',
+			  '출고 대기(공장 > 창고)',
+			  '창고 대기',
+			  '출고 검사',
+			  '출고 완료'
+		 )
+		   AND odd_isapproval = 'y'
+		 ORDER BY odd_mod_date DESC
+		 FETCH FIRST 20 ROWS ONLY 
+	</select>
+	
+<!-- 	전일 생산량 -->
+	<select id="getYesterdayCnt" resultType="int">
+		SELECT SUM(odd_actual_cnt) AS yesterCnt
+		  FROM suju_order_detail
+		 WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 1)
+		   AND odd_isapproval = 'y'
+	</select>
+	
+<!-- 	전일 생산률 -->
+	<select id="getYesterdayRate" resultType="double">
+		SELECT  
+			CASE
+			    WHEN before.qty = 0 THEN NULL
+			    ELSE ROUND(((yester.qty - before.qty) / before.qty) * 100, 0)
+			  END AS rate
+		  FROM 
+				(SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		   		   FROM suju_order_detail
+		   		  WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 1)
+		   			-- AND odd_isapproval = 'y'
+		   		) yester,
+		  		(SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		   		   FROM suju_order_detail
+		   		  WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 2)
+		   			-- AND odd_isapproval = 'y'
+		   		) before
+	</select>
+	
+<!-- 	당월 누적 생산 -->
+	<select id="getMonthCnt" resultType="int">
+		SELECT SUM(odd_actual_cnt) AS monthCnt
+		  FROM suju_order_detail
+		-- WHERE odd_isapproval = 'y'
+	       WHERE TRUNC(odd_mod_date) BETWEEN TRUNC(SYSDATE, 'MM') AND TRUNC(SYSDATE)
+	</select>
+	
+<!-- 	당월 누적 생산률 -->
+	<select id="getMonthRate" resultType="double">
+		 SELECT  
+		    CASE
+		      WHEN prev.qty = 0 THEN NULL
+		      ELSE ROUND(((curr.qty - prev.qty) / prev.qty) * 100, 0)
+		    END AS rate
+		  FROM 
+		    (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		       FROM suju_order_detail
+		      WHERE odd_mod_date &gt;= TRUNC(SYSDATE, 'MM')
+		    ) curr,
+		    (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		       FROM suju_order_detail
+		      WHERE odd_mod_date &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
+		        AND odd_mod_date &lt; TRUNC(SYSDATE, 'MM')
+		    ) prev
+	</select>
+	
+<!-- 	불량률 -->
+	<select id="getDefectCnt" resultType="double">
+		SELECT ROUND(
+		        (SUM(NVL(odd_bcount, 0)) / SUM(NVL(odd_actual_cnt, 0))) * 100, 1
+			   ) AS defect_rate
+		  FROM suju_order_detail
+		 WHERE TO_CHAR(odd_mod_date, 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM')
+	</select>
+	
+<!-- 	상품별 전일 생산량 -->
+	<select id="getUpdateYesterdayCnt" resultType="int">
+		SELECT SUM(odd_actual_cnt) AS yesterCnt
+		  FROM vw_suju_summary
+		 WHERE TRUNC(TO_DATE(odd_mod_date, 'YYYY-MM-DD')) = TRUNC(SYSDATE - 1)
+		   AND prd_code = #{prdCode}
+	</select>
+	
+<!-- 	상품별 전일 생산율 -->
+	<select id="getUpdateYesterdayRate" resultType="double">
+		SELECT  
+		    CASE
+		        WHEN before.qty = 0 THEN NULL
+		        ELSE ROUND(((yester.qty - before.qty) / before.qty) * 100, 0)
+		    END AS yesterRate
+		  FROM 
+		    (
+		        SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		          FROM vw_suju_summary
+		         WHERE TRUNC(TO_DATE(odd_mod_date, 'YYYY-MM-DD')) = TRUNC(SYSDATE - 1)
+		           AND prd_code = #{prdCode}
+		    ) yester,
+		    (
+		        SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		          FROM vw_suju_summary
+		         WHERE TRUNC(TO_DATE(odd_mod_date, 'YYYY-MM-DD')) = TRUNC(SYSDATE - 2)
+		           AND prd_code = #{prdCode}
+		    ) before
+	</select>
+	
+<!-- 	상품별 당월 누적 생산량 -->
+	<select id="getUpdateMonthCnt" resultType="int">
+		SELECT SUM(odd_actual_cnt) AS monthCnt
+		  FROM vw_suju_summary
+		 WHERE TO_DATE(odd_mod_date, 'YYYY-MM-DD') 
+		       BETWEEN TRUNC(SYSDATE, 'MM') AND TRUNC(SYSDATE)
+	       AND prd_code = #{prdCode}
+	</select>
+	
+<!-- 	상품별 누적 생산율 -->
+	<select id="getUpdateMonthRate" resultType="double">
+		SELECT  
+		  CASE
+		    WHEN prev.qty = 0 THEN NULL
+		    ELSE ROUND(((curr.qty - prev.qty) / prev.qty) * 100, 0)
+		  END AS monthRate
+		FROM 
+		  (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		     FROM vw_suju_summary
+		    WHERE TO_DATE(odd_mod_date, 'YYYY-MM-DD') &gt; TRUNC(SYSDATE, 'MM')
+		      AND prd_code = #{prdCode}
+		  ) curr,
+		  (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
+		     FROM vw_suju_summary
+		    WHERE TO_DATE(odd_mod_date, 'YYYY-MM-DD') &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
+		      AND TO_DATE(odd_mod_date, 'YYYY-MM-DD') &lt; TRUNC(SYSDATE, 'MM')
+		      AND prd_code = #{prdCode}
+		  ) prev
+	</select>
+	
+<!-- 	상풀별 불량율 -->
+	<select id="getUpdateDefectCnt" resultType="double">
+		SELECT ROUND(
+		         (SUM(NVL(odd_bcount, 0)) / NULLIF(SUM(NVL(odd_actual_cnt, 0)), 0)) * 100, 1
+		       ) AS defectRate
+		  FROM vw_suju_summary
+		 WHERE TO_CHAR(TO_DATE(odd_mod_date, 'YYYY-MM-DD'), 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM')
+		   AND prd_code = #{prdCode}
+	</select>
+	
+<!-- 	생산량 추이 - 월간 -->
+	<select id="selectMonthlyTrend" resultType="map">
+		SELECT TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM') AS label,
+		       SUM(ODD_ACTUAL_CNT) AS total_cnt
+		 FROM vw_suju_summary
+		WHERE ODD_STS IN (
+			 	'작업 완료',
+				'출고 대기(공장 > 창고)',
+				'창고 대기',
+				'출고 검사',
+				'출고 완료'
+		 )
+		  AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+		  <if test="prdCode != null and prdCode != ''">
+		    AND PRD_CODE = #{prdCode}
+		  </if>
+		GROUP BY TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM')
+		ORDER BY label
+	</select>
+	
+<!-- 	생산량 추이 - 주간 -->
+	<select id="selectWeeklyTrend" resultType="map">
+		SELECT TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM-DD') AS label,
+		       SUM(ODD_ACTUAL_CNT) AS total_cnt
+		  FROM vw_suju_summary
+	 	 WHERE ODD_STS IN (
+			 	'작업 완료',
+				'출고 대기(공장 > 창고)',
+				'창고 대기',
+				'출고 검사',
+				'출고 완료'
+		 )
+		   AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= TRUNC(SYSDATE) - 6
+		  <if test="prdCode != null and prdCode != ''">
+		    AND PRD_CODE = #{prdCode}
+		  </if>
+		 GROUP BY TO_CHAR(TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+		 ORDER BY label
+	</select>
+	
+<!-- 	 인기 품목 도넛 차트  -->
+	<select id="getPopluarPrds" resultType="map">
+		SELECT prd_code,
+			   prd_nm,
+			   COUNT(DISTINCT odd_id) AS order_count
+		  FROM vw_suju_summary
+		 WHERE TO_DATE(ord_reg_date, 'YYYY-MM-DD HH24:MI:SS')
+	   BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		   AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+		 GROUP BY prd_code, prd_nm
+		 ORDER BY order_count DESC
+		  FETCH FIRST 5 ROWS ONLY
+	</select>
+
+</mapper>	

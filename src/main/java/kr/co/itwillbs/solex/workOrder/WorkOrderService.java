@@ -20,16 +20,14 @@ public class WorkOrderService {
 	
 	// 해당 제품코드 등록 모달 조회
 	public List<Map<String, Object>> getProcessTeam(String prdCd) {
-		System.out.println(mapper.ProcessTeam(prdCd));
-		System.out.println("prdCd" + prdCd);
 		return mapper.ProcessTeam(prdCd);
 	}
 	
 	// 작업지시 등록
 	@Transactional
-	public void workOrderInsert(List<Map<String, Object>> prdInfo) {
+	public void workOrderInsert(List<Map<String, Object>> prdInfo, String empId) {
 		 for (Map<String, Object> item : prdInfo) {
-	        mapper.workOrderInsert(item);
+	        mapper.workOrderInsert(item, empId);
 	        Integer wrkId = (Integer) item.get("wrk_id");
 	        item.put("wrk_id", wrkId);
 	        mapper.workProcessInsert(item);

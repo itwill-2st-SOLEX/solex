@@ -336,7 +336,7 @@ function renderMessage(message, isMine, isRead) {
 	readStatusDiv.className = `read-status ${isRead ? '' : 'unread'}`;
 
 	msgDiv.textContent = message.content;
-	readStatusDiv.textContent = isRead ? '' : '안읽음';
+	readStatusDiv.textContent = isRead == 'Y' ? '' : '안읽음';
 	debugger;
 
 	if (isMine) {

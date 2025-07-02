@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("HTTP 상태:", status);
                 console.error("오류 객체:", error);
                 console.error("퇴근 등록 실패:", xhr.responseText);
-                alert('퇴근 등록에 실패했습니다. 다시 시도해주세요. (오류: ' + xhr.responseText + ')');
+                alert('퇴근 등록에 실패했습니다. 다시 시도해주세요.');
             }
         });
     });

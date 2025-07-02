@@ -8,6 +8,9 @@ plugins {
 group = 'kr.co.itwillbs'
 version = '0.0.1-SNAPSHOT'
 
+// [수업]
+//apply plugin: 'war'
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
@@ -48,7 +51,10 @@ dependencies {
 	// ✅ LocalDateTime 직렬화용
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
     
-	
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-tomcat
+	// [수업]
+//	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+//	implementation 'org.springframework.boot:spring-boot-starter-log4j2:3.5.3'
 }
 
 tasks.named('test') {
