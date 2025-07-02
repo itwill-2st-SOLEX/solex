@@ -40,6 +40,7 @@
 	        	    , BOM_UNIT
 	        	    , BOM_COMM
 	        		, BOM_REG_DATE
+	        		, BOM_MOD_DATE
 	        	   )
 	        VALUES (
 	                  #{bom.OPT_ID}
@@ -47,6 +48,7 @@
 	                , #{bom.BOM_CNT}
 	                , #{bom.BOM_UNIT}
 	                , #{bom.BOM_COMM}
+	                , SYSDATE + 9/24 
 	                , SYSDATE + 9/24 )
 	    </foreach>
 	    SELECT 1 FROM DUAL
@@ -81,13 +83,15 @@
      	 , BOM_CNT
      	 , BOM_UNIT
      	 , BOM_COMM
-     	 , BOM_REG_DATE)
+     	 , BOM_REG_DATE
+     	 , BOM_MOD_DATE)
     VALUES (
            src.OPT_ID
          , src.MAT_ID
          , src.BOM_CNT
          , src.BOM_UNIT
          , src.BOM_COMM
+         , SYSDATE + 9/24
          , SYSDATE + 9/24
     )                  
     </update>

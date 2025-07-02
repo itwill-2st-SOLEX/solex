@@ -37,6 +37,8 @@ public interface ProductsMapper {
 	int selectOptionTotalCount(String prdId);
 
 	int countExistingOption(Map<String, String> option);
+
+	boolean existsByPrdCode(String prdCode);
 	
 	
 	

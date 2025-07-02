@@ -93,8 +93,20 @@
 .btn-edit:hover { background-color: #138496; }
 .btn-delete:hover { background-color: #c82333; }
 
+/* 공정순서 시작 */
+#prd_process {
+    height: 150px; /* Adjust the height as needed */
+    overflow-y: auto;
+}
+/* 공정순서 끝 */
 
 
+
+/* 옵션 스크롤 */
+#optionGroupsContainers {
+    height: 200px; /* Adjust the height as needed */
+    overflow-y: auto;
+}
 
 
 /*----- 옵션 테이블 css 시작-----*/

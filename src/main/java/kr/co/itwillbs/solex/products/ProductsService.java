@@ -99,4 +99,8 @@ public class ProductsService {
 	public int getOptionTotalCount(String prdId) {
 		return productsMapper.selectOptionTotalCount(prdId);
 	}
+
+	public boolean isPrdCodeDuplicate(String prdCode) {
+        return productsMapper.existsByPrdCode(prdCode); 
+    }
 }

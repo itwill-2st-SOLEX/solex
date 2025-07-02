@@ -26,7 +26,7 @@
 						    <div class="modal-dialog modal-dialog-scrollable modal-lg"> 
 						    	<div class="modal-content">
 						            <div class="modal-header">
-						                <h5 class="modal-title" id="exampleModalLabel">제품 정보 모달</h5>
+						                <h5 class="modal-title" id="productModalLabel"></h5>
 						                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						            </div>
 						            <!-- modal-body 시작 -->
@@ -62,19 +62,17 @@
 														<br>
 														<select id="prdTypeSelect" class="form-select"></select>
 									                </div>
+									                <div class="col">
+										            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
+														<br>
+														<select id="prdUnitSelect" class="form-select"></select>
+										            </div>
 										        </div>
 								                <div class="row mb-4">
 									                <div class="col" id="prd_process">
 									                    <label for="prd_process" class="form-label">공정 순서</label>
 														<br>
 									                </div>
-										        </div>
-								                <div class="row mb-4">
-										        	<div class="col">
-										            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
-														<br>
-														<select id="prdUnitSelect" class="form-select"></select>
-										            </div>
 										        </div>
 												<div class="row mb-4">
 													<div class="col">
@@ -119,7 +117,6 @@
 												<button type="button" class="btn btn-primary btn-sm mt-2 add-single-option-btn" data-color-code="opt_color_01" id="generateCombinationsBtn">
 													옵션 추가
 												</button>
-												<br><br>
 												<div id="optionGroupsContainers" class="mb-3" >
 													<ul class="nav nav-tabs mb-3" id="optionTabs" role="tablist">
 												        <li class="nav-item" role="presentation">
@@ -132,7 +129,7 @@
 												    <div class="tab-content" id="optionTabsContent">
 												        <div class="tab-pane fade show active" id="myOptionsContent" role="tabpanel" aria-labelledby="my-options-tab">
 												            <div id="currentOptionsGridContainer"></div>
-												            <p class="text-muted mt-2">선택된 옵션은 체크 해제가 불가능합니다.</p>
+												            <p class="text-muted mt-2"></p>
 												        </div>
 												        <div class="tab-pane fade" id="allOptionsContent" role="tabpanel" aria-labelledby="all-options-tab">
 												            <div id="allOptionsGroupsContainer"></div>

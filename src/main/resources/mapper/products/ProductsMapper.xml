@@ -185,6 +185,13 @@
 	       AND opt_size = #{opt_size}
 	       AND opt_height = #{opt_height}
 	</select>
+	
+    <select id="countProductCode" parameterType="String" resultType="int">
+       SELECT COUNT(*)
+       FROM PRODUCT
+       WHERE PRD_CODE = #{prdCode}
+    </select>
+	
 	    
 
 <!--     <delete id="deleteProductOptions" parameterType="string"> -->

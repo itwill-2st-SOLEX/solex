@@ -145,6 +145,15 @@ public class ProductsRestController {
             return ResponseEntity.status(500).body(null); 
         }
     }
+    // prd_code 겹치는지 확인
+    @GetMapping("/checkPrdCode")
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateCode(@RequestParam String prdCode) {
+        boolean isDuplicate = productsService.isPrdCodeDuplicate(prdCode);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isDuplicate", isDuplicate);
+        return ResponseEntity.ok(response);
+    }
+    
 	
 	
 }

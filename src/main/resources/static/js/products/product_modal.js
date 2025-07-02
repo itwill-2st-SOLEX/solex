@@ -23,7 +23,7 @@ async function onWriteProduct() {
 
 
 async function showProductModal(mode, data = null) {
-    const modalTitle = document.getElementById('exampleModalLabel');
+    const modalTitle = document.getElementById('productModalLabel');
     const saveProductBtn = document.getElementById('saveProductBtn');
     const prdIdHiddenInput = document.getElementById('prd_id_hidden');
 
@@ -130,7 +130,7 @@ async function showProductModal(mode, data = null) {
                 processData.forEach(process => {
                     htmlContent += `
                         <li>
-                            (<small>${process.PRC_CODE}</small>)<br>
+                            ${process.PRC_NM}(<small>${process.PRC_CODE}</small>)<br>
                             <span style="font-size: 0.9em; color: #666;">${process.PRC_DES || '설명 없음'}</span>
                         </li>
                     `;
@@ -138,7 +138,7 @@ async function showProductModal(mode, data = null) {
                 htmlContent += '</ol>';
                 prdProcessDiv.innerHTML = htmlContent;
             } else {
-                prdProcessDiv.innerHTML = '<p>해당 제품 유형에 대한 공정 정보가 없습니다.</p>';
+                prdProcessDiv.innerHTML = '<p class="empty-process-message">해당 제품 유형에 대한 공정 정보가 없습니다.</p>';
             }
 
         } catch (error) {
@@ -619,6 +619,34 @@ async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
     }
 }
 
+
+
+// 제품코드 중복확인 
+const checkDuplicateUrl = '/products/api/checkPrdCode'; 
+// 비동기 처리를 위해 async/await 또는 .then().catch() 사용
+async function checkPrdCode(code) {
+    try {
+        const response = await fetch(`${checkDuplicateUrl}?prdCode=${code}`); // GET 요청 예시
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json(); // 서버에서 JSON 응답을 기대
+
+        // 서버 응답 형태에 따라 변경될 수 있음.
+        if (data.isDuplicate) { // 또는 data.exists 등 서버 응답에 따라
+            alert("이미 존재하는 제품 코드입니다. 다른 코드를 입력해주세요.");
+            return true; // 중복됨
+        } else {
+            return false; // 중복 아님
+        }
+    } catch (error) {
+        console.error("제품 코드 중복 확인 중 오류 발생:", error);
+        alert("제품 코드가 중복됩니다. 다시 시도해주세요.");
+        return true; // 오류 발생 시 일단 중복으로 처리하여 저장을 막음 (또는 다른 로직)
+    }
+}
+
 // ⭐ 통합된 제품 등록/수정 처리 함수
 async function processProductData(mode) { 
     console.log(`제품 ${mode === 'register' ? '등록' : '수정'} 시작`);
@@ -645,6 +673,12 @@ async function processProductData(mode) {
 	    alert("제품 코드는 대문자 4글자로 입력해주세요.");
 	    return;
 	}
+	// DB 중복 확인
+    const isDuplicate = await checkPrdCode(prdCode);
+    if (isDuplicate) {
+       	// 경고 메시지는 이미 checkProductCodeDuplicate 함수 안에서 띄워졌으므로 여기서는 추가 작업 없이 종료
+       	return;
+   	}
     if (!prdPrice || isNaN(prdPrice) || Number(prdPrice) <= 0) { alert("제품 가격을 올바르게 입력해주세요."); return; }
     if (!prdType) { alert("제품 유형을 선택해주세요."); return; }
     if (!prdUnit) { alert("제품 단위를 선택해주세요."); return; }
@@ -730,7 +764,48 @@ async function processProductData(mode) {
 }
 
 
+document.getElementById('uploadExcelBtn').addEventListener('click', async () => {
+	alert('잘됨!');
+    const fileInput = document.getElementById('excelFileInput');
+    const file = fileInput.files[0]; // 선택된 파일 가져오기
 
+    if (!file) {
+        alert('업로드할 엑셀 파일을 선택해주세요.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('excelFile', file); // 'excelFile'은 서버에서 파일을 받을 때 사용할 이름
+
+    try {
+        const response = await fetch('/SOLEX/products/api/uploadExcel', { // 서버 엔드포인트
+            method: 'POST',
+            body: formData // FormData를 직접 body에 넣으면 Content-Type은 자동으로 multipart/form-data로 설정됩니다.
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('제품 등록이 완료되었습니다!');
+            // 성공 후 필요한 작업 (예: 그리드 새로고침, 파일 입력 초기화)
+            // window.bom_grid.readData(1); // 제품 목록 다시 불러오기 등
+        } else {
+            alert('제품 등록 실패: ' + (result.message || '알 수 없는 오류'));
+            // 서버에서 반환된 상세 오류 메시지를 표시할 수 있습니다.
+            if (result.errors) { // 예: { errors: [{ row: 2, message: '제품 코드가 중복됩니다.' }] }
+                let errorDetails = result.errors.map(err => `행 ${err.row}: ${err.message}`).join('\n');
+                alert('상세 오류:\n' + errorDetails);
+            }
+        }
+    } catch (error) {
+        console.error('엑셀 업로드 중 오류 발생:', error);
+        alert('엑셀 업로드 중 네트워크 오류가 발생했습니다.');
+    }
+});
 // ⭐ 중요: 초기 로드 시 이미 체크되어 있는 체크박스에 대한 색상 적용 ⭐
 // 이 부분은 generateAndDisplayCombinations 함수 끝에 추가하거나,
 // 체크박스를 생성하는 루프 내에서 isSelectedCombination이 true일 때 바로 클래스를 추가해도 됩니다.
