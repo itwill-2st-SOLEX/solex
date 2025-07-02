@@ -4,8 +4,6 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layouts/layout}">
 <head>
-	<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
-	<!-- <meta charset="UTF-8"> -->
 	<title>SOLEX</title>
 	
 	<!-- Toast UI Calendar CSS -->
@@ -22,6 +20,7 @@
 
     <!-- 이미 쓰고 있는 본체 ↓ -->
     <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+	<script th:src="@{/js/main/script.js}"></script>
 	
 	
 
@@ -69,6 +68,8 @@
 						</nav>
 			        </header>
 			        <main id="calendar" class="calendar-area"><!-- Calendar 붙는 곳 --></main>
+			        
+			        
 			      </section>
 			
 			      <!-- 결재·즐겨찾기 세로 스택 -->
@@ -88,10 +89,9 @@
 			  </div><!-- /custom-content -->
 			</div><!-- /custom-body -->
 		
-
 	</th:block>
 	
 	
-	<script th:src="@{/js/main/script.js}"></script>
+	
 </body>
 </html>
