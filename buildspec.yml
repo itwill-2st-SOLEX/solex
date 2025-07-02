@@ -1,0 +1,51 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-northeast-2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+    commands:
+      - yum update -y
+      - echo Installing SDKMAN and Gradle
+      - curl -s "https://get.sdkman.io" | bash
+      - source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk install gradle  # Gradle 설치
+  pre_build:
+    commands:
+      - echo Build started on `date`
+      - chmod +x gradlew  # ./gradlew 파일에 실행 권한 추가
+      - echo "Parameter Store에서 비밀값 가져오기"
+      - DB_USER=$(aws ssm get-parameter --name "/solex/local/DB_USERNAME" --with-decryption --query "Parameter.Value" --output text)
+      - DB_PASS=$(aws ssm get-parameter --name "/solex/local/DB_PASSWORD" --with-decryption --query "Parameter.Value" --output text)
+      - AES_URL=$(aws ssm get-parameter --name "/solex/local/AES_SECRET_URL" --with-decryption --query "Parameter.Value" --output text)
+      - AES_KEY=$(aws ssm get-parameter --name "/solex/local/AES_SECRET_KEY" --with-decryption --query "Parameter.Value" --output text)
+      - |
+        cat > src/main/resources/application-local.yml << EOF
+        spring:
+          datasource:
+            driver-class-name: oracle.jdbc.OracleDriver
+            url: jdbc:oracle:thin:@//localhost:1521/xe
+            username: ${DB_USER}
+            password: ${DB_PASS}
+        business:
+          api:
+            url: ${AES_URL}
+            secret: ${AES_KEY}
+        EOF
+  build:
+    commands:
+      - echo Building the Spring Boot application
+      - source "$HOME/.sdkman/bin/sdkman-init.sh" && ./gradlew clean bootWar  # 빌드 명령
+      - ls -l build/libs/
+      - mv build/libs/solex.war solex.war
+  post_build:
+    commands:
+      - echo Build and packaging completed on `date`
+artifacts:
+  files:
+    - SOLEX.war  # 생성된 아티팩트가 myapp.war임을 확실히 함
+    - appspec.yml
+    - scripts/*
