@@ -2,28 +2,18 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.co.itwillbs.solex.equipment_history.EquipmentHistoryMapper">
+<mapper namespace="kr.co.itwillbs.solex.equipmenthistory.EquipmentHistoryMapper">
 
-	<select id="equipmentHistoryMapper" resultType="map">
+	<select id="getEquipmentHistory" resultType="map">
   		SELECT  e.eqp_id   AS eqp_id, 
 		  		e.eqp_code AS eqp_code, 
 		  		e.eqp_name AS eqp_name
 		FROM    equipment e
-		WHERE   EXISTS ( SELECT 1
-		                 FROM   equipment_history eh
-		                 WHERE  eh.eqp_id = e.eqp_id )
+		WHERE   EXISTS (SELECT 1
+						FROM   equipment_history eh
+		     			WHERE  eh.eqp_id = e.eqp_id)
 		ORDER BY e.eqp_id 
   		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
    </select>
-	
-	<select id="equipmenthistoryList" resultType="map">
-		SELECT  e.eqp_id   AS eqp_id, 
-		  		e.eqp_code AS eqp_code, 
-		  		e.eqp_name AS eqp_name
-		FROM    equipment e
-		WHERE   EXISTS ( SELECT 1
-		                 FROM   equipment_history eh
-		                 WHERE  eh.eqp_id = e.eqp_id )
-		ORDER BY e.eqp_id 
-	</select>
+
 </mapper>

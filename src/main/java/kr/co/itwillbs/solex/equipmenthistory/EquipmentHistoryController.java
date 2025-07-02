@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.equipment_history;
+package kr.co.itwillbs.solex.equipmenthistory;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +13,7 @@ public class EquipmentHistoryController {
 	@GetMapping("/page")
 	public String getMethodName() {
 		
-		return "equipmenthistory/equipmentHistoryDrafts";
+		return "equipmenthistory/equipmenthistoryDrafts";
 	}
 	
 }
