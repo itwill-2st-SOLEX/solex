@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.workHistory.WorkHistoryMapper">
+<!-- 	작업지시 조회 -->
+	<select id="selectWorkHistoryList" resultType="map">
+		SELECT odd_id
+			   , prd_id
+			   , prd_code
+			   , prd_nm
+			   , opt_id -- 옵션 id
+			   , odd_cnt
+			   , odd_sts
+			   , prd_color
+			   , prd_size
+			   , prd_height
+			   , ord_end_date
+		  FROM vw_suju_summary -- 뷰테이블
+		 WHERE odd_sts in (SELECT det_nm FROM code_detail WHERE det_id between 'odd_sts_06' and 'odd_sts_09')
+		 
+		 
+		 ORDER BY odd_id DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+</mapper>

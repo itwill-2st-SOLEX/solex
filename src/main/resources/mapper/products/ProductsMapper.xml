@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.products.ProductsMapper">
+	<!-- product 무한스크롤 -->
+	<select id="selectPagedProductList" resultType="map">
+	    SELECT
+	    	   p.prd_id,
+			   p.prd_nm,
+			   p.prd_price,
+			   p.prd_unit PRD_SELECTED_UNIT,
+			   p.prd_type PRD_SELECTED_TYPE,
+			   p.prd_code,
+			   p.prd_comm,
+			   p.prd_reg_date,
+			   p.prd_up_date,
+			   
+			   o.opt_id, 
+			   o.opt_color, 
+			   o.opt_height, 
+			   o.opt_size,
+			   
+			   cd_type.det_nm PRD_TYPE, -- 유형
+			   cd_unit.det_nm PRD_UNIT, -- 단위
+			   cd_col.det_nm PRD_COLOR, -- 색상
+			   cd_size.det_nm PRD_SIZE, -- 사이즈
+			   cd_height.det_nm PRD_HEIGHT -- 굽
+	      FROM product p
+	    
+	 LEFT JOIN product_option o 
+	        ON p.prd_id = o.prd_id
+	 LEFT JOIN code_detail cd_col 
+	      	ON cd_col.det_id = o.opt_color
+	 LEFT JOIN code_detail cd_size 
+	 	  	ON cd_size.det_id = o.opt_size
+	 LEFT JOIN code_detail cd_height 
+	 		ON cd_height.det_id = o.opt_height
+		
+		 JOIN code_detail cd_type 
+		   ON cd_type.det_id = p.prd_type
+		 JOIN code_detail cd_unit 
+		   ON cd_unit.det_id = p.prd_unit
+	    <where>
+	        <if test="prdYn != null and prdYn != ''">
+	           prd_yn = #{prdYn}
+	        </if>
+	    </where>
+	    ORDER BY PRD_ID
+	    OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
+	    
+	</select>
+	<select id="selectTotalProductCount" resultType="int">
+		SELECT COUNT(*) 
+		  FROM product p
+	 LEFT JOIN product_option o 
+     		ON p.prd_id = o.prd_id
+		<where>
+			<if test="prdYn != null and prdYn != ''">
+			prd_yn = #{prdYn}
+			</if>
+		</where>
+	</select>
+    <select id="selectProductsLists" resultType="java.util.Map">
+    	SELECT COUNT(*) 
+    	  FROM product p
+     LEFT JOIN product_option o 
+     		ON p.prd_id = o.prd_id
+		 WHERE prd_yn = 'Y'
+    </select>
+    <select id="selectPrdUnitTypesAsMap" resultType="java.util.Map">
+    	SELECT
+			   cd.cod_id,
+			   cd.det_id,
+			   cd.det_nm
+		  FROM CODE c
+		  JOIN code_detail cd
+		    ON c.cod_id = cd.cod_id
+		 WHERE cod_yn = 'y' and det_yn = 'y'
+		   AND cd.cod_id = #{groupCode}
+	  ORDER BY det_sort
+<!--         SELECT prd_id, prd_nm, prd_unit, prd_type, det_nm -->
+<!--           FROM product p -->
+<!-- 		  JOIN code_detail cd  -->
+<!-- 		    ON p.prd_unit = cd.det_id -->
+<!--        	 WHERE prd_yn='Y' -->
+<!-- 		  AND prd_id=21 -->
+
+    </select>
+    <insert id="insertProduct" parameterType="map">
+	    INSERT INTO PRODUCT (
+			        PRD_NM,
+			        PRD_PRICE,
+			        PRD_CODE,
+			        PRD_UNIT,
+			        PRD_TYPE,
+			        PRD_COMM,
+			        PRD_REG_DATE,
+			        PRD_UP_DATE
+	    ) VALUES (
+			        #{prd_nm},
+			        #{prd_price},
+			        #{prd_code},
+			        #{prd_unit},
+			        #{prd_type},
+			        #{prd_comm},
+			        SYSDATE + 9/24 ,
+			        null
+	    )
+	</insert>
+	<!-- 마지막으로 생성된 prd_id 조회 (Oracle IDENTITY 시퀀스 currval) -->
+	<select id="selectLatestProductId" resultType="long">
+	  	SELECT ISEQ$$_167644.CURRVAL FROM dual
+	</select>
+	<!-- 제품 OPTION 삽입 -->
+	<insert id="insertProductOption" parameterType="map">
+	    <selectKey keyProperty="opt_id" order="BEFORE" resultType="long">
+	      	SELECT PRODUCT_OPTION_SEQ.NEXTVAL FROM dual
+	    </selectKey>
+	    INSERT INTO PRODUCT_OPTION (
+	        OPT_ID,
+	        PRD_ID,
+	        OPT_COLOR,
+	        OPT_SIZE,
+	        OPT_HEIGHT
+	    ) VALUES (
+	        #{opt_id},
+	        #{prd_id},
+	        #{opt_color},
+	        #{opt_size},
+	        #{opt_height}
+	    )
+  	</insert>
+  	<!-- 제품에 대한 모든 옵션 값 출력 -->
+	<select id="getProductOptionsByProductId" resultType="java.util.Map">
+      SELECT
+             o.OPT_COLOR,  
+             o.OPT_SIZE,
+             o.OPT_HEIGHT,
+			 cd_col.det_nm as colorName,
+			 cd_size.det_nm as sizeName,
+			 cd_height.det_nm as heightName
+			
+		FROM PRODUCT_OPTION o
+   LEFT JOIN code_detail cd_col 
+		  ON cd_col.det_id = o.opt_color
+   LEFT JOIN code_detail cd_size 
+		  ON cd_size.det_id = o.opt_size
+   LEFT JOIN code_detail cd_height 
+		  ON cd_height.det_id = o.opt_height
+       WHERE PRD_ID = #{prdId}
+       ORDER BY o.OPT_COLOR, o.OPT_SIZE, o.OPT_HEIGHT 	
+    </select>
+	<select id="selectOptionTotalCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM PRODUCT P
+		  JOIN PRODUCT_OPTION O
+				ON P.PRD_ID = O.PRD_ID
+		 WHERE P.PRD_ID = #{prdId} 
+		   AND UPPER(O.OPT_YN)='Y'
+	</select>
+	   
+    
+    <!-- 제품 수정, 삭제 기능은 없애기로 함. 6월26일 -->
+    <update id="updateProduct" parameterType="map">
+        UPDATE PRODUCT
+        SET
+            PRD_NM = #{prd_nm},
+            PRD_PRICE = #{prd_price},
+            PRD_CODE = #{prd_code},
+            PRD_UNIT = #{prd_unit},
+            PRD_TYPE = #{prd_type},
+            PRD_COMM = #{prd_comm},
+            PRD_UP_DATE = SYSDATE + 9/24 
+        WHERE
+            PRD_ID = #{prd_id}
+    </update>
+    
+    <select id="countExistingOption" parameterType="map" resultType="int">
+	    SELECT COUNT(*)
+	      FROM PRODUCT_OPTION
+	     WHERE prd_id = #{prd_id}
+	       AND opt_color = #{opt_color}
+	       AND opt_size = #{opt_size}
+	       AND opt_height = #{opt_height}
+	</select>
+	
+    <select id="countProductCode" parameterType="String" resultType="int">
+       SELECT COUNT(*)
+       FROM PRODUCT
+       WHERE PRD_CODE = #{prdCode}
+    </select>
+	
+	    
+
+<!--     <delete id="deleteProductOptions" parameterType="string"> -->
+<!--         DELETE FROM PRODUCT_OPTION -->
+<!--         WHERE PRD_ID = #{prdId} -->
+<!--     </delete> -->
+    
+
+</mapper>	

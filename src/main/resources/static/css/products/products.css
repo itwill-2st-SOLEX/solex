@@ -1,0 +1,148 @@
+@charset "UTF-8";
+
+.content-area {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.product {
+	padding: 10px;
+	width: 50%;
+	height: auto;
+}
+
+.p-title {
+	padding: 10px;
+}
+#prod-area {
+	width:65%;	
+}
+#bom-area {
+	width:100%;
+}
+
+.controll-area {
+	display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+	align-items: center;
+	padding-bottom: 20px;
+}
+
+.searchIp {
+	padding: 5px;
+	width: 250px;
+	height: 35px;
+}
+
+.btn-area {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+	height: 35px;
+}
+
+.add-btn {
+	height: 100%;
+}
+
+.save-btn {
+	height: 100%;
+}
+
+.delete-btn {
+	height: 100%;
+}
+
+
+/* ------------ prod-grid 내의 PRD_NM 컬럼 셀에만 적용 ------------ */
+.form-control[readonly] {
+    background-color: #e9ecef; /*Bootstrap의 form-control 클래스에 적용*/
+    opacity: 1; /* Bootstrap의 기본값을 유지하거나 오버라이드 */
+    border: gray 1px solid;
+}
+
+
+/* 버튼 스타일 (기존 btn, btn-info 등 부트스트랩 클래스와 병행) */
+.add-single-option-btn {
+    /* 부트스트랩 btn btn-primary btn-sm 에 추가 */
+    /* background-color: #007bff; */ /* 부트스트랩 primary 색상 사용 */
+    /* color: white; */
+    /* padding: 8px 15px; */
+    /* border: none; */
+    /* border-radius: 4px; */
+    /* cursor: pointer; */
+    margin-top: 15px; /* 테이블과 버튼 사이 간격 */
+    font-size: 0.9em;
+}
+
+/* 관리 버튼 그룹 (수정/삭제) */
+.action-btns {
+    white-space: nowrap; /* 버튼들이 한 줄에 유지되도록 */
+}
+.btn-edit, .btn-delete {
+    /* 부트스트랩 btn btn-sm 에 추가 */
+    padding: 6px 10px;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+.btn-edit { background-color: #17a2b8; color: white; border: none; } /* info */
+.btn-delete { background-color: #dc3545; color: white; border: none; } /* danger */
+.btn-edit:hover { background-color: #138496; }
+.btn-delete:hover { background-color: #c82333; }
+
+/* 공정순서 시작 */
+#prd_process {
+    height: 150px; /* Adjust the height as needed */
+    overflow-y: auto;
+}
+/* 공정순서 끝 */
+
+
+
+/* 옵션 스크롤 */
+#optionGroupsContainers {
+    height: 200px; /* Adjust the height as needed */
+    overflow-y: auto;
+}
+
+
+/*----- 옵션 테이블 css 시작-----*/
+.size-group-start {
+    /* 상단 테두리 */
+    border-top: 2px solid #ccc !important; /* 구분선 색상과 두께 조절 */
+    /* 여백 추가 (선택 사항) */
+    margin-top: 10px;
+}
+
+/* style.css 또는 <style> 태그 내 */
+.current-product-option {
+    background-color: #f0f8ff; /* 연한 파란색 배경 */
+    font-weight: bold; /* 글씨를 진하게 */
+}
+/*----- 옵션 테이블 css 끝-----*/
+
+#optionGroupsContainer{
+	height: 350px;
+	overflow-y: auto;
+	border: 1px solid #ccc;
+	padding: 15px;
+	background-color:  #f9f9f9;
+	width: 100%;
+}
+
+/* 옵션테이블 체크박스 css */
+.disabled-option-row .tui-grid-cell-row-header input[type="checkbox"] {
+    opacity: 0.5; /* 체크박스를 반투명하게 만들어 회색으로 보입니다 */
+    cursor: not-allowed; /* 마우스를 올렸을 때 금지 커서로 변경 */
+    /* pointer-events: none; 는 JavaScript 로직으로 이미 체크 해제를 막고 있으므로, 굳이 필요하지 않을 수 있습니다.
+       하지만 클릭을 완전히 막아 시각적인 피드백을 강화하려면 추가할 수 있습니다. */
+}
+
+/* 추가적으로, 행 전체에 대한 시각적 비활성화 효과를 주고 싶다면 (예: 텍스트 색상 변경) */
+.disabled-option-row {
+    color: #888; /* 텍스트 색상을 회색으로 변경 */
+    /* background-color: #f5f5f5; */ /* 배경색을 연한 회색으로 변경 */
+}
