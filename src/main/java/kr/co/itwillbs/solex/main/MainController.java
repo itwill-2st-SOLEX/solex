@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex;
+package kr.co.itwillbs.solex.main;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

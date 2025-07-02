@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.itwillbs.solex.main.MainMapper">	
+	
+	<select id="mainNotice" resultType="map">
+		SELECT n.not_id, n.emp_id, n.not_tt, n.not_con, not_reg_date, e.emp_nm, ve.emp_dep_nm, ve.emp_pos_nm
+		FROM NOTICE n JOIN EMPLOYEE e ON n.emp_id = e.emp_id
+		   		LEFT JOIN  VIEW_EMPLOYEE ve ON e.emp_id = ve.emp_id
+		ORDER BY n.not_reg_date DESC 
+		FETCH FIRST 3 ROWS ONLY;
+	</select>
+  </mapper>
+  
+  
+  
+  
+  
+  

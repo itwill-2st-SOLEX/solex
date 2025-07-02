@@ -28,6 +28,8 @@
   white-space: nowrap;
 }
 
+
+
 /* 리스트 */
 .panel-list {
   list-style: none;
@@ -67,7 +69,7 @@
 .box1 { /* 3‑분할 */
   display: flex;
   gap: var(--gap);
-  height: 200px;
+  height: 170px;
 }
 
 .box1 .notice  { flex: 0 0 41%; }  /* 넓게 */
@@ -117,11 +119,84 @@
 }
 
 /* 팝업 폼에서 Location 입력 필드를 완전히 숨김 */
-.toastui-calendar-dropdown-section.toastui-calendar-state-section,
+/*.toastui-calendar-dropdown-section.toastui-calendar-state-section,*/
 .toastui-calendar-popup-section-item.toastui-calendar-popup-section-location,
-#calendar > div.toastui-calendar-floating-layer > div.toastui-calendar-event-form-popup-slot > div > form > div.toastui-calendar-form-container > div:nth-child(3) {
+#calendar > div.toastui-calendar-floating-layer > div.toastui-calendar-event-form-popup-slot > div > form > div.toastui-calendar-form-container > div:nth-child(3),
+.toastui-calendar-popup-section-private {
     display: none !important;
 }
+
+.toastui-calendar-popup-section-item.toastui-calendar-popup-section-title {
+	width: 100%;
+}
+
+.toastui-calendar-popup-button,
+.toastui-calendar-dropdown-menu	 {
+	font-weight: 700;
+}
+
+.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(1)>.toastui-calendar-dot{
+	background-color: #66B3FF;
+}
+
+.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(2)>.toastui-calendar-dot{
+	background-color: #FF8A4D;
+}
+
+.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(3)>.toastui-calendar-dot{
+	background-color: #90A4AE;
+}
+
+.toastui-calendar-template-popupIsAllday {
+	color: #444;
+	font-weight: 500;
+}
+
+.toastui-calendar-day-name-item.toastui-calendar-month {
+	width:500px !important;
+}
+
+.toastui-calendar-detail-item.toastui-calendar-detail-item-indent{
+	display: none;
+}
+
+
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) {
+	display: flex;
+	align-items: center;
+}
+
+
+div.toastui-calendar-event-detail-popup-slot > div > div.toastui-calendar-detail-container{
+	font-size: 20rem;
+}
+
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) > span.toastui-calendar-content > span > div,
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(3) > span.toastui-calendar-content {
+	font-weight: 500;
+}
+
+#monthLabel {
+	color: #444;
+	font-size: 1.2rem;
+	font-weight: 400;
+}
+
+
+div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui-calendar-content {
+	margin-bottom: 20px;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

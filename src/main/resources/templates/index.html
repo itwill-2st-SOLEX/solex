@@ -6,20 +6,28 @@
 <head>
 	<title>SOLEX</title>
 	
-	<!-- Toast UI Calendar CSS -->
-    <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
-    <link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
-    <link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
+
+	<script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.js"></script>
+	<script src="https://uicdn.toast.com/tui.dom/v3.0.0/tui-dom.js"></script>
+
+	<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css">
+	<link rel="stylesheet" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css">
+	<script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
+	<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
+	<script src="https://uicdn.toast.com/tui.date-picker/latest/locale/ko.js"></script>
+
+	<link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+	<script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/dayjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/weekday.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/localeData.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/timezone.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/utc.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/locale/ko.js"></script> 
+	
 	<link rel="stylesheet" th:href="@{/css/main/style.css}" />
 
-	<!-- Toast UI Calendar JS -->
-    <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.js"></script>
-    <script src="https://uicdn.toast.com/tui.dom/v3.0.0/tui-dom.js"></script>
-    <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
-    <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
-
-    <!-- 이미 쓰고 있는 본체 ↓ -->
-    <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
 	<script th:src="@{/js/main/script.js}"></script>
 	
 	
@@ -61,10 +69,19 @@
 			      <section class="panel calendar flex-grow-1">
 			        <header class="calendar-header">
 			          <nav class="calendar-nav">
-						  <button class="btn-nav today">Today</button>
+						<button id="prevMonthBtn" class="btn btn-link px-2">
+					        <i class="menu-icon tf-icons bx bx-caret-left"></i>
+					    </button>
+
+					    <p id="monthLabel" class="m-0 mx-3 fw-bold">2025년&nbsp;6월</p>
+
+					    <button id="nextMonthBtn" class="btn btn-link px-2">
+					        <i class="menu-icon tf-icons bx bx-caret-right"></i>
+					    </button>
+<!--						  <button class="btn-nav today">Today</button>
 						  <button class="btn-nav prev">←</button>
 						  <button class="btn-nav next">→</button>
-						  <span class="nav-range navbar--range"></span>
+						  <span class="nav-range navbar--range"></span>-->
 						</nav>
 			        </header>
 			        <main id="calendar" class="calendar-area"><!-- Calendar 붙는 곳 --></main>
