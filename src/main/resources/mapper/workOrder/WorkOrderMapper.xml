@@ -56,7 +56,7 @@
 	
 <!-- 	작업지시 등록 -->
 	<insert id="workOrderInsert">
-	<selectKey keyProperty="wrk_id" resultType="int" order="BEFORE">
+	<selectKey keyProperty="prdInfo.wrk_id" resultType="int" order="BEFORE">
         SELECT work_order_seq.NEXTVAL FROM dual
     </selectKey>
 		INSERT INTO work_order (wrk_id,
@@ -65,10 +65,10 @@
 			    				prd_cd,
 			    				wrk_ord_date,
 			    				wrk_ord_empid
-		) VALUES (#{wrk_id},
-				  #{prcId},         -- 공정id
-			      #{oddId},			-- 주문 id
-			      #{prdCd},         -- 주문 cd
+		) VALUES (#{prdInfo.wrk_id},
+				  #{prdInfo.prcId},         -- 공정id
+			      #{prdInfo.oddId},			-- 주문 id
+			      #{prdInfo.prdCd},         -- 주문 cd
 			      SYSDATE + 9/24,  -- 작업 지시일
 				  #{empId}
 		)

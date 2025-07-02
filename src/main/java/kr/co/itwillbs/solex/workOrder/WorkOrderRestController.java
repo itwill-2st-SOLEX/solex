@@ -41,6 +41,7 @@ public class WorkOrderRestController {
 								HttpSession session) {
 		String empId = (String)session.getAttribute("empId");
 		System.out.println(empId);
+		System.out.println(prdInfo);
 		service.workOrderInsert(prdInfo, empId);
 	}
 	
