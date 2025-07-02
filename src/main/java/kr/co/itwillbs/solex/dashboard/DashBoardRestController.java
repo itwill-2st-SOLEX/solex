@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
@@ -29,18 +30,33 @@ public class DashBoardRestController {
 		// 당월 누적 생산
 		summary.put("monthCnt", service.getMonthCnt());
 		summary.put("monthRate", service.getMonthRate());
+		//당뤌 불량율
 		summary.put("defectCnt", service.getDefectCnt());
-		System.out.println(summary);
 		return summary; 
+	}
+	
+	// 상품별 3개 요약 카드
+	@GetMapping("/summary/{prdCode}")
+	public Map<String, Object> getUpdateSummary(@PathVariable("prdCode") String prdCode) {
+		System.out.println("prdCode: " + prdCode);
+		Map<String, Object> updateSummary = new HashMap<>();
+		// 상품 전일 생산량 
+		updateSummary.put("yesterCnt", service.getUpdateYesterdayCnt(prdCode));
+		updateSummary.put("yesterRate", service.getUpdateYesterdayRate(prdCode));
+		// 당월 누적 생산
+		updateSummary.put("monthCnt", service.getUpdateMonthCnt(prdCode));
+		updateSummary.put("monthRate", service.getUpdateMonthRate(prdCode));
+		// 상품별 불량율
+		updateSummary.put("defectCnt", service.getUpdateDefectCnt(prdCode));
+		
+		System.out.println("updateSummary" + updateSummary);
+		return updateSummary;
 	}
 	
 	// 생산량 추이
 	@GetMapping("/productions/trend")
 	public List<Map<String, Object>> getProductionTrend(@RequestParam("type") String type,
 														@RequestParam(value = "prdCode", required = false) String prdCode) {
-		System.out.println(type);
-		System.out.println(prdCode);
-		System.out.println(service.getProductionTrend(type, prdCode));
 		return service.getProductionTrend(type, prdCode);
 	}
 	

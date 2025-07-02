@@ -32,7 +32,6 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     String empId = authentication.getName();
                     request.getSession().setAttribute("empId", empId);
-                    System.out.println("empId" + empId);
 
                     response.sendRedirect("/SOLEX");
                 })
