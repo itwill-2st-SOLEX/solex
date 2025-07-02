@@ -96,7 +96,7 @@
 	</div>
 	
 <!-- ✨ Mypage 모달창 띄우기 위해  -->
-	<div class="modal fade" id="exampleModal" tabindex="-1" aria-hidden="true">
+	<div class="modal fade" id="mypageModal" tabindex="-1" aria-hidden="true">
 	  <div class="modal-dialog modal-lg">
 	    <div class="modal-content">
 	      <div class="modal-header">
@@ -132,7 +132,7 @@
 		//마이페이지 모달창 내부
 		async function openModal(empData){
 			
-			const modalElement = document.getElementById('exampleModal');
+			const modalElement = document.getElementById('mypageModal');
 			const modal = new bootstrap.Modal(modalElement);
 			const modalBody = modalElement.querySelector('.modal-body');
 			modalBody.innerHTML = '';
