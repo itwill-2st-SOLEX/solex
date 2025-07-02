@@ -158,11 +158,15 @@ public class ManagerService {
 				} else {
 					
 					//마지막 공정이면
-					//수주 디테일에 생산수량 업데이트
+					//수주 테이블에 업데이트				
 					stepInfo.put("wpoId", stepInfo.get("WPO_ID"));
 					stepInfo.put("oddModDate", LocalDateTime.now());	//변경일
 					
-					managerMapper.updateSujuDetail(stepInfo);
+					//수주 디테일에 작업완료로 상태 변경, 불량개수/생산량 업데이트
+					managerMapper.updateSujuDetail(stepInfo);	
+					
+					//수주 히스토리에 작업 완료 처리
+					managerMapper.insertSujuHistory(stepInfo);
 					System.out.println("끝!");
 				}
 		

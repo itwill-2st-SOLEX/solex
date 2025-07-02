@@ -5,11 +5,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("lot")
@@ -69,6 +74,7 @@ public class LotRestController {
 		return Collections.emptyList();
 	}
 	
+	// LOT 상세조회
 	@GetMapping("detail")
 	public Map<String, Object> getLotDetail(@RequestParam Map<String, String> param) {
 		
@@ -101,6 +107,15 @@ public class LotRestController {
 	    }
 
 	    return Collections.emptyMap();
+	}
+	
+	// ---------------- Insert ----------------
+	@PostMapping("/product/save")
+	public Map<String, Object> insertAllLotByOddId(@RequestBody Map<String, Object> param) {
+        Long oddId = Long.valueOf(param.get("oddId").toString());
+        lotService.insertLotCascade(oddId);
+        
+        return Map.of("success", true);
 	}
 
 

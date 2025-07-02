@@ -16,4 +16,57 @@
 		FROM product_option
 		where prd_id = #{itemId}
 	</select>
+
+	<!-- 출고 가능한 제품 옵션 -->
+	<select id="findAvailableProductOptionsByProductId" resultType="map">
+		SELECT
+			p.prd_id,
+			p.prd_nm,
+			po.opt_id,
+			po.opt_color,
+			po.opt_size,
+			po.opt_height,
+			cd2.det_nm AS opt_color_nm,
+			cd3.det_nm AS opt_size_nm,
+			cd4.det_nm AS opt_height_nm,
+			SUM(ad.are_det_qty) AS total_quantity
+		FROM
+			product p
+		LEFT JOIN
+			area a ON a.item_id = p.prd_id
+		LEFT JOIN
+			area_detail ad ON ad.are_id = a.are_id
+		LEFT JOIN
+			product_option po ON po.opt_id = ad.item_id -- 기존 opt 별칭을 po로 변경
+		LEFT JOIN
+			code_detail cd2 ON po.opt_color = cd2.det_id -- 컬러 코드 JOIN
+		LEFT JOIN
+			code_detail cd3 ON po.opt_size = cd3.det_id   -- 사이즈 코드 JOIN
+		LEFT JOIN
+			code_detail cd4 ON po.opt_height = cd4.det_id -- 높이 코드 JOIN
+		WHERE
+			p.prd_id = #{prd_id}
+			AND a.are_type = 'area_type_02'
+			AND ad.are_det_qty &gt; 0
+		GROUP BY
+			p.prd_id,
+			p.prd_nm,
+			po.opt_id,
+			po.opt_color,
+			po.opt_size,
+			po.opt_height,
+			cd2.det_nm,
+			cd3.det_nm,
+			cd4.det_nm
+		ORDER BY
+			po.opt_id
+	</select>
+
+
+	
+	
+	
+	
+	
+
 </mapper>

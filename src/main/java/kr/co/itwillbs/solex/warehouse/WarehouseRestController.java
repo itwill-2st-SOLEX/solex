@@ -33,6 +33,7 @@ public class WarehouseRestController {
 		System.out.println("page:" + page + "size: " + size);
     	
     	List<Map<String, Object>> listMap = warehouseService.getWarehouseList(offset, size);
+    	System.out.println(listMap);
     	return listMap;
     }
     
