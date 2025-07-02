@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.orderrequest;
+package kr.co.itwillbs.solex.shipments;
 
 import java.util.List;
 import java.util.Map;
@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class OrderRequestsService {
+public class ShipmentsService {
 
     @Autowired
-    private OrderRequestsMapper orderRequestsMapper;
+    private ShipmentsMapper orderRequestsMapper;
 	
 	public List<Map<String, Object>> getPagedGridDataAsMap(int page, int pageSize) {
 		int offset = page * pageSize;
@@ -45,9 +45,6 @@ public class OrderRequestsService {
 
         // 2. 파라미터로 넘겨줬던 Map에서 'result_code' 키로 결과를 꺼내 확인
         String resultCode = (String) params.get("result_code");
-
-        System.out.println("result_code: " + resultCode);
-
         // null 체크 추가
         // 3. 프로시저가 'SUCCESS'를 반환하지 않았다면 실패로 간주하고 예외 발생
         if (!"SUCCESS".equals(resultCode)) {
