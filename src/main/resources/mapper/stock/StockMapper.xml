@@ -11,7 +11,7 @@
                wh.whs_add AS adr,
                wh.whs_da AS da,
                wh.whs_add || ', ' || wh.whs_da AS full,
-               wh.whs_sts AS sts,
+               c.det_nm AS sts,
                COUNT(ar.are_id) AS cnt,
                emp.emp_nm || '(' || emp.emp_num || ')' as emp
 		FROM warehouse wh
@@ -19,8 +19,10 @@
 		ON ar.whs_id = wh.whs_id
 		LEFT  JOIN employee emp  
 		ON emp.emp_id = wh.emp_id
+		LEFT JOIN code_detail c
+		ON wh.whs_sts = c.det_id
 		GROUP BY
-			wh.whs_id, wh.whs_nm, wh.whs_pc, wh.whs_add, wh.whs_da, wh.whs_sts,
+			wh.whs_id, wh.whs_nm, wh.whs_pc, wh.whs_add, wh.whs_da, c.det_nm,
 			emp.emp_nm, emp.emp_num
 		ORDER BY wh.whs_id DESC
   		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY

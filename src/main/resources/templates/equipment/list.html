@@ -53,88 +53,88 @@
 
 	
 	<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	    <div class="modal-dialog modal-lg">
+	    <div class="modal-dialog modal-dialog-scrollable modal-lg">
 	        <div class="modal-content" id="modalContentContainer">
-	        	<div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">설비 등록</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <div class="row mb-3">
-                 <div class="col">
-			        <label for="CLI_NM" class="form-label">제조사</label>
-			        <div>
-			            <select class="form-select" id="CLI_NM" aria-label="Default select example">
-							<option selected="">-제조사를 선택해주세요-</option>
-						  </select>
-			        </div>
-			    </div>
-                <div class="col">
-			        <label for="PRC_NM" class="form-label">공정</label>
-			        <div>
-			            <select class="form-select" id="PRC_NM" aria-label="Default select example">
-							<option selected="">-공정을 선택해주세요-</option>
-						</select>
-			        </div>
-			    </div>
-            </div>
-			<div class="row mb-3">
-				<div class="col">
-		            <label for="TEAM_NAME" class="form-label">팀</label>
-		            <div>
-						<select class="form-select" id="TEAM_NAME" aria-label="Default select example">
-							<option selected="">-팀을 선택해주세요-</option>
-						</select>
-		            </div>
-				</div>
-				<div class="col">
-		            <label for="EQP_STS" class="form-label">설비 상태</label>
-		            <div>
-			            <select class="form-select" id="EQP_STS" aria-label="Default select example">
-							<option value="">-설비 상태를 선택해주세요-</option>
-							<option value="n">비활성화</option>
-							<option value="y">활성화</option>
-						</select>
-			        </div>
-				</div>
-	        </div>
-			<div class="row mb-3">
-				<div class="col">
-					<label for="EQP_NAME" class="form-label">설비 명</label>
-					<div class="d-flex align-items-center">
-						<input type="text" id="EQP_NAME" name="EQP_NAME" placeholder="설비 명을 입력해주세요." class="form-control" value="">
+	            <div class="modal-header" style="border-bottom: 1px solid black;">
+	                <h5 class="modal-title" id="exampleModalLabel">설비 등록</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	            </div>
+	            <div class="modal-body">
+					<div class="row mb-3">
+						<div class="col">
+							<label for="CLI_NM" class="form-label">제조사</label>
+							<div>
+								<select class="form-select" id="CLI_NM" aria-label="Default select example">
+									<option selected="">-제조사를 선택해주세요-</option>
+								</select>
+							</div>
+						</div>
+						<div class="col">
+							<label for="PRC_NM" class="form-label">공정</label>
+							<div>
+								<select class="form-select" id="PRC_NM" aria-label="Default select example">
+									<option selected="">-공정을 선택해주세요-</option>
+								</select>
+							</div>
+						</div>
 					</div>
-				</div>
-				<div class="col">
-					<label for="EQP_PRICE" class="form-label">설비 가격</label>
-					<div class="d-flex align-items-center">
-						<input type="text" id="EQP_PRICE" name="EQP_PRICE" placeholder="설비 가격을 입력해주세요." class="form-control" value="">	
+					<div class="row mb-3">
+						<div class="col">
+							<label for="TEAM_NAME" class="form-label">팀</label>
+							<div>
+								<select class="form-select" id="TEAM_NAME" aria-label="Default select example">
+									<option selected="">-팀을 선택해주세요-</option>
+								</select>
+							</div>
+						</div>
+						<div class="col">
+							<label for="EQP_STS" class="form-label">설비 상태</label>
+							<div>
+								<select class="form-select" id="EQP_STS" aria-label="Default select example">
+									<option value="">-설비 상태를 선택해주세요-</option>
+									<option value="n">비활성화</option>
+									<option value="y">활성화</option>
+								</select>
+							</div>
+						</div>
 					</div>
-				</div>
-			</div>
-			<div class="row mb-3">
-				<div class="col">
-		            <label for="EQP_PURCHASE_DATE" class="form-label">구입일</label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" id="EQP_PURCHASE_DATE">
-		            </div>
-				</div>
-				<div class="col">
-		            <label for="EQP_INSTALLATION_DATE" class="form-label">설치일</label>
-		            <div class="d-flex align-items-center">
-		                <input class="form-control" type="date" id="EQP_INSTALLATION_DATE">
-		            </div>
-				</div>
-	        </div>
+					<div class="row mb-3">
+						<div class="col">
+							<label for="EQP_NAME" class="form-label">설비 명</label>
+							<div class="d-flex align-items-center">
+								<input type="text" id="EQP_NAME" name="EQP_NAME" placeholder="설비 명을 입력해주세요." class="form-control" value="">
+							</div>
+						</div>
+						<div class="col">
+							<label for="EQP_PRICE" class="form-label">설비 가격</label>
+							<div class="d-flex align-items-center">
+								<input type="text" id="EQP_PRICE" name="EQP_PRICE" placeholder="설비 가격을 입력해주세요." class="form-control" value="">	
+							</div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label for="EQP_PURCHASE_DATE" class="form-label">구입일</label>
+							<div class="d-flex align-items-center">
+								<input class="form-control" type="date" id="EQP_PURCHASE_DATE">
+							</div>
+						</div>
+						<div class="col">
+							<label for="EQP_INSTALLATION_DATE" class="form-label">설치일</label>
+							<div class="d-flex align-items-center">
+								<input class="form-control" type="date" id="EQP_INSTALLATION_DATE">
+							</div>
+						</div>
+					</div>
 
-            <div class="mb-3">	
-				<label for="EQP_COMM" class="form-label">설비 설명</label>
-				<textarea class="form-control" id="EQP_COMM" name="EQP_COMM" rows="5"></textarea>
-			</div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="submitBtn">등록</button>
-        </div>
+					<div class="mb-3">	
+						<label for="EQP_COMM" class="form-label">설비 설명</label>
+						<textarea class="form-control" id="EQP_COMM" name="EQP_COMM" rows="5"></textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="submitBtn">등록</button>
+				</div>
 	        </div>
 	    </div>
 	</div>
