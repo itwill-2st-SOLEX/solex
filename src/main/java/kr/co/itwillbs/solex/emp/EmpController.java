@@ -28,7 +28,6 @@ public class EmpController {
 
 
 		List<Map<String, Object>> empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
-//		empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
 
 		model.addAttribute("empList", empList);
 		model.addAttribute("includeEmpSts", includeEmpSts); // 체크박스 유지용

@@ -18,6 +18,7 @@
 			mat_lmd_date as "matLmdDate",
 			mat_comm as "matComm"
 		FROM material_orders
+		ORDER BY mat_ord_id
 	</select>
 	
 	<select id="getMaterialOrderList" resultType="map">
@@ -32,6 +33,7 @@
 			TO_CHAR(mat_lmd_date, 'yyyy-MM-dd') as "matLmdDate",
 			mat_comm as "matComm"
 		FROM material_orders
+		ORDER BY mat_ord_id
 	</select>
 	
 <!-- 	자재발주 등록 -->
@@ -108,4 +110,16 @@
 			#{whs_his_cnt}
 		)
 	</insert>
+	
+	<update id="updateApproval" parameterType="map">
+		UPDATE material_orders
+		SET mat_ord_sts = 'mat_ord_sts_01'
+		WHERE mat_ord_id = #{mat_ord_id}
+	</update>
+	
+	<update id="updateDeny" parameterType="map">
+		UPDATE material_orders
+		SET mat_ord_sts = 'mat_ord_sts_02'
+		WHERE mat_ord_id = #{mat_ord_id}
+	</update>
 </mapper>

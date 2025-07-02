@@ -36,6 +36,10 @@ public interface MaterialOrdersMapper {
 
 	// 승인버튼 누르면 insert - 선입선출 StockLeger
 	int matAppStockLeger(Map<String, Object> map);
+
+	void updateApproval(Map<String, Object> map);
+	
+	void updateDeny(Map<String, Object> map);
 	
 	
 }

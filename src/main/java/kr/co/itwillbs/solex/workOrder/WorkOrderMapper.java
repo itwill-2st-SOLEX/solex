@@ -14,7 +14,7 @@ public interface WorkOrderMapper {
 	// 해당 제품코드 등록 모달 조회
 	List<Map<String, Object>> ProcessTeam(String prdCd);
 	// 작업지시 등록
-	void workOrderInsert(Map<String, Object> prdInfo);
+	void workOrderInsert(@Param("prdInfo") Map<String, Object> prdInfo, @Param("empId") String empId);
 	void workProcessInsert(Map<String, Object> prdInfo);
 	// 주문테이블 상태값 업테이트
 	void updateSujuOrderSts(String oddId);
