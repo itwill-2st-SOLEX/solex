@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.security;
+package kr.co.itwillbs.solex.login;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +32,6 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     String empId = authentication.getName();
                     request.getSession().setAttribute("empId", empId);
-                    System.out.println("empId" + empId);
 
                     response.sendRedirect("/SOLEX");
                 })

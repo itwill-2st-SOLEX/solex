@@ -5,8 +5,6 @@ $(function() {
 	recentFinishedList();
 	// 페이지 맨 위 3개 요약카드
 	dashboardSummary();
-	// ✅ 숫자 지표 카드 설정
-	$('#defectRate').text('2.29%');
 
 	// 인기 품목 도넛차트
 	let today = new Date();
@@ -78,12 +76,41 @@ async function dashboardSummary() {
 		document.getElementById('monthRate').textContent =
 			monthRate === null ? '–' : `${monthRate > 0 ? '+' : ''}${monthRate}%`;
 
-		//		document.getElementById('defectRate').textContent = (data.defectRate ?? 0) + '%';
-		//		document.getElementById('defectRateTrend').textContent = formatRate(data.defectRateTrend);
+		document.getElementById('defectRate').textContent = (data.defectCnt ?? 0) + '%';
 	} catch (err) {
 		console.error('🚨 요약 카드 데이터 불러오기 실패:', err);
 	}
 }
+
+// 상품별 3개 요약 카드
+async function updateSummaryCards(prdCode, prdNm) {
+	try {
+		const response = await fetch(`/SOLEX/dashboard/summary/${prdCode}`);
+		if (!response.ok) throw new Error('서버 응답 실패');
+
+		const data = await response.json();
+debugger;
+		// 텍스트 라벨 동적 변경
+		document.getElementById('yesterdayLabel').textContent = `${prdNm} 전일 생산량`;
+		document.getElementById('monthLabel').textContent = `${prdNm} 당월 누적 생산`;
+		document.getElementById('defectLabel').textContent = `${prdNm} 당월 불량률`;
+
+		// 값 세팅
+		document.getElementById('yesterdayCount').textContent = (data.yesterCnt ?? 0).toLocaleString();
+		document.getElementById('yesterdayRate').textContent =
+			data.yesterRate === null ? '–' : `${data.yesterRate > 0 ? '+' : ''}${data.yesterRate}%`;
+
+		document.getElementById('monthCount').textContent = (data.monthCnt ?? 0).toLocaleString();
+		document.getElementById('monthRate').textContent = 
+			data.monthRate === null ? '–' : `${data.monthRate > 0 ? '+' : ''}${data.monthRate}%`;
+
+		document.getElementById('defectRate').textContent = (data.defectCnt ?? 0) + '%';
+		debugger;
+	} catch (err) {
+		console.error('📊 요약 카드(상품별) 로딩 실패:', err);
+	}
+}
+
 // 생산량 추이 그래프
 async function fetchLineChartData(type, prdCode = null, prdNm = null) {
 	const url = new URL('/SOLEX/dashboard/productions/trend', window.location.origin);
@@ -95,7 +122,6 @@ async function fetchLineChartData(type, prdCode = null, prdNm = null) {
 		const response = await fetch(url);
 		if (!response.ok) throw new Error('서버 응답 실패');
 		const json = await response.json();
-		debugger;
 
 		let labels = json.map(item => item.LABEL);
 		let data = json.map(item => item.TOTAL_CNT);
@@ -103,7 +129,7 @@ async function fetchLineChartData(type, prdCode = null, prdNm = null) {
 		return {
 			labels: labels,
 			datasets: [{
-				label: prdNm ? `${prdNm } 생산량` : '전체 생산량',
+				label: prdNm ? `${prdNm} 생산량` : '전체 생산량',
 				data: data,
 				borderColor: '#4e73df',
 				backgroundColor: '#4e73df',
@@ -149,11 +175,13 @@ async function recentFinishedList() {
 			li.className = 'prd-card';
 			li.innerHTML = `
 		    <strong>${item.PRD_NM}, ${item.PRD_COLOR} ${item.PRD_SIZE} ${item.PRD_HEIGHT}cm</strong>
-		    <span class="time">${item.ORD_MOD_DATE} ${item.ODD_STS}</span>
+		    <span class="time">${item.ODD_MOD_DATE} ${item.ODD_STS}</span>
 		  `;
 			// 해당 제품의 PRD_CODE로 데이터 갱신
 			li.addEventListener('click', () => {
-				updateLineChart('monthly', item.PRD_CODE, item.PRD_NM);
+				let activeType = $('.toggle-btn.active').data('type') || 'monthly';
+				updateLineChart(activeType, item.PRD_CODE, item.PRD_NM);
+				updateSummaryCards(item.PRD_CODE, item.PRD_NM);
 			});
 
 			container.appendChild(li);
@@ -233,8 +261,8 @@ async function renderDonutChart(startDate, endDate) {
 		}
 
 		// 데이터 있을 때
-		const labels = data.map(item => `${item.PRD_NM}\n(${item.PRD_CODE})`);
-		const values = data.map(item => item.ORDER_COUNT);
+		let labels = data.map(item => `${item.PRD_NM}\n(${item.PRD_CODE})`);
+		let values = data.map(item => item.ORDER_COUNT);
 
 		if (donutChart) donutChart.destroy();
 
