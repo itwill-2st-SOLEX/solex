@@ -79,6 +79,7 @@
 	<!-- 최상위 LOT 상세조회 -->
 	<select id="selectProductLotDetail" parameterType="long" resultType="map">
 	    SELECT
+	    	DISTINCT
 	        pl.prd_lot_code AS "lotCode",
 	        e.emp_nm AS "orderName",
 	        e.emp_num AS "orderNum",
@@ -227,8 +228,10 @@
     <select id="selectWorkOrdersByOddId" parameterType="long" resultType="map">
         SELECT	wo.wrk_id as "wrk_id",
         		wo.prc_id as "prc_id",
-        		wo.wrk_ord_empId AS "wrk_ord_empId"
+        		wo.wrk_ord_empId AS "wrk_ord_empId",
+        		wpo.wpo_team AS "wpo_team"
         FROM work_order wo
+        JOIN work_process wpo ON wo.wrk_id = wpo.wrk_id
         WHERE wo.odd_id = #{oddId}
     </select>
 
@@ -246,14 +249,43 @@
         ) VALUES (
             #{prdLotId},
             #{prc_id},
-            (SELECT emp_nm FROM employee WHERE emp_id = #{wrk_ord_empId}),
-            (SELECT emp_num FROM employee WHERE emp_id = #{wrk_ord_empId}),
+	        (SELECT emp.emp_nm	-- ✅ 공정장의 이름
+	         FROM work_order wo
+	         JOIN process prc ON wo.prc_id = prc.prc_id
+	         JOIN employee emp
+	              ON emp.emp_dep_cd = prc.det_id
+	             AND emp.emp_team_cd = #{wpo_team}
+	             AND emp.emp_pos_cd = 'pos_04'
+	         WHERE wo.wrk_id = #{wrk_id}
+	           AND ROWNUM = 1),
+	        (SELECT emp.emp_num	-- ✅ 공정장의 사번
+	         FROM work_order wo
+	         JOIN process prc ON wo.prc_id = prc.prc_id
+	         JOIN employee emp
+	              ON emp.emp_dep_cd = prc.det_id
+	             AND emp.emp_team_cd = #{wpo_team}
+	             AND emp.emp_pos_cd = 'pos_04'
+	         WHERE wo.wrk_id = #{wrk_id}
+	           AND ROWNUM = 1),
             NULL,
             NULL,
-            NULL,
-            NULL
+            (SELECT wpo_status FROM work_process wp WHERE wp.wrk_id = #{wrk_id} AND ROWNUM = 1),	-- work_process.wpo_status (공정진행상태)
+	        (SELECT  eqp.eqp_id
+			FROM    equipment eqp
+			JOIN    process prc ON eqp.prc_id = #{prc_id}
+			JOIN    employee emp ON emp.emp_team_cd = eqp.emp_team
+			WHERE   prc.det_id = emp.emp_dep_cd
+			AND		prc.prc_id = #{prc_id})
         )
     </insert>
+    
+    <!-- ✅ prc_lot_id 조회 -->
+    <select id="selectPrcLotId" parameterType="map" resultType="long">
+        SELECT prc_lot_id
+        FROM process_lot
+        WHERE prd_lot_id = #{prdLotId} AND prc_id = #{prc_id}
+        ORDER BY prc_lot_id DESC FETCH FIRST 1 ROWS ONLY
+    </select>
 
     <!-- ✅ prdLot_processLot_mapping insert -->
     <insert id="insertProductProcessMapping" parameterType="map">

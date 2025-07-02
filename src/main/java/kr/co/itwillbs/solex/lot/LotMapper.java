@@ -48,7 +48,9 @@ public interface LotMapper {
     List<Map<String, Object>> selectWorkOrdersByOddId(@Param("oddId") Long oddId);
     // 5. process_lot insert
     void insertProcessLot(Map<String, Object> param);
-    // // 6. 매핑 insert
+    // 6. insert 이후 prc_lot_id 조회
+    Long selectPrcLotId(Map<String, Object> param);
+    // 7. 매핑 insert
     void insertProductProcessMapping(Map<String, Object> param);
 
 }

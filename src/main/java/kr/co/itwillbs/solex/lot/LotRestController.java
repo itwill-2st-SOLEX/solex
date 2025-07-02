@@ -79,7 +79,6 @@ public class LotRestController {
 	public Map<String, Object> getLotDetail(@RequestParam Map<String, String> param) {
 		
 		String id = param.get("id");
-		
 	    if (id == null) return Collections.emptyMap();
 
 	    // ✅ 공정 항목

@@ -154,21 +154,25 @@ public class LotService {
         
         // 3. insert 이후 prd_lot_id 조회
         Long prdLotId = lotMapper.selectPrdLotId(lotInfo);
-        System.out.println("prdLotId : " + prdLotId);
+        System.out.println("생성된 prdLotId : " + prdLotId);
         if (prdLotId == null) return;
 
         // 4. 작업지시 리스트 조회
         List<Map<String, Object>> workOrders = lotMapper.selectWorkOrdersByOddId(oddId);
-        System.out.println("workOrders : " + workOrders);
+        System.out.println("조회한 작업지시 리스트 : " + workOrders);
 
         for (Map<String, Object> wrk : workOrders) {
             wrk.put("prdLotId", prdLotId);
-            System.out.println("wrk : " + wrk);
+            System.out.println("작업지시(반복) : " + wrk);
             // 5. process_lot insert
             lotMapper.insertProcessLot(wrk);
-            Long prcLotId = Long.valueOf(wrk.get("prcLotId").toString());
+            
+            // 6. insert 이후 prc_lot_id 조회
+            Long prcLotId = lotMapper.selectPrcLotId(wrk);
+            System.out.println("생성된 prcLotId : " + prcLotId);
+            if (prcLotId == null) continue;
 
-            // 6. 매핑 insert
+            // 7. 매핑 insert
             Map<String, Object> mapping = new HashMap<>();
             mapping.put("prdLotId", prdLotId);
             mapping.put("prcLotId", prcLotId);
