@@ -18,4 +18,9 @@ public class EquipmentHistoryService {
 		
 		return lm;
 	}
+
+	public List<Map<String, Object>> getEquipmentHistoryDetail(String eqpId) {
+		Long eqpIdLong = Long.valueOf(eqpId);
+		return equipmentHistoryMapper.getEquipmentHistoryDetail(eqpIdLong);
+	}
 }

@@ -100,14 +100,15 @@
 	
 <!-- 	승인 버튼 누르면 update - stock_ledger -->
 	<insert id="matAppStockLeger">
-		INSERT INTO stock_ledger(item_id, warehouse_id, are_id, inbound_at, initial_cnt, remaining_cnt)
+		INSERT INTO stock_ledger(item_id, warehouse_id, are_id, inbound_at, initial_cnt, remaining_cnt,stk_cat)
 		VALUES (
 			#{mat_id},
 			#{whs_id},
 			#{are_id},
 			SYSDATE,
 			#{whs_his_cnt},
-			#{whs_his_cnt}
+			#{whs_his_cnt},
+			'stock_cat_02'
 		)
 	</insert>
 	
