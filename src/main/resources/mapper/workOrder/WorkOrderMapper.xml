@@ -142,13 +142,15 @@
 								  are_id,
 								  inbound_at,
 								  initial_cnt,
-								  remaining_cnt
+								  remaining_cnt,
+								  stk_cat
 		) values (#{optId},
 				  #{warehouseId},
 				  #{areaId},
 				  SYSDATE + (9/24),
 				  #{assignQty}, 
-				  #{assignQty}
+				  #{assignQty},
+				  'stock_cat_01'
 		)
 	</insert>
 <!-- 	구역 테이블 -->
