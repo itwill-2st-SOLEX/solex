@@ -27,14 +27,14 @@ public class WorkOrderService {
 	@Transactional
 	public void workOrderInsert(List<Map<String, Object>> prdInfo, String empId) {
 		 for (Map<String, Object> item : prdInfo) {
-//	        mapper.workOrderInsert(item, empId);
+	        mapper.workOrderInsert(item, empId);
 	        Integer wrkId = (Integer) item.get("wrk_id");
 	        item.put("wrk_id", wrkId);
-//	        mapper.workProcessInsert(item);
+	        mapper.workProcessInsert(item);
 	    }
 		// 주문테이블, 주문 디테일테이블 상태값 업테이트
 		String oddId = (String) prdInfo.get(0).get("oddId");
-//		mapper.updateSujuOrderSts(oddId);
+		mapper.updateSujuOrderSts(oddId);
 	}
 	
 	// 창고 조회
