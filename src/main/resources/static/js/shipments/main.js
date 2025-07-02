@@ -36,19 +36,57 @@ function createInnerGrid() {
   if (!gridContainer) return;
   gridContainer.innerHTML = '';
   INNER_TUI_GRID_INSTANCE = new tui.Grid({
-      el: gridContainer, rowHeaders: ['checkbox'], bodyHeight: 200, scrollX: false,
+      el: gridContainer, rowHeaders: ['checkbox'], bodyHeight: 178, scrollX: false,
       // 크기 자동 조정
       columns: [
-          { header: '상품명', name: 'productName', minWidth: 194, align: 'center' },
-          { header: '색상', name: 'colorName', minWidth: 194, align: 'center' },
-          { header: '사이즈', name: 'sizeName', minWidth: 194, align: 'center' },
-          { header: '굽높이', name: 'heightName', minWidth: 194, align: 'center' },
-          { header: '수량', name: 'quantity', editor: 'text', minWidth: 192, align: 'right' },
+          { header: '상품명', name: 'productName', minWidth: 197, align: 'center' },
+          { header: '색상', name: 'colorName', minWidth: 197, align: 'center' },
+          { header: '사이즈', name: 'sizeName', minWidth: 197, align: 'center' },
+          { header: '굽높이', name: 'heightName', minWidth: 197, align: 'center' },
+          { header: '수량', name: 'quantity', editor: 'text', minWidth: 197, align: 'right' },
           { name: 'productCode', hidden: true }, { name: 'colorCode', hidden: true },
           { name: 'sizeCode', hidden: true }, { name: 'heightCode', hidden: true },
       ],
   });
 }
+
+function formatWithCommaAndCaret(input) {
+  const originalValue = input.value;
+  const cursorStart = input.selectionStart;
+
+  // 1. 현재 커서 위치 왼쪽에 있는 "숫자"의 개수를 센다 (이것이 기준점).
+  const digitsBeforeCursor = originalValue.substring(0, cursorStart).replace(/[^\d]/g, '').length;
+
+  // 2. 입력값에서 숫자만 추출한다.
+  const numericValue = originalValue.replace(/[^\d]/g, '');
+
+  if (numericValue === '') {
+    input.value = '';
+    return;
+  }
+
+  // 3. 쉼표(,) 포맷을 적용한다.
+  const formattedValue = Number(numericValue).toLocaleString('ko-KR');
+  input.value = formattedValue;
+
+  // 4. 새로운 커서 위치를 찾는다.
+  // 포맷팅된 값에서 아까 세어둔 '숫자 개수'만큼 이동한 위치를 찾으면 된다.
+  let newCursorPos = 0;
+  let digitCount = 0;
+  for (const char of formattedValue) {
+    if (digitCount === digitsBeforeCursor) {
+      break; // 숫자 개수가 일치하면 바로 그 위치가 새로운 커서 위치.
+    }
+    newCursorPos++;
+    if (/\d/.test(char)) {
+      digitCount++;
+    }
+  }
+
+  // 5. 계산된 위치에 커서를 설정한다.
+  input.setSelectionRange(newCursorPos, newCursorPos);
+}
+
 
 
 // 3. DOM 로드 후 실행될 코드
@@ -57,7 +95,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("openPurchaseModalBtn").addEventListener("click", openPurchaseModal);
   document.getElementById("findPostCodeBtn").addEventListener("click", findPostCode);
   document.getElementById("addSelectedStockBtn").addEventListener("click", addRowToInnerGrid);
-
+  document.getElementById("deleteSelectedRowsBtn").addEventListener("click", deleteSelectedRows);
+  // 수량 입력시 포맷팅
+  document.getElementById("ord_pay").addEventListener("input", function (e) {
+    if (e.isComposing) {
+      return;
+    }
+    formatWithCommaAndCaret(e.target);
+  });
   setupInteractiveList("shippableOptionsList");
 
   // 초기 그리드 데이터 로드 (페이지 로드 시)
@@ -160,6 +205,19 @@ async function fetchGridData(page = currentPage) {
   }
 }
 
+function initDate() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  ['ord_end_date', 'ord_pay_date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = todayStr;
+      // 선택 가능한 가장 빠른 날짜를 오늘로 설정합니다. (이전 날짜 비활성화)
+      el.min = todayStr;
+    }
+  });
+}
+
+// 검색 가능한 select
 function initializeSearchableSelect(wrapperId, apiUrl) {
   const wrapper = document.getElementById(wrapperId);
   // 중복으로 이벤트 리스너가 등록되는 것을 방지하는 가드(Guard)
@@ -264,6 +322,7 @@ function initializeSearchableSelect(wrapperId, apiUrl) {
 async function openPurchaseModal() {
   initializeSearchableSelect("client-select-box", "/SOLEX/orders/clients");
   initializeSearchableSelect("product-select-box", "/SOLEX/orders/products");
+  initDate();
 
   const oldBtn = document.getElementById("submitBtn");
   // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
@@ -304,6 +363,7 @@ async function fetchSelectData(url, keyword = "") {
     return [];
   }
 }
+
 
 // 옵션 데이터 가져오기
 async function getProductOptionsData(value) {
@@ -423,6 +483,12 @@ function setupInteractiveList(containerId) {
           checkbox.checked = !checkbox.checked;
       }
   });
+}
+
+function deleteSelectedRows() {
+  const checkedKeys = INNER_TUI_GRID_INSTANCE.getCheckedRowKeys();
+  console.log(INNER_TUI_GRID_INSTANCE);
+  INNER_TUI_GRID_INSTANCE.removeRows(checkedKeys);
 }
 
 

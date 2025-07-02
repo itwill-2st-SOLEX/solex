@@ -46,7 +46,7 @@
 	<div class="modal fade" id="myModal" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-scrollable modal-xl">
 			<div class="modal-content">
-				<div class="modal-header">
+				<div class="modal-header" style="border-bottom: 1px solid black;">
 					<h5 class="modal-title" id="myModalTitle">출고 등록</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
@@ -120,21 +120,21 @@
 									</div>
 									<div class="d-flex mt-2 gap-2">
 										<button type="button" id="addSelectedStockBtn" class="btn custom-btn-blue w-100" data-action="add">선택 항목 추가</button>
-										<button type="button" onclick="resetOptionForms()" class="btn btn-light w-100" data-action="reset">초기화</button>
+										<button type="button" onclick="resetOptionForms()" class="btn btn-light w-100" data-action="reset">제품 초기화</button>
 									</div>
 								</div>
 							</div>
 				
-							<div class="d-flex justify-content-end mt-4 mb-2">
+							<div class="d-flex justify-content-end mt-2 mb-3">
 								<button type="button" class="btn btn-danger" id="deleteSelectedRowsBtn">선택 항목 삭제</button>
 							</div>
-							<div id="innerGrid"></div>
+							<div id="innerGrid" style="height: 217px;"></div>
 						</div>
 					</div>
 				</div>
-				<div class="modal-footer">
+				<div class="modal-footer" style="margin-right: 1.6rem;">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-					<button type="button" class="btn btn-primary" id="submitBtn">등록</button>
+					<button type="button" class="btn custom-btn-blue" id="submitBtn">등록</button>
 				</div>
 			</div>
 		</div>

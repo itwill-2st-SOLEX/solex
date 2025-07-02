@@ -133,12 +133,12 @@
 	
 	<!-- 주문 상세 상태 변경 -->
 	<update id="updateOrderStatus" parameterType="Map">
-		update suju_order_detail
-		set odd_sts = 'odd_sts_02'
-		set odd_mod_date = sysdate + 9/244
-		set odd_isapproval = 'y'
-		where odd_id = #{odd_id}
-	</update>
+    update suju_order_detail
+       set odd_sts = 'odd_sts_02',
+           odd_mod_date = sysdate + 9/24,
+           odd_isapproval = 'y'
+     where odd_id = #{odd_id}
+</update>
 	<!-- 승인 로직 -->
 
 
