@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.products;
 
+import java.lang.System.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,8 +30,6 @@ public class ProductsRestController {
 	
 	@Autowired
 	private ProductsService productsService;
-	@Autowired
-	private BomsService bomsService;
 	@Autowired
 	private ProcessService processService;
 
@@ -147,13 +146,14 @@ public class ProductsRestController {
     }
     // prd_code 겹치는지 확인
     @GetMapping("/checkPrdCode")
-    public ResponseEntity<Map<String, Boolean>> checkDuplicateCode(@RequestParam String prdCode) {
-        boolean isDuplicate = productsService.isPrdCodeDuplicate(prdCode);
-        Map<String, Boolean> response = new HashMap<>();
+	public ResponseEntity<Map<String, Object>> checkPrdCode(@RequestParam("prdCode") String prdCode) {
+		int isDuplicate = productsService.isPrdCodeDuplicate(prdCode); // 이 라인에서 에러가 날 가능성
+
+        Map<String, Object> response = new HashMap<>();
         response.put("isDuplicate", isDuplicate);
+
+        System.out.println("checkPrdCode 결과: " + isDuplicate); // 결과도 출력
         return ResponseEntity.ok(response);
-    }
-    
-	
-	
+
+	}
 }

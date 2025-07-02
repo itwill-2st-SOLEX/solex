@@ -100,7 +100,7 @@ public class ProductsService {
 		return productsMapper.selectOptionTotalCount(prdId);
 	}
 
-	public boolean isPrdCodeDuplicate(String prdCode) {
+	public int isPrdCodeDuplicate(String prdCode) {
         return productsMapper.existsByPrdCode(prdCode); 
     }
 }

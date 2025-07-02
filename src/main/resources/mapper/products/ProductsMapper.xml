@@ -186,7 +186,7 @@
 	       AND opt_height = #{opt_height}
 	</select>
 	
-    <select id="countProductCode" parameterType="String" resultType="int">
+    <select id="existsByPrdCode" resultType="int">
        SELECT COUNT(*)
        FROM PRODUCT
        WHERE PRD_CODE = #{prdCode}
