@@ -121,63 +121,107 @@ document.addEventListener('DOMContentLoaded', function(){
 			const form = document.createElement('form');
 			form.id = 'joinForm'
 			
+			modalTitle.textContent = '자재 발주 등록';
 			
 			form.innerHTML = `
 				<div class="modal-body big-box">
-				  				<div class="row mb-3">
-				  					<div class="col">
-									  <label>사진</label>
-									  <input type="file" class="form-control d-inline-block w-25" name="emp_img" required><br>
-									  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
-								   </div>	
-								   <div class="col">
-				`
-			// ===== 사진 =====
-			let div0 = document.createElement('div');
-			div0.className = 'mb-3';
-			div0.innerHTML = `
-			`;
-			form.appendChild(div0);
+					<div class="row mb-3">
+						<div class="col">
+							<label>사원번호</label>
+							<div><input type="text" class="form-control" name="emp_nm" required></div>
+						</div>	
+						<div class="col">
+							<label>이름</label>
+							<div><input type="text" class="form-control" name="emp_nm" required></div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>성별</label>
+							<div>
+								<label id="gender"><input type="radio" name="emp_gd" value="M" checked> 남</label>
+								<label id="gender"><input type="radio" name="emp_gd" value="W"> 여</label><br>
+							</div>
+						</div>
+						<div class="col">
+							<label>생년월일</label>
+							<div><input type="text"class="form-control" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="ex)990101" required></div>
+							<div><input type="hidden" name="emp_pw" id="emp_pw"></div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>연락처</label>
+							<div>
+								<input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
+								<input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
+								<input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required><br>
+								<input type="hidden" name="emp_phone" id="emp_phone">
+							</div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>이메일</label>
+							<div>
+								<input type="text" id="emp_email1" class="form-control d-inline-block w-25" required> @
+								<input type="text" id="emp_email2" class="form-control d-inline-block w-25" required><br>
+								<input type="hidden" name="emp_email" id="emp_email">
+							</div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>직급</label>
+								<select name="empPosCd" id="empPosCd" class="form-control">
+									<option value="">-- 직급을 선택하세요 --</option>
+								</select>
+						</div>
+						<div class="col">
+							<label>사원</label>
+								<select name="empCatCd" id="empCatCd" class="form-control">
+									<option value="">-- 사원을 선택하세요 --</option>
+								</select>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>부서</label>
+								<select name="empDepCd" id="empDepCd" class="form-control">
+									<option value="">-- 부서를 선택하세요 --</option>
+								</select>
+						</div>
+						<div class="col">
+							<label>팀</label>
+								<select name="empTeamCd" id="empTeamCd" class="form-control">
+									<option value="">-- 팀을 선택하세요 --</option>
+								</select>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+						<label>주소</label><br>
+								  <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
+								  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+								  <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
+								  <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control" placeholder="상세주소" required>
+								  <input type="text" id="sample6_extraAddress" class="form-control" placeholder="참고항목">
+						</div>
+					</div>
+	
+	
+	
+	
+					<div class="modal-footer">
+						<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+						<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
+						<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
+					</div>
+				</div>
+					
+								   
+				`			
 			
-
-			// ===== 이름 =====
-			let div2 = document.createElement('div');
-			div2.className = 'mb-3';
-			div2.innerHTML = `
-			  <label>이름</label>
-			  <input type="text" class="form-control d-inline-block w-25" name="emp_nm" required><br>
-			`;
-			form.appendChild(div2);
-
-			// ===== 입사일 =====
-			let div3 = document.createElement('div');
-			div3.className = 'mb-3';
-			div3.innerHTML = `
-			  <label>입사일</label>
-			  <input type="date" class="form-control d-inline-block w-25" name="emp_hire" style="${empData ? 'display:none;' : ''}" required><br>
-			`;
-			form.appendChild(div3);
-
-			// ===== 성별 =====
-			let div4 = document.createElement('div');
-			div4.className = 'mb-3';
-			div4.innerHTML = `
-			  <label>성별</label>
-			  <label><input type="radio" name="emp_gd" value="M" checked> 남</label>
-			  <label><input type="radio" name="emp_gd" value="W"> 여</label><br>
-			`;
-			form.appendChild(div4);
-
-
-			// ===== 생년월일 =====
-			let div5 = document.createElement('div');
-			div5.className = 'mb-3';
-			div5.innerHTML = `
-			  <label>생년월일</label>
-			  <input type="text" class="form-control d-inline-block w-25" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="ex)990101" required>
-			  <input type="hidden" name="emp_pw" id="emp_pw"><br>
-			`;
-			form.appendChild(div5);
 
 			// ===== 분류, 부서, 직급, 팀 (코드 리스트는 서버에서 전달 필요) =====
 			let inlineDiv = document.createElement('div');
@@ -210,55 +254,6 @@ document.addEventListener('DOMContentLoaded', function(){
 			
 
 			// ===== 연락처 =====
-
-			let div6 = document.createElement('div');
-
-			div6.className = 'mb-3';
-
-			div6.innerHTML = `
-			  <label>연락처</label>
-			  <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
-			  <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
-			  <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required><br>
-			  <input type="hidden" name="emp_phone" id="emp_phone">
-			`;
-
-			form.appendChild(div6);
-
-			
-
-			// ===== 이메일 =====
-
-			let div7 = document.createElement('div');
-
-			div7.className = 'mb-3';
-
-			div7.innerHTML = `
-			  <label>이메일</label>
-			  <input type="text" id="emp_email1" class="form-control d-inline-block w-25" required> @
-			  <input type="text" id="emp_email2" class="form-control d-inline-block w-25" required><br>
-			  <input type="hidden" name="emp_email" id="emp_email">
-			`;
-
-			form.appendChild(div7);
-
-			
-			// ===== 주소 =====
-
-			let div8 = document.createElement('div');
-
-			div8.className = 'mb-3';
-
-			div8.innerHTML = `
-			  <label>주소</label><br>
-			  <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
-			  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-			  <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
-			  <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1" placeholder="상세주소" required>
-			  <input type="text" id="sample6_extraAddress" placeholder="참고항목">
-			`;
-
-			form.appendChild(div8);
 
 			// ===== 버튼 =====
 
