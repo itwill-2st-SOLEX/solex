@@ -63,12 +63,14 @@
 								prc_id,
 			    				odd_id,
 			    				prd_cd,
-			    				wrk_ord_date
+			    				wrk_ord_date,
+			    				wrk_ord_empid
 		) VALUES (#{wrk_id},
 				  #{prcId},         -- 공정id
 			      #{oddId},			-- 주문 id
 			      #{prdCd},         -- 주문 cd
-			      SYSDATE + 9/24  -- 작업 지시일
+			      SYSDATE + 9/24,  -- 작업 지시일
+				  #{empId}
 		)
 	</insert>
 <!-- 	작업지시 공정테이블 등록 -->

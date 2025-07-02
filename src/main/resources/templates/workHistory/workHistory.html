@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/workOrder/workOrder.css}" />
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<!-- 여기서 부터 작성하시면 됩니다  -->
+			<h2>작업이력</h2>
+			<!-- 본문 영역-->
+			<div class="custom-content">
+				<!-- 				그리드 JS에서 만듬 -->
+				<div id="grid"></div>
+<!-- 				작업지시 모달 -->
+<!-- 				<div class="modal fade" id="WorkModal" tabindex="-1" -->
+<!-- 					aria-labelledby="detailModalLabel" aria-hidden="true"> -->
+<!-- 					<div class="modal-dialog modal-lg"> -->
+<!-- 						<div class="modal-content"> -->
+<!-- 							<div class="modal-header"> -->
+<!-- 								<h2 class="modal-title" id="detailModalLabel">작업지시 등록</h2> -->
+<!-- 							</div> -->
+<!-- 							<div class="approval-line"> -->
+<!-- 								<div class="modal-body"> -->
+<!-- 									 js에서 채움 -->
+<!-- 									<div id="process-steps-container" class="timeline-container"></div> -->
+<!-- 								</div> -->
+
+<!-- 							</div> -->
+<!-- 							 js에서 채움 -->
+<!-- 							<div class="modal-body"></div> -->
+<!-- 							<div class="modal-footer"> -->
+<!-- 								<button type="button" class="btn btn-secondary" -->
+<!-- 									data-bs-dismiss="modal">닫기</button> -->
+<!-- 								<button type="button" class="btn custom-btn-blue" -->
+<!-- 									id="submitWorkOrder">작업 지시 등록</button> -->
+<!-- 							</div> -->
+<!-- 						</div> -->
+<!-- 					</div> -->
+<!-- 				</div> -->
+<!-- 				창고배정 모달 -->
+<!-- 				<div class="modal fade" id="AssignWarehouseModal" tabindex="-1" -->
+<!-- 					aria-labelledby="detailModalLabel" aria-hidden="true"> -->
+<!-- 					<div class="modal-dialog modal-dialog-scrollable modal-lg"> -->
+<!-- 						<div class="modal-content"> -->
+<!-- 							<div class="modal-header"> -->
+<!-- 								<h5 class="modal-title">창고배정</h5> -->
+<!-- 								<button type="button" class="btn-close" data-bs-dismiss="modal" -->
+<!-- 									aria-label="닫기"></button> -->
+<!-- 							</div> -->
+<!-- 							<div class="modal-body"> -->
+<!-- 								<div class="row"> -->
+<!-- 									왼쪽: 검색 + 창고 목록 -->
+<!-- 									<div class="col-md-6"> -->
+<!-- 										<input type="text" id="warehouseSearch" -->
+<!-- 											class="form-control mb-2" placeholder="창고명 검색" /> -->
+<!-- 										<div id="warehouseList" class="list-group custom-scroll" -->
+<!-- 											style="max-height: 400px; overflow-y: auto;"></div> -->
+<!-- 									</div> -->
+
+<!-- 									오른쪽: 선택된 창고 상세 + 팀 선택 -->
+<!-- 									<div class="col-md-6"> -->
+<!-- 										<div id="selectedWarehouseInfo" -->
+<!-- 											class="p-3 bg-light rounded border mb-3"> -->
+<!-- 											<h6 class="fw-bold">선택된 창고</h6> -->
+<!-- 											<p id="warehouseName">-</p> -->
+<!-- 											<p id="warehouseLocation">-</p> -->
+<!-- 										</div> -->
+
+<!-- 										<label for="warehouseZoneSelect" class="form-label">창고구역 선택</label> <select -->
+<!-- 											id="warehouseZone" class="form-select"> -->
+<!-- 										</select> -->
+<!-- 									</div> -->
+<!-- 								</div> -->
+<!-- 							</div> -->
+<!-- 							<div class="modal-footer"> -->
+<!-- 								숨겨진 값 저장용 -->
+<!-- 								<input type="hidden" id="selectedWarehouseId" /> <input -->
+<!-- 									type="hidden" id="selectedOddId" /> -->
+
+<!-- 								<button type="button" class="btn btn-secondary" -->
+<!-- 									data-bs-dismiss="modal">닫기</button> -->
+<!-- 								<button type="button" class="btn custom-btn-blue" -->
+<!-- 									id="submitWarehouseAssign">창고 등록</button> -->
+<!-- 							</div> -->
+<!-- 						</div> -->
+<!-- 					</div> -->
+<!-- 				</div> -->
+	</th:block>
+	<th:block layout:fragment="script">
+		<script th:src="@{/js/workHistory/workHistory.js}"></script>
+	</th:block>
+
+</body>
+</html>

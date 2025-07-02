@@ -240,15 +240,32 @@
   	
   	<!-- 수주 테이블에 실제로 작업이 완료된 값을 업데이트하기 -->
   	<update id="updateSujuDetail">
-		UPDATE suju_order_detail sod
-		SET sod.odd_actual_cnt = #{wpoOcount}, sod.odd_sts = 'odd_sts_04', sod.odd_mod_date=#{oddModDate}
-		WHERE sod.odd_id IN (
-		         SELECT wo.odd_id
-		         FROM work_order wo
-		         	JOIN work_process wp ON wp.wrk_id = wo.wrk_id
-		         WHERE wp.wpo_id = #{wpoId}
-		)
-  	</update>
+      UPDATE suju_order_detail sod
+      SET sod.odd_actual_cnt = #{wpoOcount}, sod.odd_sts = 'odd_sts_04',
+         sod.odd_mod_date=#{oddModDate},
+         sod.odd_bcount = (                    
+	                         SELECT NVL(SUM(qh.qhi_bcount), 0)
+	                         FROM   quality_history qh
+	                         WHERE  qh.qhi_target_id IN (            
+	                                 SELECT wp2.wpo_id
+	                                 FROM   work_process wp2
+	                                 	JOIN work_order wo2 ON wo2.wrk_id = wp2.wrk_id
+	                                 WHERE  wo2.odd_id = sod.odd_id
+                           )
+                       )
+      WHERE sod.odd_id IN (
+               SELECT wo.odd_id
+               FROM work_order wo
+                  JOIN work_process wp ON wp.wrk_id = wo.wrk_id
+               WHERE wp.wpo_id = #{wpoId}
+      )
+     </update>
+     	
+	<!-- 	>> 수주 히스토리에 마지막 공정이 완료된 후 히스토리 추가 -->
+	<insert id="insertSujuHistory">
+		INSERT iNTO suju_history
+		VALUES(#{oddId}, 'odd_sts_04', #{oddModDate}, #{empID})
+	</insert>
   	
   	<!-- 그리드에서 현황 클릭했을 때 사원 작업 현황 표시하기 -->
   	  	

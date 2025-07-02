@@ -77,9 +77,7 @@ public class OrderRestController {
 	
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Map<String, Object> param, HttpSession session) {
-		
-		session.setAttribute("emp_id", "201");
-		String emp_id = (String) session.getAttribute("emp_id");		
+		String emp_id = (String) session.getAttribute("empId");		
 		
 		 // 화이트리스트 방식으로 안전한 Map 생성
 	    Map<String, Object> safe = new HashMap<>();

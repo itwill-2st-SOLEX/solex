@@ -112,8 +112,8 @@
 		     e.dep_id,          				-- 휘하 직원의 부서
 		     e.dep_position,     				-- 휘하 직원의 직위
 		     cd_e.det_sort
-		  FROM employee_copy e         			-- 휘하 직원을 나타내는 별칭
-		  JOIN employee_copy m         			-- 매니저(결재권자)를 나타내는 별칭
+		  FROM employee e         			-- 휘하 직원을 나타내는 별칭
+		  JOIN employee m         			-- 매니저(결재권자)를 나타내는 별칭
 		    ON e.dep_id = m.dep_id 				-- 동일 부서인 경우만 조인
 		  JOIN code_detail cd_e 
 		    ON e.dep_position = cd_e.det_nm -- 휘하 직원의 직위 
