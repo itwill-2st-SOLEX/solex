@@ -1,6 +1,8 @@
 package kr.co.itwillbs.solex.lot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +119,6 @@ public class LotService {
 	// 최상위 LOT 상세조회
 	public Map<String, Object> getProductLotDetail(Long prdLotId) {
         Map<String, Object> data = lotMapper.selectProductLotDetail(prdLotId);
-        System.out.println("data : " + data);
         data.put("type", "product");
         return data;
     }
@@ -141,6 +142,38 @@ public class LotService {
         Map<String, Object> data = lotMapper.selectEquipmentDetail(eqpId);
         data.put("type", "equipment");
         return data;
+    }
+    
+    // ---------------- Insert ----------------
+    public void insertLotCascade(Long oddId) {
+        // 1. 제품 + 옵션 정보 조회
+        Map<String, Object> lotInfo = lotMapper.selectLotInsertInfo(oddId);
+
+        // 2. product_lot insert
+        lotMapper.insertProductLot(lotInfo);
+        
+        // 3. insert 이후 prd_lot_id 조회
+        Long prdLotId = lotMapper.selectPrdLotId(lotInfo);
+        System.out.println("prdLotId : " + prdLotId);
+        if (prdLotId == null) return;
+
+        // 4. 작업지시 리스트 조회
+        List<Map<String, Object>> workOrders = lotMapper.selectWorkOrdersByOddId(oddId);
+        System.out.println("workOrders : " + workOrders);
+
+        for (Map<String, Object> wrk : workOrders) {
+            wrk.put("prdLotId", prdLotId);
+            System.out.println("wrk : " + wrk);
+            // 5. process_lot insert
+            lotMapper.insertProcessLot(wrk);
+            Long prcLotId = Long.valueOf(wrk.get("prcLotId").toString());
+
+            // 6. 매핑 insert
+            Map<String, Object> mapping = new HashMap<>();
+            mapping.put("prdLotId", prdLotId);
+            mapping.put("prcLotId", prcLotId);
+            lotMapper.insertProductProcessMapping(mapping);
+        }
     }
 
 }
