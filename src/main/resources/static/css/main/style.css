@@ -117,9 +117,12 @@
 }
 
 /* 팝업 폼에서 Location 입력 필드를 완전히 숨김 */
-.tui-calendar-form-item.tui-calendar-form-item-location {
+.toastui-calendar-dropdown-section.toastui-calendar-state-section,
+.toastui-calendar-popup-section-item.toastui-calendar-popup-section-location,
+#calendar > div.toastui-calendar-floating-layer > div.toastui-calendar-event-form-popup-slot > div > form > div.toastui-calendar-form-container > div:nth-child(3) {
     display: none !important;
 }
+
 
 
 /* ─── 반응형 (≤ LG) ─── */

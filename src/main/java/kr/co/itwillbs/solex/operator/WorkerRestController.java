@@ -24,7 +24,7 @@ public class WorkerRestController {
 	public WorkerService workerService;
 	
 	//로그인 구현 필요
-	Long empId = 26L;
+	Long empId = 102L;
 
 	
 	//내 부서 정보
