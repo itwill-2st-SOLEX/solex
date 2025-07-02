@@ -14,6 +14,7 @@
 		cd2.det_nm as OPT_COLOR, -- 상품 색
 		cd3.det_nm as OPT_SIZE, -- 상품 사이즈
 		cd4.det_nm as OPT_HEIGHT, -- 상품 굽높이
+		odd.odd_sts as ODD_STS,
 		CASE
         WHEN (
             SELECT COUNT(*)
@@ -39,7 +40,7 @@
 	left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
 	left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
 	left JOIN code_detail cd4 ON opt.opt_height= cd4.det_id
-	WHERE odd.odd_sts = 'odd_sts_00' -- '수주 등록' 상태인 것들만 조회
+	WHERE odd.odd_sts in ('odd_sts_00', 'odd_sts_01') -- '수주 등록' 상태인 것들만 조회
     ORDER BY cd1.det_sort asc
     OFFSET #{offset} ROWS
     FETCH NEXT #{limit} ROWS ONLY
@@ -144,5 +145,52 @@
 
 
 	<!-- 자재 요청 로직 -->
+	
+	<!-- 자재 주문 -->
+	<insert id="insertMaterialOrder" parameterType="map">
+    INSERT INTO material_orders (
+        MAT_ID,
+        EMP_ID,
+        MAT_REG_DATE,
+        MAT_QTY,
+        MAT_ORD_STS,
+		MAT_COMM,
+		MAT_LMD_DATE
+    )
+    SELECT
+        b.mat_id,                                         -- 자재 ID
+        #{emp_id},                                        -- 담당자 ID (파라미터로 받음)
+        SYSDATE + 9/24,                                   -- 발주 등록일
+        CEIL((b.bom_cnt * odd.odd_cnt) * 1.05) - SUM(ad.are_det_qty), -- ★ 불량률 5% 적용 (올림)
+        'mat_ord_sts_01',                                         -- 발주 상태 (초기값)
+		'주문상세번호(' || #{odd_id} || ') 처리 중, 자재 재고 부족으로 자동 생성된 발주입니다.',
+		SYSDATE + 9/24
+    FROM
+        suju_order_detail odd
+    LEFT JOIN
+        bom b ON odd.opt_id = b.opt_id
+    LEFT JOIN
+        area_detail ad ON ad.item_id = b.mat_id
+    WHERE
+        odd.odd_id = #{odd_id} -- 파라미터로 받은 주문 ID
+    GROUP BY
+        b.mat_id, b.bom_cnt, odd.odd_cnt
+    HAVING
+        SUM(ad.are_det_qty) &lt; CEIL((b.bom_cnt * odd.odd_cnt) * 1.05) -- ★ 불량률 5% 적용 (올림)
+</insert>
+
+
+
+
+	<!-- 자재 주문 상태 변경 -->
+	<update id="updateMaterialOrderStatus" parameterType="Map">
+	update suju_order_detail
+       	set odd_sts = 'odd_sts_01',
+           	odd_mod_date = sysdate + 9/24,
+           	odd_isapproval = 'y'
+     where odd_id = #{odd_id}
+	</update>
+
+
   
 </mapper>

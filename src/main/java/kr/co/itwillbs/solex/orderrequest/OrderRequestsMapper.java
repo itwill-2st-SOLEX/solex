@@ -30,4 +30,10 @@ public interface OrderRequestsMapper {
 	Integer updateOrderStatus(Map<String, Object> params);
 	// 승인시 동작되는 쿼리 //
 
+
+	// 자재 주문 쿼리
+	Integer insertMaterialOrder(Map<String, Object> params);
+	// 자재 주문 상태 변경 쿼리
+	Integer updateMaterialOrderStatus(Map<String, Object> params);
+
 }
