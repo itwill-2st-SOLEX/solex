@@ -15,23 +15,11 @@
 <body>
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
-		<div class="container-xxl flex-grow-1 container-p-y" style="background-color: transparent; padding-left: 0; padding-right: 0;">
-			<div class="row">
-				<div class="col-xxl-12 mb-6">
-					<div class="card">
-						<div class="d-flex align-items-start row">
-							<div class="col-sm-12">
-								<div class="card-body">
-									<h5 class="card-title mb-4">출고 관리</h5>
-									<button type="button" class="btn custom-btn-blue mb-3 float-end"
-										style="width:10%;min-width:120px;" id="openShipmentModalBtn"  data-action="create" >출고 등록</button>
-									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-	            </div>
-			</div>
+		<div class="container-xxl flex-grow-1 container-p-y" >
+			<h5 class="card-title mb-2">출고 관리</h5>
+			<button type="button" class="btn custom-btn-blue mb-2 float-end"
+				style="width:10%;min-width:120px;" id="openShipmentModalBtn"  data-action="create" >출고 등록</button>
+			<div id="grid" style="width: 100%; overflow-x: auto;"></div>
         </div>
 		
 		
@@ -125,7 +113,7 @@
 								</div>
 							</div>
 				
-							<div class="d-flex justify-content-end mt-2 mb-3">
+							<div class="d-flex justify-content-end mt-2 mb-2">
 								<button type="button" class="btn btn-danger" id="deleteSelectedRowsBtn">선택 항목 삭제</button>
 							</div>
 							<div id="innerGrid" style="height: 217px;"></div>
