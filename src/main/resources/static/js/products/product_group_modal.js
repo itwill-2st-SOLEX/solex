@@ -10,18 +10,30 @@ window.addEventListener('DOMContentLoaded', () => {
 	
 	
 	const productModalElement = document.getElementById('productModal');
-    if (productModalElement) {
-        productModalElement.addEventListener('shown.bs.modal', function () {
-            console.log('제품 모달이 완전히 표시되었습니다. selectpicker를 새로고침합니다.');
-            $('.selectpicker').selectpicker('refresh');
+	    if (productModalElement) {
+	        productModalElement.addEventListener('shown.bs.modal', function () {
+	            console.log('제품 모달이 완전히 표시되었습니다. selectpicker를 새로고침합니다.');
+	            // 기존 selectpicker refresh는 그대로 둡니다.
+	            $('.selectpicker').selectpicker('refresh');
 
-            // ⭐⭐ 여기에 data-bs-toggle 속성 제거 코드를 추가합니다 ⭐⭐
-            // Bootstrap-select가 생성한 버튼에서 'data-bs-toggle="dropdown"' 속성을 제거합니다.
-            // 이렇게 하면 Bootstrap 5의 드롭다운 컴포넌트가 이 버튼의 클릭을 가로채지 않게 됩니다.
-            $('.bootstrap-select .dropdown-toggle').removeAttr('data-bs-toggle');
-            console.log('Bootstrap-select 버튼에서 data-bs-toggle 속성 제거 완료.');
-        });
-    }
+	            // ⭐⭐ 여기에 data-bs-toggle 속성 제거 코드를 추가합니다 ⭐⭐
+	            $('.bootstrap-select .dropdown-toggle').removeAttr('data-bs-toggle');
+	            console.log('Bootstrap-select 버튼에서 data-bs-toggle 속성 제거 완료.');
+	        });
+
+	        // ⭐⭐ 새로 추가할 부분: '옵션 추가' 탭이 보여질 때 selectpicker 새로고침 ⭐⭐
+	        const allOptionsTabButton = document.getElementById('all-options-tab');
+	        if (allOptionsTabButton) {
+	            allOptionsTabButton.addEventListener('shown.bs.tab', function (event) {
+	                console.log('\'옵션 추가\' 탭이 활성화되었습니다. selectpicker를 새로고침합니다.');
+	                $('.selectpicker').selectpicker('refresh');
+	                // 탭이 변경될 때도 data-bs-toggle을 다시 제거해 주는 것이 좋습니다.
+	                $('.bootstrap-select .dropdown-toggle').removeAttr('data-bs-toggle');
+	            });
+	        }
+	    }
+	
+	
 });	
 
 
