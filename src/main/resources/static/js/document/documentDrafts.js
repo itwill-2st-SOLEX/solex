@@ -8,7 +8,10 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '기안서 번호', name: 'doc_id', align : 'center' },
+			{header: '기안서 번호', name: 'doc_id', align: 'center',
+			   renderer: { styles: { color: '#007bff', textDecoration: 'underline', cursor: 'pointer' }
+			   }
+			 },
 			{ header: '기안서 종류', name: 'doc_type',align : 'center', sortable: 'true' },
 			{ header: '결재상태', name: 'doc_sts', sortable: 'true',align : 'center' },
 			{ header: '등록일', name: 'doc_reg_time', align : 'center' }

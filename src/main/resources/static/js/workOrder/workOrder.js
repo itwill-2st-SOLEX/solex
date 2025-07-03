@@ -7,7 +7,6 @@ $(function() {
 		bodyHeight: 580,
 		scrollY: true,
 		data: [],
-		rowHeaders: ['checkbox'],
 		header: {
 			height: 80,
 			complexColumns: [
