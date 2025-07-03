@@ -25,9 +25,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			{header: '발주설명', name : 'matComm', align: 'center', width: 330},
 			{header: '발주수량', name : 'matQty', align: 'center', width: 99},
 			{header: '발주 요청일', name : 'matRegDate', align: 'center', width: 118},
-			{header: '예상 입고일', name : 'matEtaDate', align: 'center', width: 118},
 			{header: '실제 입고일', name : 'matAtaDate', align: 'center', width: 118},
-//			{header: '최종 수정일', name : 'matLmdDate', align: 'center', width: 105},
 			{header: '승인/반려', name : 'mat_ok', align: 'center', width: 250, 
 				formatter: ({ value, rowKey }) =>	{
 //				   // 값이 '반려'(또는 '승인')라면 그대로 출력
@@ -225,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	  						<div><input type="date" class="form-control d-inline-block" name= "mat_ata_date" required></div>
 	  					</div>
 	  				</div>
+					<input type="hidden" values="${emp_id}">
 	  				<div class="modal-footer">
 	  					<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
 	  					<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
@@ -361,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			      if (res.ok) {
 			        alert('승인 완료');
 			        modal.hide();
-//			        loadMatList(0);             // 그리드만 새로고침
+
 					//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
 					grid.setValue(rowKey, 'mat_ok', '승인');
 					

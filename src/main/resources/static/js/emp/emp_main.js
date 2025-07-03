@@ -25,22 +25,20 @@ document.addEventListener('DOMContentLoaded', function(){
 	    ]
 	});
 	
-	const checkAllCheckbox = document.getElementById('check-all');
+//	const checkAllCheckbox = document.getElementById('check-all');
 	
-	checkAllCheckbox.addEventListener('change', (event) => {
-		if(event.target.checked){
-			console.log("checked == "); // ok
-			
-			// 퇴사자 포함 누르면
-			const allData = grid.getData();
-			
-			allData.forEach(row =>{
-				grid.check(row.rowKey);
-			});
-		} else {
-			grid.uncheckAll();
-		}
-	});
+//	checkAllCheckbox.addEventListener('change', (event) => {
+//		if(event.target.checked){
+//			console.log("checked == "); // ok
+//			
+//			
+//			allData.forEach(row =>{
+//				grid.check(row.rowKey);
+//			});
+//		} else {
+//			grid.uncheckAll();
+//		}
+//	});
 
 	// 사원 목록 조회 
 	async function loadDrafts(page) { //page번호를 인자로 받아 사원목록을 불러옴 (30개당 한페이지)
@@ -149,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function(){
 							    <div class="row mb-3">
 							      <div class="col">
 							        <label>성별</label><br>
-							        <label id="genderM"><input type="radio" name="emp_gd" value="M" checked> 남</label>
+							        <label id="genderM"><input type="radio" name="emp_gd" value="M" > 남</label>
 							        <label><input type="radio" name="emp_gd" value="W"> 여</label>
 							      </div>
 							      <div class="col">
@@ -307,12 +305,10 @@ document.addEventListener('DOMContentLoaded', function(){
 					            alert('이메일을 모두 입력해 주세요.');
 					            return;
 					        }
-					        
-					        const url = '/SOLEX/emp';
-					        const method = 'POST';
 
 					        const formData = new FormData(form); // 동적으로 생성된 'form' 사용
-							formData.append("emp_img", imgFile); // 파일은 직접 append
+//							formData.append("emp_img", emp_img); // 파일은 직접 append
+							const empImgFile = document.querySelector('#emp_img').files[0]; // file input 에서 실제 file 얻기 
 							
 					        const payload = {
 					            emp_nm: formData.get('emp_nm'),
@@ -330,9 +326,23 @@ document.addEventListener('DOMContentLoaded', function(){
 					            emp_da: formData.get('emp_da'),
 					            emp_ea: document.getElementById('sample6_extraAddress')?.value || '' // name 없는 경우
 					        };
-
-					        console.log('서버로 보낼 등록 데이터 (payload):', payload);
-					        await sendData(url, method, payload, false); // isModifyMode = false
+							
+							const formDataToSend = new FormData();
+							
+							formDataToSend.append(
+							  'emp',
+							  new Blob([JSON.stringify(payload)], { type: 'application/json' })
+							);
+							
+							// 파일 파트
+							formDataToSend.append('emp_img', empImgFile);
+							
+							await fetch('/SOLEX/emp', {
+							  method: 'POST',
+							  body: formDataToSend         // 👈 헤더를 직접 지정하지 말 것!
+							});
+							alert('인사등록 성공');
+							modal.hide();
 					    });
 					}
 
@@ -482,11 +492,6 @@ document.addEventListener('DOMContentLoaded', function(){
 							document.getElementById('sample6_detailAddress').readOnly = true;
 							document.getElementById('sample6_extraAddress').readOnly = true;
 
-							// 버튼 가시성 업데이트
-							if (registerBtn) registerBtn.style.display = 'none'; // 수정 모드에서는 등록 버튼 숨김
-							if (registerBtn) registerBtn.style.display = 'none'; // 수정 모드에서는 등록 버튼 숨김
-							if (modifyBtn) modifyBtn.style.display = ''; // 수정 모드에서는 수정 버튼 표시
-
 						}, 200); // select, input이 다 그려진 후에 값 설정
 
 					} else { // 등록 모드
@@ -495,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function(){
 						modalTitle.textContent ='사원 등록';
 						// 등록 모드에서는 모든 필드를 수정 가능하게 (readOnly 해제)
 						document.querySelector('input[name="emp_img"]').readOnly = false; 
-						document.querySelector('input[name="emp_num"]').readOnly = false; 
+//						document.querySelector('input[name="emp_num"]').readOnly = false; 
 						document.querySelector('input[name="emp_nm"]').readOnly = false;
 						document.querySelector('input[name="emp_hire"]').readOnly = false;
 						document.querySelectorAll('input[name="emp_gd"]').forEach(radio => radio.readOnly = false);
@@ -513,7 +518,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 						// 버튼 가시성 업데이트
 						if (registerBtn) registerBtn.style.display = ''; // 등록 모드에서는 등록 버튼 표시
-						if (modifyBtn) modifyBtn.style.display = 'none'; // 등록 모드에서는 수정 버튼 숨김
 					}
 
 					// 모달 표시
