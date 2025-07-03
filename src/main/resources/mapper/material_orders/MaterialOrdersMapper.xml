@@ -39,14 +39,14 @@
 <!-- 	자재발주 등록 -->
 	<insert id="materialOrderRegist">
 		INSERT INTO material_orders
-		(mat_id, mat_qty, mat_reg_date, mat_eta_date, mat_ata_date, mat_comm)
+		(mat_id, mat_qty, mat_reg_date, mat_ata_date, mat_comm, emp_id)
 		VALUES (
 		#{mat_id, jdbcType=NUMERIC},
 		#{mat_qty, jdbcType=NUMERIC},
 		#{mat_reg_date, jdbcType=DATE},
-		#{mat_eta_date, jdbcType=DATE},
 		#{mat_ata_date, jdbcType=DATE},
-		#{mat_comm, jdbcType=VARCHAR}
+		#{mat_comm, jdbcType=VARCHAR},
+		#{emp_id, jdbcType=VARCHAR}
 		)
 	</insert>
 	

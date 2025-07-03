@@ -24,7 +24,7 @@
         #{emp_email, jdbcType=VARCHAR},
         #{emp_add, jdbcType=VARCHAR},
         #{emp_da, jdbcType=VARCHAR},
-        'sts_01',
+        'emp_sts_01',
         #{emp_pc, jdbcType=NUMERIC},    
         #{empCatCd, jdbcType=VARCHAR},
         #{empPosCd, jdbcType=VARCHAR},

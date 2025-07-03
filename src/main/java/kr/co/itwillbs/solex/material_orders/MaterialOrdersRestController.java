@@ -3,6 +3,7 @@ package kr.co.itwillbs.solex.material_orders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
@@ -28,7 +29,12 @@ public class MaterialOrdersRestController {
 	private MaterialOrdersService materialOrdersService;
 	
 	@PostMapping("/registration")
-	public void materialOrderRegist(@RequestBody  Map<String, Object> matordMap) {
+	public void materialOrderRegist(@RequestBody Map<String, Object> matordMap, HttpSession session) {
+		System.out.println("#################################");
+		String emp_id = (String) session.getAttribute("empId");
+		System.out.println("emp_id = " + emp_id);
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		matordMap.put("emp_id", emp_id);
 		System.out.println("mat ord map = " + matordMap);
 		materialOrdersService.materialOrderRegist(matordMap);	
 	}
@@ -46,7 +52,6 @@ public class MaterialOrdersRestController {
 		
 		int num = Integer.parseInt(matId);
 		
-
 		return materialOrdersService.getWarehouse(num);
 	}
 	
