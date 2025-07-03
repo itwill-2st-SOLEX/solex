@@ -16,6 +16,7 @@ public interface WorkOrderMapper {
 	// 작업지시 등록
 	void workOrderInsert(@Param("prdInfo") Map<String, Object> prdInfo, @Param("empId") String empId);
 	void workProcessInsert(Map<String, Object> prdInfo);
+	void insertSujuHistory(@Param("oddId") String oddId, @Param("empId") String empId);
 	// 주문테이블 상태값 업테이트
 	void updateSujuOrderSts(String oddId);
 	// 창고 조회
@@ -29,6 +30,9 @@ public interface WorkOrderMapper {
 	void areaUpdate(Map<String, Object> prdInfo);
 	// 4. 구역 디테일 update
 	void areaDetailUpdate(Map<String, Object> prdInfo);
-	//  5. 수주 detail update
+	// 5. 수주 detail update
 	void sujuDetailUpdate(Map<String, Object> prdInfo);
+	// 6. 수주 히스토리 테이블 인서트
+	void sujuInserthistory(@Param("prdInfo") Map<String, Object> prdInfo, @Param("empId") String empId);
+	
 }

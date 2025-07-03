@@ -62,7 +62,7 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary"
 						          data-bs-dismiss="modal">닫기</button>
-							<button type="button" id="submitWarehouse"
+							<button type="button" id="submitEquipmentHistory"
 						          class="btn custom-btn-blue">등록</button>
 						</div>
 					</div>
@@ -96,10 +96,11 @@
 				<div id="grid"></div>
 			</div>
 		</div>
-		<th:block layout:fragment="script">
-			<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-			<script th:src="@{/js/equipment_history/equipment_history.js}"></script>
-			<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-		</th:block>
+	</th:block>
+	<th:block layout:fragment="script">
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script th:src="@{/js/equipment_history/equipment_history.js}"></script>
+		<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	</th:block>
 </body>
 </html>

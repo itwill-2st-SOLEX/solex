@@ -1,10 +1,8 @@
-document.addEventListener('DOMContentLoaded', function(){
-	
+$(function() {	
 	let currentPage = 0;
 	const pageSize = 30;
 
 	const grid = new tui.Grid({
-		
 	    el: document.getElementById('grid'),
 	    data: [], // 초기에는 빈 배열로 시작, scrollMoreClient 함수가 데이터를 채움
 	    height: 600,
@@ -45,6 +43,39 @@ document.addEventListener('DOMContentLoaded', function(){
 	    ]
 	}); //tui 그리드 가져오기 끝
 	
+	// 자재 목록 조회 
+	async function loadDrafts(page) { //page번호를 인자로 받아 자재목록을 불러옴 (30개당 한페이지)
+
+		const response = await fetch(`/SOLEX/material/materialList?page=${page}&size=${pageSize}`); // 백엔드api에 fetch요청 30명씩 끊어서 ... 
+		const rawData = await response.json(); // 받은 데이터를 필요한 형태로 가공
+		const data = rawData.map(row => ({ // 이게 서버에서 받아온 사원정보 리스트(배열) 이런식으로 들어있음 //
+			// .map()함수는 배열의 요소를 다른형태로 바꿔서 새 배열을 만든다는데 뭔말;
+			// row는 객체를 하나씩 꺼내서 사용할 필드만 골라 새 객체를 만들어 넣음 (=그리드에 넣을 데이터를 원하는 형태로 변환)
+		    matId: row.matId,
+			cliId: row.cliId, 
+		    matCd: row.matCd,
+		    matNm: row.matNm,
+		    matUnit: row.matUnit,
+			mat_price: row.matPrice,
+			mat_comm: row.matComm,
+			matRegDate: row.matRegDate,
+			mat_is_active: row.matIsActive
+		}));
+
+		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
+		page === 0 ? grid.resetData(data) : grid.appendRows(data);
+
+		//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
+      	currentPage++;
+
+		//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
+      	if (data.length < pageSize) grid.off("scrollEnd");
+  
+  	}
+
+	loadDrafts(currentPage); //최조 1페이지 로딩
+	grid.on('scrollEnd', () =>  loadDrafts(currentPage)); // 스크롤 끝나면 다음 페이지 로딩
+
 	//테이블에서 바로 수정할 수 있는 코드 
 	grid.on('afterChange', async (ev) => { // 그리드에서 셀이 편집될때 afterchange 이벤트가 발생
 	    for (const change of ev.changes) {
@@ -99,274 +130,134 @@ document.addEventListener('DOMContentLoaded', function(){
 	    }
 	}); //테이블 수정코드 fin
 	
-	// 거래처 목록을 받아와 <select> 에 채워 주는 공통 함수
-	async function fetchAndPopulateClients(selectElement) {
-	  try {
-	    // 실제 거래처 목록을 반환하는 API 엔드포인트로 바꿔 주세요
-	    const response = await fetch('/SOLEX/clients/name');
-	    if (!response.ok) {
-	      throw new Error('서버에서 거래처 목록을 가져오지 못했습니다.');
-	    }
+	/**  공통: JSON 응답(fetch) ― 바디가 없으면 기본값 반환 */
+	async function fetchJson(url, defaultValue = null) {
+	  const res = await fetch(url);
 
-	    const clients = await response.json();
-		
-	    clients.forEach(cli => {
-	      const option = document.createElement('option');
-	      option.value = cli.CLI_ID; // 거래처 id 까먹지 마리 까먹으면 딱밤 10대
-	      option.textContent = cli.CLI_NM;  // 사용자에게 보이는 라벨 
-	      selectElement.appendChild(option);
-	    });
-	  } catch (error) {
-	    console.error('거래처 목록 로딩 실패:', error);
-	  }
+	  // 204 No Content 같이 바디가 없는 성공 응답
+	  if (res.status === 204) return defaultValue;
+
+	  if (!res.ok) throw new Error(`${url} 오류`);
+
+	  const text = await res.text();       // 바로 json() 하지 말고 text() 로 읽음
+	  if (!text) return defaultValue;      // Content-Length: 0 인 경우
+
+	  return JSON.parse(text);
 	}
 	
-	// 자재 단위 select 박스 채우기
-	async function fetchAndPopulateMaterialUnits(selectElement) {
+	// 거래처 목록을 받아와 <select> 에 채워 주는 공통 함수
+	async function loadClientNames() {
+		
+		const $sel = $('#cliId');
+		
+		// 이미 한 번 불러왔으면 재요청 생략
+		if ($sel.data('loaded')) return;
+		
 		try {
-			const response = await fetch('/SOLEX/material/code'); 
-			if (!response.ok) {
-				throw new Error('서버에서 단위 목록을 가져오는 데 실패했습니다.');
-			}
-			const units = await response.json();
+		    const list = await fetchJson('/SOLEX/clients/name', []);
 
-			// 받아온 단위 목록으로 option 태그를 생성하여 select box에 추가
-			units.forEach(unit => {
-				const option = document.createElement('option');
-				option.value = unit.DET_ID;
-				option.textContent = unit.DET_NM;
-				console.log('option = ', option);
-				selectElement.appendChild(option);
-			});
+		    list.forEach(cli => {
+				$('<option>', {
+		        	value: cli.CLI_ID,                // 실제 값 
+		        	text : cli.CLI_NM      // 사용자에게 보이는 글자
+		      	}).appendTo($sel);
+		    });
 
-		} catch (error) {
-			console.error('자재 단위 목록 로딩 실패:', error);
+		    $sel.data('loaded', true);      // 플래그
+			
+		} catch (err) {
+		    	console.error('거래처 목록 로딩 실패', err);
+		    	alert('거래처 목록 로딩 실패');
 		}
 	}
 	
-	// 자재 목록 조회 
-	async function loadDrafts(page) { //page번호를 인자로 받아 자재목록을 불러옴 (30개당 한페이지)
-
-		const response = await fetch(`/SOLEX/material/materialList?page=${page}&size=${pageSize}`); // 백엔드api에 fetch요청 30명씩 끊어서 ... 
-		const rawData = await response.json(); // 받은 데이터를 필요한 형태로 가공
-		const data = rawData.map(row => ({ // 이게 서버에서 받아온 사원정보 리스트(배열) 이런식으로 들어있음 //
-		// .map()함수는 배열의 요소를 다른형태로 바꿔서 새 배열을 만든다는데 뭔말;
-		// row는 객체를 하나씩 꺼내서 사용할 필드만 골라 새 객체를 만들어 넣음 (=그리드에 넣을 데이터를 원하는 형태로 변환)
-	    matId: row.matId,
-		cliId: row.cliId, 
-	    matCd: row.matCd,
-	    matNm: row.matNm,
-	    matUnit: row.matUnit,
-		mat_price: row.matPrice,
-		mat_comm: row.matComm,
-		matRegDate: row.matRegDate,
-		mat_is_active: row.matIsActive
+	// 거래처 목록을 받아와 <select> 에 채워 주는 공통 함수
+	async function loadMaterialUnits() {
 		
-  	}));
+		const $sel = $('#matUnit');
+		
+		// 이미 한 번 불러왔으면 재요청 생략
+		if ($sel.data('loaded')) return;
+		
+		try {
+		    const list = await fetchJson('/SOLEX/material/code', []);
 
-		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
-		page === 0 ? grid.resetData(data) : grid.appendRows(data);
+		    list.forEach(unit => {
+				$('<option>', {
+		        	value: unit.DET_ID,                // 실제 값 
+		        	text : unit.DET_NM      // 사용자에게 보이는 글자
+		      	}).appendTo($sel);
+		    });
 
-		//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
-      	currentPage++;
-
-		//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
-      	if (data.length < pageSize) grid.off("scrollEnd");
-  
-  	}
-
-		  	loadDrafts(currentPage); //최조 1페이지 로딩
-			grid.on('scrollEnd', () =>  loadDrafts(currentPage)); // 스크롤 끝나면 다음 페이지 로딩
-
-//			// 등록 버튼 (모달 열기) 
-			document.getElementById('RegisterModalBtn').addEventListener('click', function() {
-				  openModal(); 
-			});
+		    $sel.data('loaded', true);      // 플래그
 			
-			// 등록 모달 내부 
-			async function openModal(){
-				const modalElement = document.getElementById('exampleModal');
-				const modal = new bootstrap.Modal(modalElement);
-				const modalBody = modalElement.querySelector('.modal-body');
-				const modalTitle = document.getElementById('exampleModalLabel');
-				
-				modalBody.innerHTML = ''; // 모달 열릴때마다 기존 내용 제거
-				
-				// 폼 생성 후 select box에 옵션 추가 form 요소를 동적으로 생성하고 기본속성을 설정 
-				const form = document.createElement('form'); // 이게 dom api를 사용해 html 요소 생성
-				form.setAttribute('id','materialForm'); // 폼요소에 id 속성을 부여하고 materialForm이라는 값을 넣음 
-				form.setAttribute('method','post');
-				
-					// ===== 자재ID =====
-					let div1 = document.createElement('div');
-					div1.className = 'mb-3'; 
-					div1.innerHTML = `
-					  <label>자재ID</label>
-					  <input type="text" class="form-control d-inline-block " name="mat_id" required><br>
-					`;
-					form.appendChild(div1);
-					
-					// ===== 자재코드 =====
-					let div3 = document.createElement('div');
-					div3.className = 'mb-3';
-					div3.innerHTML = `
-					  <label>자재코드</label>
-					  <input type="text" class="form-control d-inline-block " name="mat_cd" required><br>
-					`;
-					form.appendChild(div3);
-				
-					// ===== 자재명 =====
-					let div4 = document.createElement('div');
-					div4.className = 'mb-3';
-					div4.innerHTML = `
-					  <label>자재명</label>
-					  <input type="text" class="form-control d-inline-block " name="mat_nm" required><br>
-					`;
-					form.appendChild(div4);
-					
-					// ===== 거래처ID =====
-					let div2 = document.createElement('div');
-					div2.className = 'mb-3';
-					div2.innerHTML = `
-						<label>거래처</label>   
-						<select name="cli_id" id="cliId" class="form-select d-inline-block">     
-					  		<option value="">-- 거래처를 선택하세요 --</option>   
-						</select>
-					`;
-					form.appendChild(div2);
-					
-					const cliSelect = form.querySelector('#cliId');
-					await fetchAndPopulateClients(cliSelect);
-					
-					// 단위
-					let inlineDiv = document.createElement('div');
-					inlineDiv.className = 'inline-container';
-					inlineDiv.innerHTML = `
-						<span>단위</span>
-							<select name="matUnit" id="matUnit" class="form-select">
-								<option value="">-- 단위를 선택하세요 --</option>
-							</select><br>
-					`;
-					form.appendChild(inlineDiv);	
-					
-					// 방금 생성한 form 내부의 자재 단위 select 요소를 찾음
-					const matUnitSelect = form.querySelector('#matUnit');
-					
-					// 서버에서 단위 목록을 가져와 select box를 채움 
-					await fetchAndPopulateMaterialUnits(matUnitSelect);
+		} catch (err) {
+		    	console.error('거래처 목록 로딩 실패', err);
+		    	alert('자재 단위 목록 로딩 실패');
+		}
+	}
 	
-					// ===== 설명 =====
-					let div6 = document.createElement('div');
-					div6.className = 'mb-3';
-					div6.innerHTML = `
-					  <label>설명</label>
-					  <input type="text" class="form-control d-inline-block" name="mat_comm" required><br>
-					`;
-					form.appendChild(div6);
 	
-									
-					// ===== 가격 =====
-					let div5 = document.createElement('div');
-					div5.className = 'mb-3';
-					div5.innerHTML = `
-					  <label>가격</label>
-					  <input type="text" class="form-control d-inline-block" name="mat_price" required><br>
-					`;
-					form.appendChild(div5);
-					
-					
-					// ===== 등록일 =====
-					let div7 = document.createElement('div');
-					div7.className = 'mb-3';
-					div7.innerHTML = `
-					  <label>등록일</label>
-					  <input type="date" class="form-control d-inline-block" name="mat_reg_date" required><br>
-					`;
-					form.appendChild(div7);
-					
-					// ===== 버튼 =====
-					let footerDiv = document.createElement('div');
-					footerDiv.className = 'modal-footer';
-					footerDiv.innerHTML = `
-					  <button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
-					  <button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
-					  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-					`;
+	
+	const $materialModal  = $('#exampleModal');
 
-					form.appendChild(footerDiv);
-					modalBody.appendChild(form); // 최종 폼 삽입
+	$materialModal .on('show.bs.modal', loadClientNames);   // 거래처
+	$materialModal .on('show.bs.modal', loadMaterialUnits); // 자재 단위
+	
+	$materialModal.on('hidden.bs.modal', function () {
+		  const $modal = $(this);
+
+		  // ① <form> 태그가 있다면 한 줄로 끝!
+		  $modal.find('form')[0]?.reset();
+
+		  // ② 별도 <form>이 없을 때는 각 요소를 개별 초기화
+		  $modal.find('input, textarea').val('');
+		  $modal.find('select').prop('selectedIndex', 0);   // 첫 옵션으로
+		});
+	
+	// 자재 등록
+	$('#submitMaterial').on('click', async function () {
+		
+		const $modal    = $('#exampleModal');
+		
+		const matCd    = $.trim($modal.find('#matCd').val()); 
+		const matNm    = $.trim($modal.find('#matNm').val());
+		const cliId    = $modal.find('#cliId').val();
+		const matUnit  = $modal.find('#matUnit').val(
+		); 
+		const matComm    = $.trim($modal.find('#matComm').val()); 
+		const matPrice    = $.trim($modal.find('#matPrice').val()); 
 				
-				// 폼이 DOM에 추가된 후, 버튼 요소를 다시 가져옵니다.
-				const registerBtn = document.getElementById('registerBtn');
+		/* --- 검증 --- */
+//	  	나중에 지피티 한테 물어봐서 유효성 검증 추가하삼
+
+	  	/* --- 서버로 전송할 데이터 --- */
+	  	const payload = {
+	    	matCd     : matCd,
+	    	matNm : matNm,
+	    	cliId   : cliId,
+			matUnit    : matUnit,
+			matComm   : matComm,
+			matPrice    : matPrice
+	  	};
 				
-				// 폼 데이터 전송 및 공통 후처리 함수
-				async function sendData(url, method, payload, isModifyMode) {
-				    try {
-				        const response = await fetch(url, {
-				            method: method,
-				            headers: { 'Content-Type': 'application/json' },
-				            body: JSON.stringify(payload)
-				        });
+		try {
+	    	const res = await fetch('/SOLEX/material', {  // ← POST 엔드포인트
+	  			method  : 'POST',
+	      		headers : { 'Content-Type': 'application/json' },
+	      		body    : JSON.stringify(payload)
+	    	});
+	    	if (!res.ok) throw new Error(`에러러러러러러`);
 
-				        if (!response.ok) {
-				            throw new Error(`서버 오류: ${response.status} - ${errorData.message || '알 수 없는 오류'}`);
-				        }
+	    	alert('자재가 등록되었습니다@@');
+	    	$modal.modal('hide');
 
-				        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-				        if (modalInstance) {
-				            modalInstance.hide();
-				        }
-				        loadDrafts(0); // 자재 목록 새로고침 (첫 페이지부터 다시 로드)
-
-				    } catch (error) {
-				        console.error('데이터 전송 중 오류 발생:', error);
-				        alert('오류 발생: ' + error.message);
-				    }
-				}// try 끝
-				
-				// --- 1. 등록 버튼 클릭 이벤트 처리 ---
-					if (registerBtn) {
-					    registerBtn.addEventListener('click', async function(event) {
-					        event.preventDefault(); // type="submit"이므로 기본 제출 방지
-
-					        const formData = new FormData(form); // 동적으로 생성된 'form' 사용
-					        const payload = {
-					            cli_id: formData.get('cli_id'),
-					            mat_cd: formData.get('mat_cd'),
-					            mat_nm: formData.get('mat_nm'),
-					            mat_price: formData.get('mat_price'),
-					            matUnit: formData.get('matUnit'),
-					            mat_comm: formData.get('mat_comm'),
-					            mat_reg_date: formData.get('mat_reg_date').replace(/\./g, '-'),
-					            mat_is_active: formData.get('mat_is_active')
-					        };
-
-					        console.log('서버로 보낼 등록 데이터 (payload):', payload);
-							
-							try {
-						           const response = await fetch(`/SOLEX/material/registration`, {
-						               method: 'POST',
-						               headers: {
-						                   'Content-Type': 'application/json'
-						               },
-						               body: JSON.stringify(payload)
-						           });
-
-						           if (response.ok) {
-						               // 등록 성공 → 모달 닫기
-						               const modalEl = document.getElementById('exampleModal');
-						               const modal = bootstrap.Modal.getInstance(modalEl).hide();
-
-						           } else {
-						               alert('등록 실패: 서버 오류 발생');
-						           }
-						       } catch (error) {
-						           console.error('전송 중 오류 발생:', error);
-						           alert('서버 전송 실패!');
-						       }
-							
-							
-					    });
-					}// if문 끝
-	}//모달 내부 끝
+	    	// 목록 새로고침
+	    	currentPage = 0;
+	    	loadDrafts(currentPage);
+  		} catch (err) {
+    		console.error('자재 등록 실패', err);
+    		alert('자재 등록 실패');
+  		}
+	});		
 });

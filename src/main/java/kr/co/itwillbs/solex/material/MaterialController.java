@@ -20,7 +20,7 @@ public class MaterialController {
 	private MaterialService materialService;
 	
 	//자재 메인페이지
-	@GetMapping("page")
+	@GetMapping("/page")
 	public String getMethodName() {
 		List<Map<String, Object>> materialList = materialService.getMaterial();
 		return "material/material_main";

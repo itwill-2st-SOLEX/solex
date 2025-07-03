@@ -62,4 +62,9 @@ public class EquipmentService {
 		return equipmentMapper.getTeam(processId);
 	}
 
+	public List<Map<String, Object>> getEquipmentName() {
+		// TODO Auto-generated method stub
+		return equipmentMapper.getEquipmentName();
+	}
+
 }

@@ -46,10 +46,10 @@ public class MaterialRestController {
 	}
 	
 	//자재등록 - post 
-	@PostMapping("/registration")
-	public String registrationPost(@RequestBody Map<String, Object> matMap) throws Exception {
-			materialService.registerMat(matMap); // 인스턴스를 통한 호출
-	    return "redirect:/material";
+	@PostMapping("")
+	public void registrationPost(@RequestBody Map<String, Object> matMap) throws Exception {
+		System.out.println(matMap);
+		materialService.registerMat(matMap); // 인스턴스를 통한 호출
 	}
 	
 	// toast_ui grid 자재 수정
