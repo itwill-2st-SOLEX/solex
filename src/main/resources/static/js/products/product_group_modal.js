@@ -2,6 +2,7 @@
 let allColorOptions = [];
 let allSizeOptions = [];
 let allHeightOptions = [];
+let toastGridInstances = [];
 
 
 
@@ -623,7 +624,7 @@ async function processProductData(mode) {
 	const selectedColors = $('#colorMultiSelect').val() || []; // 선택된 컬러 ID 배열
    	const selectedSizes = $('#sizeMultiSelect').val() || [];   // 선택된 사이즈 ID 배열
    	const selectedHeights = $('#heightMultiSelect').val() || []; // 선택된 굽 ID 배열
- 
+ 	
 
     // 2. 유효성 검사 (변경 없음)
     if (!prdNm) { alert("제품명을 입력해주세요."); return; }
@@ -650,27 +651,51 @@ async function processProductData(mode) {
 	// 등록 모드 또는 수정 모드 모두 Toast UI Grid에서 선택된 옵션을 가져옵니다.
     // generateAndDisplayCombinations에서 이미 그리드가 생성되었고 데이터가 로드된 상태라고 가정합니다.
     if (mode === 'register' || mode === 'update') {
-		toastGridInstances.forEach(gridInstance => {
-	        const checkedRowsFromGrid = gridInstance.getCheckedRows();
-	        checkedRowsFromGrid.forEach(row => {
-	            selectedOptions.push({
-	                // 그리드 컬럼 name과 일치하는 속성명 사용
-	                opt_color: row.colorCode, 
-	                opt_size: row.sizeCode,
-	                opt_height: row.heightCode,
+		selectedColors.forEach(colorId => {
+	        selectedSizes.forEach(sizeId => {
+	            selectedHeights.forEach(heightId => {
+	                selectedOptions.push({
+	                    OPT_COLOR: colorId,
+	                    OPT_SIZE: sizeId,
+	                    OPT_HEIGHT: heightId,
+	                    OPT_YN: 'Y' // 항상 'Y'로 저장 (선택된 옵션이므로)
+	                });
 	            });
 	        });
-		});
+	    });
 
         // 등록 모드에서는 옵션 선택이 필수
         if (mode === 'register' && selectedOptions.length === 0) {
             alert("하나 이상의 제품 옵션 조합을 선택해주세요.");
             return;
         }
-        // 수정 모드에서는 모든 기존 옵션을 유지하거나,
-        // 체크된 옵션만 업데이트하도록 로직을 조절할 수 있습니다.
-        // 현재 로직은 체크된 옵션만 서버로 보냅니다.
     }
+	
+	// ⭐⭐ 4. 수정 모드에서 옵션 중복 유효성 검사 (새로 추가) ⭐⭐
+    if (mode === 'update') {
+        const existingOptions = window.currentProductExistingOptions || [];
+
+        if (selectedOptions.length === 0) {
+            alert("수정할 옵션 조합을 하나 이상 선택해주세요.");
+            return;
+        }
+
+        for (const newOption of selectedOptions) {
+            // 현재 선택된 옵션 조합이 기존 옵션들과 정확히 일치하는지 확인
+            const isDuplicate = existingOptions.some(existing => {
+                return existing.OPT_COLOR === newOption.OPT_COLOR &&
+                       existing.OPT_SIZE === newOption.OPT_SIZE &&
+                       existing.OPT_HEIGHT === newOption.OPT_HEIGHT;
+            });
+
+            if (isDuplicate) {
+                alert(`오류: 이미 존재하는 옵션 조합이 있습니다. \n\n색상: ${newOption.OPT_COLOR}\n사이즈: ${newOption.OPT_SIZE}\n굽: ${newOption.OPT_HEIGHT}\n\n이 조합은 다시 추가할 수 없습니다.`);
+                return; // 중복 발견 시 함수 실행 중단
+            }
+        }
+        console.log("수정 모드: 선택된 옵션 조합 중복 유효성 검사 통과.");
+    }
+    // ⭐⭐ 유효성 검사 끝 ⭐⭐
     
     console.log("선택된 옵션:", selectedOptions);
     
@@ -685,25 +710,11 @@ async function processProductData(mode) {
         prd_reg_date: prdRegDate,
         // 수정 모드일 경우에만 prd_id와 prd_up_date를 포함
         ...(mode === 'update' && { prd_id: prdId, prd_up_date: prdUpDate }),
-        options: [] // 수집된 옵션 데이터
+        options: selectedOptions // 수집된 옵션 데이터
     };
 	if (mode === 'edit') {
        productData.PRD_ID = prd_id; // 수정 모드일 때만 PRD_ID 포함
    	}
-	// 3개 드롭다운에서 선택된 모든 조합을 생성 (이전의 generateAndDisplayCombinations 로직과 유사)
-    selectedColors.forEach(colorId => {
-        selectedSizes.forEach(sizeId => {
-            selectedHeights.forEach(heightId => {
-                productData.options.push({
-                    OPT_COLOR: colorId,
-                    OPT_SIZE: sizeId,
-                    OPT_HEIGHT: heightId,
-                    OPT_YN: 'Y' // 항상 'Y'로 저장 (선택된 옵션이므로)
-                });
-            });
-        });
-    });
-    console.log("전송할 제품 데이터:", productData);
 
     // 5. API 호출 (변경 없음)
     const url = mode === 'register' ? '/SOLEX/products/api/productRegist' : '/SOLEX/products/api/productUpdate';

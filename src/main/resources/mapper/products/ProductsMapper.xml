@@ -127,9 +127,10 @@
 	    ) VALUES (
 	        #{opt_id},
 	        #{prd_id},
-	        #{opt_color},
-	        #{opt_size},
-	        #{opt_height}
+	        #{OPT_COLOR, jdbcType=VARCHAR},  
+	        #{OPT_SIZE, jdbcType=VARCHAR},   
+	        #{OPT_HEIGHT, jdbcType=VARCHAR}  
+
 	    )
   	</insert>
   	<!-- 제품에 대한 모든 옵션 값 출력 -->
@@ -185,6 +186,7 @@
 	       AND opt_size = #{opt_size}
 	       AND opt_height = #{opt_height}
 	</select>
+	
 	
     <select id="existsByPrdCode" resultType="int">
        SELECT COUNT(*)

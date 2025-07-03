@@ -83,6 +83,7 @@ public class ProductsRestController {
 	// 제품 insert
 	@PostMapping("/productRegist")
 	public ResponseEntity<Map<String, String>> registerProduct(@RequestBody Map<String, Object> requestMap) {
+		System.out.println("requestMap 옵션보려고 보는 requestMap :" + requestMap);
         // 서비스 호출, Map을 그대로 넘김
         productsService.registerProduct(requestMap);
 
