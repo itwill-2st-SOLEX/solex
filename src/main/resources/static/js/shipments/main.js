@@ -17,17 +17,14 @@ const grid = new tui.Grid({
   scrollX: false,
   data: [], // 초기 데이터는 비어있음
   columns: [
-    {header: "수주 상세번호",name: "ODD_ID",width: 100,align: "center",sortable: true},
-    {header: "제품 코드",name: "PRD_CODE",width: 100,align: "center",sortable: true},
+    {header: "수주 번호",name: "ORD_ID",width: 100,align: "center",sortable: true},
     {header: "거래처", name: "CLI_NM", align: "center", sortable: true },
-    {header: "제품명", name: "PRD_NM", width: 200,align: "center",sortable: true},
-    {header: "컬러", name: "OPT_COLOR",width: 80,align: "center",sortable: true},
-    {header: "사이즈",name: "OPT_SIZE",width: 80,align: "center",sortable: true},
-    {header: "굽",name: "OPT_HEIGHT",width: 80,align: "center",sortable: true},
-    {header: "주문 수량", name: "ODD_CNT", align: "center", sortable: true },
-    {header: "진행 현황", name: "DET_NM", align: "center", sortable: true },
-    {header: "원자재 재고 여부",name: "PRODUCTION_STATUS",align: "center",sortable: true},
+    {header: "거래처 대표자", name: "CLI_CEO", align: "center", sortable: true },
+    {header: "거래처 대표자 전화번호", name: "CLI_PHONE", align: "center", sortable: true },
+    {header: "배송지", name: "ORD_ADDRESS", align: "center", width: 200, sortable: true },
     {header: "납품 요청일",name: "ORD_END_DATE",align: "center",sortable: true},
+    {header: "상태", name: "DET_NM", align: "center", sortable: true },
+    {header: "상태 변경일",name: "ORD_MOD_DATE",align: "center",sortable: true}
   ],
 });
 
@@ -44,8 +41,10 @@ function createInnerGrid() {
           { header: '사이즈', name: 'sizeName', minWidth: 197, align: 'center' },
           { header: '굽높이', name: 'heightName', minWidth: 197, align: 'center' },
           { header: '수량', name: 'quantity', editor: 'text', minWidth: 197, align: 'right' },
-          { name: 'productCode', hidden: true }, { name: 'colorCode', hidden: true },
-          { name: 'sizeCode', hidden: true }, { name: 'heightCode', hidden: true },
+          { name: 'productCode', hidden: true }, 
+          { name: 'colorCode', hidden: true },
+          { name: 'sizeCode', hidden: true }, 
+          { name: 'heightCode', hidden: true },
       ],
   });
 }
@@ -142,10 +141,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         // 작업 지시용 모달 열기
         openPurchaseModal();
       }
-      //  else if (action === 'request') {
-      //     // 자재 요청용 모달 열기
-      //     openMaterialRequestModal(oddId);
-      // }
     }
   });
 });
@@ -158,7 +153,7 @@ async function fetchGridData(page = currentPage) {
     params.append("page", currentPage);
     params.append("pageSize", pageSize);
 
-    const url = `/SOLEX/order-requests/data?${params.toString()}`;
+    const url = `/SOLEX/shipments/data?${params.toString()}`;
 
     const response = await fetch(url);
 
@@ -173,13 +168,18 @@ async function fetchGridData(page = currentPage) {
     // 3. 응답 데이터를 JSON으로 파싱
     const data = await response.json();
 
-    data.map((item) => {
-      if (item.PRODUCTION_STATUS == "생산 가능") {
-        // data-action="instruct" 추가
-        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시</button>`;
-      } else {
-        // data-action="request" 추가
-        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="request" data-ord-id="${item.ODD_ID}">자재 요청</button>`;
+    console.log(data);
+    data.forEach(item => {
+      if(item.ODD_STS === 'odd_sts_05') {
+        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ORD_ID}">승인/반려</button>`;
+      } else if(item.DET_NM === 'odd_sts_06') {
+        item.DET_NM = '수주 수정';
+      } else if(item.DET_NM === 'odd_sts_07') {
+        item.DET_NM = '수주 삭제';
+      } else if(item.DET_NM === 'odd_sts_08') {
+        item.DET_NM = '수주 완료';
+      } else if(item.DET_NM === 'odd_sts_09') {
+        item.DET_NM = '수주 취소';
       }
     });
 
@@ -418,6 +418,9 @@ function addRowToInnerGrid() {
       // li 태그에 저장된 JSON 문자열을 다시 자바스크립트 객체로 변환
       return JSON.parse(stockItem.dataset.itemJson);
   });
+  
+
+
 
   const existingRows = INNER_TUI_GRID_INSTANCE.getData();
   let addedCount = 0;
@@ -434,6 +437,10 @@ function addRowToInnerGrid() {
               sizeName:    item.OPT_SIZE_NM,
               heightName:  item.OPT_HEIGHT_NM,
               quantity:    1,
+              productCode: item.PRD_ID,
+              colorCode:   item.OPT_COLOR,
+              sizeCode:    item.OPT_SIZE,
+              heightCode:  item.OPT_HEIGHT,
           });
           addedCount++;
       }
@@ -486,35 +493,103 @@ function setupInteractiveList(containerId) {
 }
 
 function deleteSelectedRows() {
-  const checkedKeys = INNER_TUI_GRID_INSTANCE.getCheckedRowKeys();
-  console.log(INNER_TUI_GRID_INSTANCE);
-  INNER_TUI_GRID_INSTANCE.removeRows(checkedKeys);
+  INNER_TUI_GRID_INSTANCE.removeCheckedRows();
 }
 
+// 콤마제거
+function unformatWithComma(str) { return String(str || '').replace(/,/g, ''); }
 
+// 폼 검증
+function validateFinalForm() {
+  const gridData = INNER_TUI_GRID_INSTANCE.getData();
+  if (gridData.length === 0) {
+    alert('상품을 추가해주세요.');
+    return false;
+  }
 
+  if(!document.getElementById('selected_client_id').value) {
+    alert('거래처를 선택해주세요.');
+    return false;
+  }
+
+  if(!document.getElementById('ord_pay').value) {
+    alert('결제 금액을 입력해주세요.');
+    return false;
+  }
+
+  if(!document.getElementById('ord_end_date').value) {
+    alert('납품 요청일을 입력해주세요.');
+    return false;
+  }
+
+  if(!document.getElementById('ord_pay_date').value) {
+    alert('결제일을 입력해주세요.');
+    return false;
+  }
+
+  if(!document.getElementById('cli_pc').value) {
+    alert('우편번호를 입력해주세요.');
+    return false;
+  }
+
+  if(!document.getElementById('cli_add').value) {
+    alert('기본주소를 입력해주세요.');
+    return false;
+  }
+
+  if(!document.getElementById('cli_da').value) {
+    alert('상세주소를 입력해주세요.');
+    return false;
+  }
+  return true;
+}
+
+// 폼 제출
 async function submitForm() {
   if (!validateFinalForm()) return;
   const gridData = INNER_TUI_GRID_INSTANCE.getData();
   const finalPayload = {
+
+    // 거래처
     cli_id: document.getElementById('selected_client_id').value,
-    prd_id: document.getElementById('selected_product_id').value,
+    // 결제 방식
     pay_type: document.getElementById('pay_type')?.value,
-    ord_pay: unformatWithComma(document.getElementById('odd_pay')?.value),
-    ord_end_date: document.getElementById('odd_end_date')?.value,
-    ord_pay_date: document.getElementById('odd_pay_date')?.value,
+    // 결제 금액
+    ord_pay: unformatWithComma(document.getElementById('ord_pay')?.value),
+    // 납품 요청일
+    ord_end_date: document.getElementById('ord_end_date')?.value,
+    // 결제일
+    ord_pay_date: document.getElementById('ord_pay_date')?.value,
+    // 주소
     ord_pc: document.getElementById('cli_pc')?.value,
     ord_add: document.getElementById('cli_add')?.value,
     ord_da: document.getElementById('cli_da')?.value,
-    items: gridData.map(row => ({...row, quantity: unformatWithComma(row.quantity)}))
+    // 상품 목록
+    items: gridData.map(row => ({...row}))
   };
+
+
+  console.log(finalPayload);
+
+  // 3. 서버에 "주문 생성" 요청을 한 번만 보낸다.
   try {
-    const response = await fetch('/SOLEX/purchase-orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalPayload) });
+    const response = await fetch('/SOLEX/shipments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(finalPayload)
+    });
+
     const result = await response.json();
-    if (!response.ok) throw new Error(result.message || `서버 오류`);
+    if (!response.ok) {
+      // 서버가 보낸 에러 메시지(예: "재고가 부족합니다.")를 그대로 사용
+      throw new Error(result.message || '서버 처리 중 오류가 발생했습니다.');
+    }
+
     alert(result.message || '성공적으로 처리되었습니다.');
     location.reload();
+
   } catch (error) {
+    // 여기서 재고 부족 등 서버에서 발생한 모든 오류를 처리
     alert(`오류: ${error.message}`);
   }
-}
+} 

@@ -178,7 +178,7 @@ box-shadow: 0 5px 10px rgba(0,0,0,0.1);
     grid-template-areas:
         "header         header           header         header"
         "payment-method payment-amount   options-list   options-list"
-        "delivery-date  payment-due-date options-list   options-list"
+        "payment-due-date delivery-date   options-list   options-list"
         "address        address          options-list   options-list";
 }
 
