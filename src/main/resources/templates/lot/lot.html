@@ -33,11 +33,6 @@
 						<div class="btn-area">
 							<button class="btn custom-btn-blue" type="button" onclick="loadFilteredLotTree()">검색</button>
 							<button class="btn custom-btn-blue" type="button" onclick="resetFilters()">초기화</button>
-							<div style="margin-top: 20px;">
-							  <h3>테스트용 LOT 저장</h3>
-							  <input type="text" id="oddId">
-							  <button id="lotSaveBtn">LOT 저장 요청</button>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -67,10 +62,15 @@
 												<p><strong>LOT 코드</strong></p>
 												<span id="lotCode" class="lotCode"></span>
 											</div>
-											<div class="single">
-												<p><strong>작업지시자</strong></p>
-												<span id="orderName"></span>
-												<span id="orderNum"></span>
+											<div class="half">
+												<div class="single">
+													<p><strong>작업지시자</strong></p>
+													<span id="orderName"></span>
+												</div>
+												<div class="single">
+													<p><strong>사원번호</strong></p>
+													<span id="orderNum"></span>
+												</div>
 											</div>
 											<div class="half">
 												<div class="single">
@@ -119,12 +119,18 @@
 												<div class="single">
 													<p><strong>공정명</strong></p>
 													<span id="processName"></span>
-													<p><strong>공정코드</strong></p>
-													<span id="processCode"></span>
 												</div>
 												<div class="single">
 													<p><strong>공정장</strong></p>
 													<span id="operatorName"></span>
+												</div>
+											</div>
+											<div class="half">
+												<div class="single">
+													<p><strong>공정코드</strong></p>
+													<span id="processCode"></span>
+												</div>
+												<div class="single">
 													<p><strong>공정장 사번</strong></p>
 													<span id="operatorNum"></span>
 												</div>

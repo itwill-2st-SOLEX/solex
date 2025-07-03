@@ -120,8 +120,8 @@
 	            prc.prc_code AS "processCode",
 	            pl.erp_nm AS "operatorName",
 	            pl.erp_num AS "operatorNum",
-	            NVL(pl.prc_lot_start_date, "생산대기중") AS "processStartDate",
-	            NVL(pl.prc_lot_end_date,"생산대기중") AS "processEndDate",
+	            pl.prc_lot_start_date AS "processStartDate",
+	            pl.prc_lot_end_date AS "processEndDate",
 	            wp.wpo_jcount AS "successCount",
 	            NVL(qh.qhi_bcount, 0) AS "failCount",
 	            e.eqp_name AS "usedEquipmentName",
@@ -190,10 +190,29 @@
     <select id="selectLotInsertInfo" parameterType="long" resultType="map">
         SELECT
             #{oddId} AS "odd_id",
-            'LOT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || p.prd_code || '-' || cd1.det_nm || '-' || cd2.det_nm || '-' || LPAD(ROWNUM, 3, '0') AS "prd_lot_code",
+            'LOT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || p.prd_code || '-' || cd1.det_nm || '-' || cd2.det_nm || '-' ||
+            LPAD(NVL((
+	            SELECT COUNT(*)
+	            FROM product_lot pl
+	            JOIN suju_order_detail sod2 ON pl.odd_id = sod2.odd_id
+	            JOIN product_option po2 ON sod2.opt_id = po2.opt_id
+	            WHERE TO_CHAR(pl.prd_lot_start_date, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+	              AND po2.prd_id = po.prd_id
+	              AND po2.opt_size = po.opt_size
+	              AND po2.opt_color = po.opt_color
+	        ), 0) + 1, 3, '0') AS "prd_lot_code",
+            LPAD(NVL((
+	            SELECT COUNT(*)
+	            FROM product_lot pl
+	            JOIN suju_order_detail sod2 ON pl.odd_id = sod2.odd_id
+	            JOIN product_option po2 ON sod2.opt_id = po2.opt_id
+	            WHERE TO_CHAR(pl.prd_lot_start_date, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+	              AND po2.prd_id = po.prd_id
+	              AND po2.opt_size = po.opt_size
+	              AND po2.opt_color = po.opt_color
+	        ), 0) + 1, 3, '0') AS "prd_lot_sort",
             SYSDATE AS "prd_lot_start_date",
-            'lot_status_02' AS "prd_lot_status",
-            1 AS "prd_lot_sort"
+            'lot_status_02' AS "prd_lot_status"
         FROM suju_order_detail sod
         JOIN product_option po ON sod.opt_id = po.opt_id
         JOIN product p ON po.prd_id = p.prd_id
@@ -303,6 +322,16 @@
     </insert>
     
     <!-- 자재 입고 시 -->
+    <!-- 1. 같은 날짜에 입고한적 있는지 MatLot 조회 -->
+    <select id="selectNextMaterialLotSort" parameterType="map" resultType="int">
+	    SELECT
+	        NVL(MAX(SUBSTR(mat_lot_code, -3)), 0) -- LOT 코드에서 뒤의 3자리만 가져옴
+	    FROM material_lot
+	    WHERE mat_id = #{mat_id}
+	      AND TO_CHAR(mat_date, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+	</select>
+    
+    <!-- 2. material_lot insert -->
     <insert id="insertMaterialLot" parameterType="map">
 	    INSERT INTO material_lot (
 	        mat_lot_code,
@@ -314,7 +343,7 @@
 	        #{mat_lot_code},
 	        #{mat_id},
 	        sysdate,
-	        #{whs_his_cnt},
+	        #{mat_sort},
 	        #{are_id}
 	    )
 	</insert>

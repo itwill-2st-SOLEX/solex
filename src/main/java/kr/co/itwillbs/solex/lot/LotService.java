@@ -178,9 +178,16 @@ public class LotService {
     }
     // ---------------- 자재 입고 시 ----------------
     public void createMaterialLot(Map<String, Object> map) {
-        // 필요한 정보 구성
-        String matLotCode = "MAT-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "-" + 001;
+    	// 같은 자재 + 오늘 날짜의 LOT 순번 가져오기
+        Integer nextSort = lotMapper.selectNextMaterialLotSort(map);
+        int sort = (nextSort != null ? nextSort : 0) + 1;
+
+        // LOT 코드 생성
+        String matLotCode = "MAT-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+                           + "-" + String.format("%03d", sort);
+
         map.put("mat_lot_code", matLotCode);
+        map.put("mat_sort", sort);
 
         // insert
         lotMapper.insertMaterialLot(map);
