@@ -167,14 +167,14 @@ async function openWorkInstructionModal(selectedId) {
     // 상태에 따라 글자색을 다르게 하기 위한 클래스 변수
     const statusClass = material.STK_MATERIAL_STATUS.includes('부족') ? 'text-danger' : 'text-success';
     // 불량율 계산 10%
-    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.1); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.05); // 소수점이 나올 수 있으므로 올림(ceil) 처리
     // 각 자재 정보를 div로 감싸서 간격을 줍니다.
     return `
         <div style="margin-bottom: 10px;">
             <strong>${material.MAT_NM}</strong>
             <div style="padding-left: 15px;">
                 - 단위당 필요 갯수 : ${material.BOM_CNT}, 
-                총 필요 갯수(+불량율 10%) : ${finalRequiredCnt}, 
+                총 필요 갯수(+불량율 5%) : ${finalRequiredCnt}, 
                 현 재고 : ${material.STK_MATERIAL_CNT}개 
                 <strong class="${statusClass}">${material.STK_MATERIAL_STATUS}</strong>
             </div>

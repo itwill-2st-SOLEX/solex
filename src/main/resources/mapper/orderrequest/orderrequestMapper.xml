@@ -114,7 +114,7 @@
 	                AND NVL((
 	                    SELECT SUM(ar.are_qty) FROM area ar
 	                    WHERE ar.item_id = b.mat_id AND ar.are_type = 'area_type_01'
-	                ), 0) < CEIL(b.bom_cnt * odd.odd_cnt * 1.1)
+	                ), 0) < CEIL(b.bom_cnt * odd.odd_cnt * 1.05)
 	            ) > 0 THEN '부족' -- 재고가 부족한 자재가 1개 이상이면 '부족'
 	            ELSE '충분'
 	        END

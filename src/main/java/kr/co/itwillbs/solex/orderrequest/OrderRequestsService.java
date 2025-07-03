@@ -68,6 +68,7 @@ public class OrderRequestsService {
 
          // 자재 주문  
         Integer materialOrderStatus = orderRequestsMapper.insertMaterialOrder(params);
+        System.out.println(materialOrderStatus);
         
         
         // null 체크 추가

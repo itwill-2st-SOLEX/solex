@@ -15,13 +15,18 @@ public interface ShipmentsMapper {
 	    @Param("limit") int limit
 	);
 
-	// 주문 상세 조회 쿼리
-	List<Map<String, Object>> getOrderDetail(@Param("odd_id") String odd_id);
-
-
 	// 주문 생성 쿼리
 	int createOrderRequest(Map<String, Object> params);
 
 	int createSujuOrderDetail(@Param("list") List<Map<String, Object>> items);
+
+	int approveForm(int ord_id);
+
+	Map<String, Object> selectOrderDetailById(int odd_id);
+	
+	
+	
+	
+	
 
 }

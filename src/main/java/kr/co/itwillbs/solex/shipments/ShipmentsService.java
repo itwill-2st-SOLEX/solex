@@ -1,6 +1,7 @@
 package kr.co.itwillbs.solex.shipments;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,21 +9,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.itwillbs.solex.sales.OrderMapper;
+
 @Service
 public class ShipmentsService {
 
     @Autowired
     private ShipmentsMapper shipmentsMapper;
+
 	
 	public List<Map<String, Object>> getPagedGridDataAsMap(int page, int pageSize) {
 		int offset = page * pageSize;
         List<Map<String, Object>> resultList = shipmentsMapper.selectPagedOrderDataAsMap(offset, pageSize);
 		return resultList;
 	}
-
-	public List<Map<String, Object>> getOrderDetail(String odd_id) {
-		List<Map<String, Object>> resultList = shipmentsMapper.getOrderDetail(odd_id);
-		return resultList;
+	
+	
+	@Transactional(readOnly = true)
+	public Map<String, Object> getOrderDetail(int ord_id) {
+		Map<String, Object> orderData = shipmentsMapper.selectOrderDetailById(ord_id);
+		return orderData;
 	}
     
     @Transactional(rollbackFor = Exception.class) 
@@ -45,26 +51,23 @@ public class ShipmentsService {
         }
 
         // 주문 상태 변경
-        Integer result2 = shipmentsMapper.createSujuOrderDetail(items);
+        Integer result = shipmentsMapper.createSujuOrderDetail(items);
         // null 체크 추가
-        if (result2 == null || result2 <= 0) {
+        if (result == null || result <= 0) {
             throw new RuntimeException("주문 상태 변경에 실패했습니다.");
         }
     }
+
+    @Transactional(rollbackFor = Exception.class) 
+    public void approveForm(int ord_id) throws Exception {
+        // 주문 상태 변경
+        Integer result = shipmentsMapper.approveForm(ord_id);
+        // null 체크 추가
+        if (result == null || result <= 0) {
+            throw new RuntimeException("주문 승인에 실패했습니다.");
+        }
+    }
+
 }
 
 
-
-// 설비 정보, 공정 정보
-
-// 두개의 테이블에 대한 매핑테이블
-
-// 와이?!?!?!?!?!?!?!?!??!?
-// 공정 하나의 여려개 가능
-// 공정에 여러 설비가 들어가니깐.
-// 
-
-// 굿
-
-// 설비 테이블 + 공정 테이블 = 매핑 테이블	
-// 언제까지?

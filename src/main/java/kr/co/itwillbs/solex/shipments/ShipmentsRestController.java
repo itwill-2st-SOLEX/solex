@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,15 +50,26 @@ public class ShipmentsRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류가 발생했습니다.");
         }
     }
-
-
-
-
 	
 	@GetMapping("{odd_id}") // 
-	public List<Map<String, Object>> getOrderDetail(@PathVariable("odd_id") String odd_id) throws Exception {
-		List<Map<String, Object>> list = shipmentsService.getOrderDetail(odd_id);
-		return list; 
+	public Map<String, Object> getOrderDetail(@PathVariable("odd_id") int odd_id) throws Exception {
+		Map<String, Object> orderData = shipmentsService.getOrderDetail(odd_id);
+		return orderData;
 	}
+
+    @PatchMapping("{odd_id}")
+    public ResponseEntity<String> approveForm(@PathVariable("odd_id") int odd_id) throws Exception {
+        try {
+            shipmentsService.approveForm(odd_id);
+            return ResponseEntity.ok("정상적으로 처리되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류가 발생했습니다.");
+        }
+    }
+	
+	
+	
+	
 	
 }

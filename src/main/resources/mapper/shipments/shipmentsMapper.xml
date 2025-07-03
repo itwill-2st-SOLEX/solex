@@ -5,7 +5,7 @@
 <mapper namespace="kr.co.itwillbs.solex.shipments.ShipmentsMapper">
   	<select id="selectPagedOrderDataAsMap" parameterType="Map" resultType="Map">
   	SELECT
-		ord.ord_id as ORD_ID, -- 수주 번호
+		odd.odd_id as ODD_ID, -- 수주 상세 번호
 		cli.cli_nm as CLI_NM, -- 거래처명
 		cli.cli_ceo as CLI_CEO, -- 거래처 대표자
 		cli.cli_phone as CLI_PHONE, -- 거래처 대표자 전화번호
@@ -24,57 +24,39 @@
     OFFSET #{offset} ROWS
     FETCH NEXT #{limit} ROWS ONLY
 	</select>
-	
-	<select id="getOrderDetail" parameterType="Map" resultType="Map">
-	<![CDATA[
-	SELECT
-	    odd.odd_id as ODD_ID,
-	    cli.cli_nm as CLI_NM,
-	    TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE,
-	    prd.prd_nm as PRD_NM,
-	    cd2.det_nm as OPT_COLOR,
-	    cd3.det_nm as OPT_SIZE,
-	    cd4.det_nm as OPT_HEIGHT,
-	    odd.odd_cnt as ODD_CNT,
-	    NVL((
-	        SELECT SUM(ar.are_qty) FROM area ar
-	        WHERE ar.item_id = opt.opt_id AND ar.are_type = 'area_type_02' -- 완제품 구역 코드 (가정)
-	    ), 0) as STK_CNT,
-	    
-	    mat.mat_nm as MAT_NM,
-	    bom.bom_cnt as BOM_CNT,
-	    (bom.bom_cnt * odd.odd_cnt) as TOTAL_BOM_CNT,
-	
-	    NVL((
-	        SELECT SUM(ar.are_qty) FROM area ar
-	        WHERE ar.item_id = mat.mat_id AND ar.are_type = 'area_type_01' -- 자재 구역 코드
-	    ), 0) as STK_MATERIAL_CNT,
 
-	    CASE
-	        WHEN NVL((
-	            SELECT SUM(ar.are_qty) FROM area ar
-	            WHERE ar.item_id = mat.mat_id AND ar.are_type = 'area_type_01'
-	        ), 0) >= (bom.bom_cnt * odd.odd_cnt)
-	        THEN '충분'
-	        ELSE '부족'
-	    END as STK_MATERIAL_STATUS
-	FROM suju_order_detail odd
-	JOIN suju_order ord ON odd.ord_id = ord.ord_id
-	JOIN client cli ON ord.cli_id = cli.cli_id
-	JOIN product_option opt ON odd.opt_id = opt.opt_id
-	JOIN product prd ON opt.prd_id = prd.prd_id
-	LEFT JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
-	LEFT JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
-	LEFT JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
-	-- [수정 4] stock 테이블과의 JOIN 2개 모두 삭제
-	-- LEFT JOIN stock stk_1 ON stk_1.item_id = opt.opt_id
-	JOIN bom ON bom.opt_id = opt.opt_id
-	JOIN material mat ON bom.mat_id = mat.mat_id
-	-- LEFT JOIN stock stk_material ON stk_material.item_id = mat.mat_id
-	WHERE odd.odd_id = #{odd_id}
-	]]>
+	<!-- 수주 상세 조회 -->
+	<select id="selectOrderDetailById" parameterType="int" resultType="map">
+		 SELECT
+			odd.odd_id as ODD_ID, -- 수주 상세 번호
+			cli.cli_nm as CLI_NM, -- 거래처명
+			prd.prd_nm as PRD_NM, -- 제품명
+			ord.ord_pc as ORD_PC,
+			ord.ord_add as ORD_ADD,
+			ord.ord_da as ORD_DA, -- 주소		
+			ord.pay_type as PAY_TYPE, -- 결제 방식
+			ord.ord_pay as ORD_PAY, -- 결제 금액
+			ord.ord_pay_date as ORD_PAY_DATE, -- 결제 예정일
+			TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE, -- 납품 예정일
+			opt.opt_color as OPT_COLOR,
+			opt.opt_size as OPT_SIZE,
+			opt.opt_height as OPT_HEIGHT,
+			odd.odd_cnt as ODD_CNT,
+			cd2.det_nm as OPT_COLOR_NM,
+			cd3.det_nm as OPT_SIZE_NM,
+			cd4.det_nm as OPT_HEIGHT_NM,
+			odd.odd_cnt as ODD_CNT
+		FROM suju_order ord
+		left JOIN client cli ON ord.cli_id = cli.cli_id
+		left join suju_order_detail odd on odd.ord_id = ord.ord_id
+		left JOIN product_option opt ON opt.opt_id = odd.opt_id
+		left join product prd on prd.prd_id = opt.prd_id
+		left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+		left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+		left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
+		WHERE odd.odd_id = #{odd_id};
 	</select>
-
+	
 
 	<!-- 주문 생성 -->
 	<insert id="createOrderRequest" parameterType="map" keyProperty="ord_id" keyColumn="ord_id" useGeneratedKeys="true">
@@ -129,11 +111,25 @@
 				#{item.quantity},
 				#{item.odd_sts},
 				SYSDATE + 9/24,
-				'n'
+				'y'
 			FROM DUAL
 		</foreach>
 	</insert>
 	<!-- 주문 등록 트랜잭션 끝 -->
+
+	<!-- 수주테이블과 수주상세테이블 조인해서 수주 번호에 해당하는 수주 상세들 전부 승인 -->
+	<update id="approveForm" parameterType="int">
+		MERGE INTO suju_order_detail odd
+			USING (
+				SELECT ord.ord_id
+				FROM suju_order ord
+				WHERE ord.ord_id = #{ord_id}
+			) src
+			ON (odd.ord_id = src.ord_id)
+		WHEN MATCHED THEN
+		UPDATE SET odd.odd_sts = 'odd_sts_06', odd.odd_mod_date = SYSDATE + 9/24;
+	</update>
+
 
   
 </mapper>

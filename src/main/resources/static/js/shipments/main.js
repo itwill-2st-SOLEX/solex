@@ -17,7 +17,7 @@ const grid = new tui.Grid({
   scrollX: false,
   data: [], // 초기 데이터는 비어있음
   columns: [
-    {header: "수주 번호",name: "ORD_ID",width: 100,align: "center",sortable: true},
+    {header: "수주 상세 번호",name: "ODD_ID",width: 150,align: "center",sortable: true},
     {header: "거래처", name: "CLI_NM", align: "center", sortable: true },
     {header: "거래처 대표자", name: "CLI_CEO", align: "center", sortable: true },
     {header: "거래처 대표자 전화번호", name: "CLI_PHONE", align: "center", sortable: true },
@@ -133,14 +133,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (target.classList.contains("assign-btn")) {
       e.stopPropagation();
 
-      const oddId = target.dataset.ordId;
+      const oddId = target.dataset.oddId;
       const action = target.dataset.action; // data-action 값을 가져옴
 
 
       if (action === "approve") {
         // 작업 지시용 모달 열기
-        openApproveModal();
-      }
+        openApproveModal(oddId);
+      } else if (action === "modify") {
+        // 수주 수정 모달 열기
+        openModifyModal(oddId);
+      } 
+    }
+  });
+
+
+  const myModalEl = document.getElementById('myModal');
+
+  // 'shown.bs.modal' 이벤트는 모달이 완전히 화면에 나타난 후에 발생합니다.
+  myModalEl.addEventListener('shown.bs.modal', () => {
+    // 이 시점에서 그리드에게 레이아웃을 다시 계산하고 그리라고 명령합니다.
+    if (INNER_TUI_GRID_INSTANCE) {
+      INNER_TUI_GRID_INSTANCE.refreshLayout();
     }
   });
 });
@@ -171,7 +185,7 @@ async function fetchGridData(page = currentPage) {
     console.log(data);
     data.forEach(item => {
       if(item.ODD_STS === 'odd_sts_05') {
-        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ORD_ID}">승인/반려</button>`;
+        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="approve" data-odd-id="${item.ODD_ID}">승인/반려</button>`;
       } else if(item.DET_NM === 'odd_sts_06') {
         item.DET_NM = '수주 수정';
       } else if(item.DET_NM === 'odd_sts_07') {
@@ -432,7 +446,6 @@ function addRowToInnerGrid() {
       if (!isDuplicate) {
           INNER_TUI_GRID_INSTANCE.appendRow({
               productName: item.PRD_NM,
-              optionCode:  item.OPT_ID,
               colorName:   item.OPT_COLOR_NM,
               sizeName:    item.OPT_SIZE_NM,
               heightName:  item.OPT_HEIGHT_NM,
@@ -498,7 +511,7 @@ function deleteSelectedRows() {
 
 // 콤마제거
 function unformatWithComma(str) { return String(str || '').replace(/,/g, ''); }
-
+function formatWithComma(str) { return String(str || '').replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
 // 폼 검증
 function validateFinalForm() {
   const gridData = INNER_TUI_GRID_INSTANCE.getData();
@@ -568,9 +581,6 @@ async function submitForm() {
     items: gridData.map(row => ({...row}))
   };
 
-
-  console.log(finalPayload);
-
   // 3. 서버에 "주문 생성" 요청을 한 번만 보낸다.
   try {
     const response = await fetch('/SOLEX/shipments', {
@@ -596,26 +606,110 @@ async function submitForm() {
 
 
 // 승인 모달 열기
-async function openApproveModal() {
+async function openApproveModal(oddId) {
   initializeSearchableSelect("client-select-box", "/SOLEX/orders/clients");
   initializeSearchableSelect("product-select-box", "/SOLEX/orders/products");
   initDate();
 
+
+  // 기존에 display none된 버튼을 display block으로 변경
+  // oldBtn은 승인 버튼은 none이 아님 oldBtn2는 반려 버튼은 none임
   const oldBtn = document.getElementById("submitBtn");
+  const oldBtn2 = document.getElementById("rejectBtn");
+  const oldBtn3 = document.getElementById("closeBtn");
+  oldBtn2.style.display = "block";
+  oldBtn3.style.display = "none";
+
   // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
   const newBtn = oldBtn.cloneNode(true);
+  const newBtn2 = oldBtn2.cloneNode(true);
+  
   // 2. 기존 버튼을 새로운 버튼으로 교체
   oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+  oldBtn2.parentNode.replaceChild(newBtn2, oldBtn2);
   // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
-  newBtn.textContent = "등록";
+  newBtn.textContent = "승인";
   newBtn.addEventListener("click", () => {
-    submitForm();
+    approveForm(oddId);
   });
+
+  console.log(oddId);
+
+  newBtn2.textContent = "반려";
+  newBtn2.addEventListener("click", () => {
+    rejectForm();
+  });
+
+  // oddId로 백엔드에 전달해서 상세 조회
+  const response = await fetch(`/SOLEX/shipments/${oddId}`);
+  const data = await response.json();
+  populateModalWithData(data);
 
   const modal = document.getElementById("myModal");
   const modalInstance = new bootstrap.Modal(modal);
   modalInstance.show();
 }
+
+
+function populateModalWithData(data) {
+  const { orderInfo, orderItems } = data;
+  if (!orderInfo) return;
+  document.getElementById('pay_type').value = orderInfo.PAYMENT_TYPE || '';
+  document.getElementById('ord_pay').value = formatWithComma(String(orderInfo.PAYMENT_AMOUNT || ''));
+  document.getElementById('ord_end_date').value = orderInfo.DELIVERY_DATE;
+  document.getElementById('ord_pay_date').value = orderInfo.PAYMENT_DATE;
+  document.getElementById('cli_pc').value = orderInfo.POSTAL_CODE || '';
+  document.getElementById('cli_add').value = orderInfo.BASE_ADDRESS || '';
+  document.getElementById('cli_da').value = orderInfo.DETAIL_ADDRESS || '';
+  if (orderInfo.CLIENT_ID && orderInfo.CLIENT_NAME) {
+      document.getElementById('client-search-input').value = orderInfo.CLIENT_NAME;
+      document.getElementById('selected_client_id').value = orderInfo.CLIENT_ID;
+  }
+  if (orderInfo.PRODUCT_ID && orderInfo.PRODUCT_NAME) {
+      document.getElementById('product-search-input').value = orderInfo.PRODUCT_NAME;
+      document.getElementById('selected_product_id').value = orderInfo.PRODUCT_ID;
+  }
+  if (orderItems && orderItems.length > 0) {
+      const transformedItems = orderItems.map(item => ({
+          productName: item.PRODUCT_NAME, 
+          colorName: item.COLOR_NAME, 
+          sizeName: item.SIZE_NAME, 
+          heightName: item.HEIGHT_NAME, 
+          quantity: item.QUANTITY, 
+          productCode: item.PRODUCT_CODE,
+          colorCode: item.COLOR_CODE, 
+          sizeCode: item.SIZE_CODE, 
+          heightCode: item.HEIGHT_CODE
+      }));
+      INNER_TUI_GRID_INSTANCE.resetData(transformedItems);
+  }
+}
+
+async function approveForm(oddId) {
+  // 승인 로직
+  // 백엔드랑 연동 상태 변경시키는 로직
+  // 컴펌을 받아서 승인 하시겠습니까?
+  if(!confirm("승인 하시겠습니까?")) return;
+
+  try {
+    // 이걸 PATCH 보내는게 맞는거 같음
+    const response = await fetch(`/SOLEX/shipments/${oddId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const result = await response.json();
+    console.log(result);
+    if (!response.ok) {
+      throw new Error(result.message || '서버 처리 중 오류가 발생했습니다.');
+    }
+    alert(result.message || '승인 처리되었습니다.');
+    location.reload();
+  } catch (error) {
+    alert(`오류: ${error.message}`);
+  }
+}
+
+
 
 // 검색어 입력 시 (keyup)
 async function fetchSelectData(url, keyword = "") {
