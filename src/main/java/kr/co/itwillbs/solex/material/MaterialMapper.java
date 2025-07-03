@@ -25,7 +25,7 @@ public interface MaterialMapper {
 	List<Map<String, Object>> getMatUnits();
 
 	//자재 등록이요 
-	int registMat(Map<String, Object> matMap);
+	void registMat(Map<String, Object> matMap);
 	
 	// 자재 수정이요
 	void updateGridCell(Map<String, Object> payload);

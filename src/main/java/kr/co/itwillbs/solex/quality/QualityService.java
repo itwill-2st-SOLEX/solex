@@ -26,4 +26,9 @@ public class QualityService {
 		return qualityMapper.getQualityList(offset, size);
 	}
 
+	public void registerQuality(Map<String, Object> qualityRequest) {
+		qualityMapper.registerQuality(qualityRequest);
+		
+	}
+
 }

@@ -14,4 +14,9 @@
   		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
    </select>
    
+   <insert id="registerQuality" parameterType="map">
+		INSERT INTO quality_item (qua_type, qua_nm)
+		VALUES (#{qtyCat}, #{qtyNm})
+   </insert>
+   
 </mapper>

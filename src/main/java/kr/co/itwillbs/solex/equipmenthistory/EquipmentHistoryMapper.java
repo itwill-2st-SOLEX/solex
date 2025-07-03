@@ -12,4 +12,6 @@ public interface EquipmentHistoryMapper {
 	List<Map<String, Object>> getEquipmentHistory(@Param("offset") int offset, @Param("size") int size);
 
 	List<Map<String, Object>> getEquipmentHistoryDetail(Long eqpId);
+
+	void registerEquipmentHistory(Map<String, Object> equipmentHistoryMap);
 }

@@ -23,4 +23,8 @@ public class EquipmentHistoryService {
 		Long eqpIdLong = Long.valueOf(eqpId);
 		return equipmentHistoryMapper.getEquipmentHistoryDetail(eqpIdLong);
 	}
+
+	public void registerEquipmentHistory(Map<String, Object> equipmentHistoryMap) {
+		equipmentHistoryMapper.registerEquipmentHistory(equipmentHistoryMap);
+	}
 }
