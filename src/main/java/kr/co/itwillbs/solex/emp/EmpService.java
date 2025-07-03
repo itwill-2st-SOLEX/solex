@@ -23,13 +23,17 @@ public class EmpService {
 
 	//인사등록
 	public void registerEmployee(Map<String, Object> empMap) {
-		System.out.println("##################################empMap = " + empMap);
-		
         String encodedPassword = passwordEncoder.encode((String) empMap.get("emp_birth"));
 		empMap.put("emp_pwd", encodedPassword);
-		
 		mapper.insertEmp(empMap);
 	}
+	
+	
+	// 인사등록 사진 저장을 위한 
+//	public void save(Map<String, Object> empMap) {
+//		// TODO Auto-generated method stub
+//		mapper.insertEmp(empMap);
+//	}
 
 	//인사목록 (재직중)
 	 public List<Map<String, Object>> getEmpList(String searchType, String searchKeyword, String includeEmpSts) {
@@ -111,6 +115,8 @@ public class EmpService {
 		System.out.println("service map = " + mapper.modifyMap(empModifyMap));
 		return mapper.modifyMap(empModifyMap);
 	}
+
+
 
 
 }

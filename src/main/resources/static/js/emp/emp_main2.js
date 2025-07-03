@@ -119,155 +119,117 @@ document.addEventListener('DOMContentLoaded', function(){
 
 			// 폼 생성 후에 select 박스에 옵션을 추가해야함 
 			const form = document.createElement('form');
-			form.setAttribute('id', 'joinForm');
-			form.setAttribute('method', 'post');
-			form.setAttribute('enctype', 'multipart/form-data'); // 이미지
+			form.id = 'joinForm'
 			
+			modalTitle.textContent = '사원 등록';
 			
-			// ===== 사진 =====
-			let div0 = document.createElement('div');
-			div0.className = 'mb-3';
-			div0.innerHTML = `
-			  <label>사진</label>
-			  <input type="file" class="form-control d-inline-block w-25" name="emp_img" required><br>
-			  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
-			`;
-			form.appendChild(div0);
-			
-
-			// ===== 이름 =====
-			let div2 = document.createElement('div');
-			div2.className = 'mb-3';
-			div2.innerHTML = `
-			  <label>이름</label>
-			  <input type="text" class="form-control d-inline-block w-25" name="emp_nm" required><br>
-			`;
-			form.appendChild(div2);
-
-			// ===== 입사일 =====
-			let div3 = document.createElement('div');
-			div3.className = 'mb-3';
-			div3.innerHTML = `
-			  <label>입사일</label>
-			  <input type="date" class="form-control d-inline-block w-25" name="emp_hire" style="${empData ? 'display:none;' : ''}" required><br>
-			`;
-			form.appendChild(div3);
-
-			// ===== 성별 =====
-			let div4 = document.createElement('div');
-			div4.className = 'mb-3';
-			div4.innerHTML = `
-			  <label>성별</label>
-			  <label><input type="radio" name="emp_gd" value="M" checked> 남</label>
-			  <label><input type="radio" name="emp_gd" value="W"> 여</label><br>
-			`;
-			form.appendChild(div4);
-
-
-			// ===== 생년월일 =====
-			let div5 = document.createElement('div');
-			div5.className = 'mb-3';
-			div5.innerHTML = `
-			  <label>생년월일</label>
-			  <input type="text" class="form-control d-inline-block w-25" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="ex)990101" required>
-			  <input type="hidden" name="emp_pw" id="emp_pw"><br>
-			`;
-			form.appendChild(div5);
-
-			// ===== 분류, 부서, 직급, 팀 (코드 리스트는 서버에서 전달 필요) =====
-			let inlineDiv = document.createElement('div');
-			inlineDiv.className = 'inline-container';
-			inlineDiv.innerHTML = `
-
-			  <span>사원</span>
-			  <select name="empCatCd" id="empCatCd" class="form-select">
-			    <option value="">-- 사원을 선택하세요 --</option>
-			  </select>
-
-			  <span>부서</span>
-			  <select name="empDepCd" id="empDepCd" class="form-select">
-			    <option value="">-- 부서를 선택하세요 --</option>
-			  </select>
-			
-			  <div>직급</div>
-			  <select name="empPosCd" id="empPosCd" class="form-select">
-			    <option value="">-- 직급을 선택하세요 --</option>
-			  </select>
-
-			  <span>팀</span>
-			  <select name="empTeamCd" id="empTeamCd" class="form-select">
-			    <option value="">-- 팀을 선택하세요 --</option>
-			  </select>
-			`;
-
-			form.appendChild(inlineDiv);
-
-			
-
-			// ===== 연락처 =====
-
-			let div6 = document.createElement('div');
-
-			div6.className = 'mb-3';
-
-			div6.innerHTML = `
-			  <label>연락처</label>
-			  <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
-			  <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
-			  <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required><br>
-			  <input type="hidden" name="emp_phone" id="emp_phone">
-			`;
-
-			form.appendChild(div6);
-
-			
-
-			// ===== 이메일 =====
-
-			let div7 = document.createElement('div');
-
-			div7.className = 'mb-3';
-
-			div7.innerHTML = `
-			  <label>이메일</label>
-			  <input type="text" id="emp_email1" class="form-control d-inline-block w-25" required> @
-			  <input type="text" id="emp_email2" class="form-control d-inline-block w-25" required><br>
-			  <input type="hidden" name="emp_email" id="emp_email">
-			`;
-
-			form.appendChild(div7);
-
-			
-			// ===== 주소 =====
-
-			let div8 = document.createElement('div');
-
-			div8.className = 'mb-3';
-
-			div8.innerHTML = `
-			  <label>주소</label><br>
-			  <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
-			  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-			  <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
-			  <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1" placeholder="상세주소" required>
-			  <input type="text" id="sample6_extraAddress" placeholder="참고항목">
-			`;
-
-			form.appendChild(div8);
+			form.innerHTML = `
+				    <div class="row mb-3">
+					  <div class="col">
+					    <div class="col">
+					      <img id="emp_img_preview" alt="사진 미리보기" src="/assets/img/emp/simple_person_pic.jpg" style="width:120px; height:160px; border-radius:4px; object-fit:cover;"/>
+					      <input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
+					    </div>
+					  </div>
+					</div>
+					
+					
+					<div class="row mb-3">
+						<div class="col">
+							<label>이름</label>
+							<div><input type="text" class="form-control" name="emp_nm" required></div>
+						</div>	
+						<div class="col">
+							<label>입사일</label>
+							<div><input type="date" class="form-control" name="emp_hire" required></div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>성별</label>
+							<div>
+								<label id="gender"><input type="radio" name="emp_gd" value="M" checked> 남</label>
+								<label id="gender"><input type="radio" name="emp_gd" value="W"> 여</label><br>
+							</div>
+						</div>
+						<div class="col">
+							<label>생년월일</label>
+							<div><input type="text"class="form-control" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="ex)990101" required></div>
+							<div><input type="hidden" name="emp_pw" id="emp_pw"></div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>연락처</label>
+							<div>
+								<input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
+								<input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
+								<input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required><br>
+								<input type="hidden" name="emp_phone" id="emp_phone">
+							</div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>이메일</label>
+							<div>
+								<input type="text" id="emp_email1" class="form-control d-inline-block w-25" required> @
+								<input type="text" id="emp_email2" class="form-control d-inline-block w-25" required><br>
+								<input type="hidden" name="emp_email" id="emp_email">
+							</div>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>직급</label>
+								<select name="empPosCd" id="empPosCd" class="form-control">
+									<option value="">-- 직급을 선택하세요 --</option>
+								</select>
+						</div>
+						<div class="col">
+							<label>사원</label>
+								<select name="empCatCd" id="empCatCd" class="form-control">
+									<option value="">-- 사원을 선택하세요 --</option>
+								</select>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<label>부서</label>
+								<select name="empDepCd" id="empDepCd" class="form-control">
+									<option value="">-- 부서를 선택하세요 --</option>
+								</select>
+						</div>
+						<div class="col">
+							<label>팀</label>
+								<select name="empTeamCd" id="empTeamCd" class="form-control">
+									<option value="">-- 팀을 선택하세요 --</option>
+								</select>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+						<label>주소</label><br>
+						  <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
+						  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+						  <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
+						  <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control" placeholder="상세주소" required>
+						  <input type="text" id="sample6_extraAddress" class="form-control" placeholder="참고항목">
+						</div>
+					</div>
+	
+					<div class="modal-footer">
+						<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+						<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
+						<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
+					</div>
+				`			
 
 			// ===== 버튼 =====
 
 			let footerDiv = document.createElement('div');
 
 			footerDiv.className = 'modal-footer';
-
-			footerDiv.innerHTML = `
-			  <button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn" style="${empData ? 'display:none;' : ''}">등록</button>
-			  <button type="button" class="btn custom-btn-blue btn-warning" id="modifyBtn" style="${empData ? '' : 'display:none;'}">수정</button>
-			  <button type="reset" class="btn btn-secondary" id="resetBtn" style="${empData ? 'display:none;' : ''}">초기화</button>
-
-			  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-			`;
 
 			form.appendChild(footerDiv);
 
@@ -306,7 +268,28 @@ document.addEventListener('DOMContentLoaded', function(){
 			    }
 			}
 			
+			// 사진 파일 선택 → 미리보기
+			const imgInput   = document.getElementById('emp_img');
+			const imgPreview = document.getElementById('emp_img_preview');
+
 			
+			// 기본 이미지 경로
+			const defaultImg = '/img/simple_person_pic.jpg';
+			
+			imgInput.addEventListener('change', e => {
+			  const file = e.target.files[0];
+			  if (!file) {                      // 선택 취소한 경우
+			    imgPreview.style.display = 'none';
+			    imgPreview.src = defaultImg;
+			    return;
+			  }
+
+			  const reader = new FileReader();
+			  reader.onload = evt => {
+			    imgPreview.src = evt.target.result;   // 선택한 이미지 표시
+			  };
+			  reader.readAsDataURL(file);             // 이미지 파일 → base64 읽기
+			});
 					// --- 1. 등록 버튼 클릭 이벤트 처리 ---
 					if (registerBtn) {
 					    registerBtn.addEventListener('click', async function(event) {
@@ -558,6 +541,11 @@ document.addEventListener('DOMContentLoaded', function(){
 					}
 				});
 				
+				///초기화 버튼 클릭 시
+				document.getElementById('resetBtn').addEventListener('click', () => {
+				  imgPreview.src = defaultImg;
+				  imgInput.value = '';  // 파일 선택도 초기화
+				});
 				
 			}); // DOMContentLoaded 끝
 			

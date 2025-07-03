@@ -1,5 +1,8 @@
 <th:block xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:fragment="header">
+	<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<!-- 	마이페이지 css입니다 -->
+	<link rel="stylesheet" th:href="@{/css/emp/emp_main.css}">
 	<div class="costom-inner">
 		<nav class="costom-nav layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
 			id="layout-navbar">
@@ -69,12 +72,7 @@
 							</li>
 							<li>
 								<a class="dropdown-item" href="#" onclick="openMypagePopup(event)"> 
-									<i class="icon-base bx bx-user icon-md me-3"></i><span>My Page</span>
-								</a>
-							</li>
-							<li>
-								<a class="dropdown-item" href="#">
-									<i class="icon-base bx bx-cog icon-md me-3"></i><span>Settings</span>
+									<i class="icon-base bx bx-user icon-md me-3"></i><span>마이페이지</span>
 								</a>
 							</li>
 							<li>
@@ -97,7 +95,7 @@
 	
 <!-- ✨ Mypage 모달창 띄우기 위해  -->
 	<div class="modal fade" id="mypageModal" tabindex="-1" aria-hidden="true">
-	  <div class="modal-dialog modal-lg">
+	  <div class="modal-dialog modal-dialog-scrollable modal-xl">
 	    <div class="modal-content">
 	      <div class="modal-header">
 	        <h5 class="modal-title" id="exampleModalLabel">마이페이지</h5>
@@ -163,81 +161,100 @@
 			const form = document.createElement('form');
 			form.id = 'mypageForm';
 			form.innerHTML = `
-				<div class="modal-body big-box">
-					<div class="row mb-3">
-						<div class="col">
-						<label>사진</label>
-						  <input type="file" class="form-control d-inline-block" name="emp_img" required><br>
-						  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
-						</div>	
-						<div class="col">
-					  	  <label>이름</label>
-						  <input type="text" class="form-control d-inline-block" name="emp_nm" value="${empNm}" required><br>
-						</div>
-					</div>
-					<div class="row mb-3">
-						<div class="col">
-						<label>직급</label>
-						  <input type="text" class="form-control d-inline-block" name="emp_pos_cd" value ="${EMPPOSCD}" readonly><br>
-						</div>	
-						<div class="col">
-					  	  <label>사원</label>
-						  <input type="text" class="form-control d-inline-block" name="emp_cat_cd" value="${EMPCATCD}" readonly><br>
-						</div>
-					</div>
-					<div class="row mb-3">
-						<div class="col">
-						<label>부서</label>
-						  <input type="text" class="form-control d-inline-block" name="emp_dep_cd" value="${EMPDEPCD}" readonly><br>
-						</div>	
-						<div class="col">
-					  	  <label>팀</label>
-						  <input type="text" class="form-control d-inline-block" name="emp_team_cd" value="${EMPTEAMCD}" readonly><br>
-						</div>
-					</div>
-					<div class="row mb-3">
-						<div class="col">
-						  <label>입사일</label>
-						  <input type="text" class="form-control d-inline-block" name="emp_hire" value="${empHire}" readonly><br>
-						</div>
-						<div class="col">
-					  	  <label>생년월일</label>
-						  <input type="text" class="form-control d-inline-block" name="emp_birth" id="emp_birth" pattern="\\d{6}" value="${empBirth}" readonly>
-						  <input type="hidden" name="emp_pw" id="emp_pw"><br>
-						</div>
-					</div>
-					<div class="row mb-3">
-						<div class="col">
-					  	  <label>연락처</label>
-						  <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" value="${hp1}" required> -
-						  <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" value="${hp2}" required> -
-						  <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" value="${hp3}" required><br>
-						  <input type="hidden" name="emp_phone" id="emp_phone">
-						</div>
-					</div>
-					<div class="row mb-3">
-						<div class="col">
-						   <label>이메일</label>
-						   <input type="text" id="emp_email1" class="form-control d-inline-block w-25" value="${em1}" required> @
-						   <input type="text" id="emp_email2" class="form-control d-inline-block w-25" value="${em2}" required><br>
-						   <input type="hidden" name="emp_email" id="emp_email">
-						</div>
-					</div>
-					<div class="row mb-3">
-						<div class="col">
-						    <label>주소</label><br>
-						   <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" value="${empPc}" required>
-						   <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-						   <input type="text" id="sample6_address" name="emp_add" class="form-control" value="${empAdd}" required><br>
-						   <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1" value="${empDa}" required><br>
-						</div>
-					</div>
-					<div class="modal-footer">
-					   <button type="button" class="btn custom-btn-blue btn-warning" id="modifyBtn" >수정</button>
-					</div>
+				<div class="row mb-4">
+				  <div class="col-3">
+				    <label>사진</label>
+				    <img id="emp_img_preview" alt="사진 미리보기"
+				    	src="/SOLEX/assets/img/emp/simple_person_pic.jpg"
+				         style="width:173px; height:208px; border-radius:4px; object-fit:cover; display:block; margin-bottom:10px;" />
+				    <input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
+				  </div>
+	
+				  <!-- 🧾 오른쪽: 나머지 입력 폼 -->
+				  <div class="col-9">
+				    <div class="row mb-3">
+				      <div class="col">
+				        <label>이름</label>
+				        <input type="text" class="form-control" name="emp_nm" value="${empNm}" required>
+				      </div>
+				      <div class="col">
+				        <label>입사일</label>
+				        <input type="date" class="form-control" name="emp_hire" value="${empHire}" readonly>
+				      </div>
+				    </div>
+	
+				    <div class="row mb-3">
+				      <div class="col">
+				        <label>성별</label><br>
+				        <label id="genderM"><input type="radio" name="emp_gd" value="M" checked> 남</label>
+				        <label><input type="radio" name="emp_gd" value="W"> 여</label>
+				      </div>
+				      <div class="col">
+				        <label>생년월일</label>
+				        <input type="text" class="form-control" name="emp_birth" id="emp_birth" pattern="\\d{6}" value="${empBirth}" placeholder="ex)990101" readonly>
+				        <input type="hidden" name="emp_pw" id="emp_pw">
+				      </div>
+				    </div>
+	
+				    <div class="row mb-3">
+				      <div class="col">
+				        <label>연락처</label><br>
+				        <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" value="${hp1}" required> -
+				        <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" value="${hp2}" required> -
+				        <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" value="${hp3}" required>
+				        <input type="hidden" name="emp_phone" id="emp_phone">
+				      </div>
+				    </div>
+	
+				    <div class="row mb-3">
+				      <div class="col">
+				        <label>이메일</label><br>
+				        <input type="text" id="emp_email1" class="form-control d-inline-block w-25" value="${em1}" required> @
+				        <input type="text" id="emp_email2" class="form-control d-inline-block w-25" value="${em2}" required>
+				        <input type="hidden" name="emp_email" id="emp_email">
+				      </div>
+				    </div>
+	
+				    <div class="row mb-3">
+				      <div class="col">
+				        <label>직급</label>
+				        <input type="text" class="form-control d-inline-block" name="emp_pos_cd" value ="${EMPPOSCD}" readonly><br>
+				      </div>
+				      <div class="col">
+				        <label>사원</label>
+				        	<input type="text" class="form-control d-inline-block" name="emp_cat_cd" value="${EMPCATCD}" readonly><br>
+				      </div>
+				    </div>
+	
+				    <div class="row mb-3">
+				      <div class="col">
+				        <label>부서</label>
+				        	<input type="text" class="form-control d-inline-block" name="emp_dep_cd" value="${EMPDEPCD}" readonly><br>
+				      </div>
+				      <div class="col">
+				        <label>팀</label>
+				        	<input type="text" class="form-control d-inline-block" name="emp_team_cd" value="${EMPTEAMCD}" readonly><br>
+				      </div>
+				    </div>
+	
+				    <div class="row mb-3">
+				      <div class="col">
+				        <label>주소</label><br>
+				        <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" value="${empPc}" required>
+				        <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+				        <input type="text" id="sample6_address" name="emp_add" class="form-control" value="${empAdd}" required>
+				        <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control" value="${empDa}" required>
+				        <input type="text" id="sample6_extraAddress" class="form-control" placeholder="참고항목">
+				      </div>
+				    </div>
+				  </div>
 				</div>
-			`;
-				
+
+		<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+			<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+		</div>
+		`;
 			modalBody.appendChild(form); // 최종 폼 삽입
 				
 			modal.show();
@@ -289,9 +306,70 @@
 		        }	
 	  	
 			}
+		    
 		}
+			// 사진 파일 선택 → 미리보기
+		const imgInput   = document.getElementById('emp_img');
+		const imgPreview = document.getElementById('emp_img_preview');
+
 		
+		// 기본 이미지 경로
+		const defaultImg = '/assets/img/emp/simple_person_pic.jpg';
 		
+		imgInput.addEventListener('change', e => {
+		  const file = e.target.files[0];
+		  if (!file) {                      // 선택 취소한 경우
+		    imgPreview.style.display = 'none';
+		    imgPreview.src = defaultImg;
+		    return;
+		  }
+
+		  const reader = new FileReader();
+		  reader.onload = evt => {
+		    imgPreview.src = evt.target.result;   // 선택한 이미지 표시
+		  };
+		  reader.readAsDataURL(file);             // 이미지 파일 → base64 읽기
+		});
+		
+		function sample6_execDaumPostcode() {	
+		    new daum.Postcode({
+		        oncomplete: function(data) {
+		            // 주소 변수
+		            var addr = ''; // 주소
+		            var extraAddr = ''; // 참고항목
+
+		            // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+		            if (data.userSelectedType === 'R') { // 도로명 주소
+		                addr = data.roadAddress;
+		            } else { // 지번 주소
+		                addr = data.jibunAddress;
+		            }
+
+		            // 참고항목
+		            if(data.userSelectedType === 'R'){
+		                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+		                    extraAddr += data.bname;
+		                }
+		                if(data.buildingName !== '' && data.apartment === 'Y'){
+		                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+		                }
+		                if(extraAddr !== ''){
+		                    extraAddr = ' (' + extraAddr + ')';
+		                }
+		                document.getElementById("sample6_extraAddress").value = extraAddr;
+		            } else {
+		                document.getElementById("sample6_extraAddress").value = '';
+		            }
+
+		            // 우편번호와 주소 정보를 해당 필드에 넣는다.
+		            document.getElementById('sample6_postcode').value = data.zonecode;
+		            document.getElementById("sample6_address").value = addr;
+
+		            // 상세주소 입력칸으로 포커스 이동
+		            document.getElementById("sample6_detailAddress").focus();
+		        }
+		    }).open();
+		}
 		/*
 		document.addEventListener('DOMContentLoaded', function () {
 		    // chat.js가 먼저 로드되어서 unreadCnt 함수가 정의되어 있어야 함
