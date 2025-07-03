@@ -10,6 +10,13 @@
 	<link rel="stylesheet"
 			href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 	<link rel="stylesheet" th:href="@{/css/materialorders/materialorders.css}" />	
+	<script th:inline="javascript">
+	    /*  세션에 emp_id 가 123 이라면
+	        아래 줄이 브라우저에 도착할 때
+	        const empId = 123;
+	        로 변합니다.                              */
+	    const empId = /*[[${session.emp_id}]]*/ "";
+	</script>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script th:src="@{/js/material_orders/material_orders_main.js}"></script>
 	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>

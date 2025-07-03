@@ -186,8 +186,6 @@ $(function() {
 		  	const form = document.createElement('form');
 		  	form.id = 'materialOrderForm';
 			
-			//요청자 id 들고오기 위해 
-			const empId = /*[[${session.empId}]]*/ "";
 			
 		  	// 안에 내용 틀 js 형식으로 가져오기 
 	  		form.innerHTML = `
@@ -228,10 +226,10 @@ $(function() {
 	  			</div>
 	  		`;
 			  				
-			const matIdSelect = form.querySelector('#matId');
-
-	  		await fetchAndPopulateMaterial(matIdSelect);
 	  		modalBody.appendChild(form); // 최종 폼 삽입
+			const matIdSelect = form.querySelector('#matId');
+	  		await fetchAndPopulateMaterial(matIdSelect);
+			form.querySelector('#empIdView').value = emp_id;
 		  		
 	  	//실제 등록
 		if(registerBtn){
@@ -241,7 +239,6 @@ $(function() {
 				const formData = new FormData(form);
 				const payload = {
 					mat_id : formData.get('mat_id'),
-					emp_id : formData.get('emp_id'),
 					mat_qty : formData.get('mat_qty'),
 					mat_reg_date : formData.get('mat_reg_date'),
 					mat_eta_date : formData.get('mat_eta_date'),
