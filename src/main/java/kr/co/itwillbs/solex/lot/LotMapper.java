@@ -37,7 +37,7 @@ public interface LotMapper {
     // 설비 상세조회
     Map<String, Object> selectEquipmentDetail(@Param("eqpId") Long eqpId);
     
-    // ---------------- Insert ----------------
+    // ---------------- 작업지시 등록 시 ----------------
     // 1. 제품 + 옵션 정보 조회
     Map<String, Object> selectLotInsertInfo(@Param("oddId") Long oddId);
     // 2. product_lot insert

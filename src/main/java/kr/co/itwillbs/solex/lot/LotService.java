@@ -1,8 +1,6 @@
 package kr.co.itwillbs.solex.lot;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +142,7 @@ public class LotService {
         return data;
     }
     
-    // ---------------- Insert ----------------
+    // ---------------- 작업지시 등록 시 ----------------
     public void insertLotCascade(Long oddId) {
         // 1. 제품 + 옵션 정보 조회
         Map<String, Object> lotInfo = lotMapper.selectLotInsertInfo(oddId);

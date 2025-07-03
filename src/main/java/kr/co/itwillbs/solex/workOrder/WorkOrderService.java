@@ -7,11 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.itwillbs.solex.lot.LotService;
+
 @Service
 public class WorkOrderService {
 	
 	@Autowired
 	WorkOrderMapper mapper;
+	@Autowired
+	private LotService lotService;
 
 	// 작업지시 조회
 	public List<Map<String, Object>> getWorkList(int offset, int size) {
@@ -35,6 +39,10 @@ public class WorkOrderService {
 		// 주문테이블, 주문 디테일테이블 상태값 업테이트
 		String oddId = (String) prdInfo.get(0).get("oddId");
 		mapper.updateSujuOrderSts(oddId);
+		
+		// ✅ 작업지시 등록 후 LOT 일괄 생성
+	    lotService.insertLotCascade(Long.parseLong(oddId));
+		
 	}
 	
 	// 창고 조회

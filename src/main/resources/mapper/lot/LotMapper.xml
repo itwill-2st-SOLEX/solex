@@ -181,8 +181,8 @@
         WHERE e.eqp_id = #{eqpId}
     </select>
     
-    <!-- SAVE -->
-    <!-- ✅ 제품 LOT 생성에 필요한 정보 조회 -->
+    <!-- 작업지시 등록 시 -->
+    <!-- ✅ 1. 제품 + 옵션 정보 조회 -->
     <select id="selectLotInsertInfo" parameterType="long" resultType="map">
         SELECT
             #{oddId} AS "odd_id",
@@ -199,7 +199,7 @@
         AND ROWNUM = 1
     </select>
 
-    <!-- ✅ product_lot insert -->
+    <!-- ✅ 2. product_lot insert -->
     <insert id="insertProductLot" parameterType="map" useGeneratedKeys="true" keyProperty="prdLotId">
         INSERT INTO product_lot (
             prd_lot_code,
@@ -216,7 +216,7 @@
         )
     </insert>
     
-    <!-- ✅ product_lot select -->
+    <!-- ✅ 3. insert 이후 prd_lot_id 조회 -->
     <select id="selectPrdLotId" parameterType="map">
     	SELECT	prd_lot_id as "prd_lot_id"
     	from	product_lot
@@ -224,7 +224,7 @@
     	and		prd_lot_sort = #{prd_lot_sort}
     </select>
 
-    <!-- ✅ odd_id로 work_order 조회 -->
+    <!-- ✅ 4. 작업지시 리스트 조회 -->
     <select id="selectWorkOrdersByOddId" parameterType="long" resultType="map">
         SELECT	wo.wrk_id as "wrk_id",
         		wo.prc_id as "prc_id",
@@ -235,7 +235,7 @@
         WHERE wo.odd_id = #{oddId}
     </select>
 
-    <!-- ✅ process_lot insert -->
+    <!-- ✅ 5. process_lot insert -->
     <insert id="insertProcessLot" parameterType="map" useGeneratedKeys="true" keyProperty="prcLotId">
         INSERT INTO process_lot (
             prd_lot_id,
@@ -270,7 +270,7 @@
             NULL,
             NULL,
             (SELECT wpo_status FROM work_process wp WHERE wp.wrk_id = #{wrk_id} AND ROWNUM = 1),	-- work_process.wpo_status (공정진행상태)
-	        (SELECT  eqp.eqp_id
+	        (SELECT  eqp.eqp_id		-- 사용설비ID
 			FROM    equipment eqp
 			JOIN    process prc ON eqp.prc_id = #{prc_id}
 			JOIN    employee emp ON emp.emp_team_cd = eqp.emp_team
@@ -279,7 +279,7 @@
         )
     </insert>
     
-    <!-- ✅ prc_lot_id 조회 -->
+    <!-- ✅ 6. insert 이후 prc_lot_id 조회 -->
     <select id="selectPrcLotId" parameterType="map" resultType="long">
         SELECT prc_lot_id
         FROM process_lot
@@ -287,7 +287,7 @@
         ORDER BY prc_lot_id DESC FETCH FIRST 1 ROWS ONLY
     </select>
 
-    <!-- ✅ prdLot_processLot_mapping insert -->
+    <!-- ✅ 7. prdLot_processLot_mapping insert -->
     <insert id="insertProductProcessMapping" parameterType="map">
         INSERT INTO prdLot_processLot_mapping (
             prd_lot_id,
