@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function(){
+$(function() {
 	// 현재 페이지 
 	let currentPage = 0;
 	
@@ -22,13 +22,10 @@ document.addEventListener('DOMContentLoaded', function(){
 			{header: '발주ID', name : 'matOrdId', align: 'center', width: 89},
 			{header: '자재ID', name : 'matId', align: 'center', width: 99},
 			{header: '요청자ID', name : 'empId', align: 'center', width: 99},
-			{header: '발주설명', name : 'matComm', align: 'center', width: 330},
+			{header: '발주설명', name : 'matComm', align: 'center', width: 600},
 			{header: '발주수량', name : 'matQty', align: 'center', width: 99},
 			{header: '발주 요청일', name : 'matRegDate', align: 'center', width: 118},
-			{header: '예상 입고일', name : 'matEtaDate', align: 'center', width: 118},
-			{header: '실제 입고일', name : 'matAtaDate', align: 'center', width: 118},
-//			{header: '최종 수정일', name : 'matLmdDate', align: 'center', width: 105},
-			{header: '승인/반려', name : 'mat_ok', align: 'center', width: 250, 
+			{header: '승인/반려', name : 'mat_ok', align: 'center', width: 230, 
 				formatter: ({ value, rowKey }) =>	{
 //				   // 값이 '반려'(또는 '승인')라면 그대로 출력
 				    if (value === '승인' || value === '반려') return value;
@@ -184,9 +181,14 @@ document.addEventListener('DOMContentLoaded', function(){
 			
 		if (mode === 'register') {
 			modalTit.textContent = '자재 발주 등록';
+			
 			// 폼 생성
 		  	const form = document.createElement('form');
 		  	form.id = 'materialOrderForm';
+			
+			//요청자 id 들고오기 위해 
+			const empId = /*[[${session.empId}]]*/ "";
+			
 		  	// 안에 내용 틀 js 형식으로 가져오기 
 	  		form.innerHTML = `
 	  			<div class="modal-body big-box">
@@ -194,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	  					<div class="col">
 	  						<label>자재ID</label>
 	  						<div><select id="matId" class="form-control d-inline-block" name= "mat_id" required>
-	  						<option value="">-- 자재를 선택하세요 --</option></select>   </div>
+	  						<option value="">-- 자재를 선택하세요 --</option></select></div>
 	  					</div>	
 						<div class="col">
 	  						<label>발주 수량</label>
@@ -203,28 +205,21 @@ document.addEventListener('DOMContentLoaded', function(){
 	  				</div>
 	  				<div class="row mb-3">
 	  					<div class="col">
+	  						<label>발주 요청일</label>
+	  						<div><input type="date" class="form-control" name= "mat_reg_date" required></div>
+	  					</div>
+	  					<div class="col">
+							<label>발주 요청자</label>
+							<div><input type="text" class="form-control" id="empIdView" readonly disabled></div>
+	  					</div>
+	  				</div>
+	  				<div class="row mb-3">
+	  					<div class="col">
 	  						<label>발주 설명</label>
 	  						<div><input type="text" class="form-control d-inline-block" name= "mat_comm" required></div>
 	  					</div>
 	  				</div>
-	  				<div class="row mb-3">
-	  					<div class="col">
-	  						<label>발주 요청일</label>
-	  						<div><input type="date" class="form-control d-inline-block" name= "mat_reg_date" required></div>
-	  					</div>
-	  				</div>
-	  				<div class="row mb-3">
-	  					<div class="col">
-	  						<label>예상 입고일</label>
-	  						<div><input type="date" class="form-control d-inline-block" name= "mat_eta_date" required></div>
-	  					</div>
-	  				</div>
-	  				<div class="row mb-3">
-	  					<div class="col">
-	  						<label>실제 입고일</label>
-	  						<div><input type="date" class="form-control d-inline-block" name= "mat_ata_date" required></div>
-	  					</div>
-	  				</div>
+					<br>
 	  				<div class="modal-footer">
 	  					<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
 	  					<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
@@ -234,49 +229,49 @@ document.addEventListener('DOMContentLoaded', function(){
 	  		`;
 			  				
 			const matIdSelect = form.querySelector('#matId');
+
 	  		await fetchAndPopulateMaterial(matIdSelect);
 	  		modalBody.appendChild(form); // 최종 폼 삽입
 		  		
-	  		//실제 등록
-	if(registerBtn){
-	  			registerBtn.addEventListener('click', async function(event) {
-	  				event.preventDefault(); // type="submit"이므로 기본 제출 방지
-	  									
-	  				const formData = new FormData(form);
-	  				const payload = {
-	  					mat_id : formData.get('mat_id'),
-	  					emp_id : formData.get('emp_id'),
-	  					mat_qty : formData.get('mat_qty'),
-	  					mat_reg_date : formData.get('mat_reg_date'),
-	  					mat_eta_date : formData.get('mat_eta_date'),
-	  					mat_ata_date : formData.get('mat_ata_date'),
-	  					mat_lmd_date : formData.get('mat_lmd_date'),
-	  					mat_comm : formData.get('mat_comm')
-	  				};
-			  				
-	  				console.log('서버로 보낼 데이터 = ', payload);
-			  				
-	  				try {
-	  					const response = await fetch(`/SOLEX/material_orders/registration`, {
-	  						method : 'POST',
-	  						headers: {
-	  							'Content-Type': 'application/json'
-	  						},
-	  						body:JSON.stringify(payload)
-	  					});
-	  					
-	  					if(response.ok){
-	  						alert('발주 등록 성공');
-	  						window.location.reload();
-	  					} else {
-	  						alert('발주 등록 실패');
-	  					}
-	  				} catch(error) {
-	  					console.log('전송중 오류발생 = ', error);
-	  					alert('서버 전송 실패');
-	  				}
-	  			});		
-			}
+	  	//실제 등록
+		if(registerBtn){
+			registerBtn.addEventListener('click', async function(event) {
+				event.preventDefault(); // type="submit"이므로 기본 제출 방지
+									
+				const formData = new FormData(form);
+				const payload = {
+					mat_id : formData.get('mat_id'),
+					emp_id : formData.get('emp_id'),
+					mat_qty : formData.get('mat_qty'),
+					mat_reg_date : formData.get('mat_reg_date'),
+					mat_eta_date : formData.get('mat_eta_date'),
+					mat_lmd_date : formData.get('mat_lmd_date'),
+					mat_comm : formData.get('mat_comm')
+				};
+		  				
+				console.log('서버로 보낼 데이터 = ', payload);
+		  				
+				try {
+					const response = await fetch(`/SOLEX/material_orders/registration`, {
+						method : 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body:JSON.stringify(payload)
+					});
+					
+					if(response.ok){
+						alert('발주 등록 성공');
+						window.location.reload();
+					} else {
+						alert('발주 등록 실패');
+					}
+				} catch(error) {
+					console.log('전송중 오류발생 = ', error);
+					alert('서버 전송 실패');
+				}
+			});		
+		}
 			} else if (mode === 'approval') { //자재가 저장 될 수 있는 창고 목록 보여주기 
 			    modalTit.textContent = '발주 승인';
 
@@ -361,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function(){
 			      if (res.ok) {
 			        alert('승인 완료');
 			        modal.hide();
-//			        loadMatList(0);             // 그리드만 새로고침
+
 					//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
 					grid.setValue(rowKey, 'mat_ok', '승인');
 					
