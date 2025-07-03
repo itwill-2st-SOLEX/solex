@@ -20,22 +20,22 @@ $(function() {
 	
 	//설비수리이력 목록 조회
 	async function equipmentList(page) {
-			const response = await fetch(`/SOLEX/equipmenthistory?page=${page}&size=${pageSize}`);
-			const rawData = await response.json();
-			const data = rawData.map((row, idx) => ({
-				eqp_id : row.EQP_ID, // id값 = 그냥 목록 순서 값 자동증가
-				eqp_code: row.EQP_CODE,
-				eqp_name: row.EQP_NAME
-			}));
-			
-			//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
-			page === 0 ? grid.resetData(data) : grid.appendRows(data);
-			
-			//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
-			currentPage++;
-			
-			//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
-			if (data.length < pageSize) grid.off("scrollEnd");
+		const response = await fetch(`/SOLEX/equipmenthistory?page=${page}&size=${pageSize}`);
+		const rawData = await response.json();
+		const data = rawData.map((row, idx) => ({
+			eqp_id : row.EQP_ID, // id값 = 그냥 목록 순서 값 자동증가
+			eqp_code: row.EQP_CODE,
+			eqp_name: row.EQP_NAME
+		}));
+		
+		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
+		page === 0 ? grid.resetData(data) : grid.appendRows(data);
+		
+		//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
+		currentPage++;
+		
+		//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
+		if (data.length < pageSize) grid.off("scrollEnd");
 	}
 
 	equipmentList(currentPage);
@@ -115,67 +115,86 @@ $(function() {
 		modal.show();
 	}		
 	
-	/* ───────────────── 모달 열릴 때 제품, 자재 목록 캐싱 ───────────────── */
-	$('#equipmentHistoryModal').on('show.bs.modal', async () => {
-		if ((cache.material && cache.product) || loading) return; // 이미 캐시됐거나 로딩 중
-	    loading = true;
-	    try {
-			const [matRes, prodRes] = await Promise.all([
-				fetch("/SOLEX/material"),
-				fetch("/SOLEX/product")
-			]);
-			if (!matRes.ok || !prodRes.ok) throw new Error();
-			cache["area_type_01"] = await matRes.json();  // [{ID, NAME}, ...]
-			cache["area_type_02"]  = await prodRes.json();
-	    } catch (e) {
-	      console.error("품목 목록 로드 실패", e);
-	      alert("품목 목록을 불러오지 못했습니다.");
-	    } finally {
-	      loading = false;
-	    }
+	async function loadEquipmentOptions() {
+	  const $sel = $('#eqhName');
+
+	  // 이미 한 번 불러왔으면 재요청 생략
+	  if ($sel.data('loaded')) return;
+
+	  try {
+	    const list = await fetchJson('/SOLEX/equipment/name', []);
+
+	    list.forEach(eqp => {
+	      $('<option>', {
+	        value: eqp.ID,                // 실제 값 
+	        text : eqp.NM      // 사용자에게 보이는 글자
+	      }).appendTo($sel);
+	    });
+
+	    $sel.data('loaded', true);      // 플래그
+	  } catch (err) {
+	    console.error('설비 목록 로드 실패', err);
+	    alert('설비 목록을 불러오지 못했습니다.');
+	  }
+	}
+	
+	/* 모달이 열릴 때 한 번만 호출 */
+	$('#equipmentHistoryModal').on('show.bs.modal', loadEquipmentOptions);
+	
+	/* ── 모달이 닫힌 뒤 입력값/선택값 초기화 ─────────────────── */
+	$('#equipmentHistoryModal').on('hidden.bs.modal', function () {
+	  const $modal = $(this);
+
+	  // ① <form> 태그가 있다면 한 줄로 끝!
+	  $modal.find('form')[0]?.reset();
+
+	  // ② 별도 <form>이 없을 때는 각 요소를 개별 초기화
+	  $modal.find('input, textarea').val('');
+	  $modal.find('select').prop('selectedIndex', 0);   // 첫 옵션으로
+
 	});
 	
 	/* ── 설비 수리이력 등록 ─────────────────────────────────── */
-	$('#submitWarehouse').on('click', async function () {
-		// 1) 모달 안의 값 읽기
-		const $modal     = $('#equipmentHistoryModal');
-		const eqpName    = $.trim($modal.find('#ephName').val());          // 설비명
-		const startDate  = $.trim($modal.find('input[name="eqh_start"]').val());
-		const endDate    = $.trim($modal.find('input[name="eqh_end"]').val());
+	$('#submitEquipmentHistory').on('click', async function () {
+		const $modal    = $('#equipmentHistoryModal');
+	  	const eqpId     = $modal.find('#eqhName').val();           // 선택한 설비 ID
+	  	const startDate = $.trim($modal.find('input[name="eqh_start"]').val());
+	  	const endDate   = $.trim($modal.find('input[name="eqh_end"]').val());
+		const reason    = $.trim($modal.find('#eqhReason').val()); // ★ 수리 사유
 
-	  // 2) 기본 검증
-	  if (!eqpName)          { alert('설비명을 입력하세요.'); return; }
-	  if (!startDate || !endDate) { alert('수리 시작·종료일을 입력하세요.'); return; }
-	  if (new Date(startDate) > new Date(endDate)) {
-	    alert('시작일이 종료일보다 늦을 수 없습니다.');
-	    return;
-	  }
+	  	/* --- 검증 --- */
+	  	if (!eqpId)            { alert('설비를 선택하세요.'); return; }
+	  	if (!startDate || !endDate) { alert('수리 시작·종료일을 입력하세요.'); return; }
+	  	if (new Date(startDate) > new Date(endDate)) {
+	    	alert('시작일이 종료일보다 늦을 수 없습니다.');
+	    	return;
+	  	}
 
-	  // 3) 컨트롤러로 보낼 데이터 구성
-	  const payload = {
-	    eqpName   : eqpName,
-	    startDate : startDate,
-	    endDate   : endDate
-	  };
+	  	/* --- 서버로 전송할 데이터 --- */
+	  	const payload = {
+	    	eqpId     : eqpId,
+	    	startDate : startDate,
+	    	endDate   : endDate,
+			reason    : reason
+	  	};
 
-	  try {
-	    const res = await fetch('/SOLEX/equipmenthistory', {   // ← 컨트롤러 URL에 맞게 조정
-	      method  : 'POST',
-	      headers : { 'Content-Type': 'application/json' },
-	      body    : JSON.stringify(payload)
-	    });
+	  	try {
+	    	const res = await fetch('/SOLEX/equipmenthistory', {  // ← POST 엔드포인트
+	  			method  : 'POST',
+	      		headers : { 'Content-Type': 'application/json' },
+	      		body    : JSON.stringify(payload)
+	    	});
+	    	if (!res.ok) throw new Error(`에러러러러러러`);
 
-	    if (!res.ok) throw new Error(`응답 코드: ${res.status}`);
+	    	alert('수리이력이 등록되었습니다.');
+	    	$modal.modal('hide');
 
-	    // 4) 성공 처리: 모달 닫기 + 목록 새로고침
-	    alert('수리이력이 등록되었습니다.');
-	    $modal.modal('hide');
-
-	    currentPage = 0;            // 첫 페이지부터 다시 로드
-	    equipmentList(currentPage); // 목록 다시 불러오기
-	  } catch (err) {
-	    console.error('수리이력 등록 실패', err);
-	    alert('등록 중 오류가 발생했습니다.');
-	  }
+	    	// 목록 새로고침
+	    	currentPage = 0;
+	    	equipmentList(currentPage);
+  		} catch (err) {
+    		console.error('수리이력 등록 실패', err);
+    		alert('등록 중 오류가 발생했습니다.');
+  		}
 	});
 });
