@@ -43,11 +43,11 @@ public class CustomUserDetailService implements UserDetailsService {
     
     private String convertToRole(String empPosCd) {
         return switch (empPosCd) {
-            case "POS_01" -> "1";
-            case "POS_02" -> "2";
-            case "POS_03" -> "3";
-            case "POS_04" -> "4";
-            case "POS_05" -> "5";
+            case "pos_01" -> "1";
+            case "pos_02" -> "2";
+            case "pos_03" -> "3";
+            case "pos_04" -> "4";
+            case "pos_05" -> "5";
             default -> "";
         };
     }

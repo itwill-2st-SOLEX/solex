@@ -172,10 +172,11 @@ async function recentFinishedList() {
 
 		data.forEach(item => {
 			const li = document.createElement('li');
+			debugger;
 			li.className = 'prd-card';
 			li.innerHTML = `
 		    <strong>${item.PRD_NM}, ${item.PRD_COLOR} ${item.PRD_SIZE} ${item.PRD_HEIGHT}cm</strong>
-		    <span class="time">${item.ODD_MOD_DATE} ${item.ODD_STS}</span>
+		    <span class="time">${item.HIS_DATE} ${item.ODD_STS}</span>
 		  `;
 			// 해당 제품의 PRD_CODE로 데이터 갱신
 			li.addEventListener('click', () => {
@@ -260,9 +261,13 @@ async function renderDonutChart(startDate, endDate) {
 			return;
 		}
 
-		// 데이터 있을 때
-		let labels = data.map(item => `${item.PRD_NM}\n(${item.PRD_CODE})`);
 		let values = data.map(item => item.ORDER_COUNT);
+		let total = values.reduce((sum, val) => sum + val, 0);
+
+		let labels = data.map(item => {
+			const percentage = ((item.ORDER_COUNT / total) * 100).toFixed(1);
+			return `${item.PRD_NM} (${item.PRD_CODE}) - ${percentage}%`;
+		});
 
 		if (donutChart) donutChart.destroy();
 
