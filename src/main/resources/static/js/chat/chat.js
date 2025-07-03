@@ -432,7 +432,7 @@ function unreadCnt() {
 				badge.classList.add('hidden');
 			}
 			// 헤더 배지 업데이트
-			updateHeaderBadge(count);
+//			updateHezzaderBadge(count);
 		},
 		error: function() {
 			console.error('안읽은 메시지 수 불러오기 실패');
@@ -441,15 +441,15 @@ function unreadCnt() {
 }
 
 // 페이지 헤더에 있는 안읽은 메세지
-function updateHeaderBadge(count) {
-	const badge = document.getElementById('header-chat-badge');
-	if (!badge) return;
-
-	if (count > 0) {
-		badge.textContent = count;
-		badge.classList.remove('d-none');
-	} else {
-		badge.classList.add('d-none');
-	}
-}
+//function updateHeaderBadge(count) {
+//	const badge = document.getElementById('header-chat-badge');
+//	if (!badge) return;
+//
+//	if (count > 0) {
+//		badge.textContent = count;
+//		badge.classList.remove('d-none');
+//	} else {
+//		badge.classList.add('d-none');
+//	}
+//}
 //window.unreadCnt = unreadCnt;
