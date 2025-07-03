@@ -20,22 +20,22 @@ $(function() {
 	
 	//설비수리이력 목록 조회
 	async function equipmentList(page) {
-			const response = await fetch(`/SOLEX/equipmenthistory?page=${page}&size=${pageSize}`);
-			const rawData = await response.json();
-			const data = rawData.map((row, idx) => ({
-				eqp_id : row.EQP_ID, // id값 = 그냥 목록 순서 값 자동증가
-				eqp_code: row.EQP_CODE,
-				eqp_name: row.EQP_NAME
-			}));
-			
-			//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
-			page === 0 ? grid.resetData(data) : grid.appendRows(data);
-			
-			//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
-			currentPage++;
-			
-			//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
-			if (data.length < pageSize) grid.off("scrollEnd");
+		const response = await fetch(`/SOLEX/equipmenthistory?page=${page}&size=${pageSize}`);
+		const rawData = await response.json();
+		const data = rawData.map((row, idx) => ({
+			eqp_id : row.EQP_ID, // id값 = 그냥 목록 순서 값 자동증가
+			eqp_code: row.EQP_CODE,
+			eqp_name: row.EQP_NAME
+		}));
+		
+		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
+		page === 0 ? grid.resetData(data) : grid.appendRows(data);
+		
+		//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
+		currentPage++;
+		
+		//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
+		if (data.length < pageSize) grid.off("scrollEnd");
 	}
 
 	equipmentList(currentPage);
@@ -141,6 +141,19 @@ $(function() {
 	/* 모달이 열릴 때 한 번만 호출 */
 	$('#equipmentHistoryModal').on('show.bs.modal', loadEquipmentOptions);
 	
+	/* ── 모달이 닫힌 뒤 입력값/선택값 초기화 ─────────────────── */
+	$('#equipmentHistoryModal').on('hidden.bs.modal', function () {
+	  const $modal = $(this);
+
+	  // ① <form> 태그가 있다면 한 줄로 끝!
+	  $modal.find('form')[0]?.reset();
+
+	  // ② 별도 <form>이 없을 때는 각 요소를 개별 초기화
+	  $modal.find('input, textarea').val('');
+	  $modal.find('select').prop('selectedIndex', 0);   // 첫 옵션으로
+
+	});
+	
 	/* ── 설비 수리이력 등록 ─────────────────────────────────── */
 	$('#submitEquipmentHistory').on('click', async function () {
 		const $modal    = $('#equipmentHistoryModal');
@@ -179,9 +192,9 @@ $(function() {
 	    	// 목록 새로고침
 	    	currentPage = 0;
 	    	equipmentList(currentPage);
-	  		} catch (err) {
-	    		console.error('수리이력 등록 실패', err);
-	    		alert('등록 중 오류가 발생했습니다.');
-	  		}
-		});
+  		} catch (err) {
+    		console.error('수리이력 등록 실패', err);
+    		alert('등록 중 오류가 발생했습니다.');
+  		}
+	});
 });
