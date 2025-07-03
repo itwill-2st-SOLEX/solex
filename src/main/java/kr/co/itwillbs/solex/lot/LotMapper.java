@@ -53,9 +53,12 @@ public interface LotMapper {
     // 7. 매핑 insert
     void insertProductProcessMapping(Map<String, Object> param);
     // ---------------- 자재 입고 시 ----------------
-    // 1. 같은 날짜에 입고한적 있는지 MatLot 조회
+    // 1. 자재ID를 통해 자재코드 조회
+    String selectMaterialCodeById(Long mat_id);
+    // 2. 같은 날짜에 입고한적 있는지 MatLot 조회
     Integer selectNextMaterialLotSort(Map<String, Object> map);
-    // 2. material_lot insert
+    // 3. material_lot insert
 	void insertMaterialLot(Map<String, Object> map);
+
 
 }

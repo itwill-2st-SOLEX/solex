@@ -156,9 +156,11 @@ public class LotService {
         // 3. insert 이후 prd_lot_id 조회
         Long prdLotId = lotMapper.selectPrdLotId(lotInfo);
         if (prdLotId == null) return;
+        System.out.println("prdLotId : " + prdLotId);
 
         // 4. 작업지시 리스트 조회
         List<Map<String, Object>> workOrders = lotMapper.selectWorkOrdersByOddId(oddId);
+        System.out.println("workOrders : " + workOrders);
 
         for (Map<String, Object> wrk : workOrders) {
             wrk.put("prdLotId", prdLotId);
@@ -178,18 +180,26 @@ public class LotService {
     }
     // ---------------- 자재 입고 시 ----------------
     public void createMaterialLot(Map<String, Object> map) {
-    	// 같은 자재 + 오늘 날짜의 LOT 순번 가져오기
+    	// 1. 자재ID를 통해 자재코드 조회
+    	Long mat_id = Long.parseLong((String) map.get("mat_id"));
+    	String matCode = lotMapper.selectMaterialCodeById(mat_id);
+    	
+    	map.put("mat_code", matCode);
+    	
+    	// 2. 같은 날짜에 입고한적 있는지 MatLot 조회
         Integer nextSort = lotMapper.selectNextMaterialLotSort(map);
         int sort = (nextSort != null ? nextSort : 0) + 1;
 
         // LOT 코드 생성
-        String matLotCode = "MAT-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-                           + "-" + String.format("%03d", sort);
+        String matLotCode = "MAT-"
+            + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) // 오늘 날짜
+            + "-" + matCode // 자재 코드
+            + "-" + String.format("%03d", sort); // 순번
 
         map.put("mat_lot_code", matLotCode);
         map.put("mat_sort", sort);
 
-        // insert
+        // 3. material_lot insert
         lotMapper.insertMaterialLot(map);
     }
 

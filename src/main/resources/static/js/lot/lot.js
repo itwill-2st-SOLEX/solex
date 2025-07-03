@@ -96,6 +96,7 @@ function showLotDetail(data) {
 		document.getElementById('processCode').textContent = data.processCode;
 		document.getElementById('operatorName').textContent = data.operatorName;
 		document.getElementById('operatorNum').textContent = data.operatorNum;
+		document.getElementById('processStatus').textContent = data.processStatus;
 		document.getElementById('processStartDate').textContent = formatDate(data.processStartDate);
 		document.getElementById('processEndDate').textContent = formatDate(data.processEndDate);
 		document.getElementById('successCount').textContent = data.successCount;
