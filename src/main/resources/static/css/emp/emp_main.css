@@ -28,6 +28,15 @@
 #genderM{
 	padding-right: 30px !important; 
 }
+#emp_img{
+	width: 90% !important;
+}
+
+.col-3 {
+    flex: 0 0 auto;
+    width: 20% !important;
+
+}
 
 /*     button { */
 /*       padding: 6px 12px; */

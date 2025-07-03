@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function(){
 							  <div class="col-3">
 							    <label>사진</label>
 							    <img id="emp_img_preview" alt="사진 미리보기"
-							         src="/assets/img/emp/simple_person_pic.jpg"
+							         src="/SOLEX/assets/img/emp/simple_person_pic.jpg"
 							         style="width:173px; height:208px; border-radius:4px; object-fit:cover; display:block; margin-bottom:10px;" />
 							    <input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
 							  </div>
@@ -222,9 +222,8 @@ document.addEventListener('DOMContentLoaded', function(){
 							</div>
 
 					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
 						<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
-						<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
-						<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
 					</div>
 				`			
 
@@ -252,18 +251,9 @@ document.addEventListener('DOMContentLoaded', function(){
 			            body: JSON.stringify(payload)
 			        });
 
-			        if (!response.ok) {
-			            throw new Error(`서버 오류: ${response.status} - ${errorData.message || '알 수 없는 오류'}`);
-			        }
-
-
 			        alert(isModifyMode ? '직원 정보가 성공적으로 수정되었습니다!' : '직원이 성공적으로 등록되었습니다!');
 			        
-			        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-			        if (modalInstance) {
-			            modalInstance.hide();
-			        }
-			        loadDrafts(0); // 직원 목록 새로고침 (첫 페이지부터 다시 로드)
+			   
 
 			    } catch (error) {
 			        console.error('데이터 전송 중 오류 발생:', error);
@@ -322,6 +312,8 @@ document.addEventListener('DOMContentLoaded', function(){
 					        const method = 'POST';
 
 					        const formData = new FormData(form); // 동적으로 생성된 'form' 사용
+							formData.append("emp_img", imgFile); // 파일은 직접 append
+							
 					        const payload = {
 					            emp_nm: formData.get('emp_nm'),
 					            emp_birth: formData.get('emp_birth').replace(/\./g, '-'), // YYYY.MM.DD -> YYYY-MM-DD
@@ -368,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function(){
 					            alert('이메일을 모두 입력해 주세요.');
 					            return;
 					        }
-
+							
 
 					        const url = '/SOLEX/emp/modify';
 					        const method = 'PUT';
@@ -502,6 +494,7 @@ document.addEventListener('DOMContentLoaded', function(){
 						form.reset(); 
 						modalTitle.textContent ='사원 등록';
 						// 등록 모드에서는 모든 필드를 수정 가능하게 (readOnly 해제)
+						document.querySelector('input[name="emp_img"]').readOnly = false; 
 						document.querySelector('input[name="emp_num"]').readOnly = false; 
 						document.querySelector('input[name="emp_nm"]').readOnly = false;
 						document.querySelector('input[name="emp_hire"]').readOnly = false;
@@ -544,50 +537,45 @@ document.addEventListener('DOMContentLoaded', function(){
 					}
 				});
 				
-				///초기화 버튼 클릭 시
-				document.getElementById('resetBtn').addEventListener('click', () => {
-				  imgPreview.src = defaultImg;
-				  imgInput.value = '';  // 파일 선택도 초기화
-				});
 				
 			}); // DOMContentLoaded 끝
 			
 function sample6_execDaumPostcode() {
-							    new daum.Postcode({
-							        oncomplete: function(data) {
-							            // 주소 변수
-							            var addr = ''; // 주소
-							            var extraAddr = ''; // 참고항목
-					
-							            // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
-							            if (data.userSelectedType === 'R') { // 도로명 주소
-							                addr = data.roadAddress;
-							            } else { // 지번 주소
-							                addr = data.jibunAddress;
-							            }
-					
-							            // 참고항목
-							            if(data.userSelectedType === 'R'){
-							                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-							                    extraAddr += data.bname;
-							                }
-							                if(data.buildingName !== '' && data.apartment === 'Y'){
-							                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-							                }
-							                if(extraAddr !== ''){
-							                    extraAddr = ' (' + extraAddr + ')';
-							                }
-							                document.getElementById("sample6_extraAddress").value = extraAddr;
-							            } else {
-							                document.getElementById("sample6_extraAddress").value = '';
-							            }
-					
-							            // 우편번호와 주소 정보를 해당 필드에 넣는다.
-							            document.getElementById('sample6_postcode').value = data.zonecode;
-							            document.getElementById("sample6_address").value = addr;
-					
-							            // 상세주소 입력칸으로 포커스 이동
-							            document.getElementById("sample6_detailAddress").focus();
-							        }
-							    }).open();
-				}
+	new daum.Postcode({
+	    oncomplete: function(data) {
+	        // 주소 변수
+	        var addr = ''; // 주소
+	        var extraAddr = ''; // 참고항목
+	
+	        // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+	        if (data.userSelectedType === 'R') { // 도로명 주소
+	            addr = data.roadAddress;
+	        } else { // 지번 주소
+	            addr = data.jibunAddress;
+	        }
+	
+	        // 참고항목
+	        if(data.userSelectedType === 'R'){
+	            if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                extraAddr += data.bname;
+	            }
+	            if(data.buildingName !== '' && data.apartment === 'Y'){
+	                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	            }
+	            if(extraAddr !== ''){
+	                extraAddr = ' (' + extraAddr + ')';
+	            }
+	            document.getElementById("sample6_extraAddress").value = extraAddr;
+	        } else {
+	            document.getElementById("sample6_extraAddress").value = '';
+	        }
+	
+	        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+	        document.getElementById('sample6_postcode').value = data.zonecode;
+	        document.getElementById("sample6_address").value = addr;
+	
+	        // 상세주소 입력칸으로 포커스 이동
+	        document.getElementById("sample6_detailAddress").focus();
+	    }
+	}).open();
+}
