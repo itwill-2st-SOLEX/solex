@@ -3,6 +3,15 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.equipment.EquipmentMapper">
+
+	<select id="getEquipmentName" resultType="Map">
+	  	SELECT
+			eq.eqp_id as id,
+			eq.eqp_name as nm
+		FROM equipment eq
+	    ORDER BY eq.eqp_id asc
+	</select>
+	
   	<select id="selectPagedEquipmentDataAsMap" parameterType="Map" resultType="Map">
   	SELECT
 		cli.cli_nm as CLI_NM,

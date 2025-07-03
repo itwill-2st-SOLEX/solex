@@ -39,9 +39,8 @@ public class MaterialService {
 	}
 
 	//자재 등록 
-	public int registerMat(Map<String, Object> matMap) {
-		System.out.println("service mat map = " + matMap);
-		return materialMapper.registMat(matMap);
+	public void registerMat(Map<String, Object> matMap) {
+		materialMapper.registMat(matMap);
 	}
 
 	

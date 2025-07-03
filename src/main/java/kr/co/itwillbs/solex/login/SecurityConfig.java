@@ -2,12 +2,14 @@ package kr.co.itwillbs.solex.login;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
     
     @Bean
@@ -22,6 +24,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login","/auth/login", "/css/**", "/js/**", "/assets/**").permitAll()
                 .anyRequest().authenticated()           // 로그인 필수
+            )
+	        .exceptionHandling(ex -> ex
+	                .accessDeniedHandler((request, response, accessDeniedException) -> {
+	                    // 접근 거부 시 처리 로직
+	                    response.setContentType("text/html;charset=UTF-8");
+	                    response.getWriter().write("<script>alert('접근 권한이 없습니다.'); location.href='/SOLEX/';</script>");
+                })
             )
             .formLogin(form -> form
                 .loginPage("/auth/login")

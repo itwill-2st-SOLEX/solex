@@ -1,8 +1,13 @@
 package kr.co.itwillbs.solex.emp;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +17,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.apache.commons.io.FilenameUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RestController
@@ -25,10 +34,25 @@ public class EmpRestController {
 	
 	// 인사등록
 	@PostMapping("")
-	public void registerEmployee(@RequestBody Map<String, Object> empMap) {
+	public void registerEmployee(@RequestPart("emp") Map<String, Object> empMap, @RequestPart("emp_img") MultipartFile file,   HttpServletRequest request) throws IOException {
+		
+		//사진등록을 위한 코드
+		 // ① 파일 저장 경로
+	    String uploadDir = "C:/solex_uploads/emp";
+        Files.createDirectories(Paths.get(uploadDir));
+        String ext = FilenameUtils.getExtension(file.getOriginalFilename());
+        String filename = UUID.randomUUID() + "." + ext;
+        Path savePath = Paths.get(uploadDir, filename);
+        file.transferTo(savePath.toFile());
 
-		empService.registerEmployee(empMap); // 인스턴스를 통한 호출
-	
+        // 이미지 URL 만들기
+        String url = request.getContextPath() + "/uploads/emp/" + filename;
+
+        // Map에 추가
+        empMap.put("emp_img", url);
+
+        // 서비스 호출 (MyBatis mapper에서도 #{emp_img}로 꺼내기 가능)
+        empService.registerEmployee(empMap);
 	}
 
 	// 무한스크롤

@@ -121,158 +121,117 @@ document.addEventListener('DOMContentLoaded', function(){
 			const form = document.createElement('form');
 			form.id = 'joinForm'
 			
+			modalTitle.textContent = '사원 등록';
 			
 			form.innerHTML = `
-				<div class="modal-body big-box">
-				  				<div class="row mb-3">
-				  					<div class="col">
-									  <label>사진</label>
-									  <input type="file" class="form-control d-inline-block w-25" name="emp_img" required><br>
-									  <img id="emp_img_preview" style="display:none; margin-top:10px; width:150px; height:150px; object-fit:cover; border:1px solid #ccc;">
-								   </div>	
-								   <div class="col">
-				`
-			// ===== 사진 =====
-			let div0 = document.createElement('div');
-			div0.className = 'mb-3';
-			div0.innerHTML = `
-			`;
-			form.appendChild(div0);
-			
+							<div class="row mb-4">
+							  <div class="col-3">
+							    <label>사진</label>
+							    <img id="emp_img_preview" alt="사진 미리보기"
+							         src="/SOLEX/assets/img/emp/simple_person_pic.jpg"
+							         style="width:173px; height:208px; border-radius:4px; object-fit:cover; display:block; margin-bottom:10px;" />
+							    <input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
+							  </div>
+				
+							  <!-- 🧾 오른쪽: 나머지 입력 폼 -->
+							  <div class="col-9">
+							    <div class="row mb-3">
+							      <div class="col">
+							        <label>이름</label>
+							        <input type="text" class="form-control" name="emp_nm" required>
+							      </div>
+							      <div class="col">
+							        <label>입사일</label>
+							        <input type="date" class="form-control" name="emp_hire" required>
+							      </div>
+							    </div>
+				
+							    <div class="row mb-3">
+							      <div class="col">
+							        <label>성별</label><br>
+							        <label id="genderM"><input type="radio" name="emp_gd" value="M" checked> 남</label>
+							        <label><input type="radio" name="emp_gd" value="W"> 여</label>
+							      </div>
+							      <div class="col">
+							        <label>생년월일</label>
+							        <input type="text" class="form-control" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="ex)990101" required>
+							        <input type="hidden" name="emp_pw" id="emp_pw">
+							      </div>
+							    </div>
+				
+							    <div class="row mb-3">
+							      <div class="col">
+							        <label>연락처</label><br>
+							        <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
+							        <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
+							        <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required>
+							        <input type="hidden" name="emp_phone" id="emp_phone">
+							      </div>
+							    </div>
+				
+							    <div class="row mb-3">
+							      <div class="col">
+							        <label>이메일</label><br>
+							        <input type="text" id="emp_email1" class="form-control d-inline-block w-25" required> @
+							        <input type="text" id="emp_email2" class="form-control d-inline-block w-25" required>
+							        <input type="hidden" name="emp_email" id="emp_email">
+							      </div>
+							    </div>
+				
+							    <div class="row mb-3">
+							      <div class="col">
+							        <label>직급</label>
+							        <select name="empPosCd" id="empPosCd" class="form-control">
+							          <option value="">-- 직급을 선택하세요 --</option>
+							        </select>
+							      </div>
+							      <div class="col">
+							        <label>사원</label>
+							        <select name="empCatCd" id="empCatCd" class="form-control">
+							          <option value="">-- 사원을 선택하세요 --</option>
+							        </select>
+							      </div>
+							    </div>
+				
+							    <div class="row mb-3">
+							      <div class="col">
+							        <label>부서</label>
+							        <select name="empDepCd" id="empDepCd" class="form-control">
+							          <option value="">-- 부서를 선택하세요 --</option>
+							        </select>
+							      </div>
+							      <div class="col">
+							        <label>팀</label>
+							        <select name="empTeamCd" id="empTeamCd" class="form-control">
+							          <option value="">-- 팀을 선택하세요 --</option>
+							        </select>
+							      </div>
+							    </div>
+				
+							    <div class="row mb-3">
+							      <div class="col">
+							        <label>주소</label><br>
+							        <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
+							        <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
+							        <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
+							        <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control" placeholder="상세주소" required>
+							        <input type="text" id="sample6_extraAddress" class="form-control" placeholder="참고항목">
+							      </div>
+							    </div>
+							  </div>
+							</div>
 
-			// ===== 이름 =====
-			let div2 = document.createElement('div');
-			div2.className = 'mb-3';
-			div2.innerHTML = `
-			  <label>이름</label>
-			  <input type="text" class="form-control d-inline-block w-25" name="emp_nm" required><br>
-			`;
-			form.appendChild(div2);
-
-			// ===== 입사일 =====
-			let div3 = document.createElement('div');
-			div3.className = 'mb-3';
-			div3.innerHTML = `
-			  <label>입사일</label>
-			  <input type="date" class="form-control d-inline-block w-25" name="emp_hire" style="${empData ? 'display:none;' : ''}" required><br>
-			`;
-			form.appendChild(div3);
-
-			// ===== 성별 =====
-			let div4 = document.createElement('div');
-			div4.className = 'mb-3';
-			div4.innerHTML = `
-			  <label>성별</label>
-			  <label><input type="radio" name="emp_gd" value="M" checked> 남</label>
-			  <label><input type="radio" name="emp_gd" value="W"> 여</label><br>
-			`;
-			form.appendChild(div4);
-
-
-			// ===== 생년월일 =====
-			let div5 = document.createElement('div');
-			div5.className = 'mb-3';
-			div5.innerHTML = `
-			  <label>생년월일</label>
-			  <input type="text" class="form-control d-inline-block w-25" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="ex)990101" required>
-			  <input type="hidden" name="emp_pw" id="emp_pw"><br>
-			`;
-			form.appendChild(div5);
-
-			// ===== 분류, 부서, 직급, 팀 (코드 리스트는 서버에서 전달 필요) =====
-			let inlineDiv = document.createElement('div');
-			inlineDiv.className = 'inline-container';
-			inlineDiv.innerHTML = `
-
-			  <span>사원</span>
-			  <select name="empCatCd" id="empCatCd" class="form-select">
-			    <option value="">-- 사원을 선택하세요 --</option>
-			  </select>
-
-			  <span>부서</span>
-			  <select name="empDepCd" id="empDepCd" class="form-select">
-			    <option value="">-- 부서를 선택하세요 --</option>
-			  </select>
-			
-			  <div>직급</div>
-			  <select name="empPosCd" id="empPosCd" class="form-select">
-			    <option value="">-- 직급을 선택하세요 --</option>
-			  </select>
-
-			  <span>팀</span>
-			  <select name="empTeamCd" id="empTeamCd" class="form-select">
-			    <option value="">-- 팀을 선택하세요 --</option>
-			  </select>
-			`;
-
-			form.appendChild(inlineDiv);
-
-			
-
-			// ===== 연락처 =====
-
-			let div6 = document.createElement('div');
-
-			div6.className = 'mb-3';
-
-			div6.innerHTML = `
-			  <label>연락처</label>
-			  <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" required> -
-			  <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" required> -
-			  <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" required><br>
-			  <input type="hidden" name="emp_phone" id="emp_phone">
-			`;
-
-			form.appendChild(div6);
-
-			
-
-			// ===== 이메일 =====
-
-			let div7 = document.createElement('div');
-
-			div7.className = 'mb-3';
-
-			div7.innerHTML = `
-			  <label>이메일</label>
-			  <input type="text" id="emp_email1" class="form-control d-inline-block w-25" required> @
-			  <input type="text" id="emp_email2" class="form-control d-inline-block w-25" required><br>
-			  <input type="hidden" name="emp_email" id="emp_email">
-			`;
-
-			form.appendChild(div7);
-
-			
-			// ===== 주소 =====
-
-			let div8 = document.createElement('div');
-
-			div8.className = 'mb-3';
-
-			div8.innerHTML = `
-			  <label>주소</label><br>
-			  <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
-			  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-			  <input type="text" id="sample6_address" name="emp_add" class="form-control" placeholder="주소" required>
-			  <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mt-1" placeholder="상세주소" required>
-			  <input type="text" id="sample6_extraAddress" placeholder="참고항목">
-			`;
-
-			form.appendChild(div8);
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+						<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+					</div>
+				`			
 
 			// ===== 버튼 =====
 
 			let footerDiv = document.createElement('div');
 
 			footerDiv.className = 'modal-footer';
-
-			footerDiv.innerHTML = `
-			  <button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn" style="${empData ? 'display:none;' : ''}">등록</button>
-			  <button type="button" class="btn custom-btn-blue btn-warning" id="modifyBtn" style="${empData ? '' : 'display:none;'}">수정</button>
-			  <button type="reset" class="btn btn-secondary" id="resetBtn" style="${empData ? 'display:none;' : ''}">초기화</button>
-
-			  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-			`;
 
 			form.appendChild(footerDiv);
 
@@ -292,18 +251,9 @@ document.addEventListener('DOMContentLoaded', function(){
 			            body: JSON.stringify(payload)
 			        });
 
-			        if (!response.ok) {
-			            throw new Error(`서버 오류: ${response.status} - ${errorData.message || '알 수 없는 오류'}`);
-			        }
-
-
 			        alert(isModifyMode ? '직원 정보가 성공적으로 수정되었습니다!' : '직원이 성공적으로 등록되었습니다!');
 			        
-			        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-			        if (modalInstance) {
-			            modalInstance.hide();
-			        }
-			        loadDrafts(0); // 직원 목록 새로고침 (첫 페이지부터 다시 로드)
+			   
 
 			    } catch (error) {
 			        console.error('데이터 전송 중 오류 발생:', error);
@@ -311,7 +261,28 @@ document.addEventListener('DOMContentLoaded', function(){
 			    }
 			}
 			
+			// 사진 파일 선택 → 미리보기
+			const imgInput   = document.getElementById('emp_img');
+			const imgPreview = document.getElementById('emp_img_preview');
+
 			
+			// 기본 이미지 경로
+			const defaultImg = '/assets/img/emp/simple_person_pic.jpg';
+			
+			imgInput.addEventListener('change', e => {
+			  const file = e.target.files[0];
+			  if (!file) {                      // 선택 취소한 경우
+			    imgPreview.style.display = 'none';
+			    imgPreview.src = defaultImg;
+			    return;
+			  }
+
+			  const reader = new FileReader();
+			  reader.onload = evt => {
+			    imgPreview.src = evt.target.result;   // 선택한 이미지 표시
+			  };
+			  reader.readAsDataURL(file);             // 이미지 파일 → base64 읽기
+			});
 					// --- 1. 등록 버튼 클릭 이벤트 처리 ---
 					if (registerBtn) {
 					    registerBtn.addEventListener('click', async function(event) {
@@ -341,6 +312,8 @@ document.addEventListener('DOMContentLoaded', function(){
 					        const method = 'POST';
 
 					        const formData = new FormData(form); // 동적으로 생성된 'form' 사용
+							formData.append("emp_img", imgFile); // 파일은 직접 append
+							
 					        const payload = {
 					            emp_nm: formData.get('emp_nm'),
 					            emp_birth: formData.get('emp_birth').replace(/\./g, '-'), // YYYY.MM.DD -> YYYY-MM-DD
@@ -387,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function(){
 					            alert('이메일을 모두 입력해 주세요.');
 					            return;
 					        }
-
+							
 
 					        const url = '/SOLEX/emp/modify';
 					        const method = 'PUT';
@@ -521,6 +494,7 @@ document.addEventListener('DOMContentLoaded', function(){
 						form.reset(); 
 						modalTitle.textContent ='사원 등록';
 						// 등록 모드에서는 모든 필드를 수정 가능하게 (readOnly 해제)
+						document.querySelector('input[name="emp_img"]').readOnly = false; 
 						document.querySelector('input[name="emp_num"]').readOnly = false; 
 						document.querySelector('input[name="emp_nm"]').readOnly = false;
 						document.querySelector('input[name="emp_hire"]').readOnly = false;
@@ -567,41 +541,41 @@ document.addEventListener('DOMContentLoaded', function(){
 			}); // DOMContentLoaded 끝
 			
 function sample6_execDaumPostcode() {
-							    new daum.Postcode({
-							        oncomplete: function(data) {
-							            // 주소 변수
-							            var addr = ''; // 주소
-							            var extraAddr = ''; // 참고항목
-					
-							            // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
-							            if (data.userSelectedType === 'R') { // 도로명 주소
-							                addr = data.roadAddress;
-							            } else { // 지번 주소
-							                addr = data.jibunAddress;
-							            }
-					
-							            // 참고항목
-							            if(data.userSelectedType === 'R'){
-							                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-							                    extraAddr += data.bname;
-							                }
-							                if(data.buildingName !== '' && data.apartment === 'Y'){
-							                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-							                }
-							                if(extraAddr !== ''){
-							                    extraAddr = ' (' + extraAddr + ')';
-							                }
-							                document.getElementById("sample6_extraAddress").value = extraAddr;
-							            } else {
-							                document.getElementById("sample6_extraAddress").value = '';
-							            }
-					
-							            // 우편번호와 주소 정보를 해당 필드에 넣는다.
-							            document.getElementById('sample6_postcode').value = data.zonecode;
-							            document.getElementById("sample6_address").value = addr;
-					
-							            // 상세주소 입력칸으로 포커스 이동
-							            document.getElementById("sample6_detailAddress").focus();
-							        }
-							    }).open();
-				}
+	new daum.Postcode({
+	    oncomplete: function(data) {
+	        // 주소 변수
+	        var addr = ''; // 주소
+	        var extraAddr = ''; // 참고항목
+	
+	        // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+	        if (data.userSelectedType === 'R') { // 도로명 주소
+	            addr = data.roadAddress;
+	        } else { // 지번 주소
+	            addr = data.jibunAddress;
+	        }
+	
+	        // 참고항목
+	        if(data.userSelectedType === 'R'){
+	            if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                extraAddr += data.bname;
+	            }
+	            if(data.buildingName !== '' && data.apartment === 'Y'){
+	                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	            }
+	            if(extraAddr !== ''){
+	                extraAddr = ' (' + extraAddr + ')';
+	            }
+	            document.getElementById("sample6_extraAddress").value = extraAddr;
+	        } else {
+	            document.getElementById("sample6_extraAddress").value = '';
+	        }
+	
+	        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+	        document.getElementById('sample6_postcode').value = data.zonecode;
+	        document.getElementById("sample6_address").value = addr;
+	
+	        // 상세주소 입력칸으로 포커스 이동
+	        document.getElementById("sample6_detailAddress").focus();
+	    }
+	}).open();
+}

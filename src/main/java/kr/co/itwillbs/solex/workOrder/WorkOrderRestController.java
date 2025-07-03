@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/workOrders")
+@PreAuthorize("hasAnyRole('1','2','3','4')")
 public class WorkOrderRestController {
 	@Autowired
 	WorkOrderService service;
@@ -40,7 +42,6 @@ public class WorkOrderRestController {
 	public void workOrderInsert(@RequestBody List<Map<String, Object>> prdInfo,
 								HttpSession session) {
 		String empId = (String)session.getAttribute("empId");
-		System.out.println(empId);
 		service.workOrderInsert(prdInfo, empId);
 	}
 	
@@ -52,7 +53,9 @@ public class WorkOrderRestController {
 	
 	// 창고 자재 등록
 	@PostMapping("/warehouses")
-	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo) {
-		service.warehousesInsert(prdInfo);
+	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo,
+								 HttpSession session) {
+		String empId = (String)session.getAttribute("empId");
+		service.warehousesInsert(prdInfo, empId);
 	}
 }
