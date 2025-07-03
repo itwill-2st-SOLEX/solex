@@ -109,7 +109,7 @@
 .toastui-calendar-root,
 .toastui-calendar-layout {
   width: 100%;
-  min-height: 500px;   /* 필요 시 조정 */
+  min-height: 680px;   /* 필요 시 조정 */
 }
 
 /* close 버튼을 Date‑Picker 위로 올리기 */
@@ -175,6 +175,8 @@ div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-chi
 div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(3) > span.toastui-calendar-content {
 	font-weight: 500;
 }
+
+
 
 #monthLabel {
 	color: #444;

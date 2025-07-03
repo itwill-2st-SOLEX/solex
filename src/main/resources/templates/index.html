@@ -40,29 +40,6 @@
 		<!-- 여기서 부터 작성하시면 됩니다  -->
 			<!-- 본문 영역-->
 			<div class="custom-content">
-
-			    <!-- ───────── box1 : 공지·매출·인기상품 ───────── -->
-			    <div class="box1 d-flex gap-3 mb-4">
-			      <!-- 공지사항 -->
-			      <section class="panel notice flex-grow-1">
-			        <h5 class="panel-title">📢 최근 공지</h5>
-			        <ul id="noticeList" class="panel-list"><!-- li 동적 삽입 --></ul>
-			      </section>
-			
-			      <!-- 이번 달 매출 -->
-			      <section class="panel price flex-grow-1">
-			        <h5 class="panel-title">💰 이번 달 매출</h5>
-			        <div id="monthlySales" class="price-value">‑</div>
-			        <div id="salesPeriod" class="price-sub"></div>
-			      </section>
-			
-			      <!-- 인기 판매품목 -->
-			      <section class="panel product flex-grow-1">
-			        <h5 class="panel-title">🔥 인기 상품</h5>
-			        <ol id="popularProducts" class="panel-list number"><!-- li 동적 삽입 --></ol>
-			      </section>
-			    </div>
-			
 			    <!-- ───────── box2 : 달력 + (결재·즐겨찾기) ───────── -->
 			    <div class="box2 d-flex gap-3">
 			      <!-- 달력 -->
@@ -78,19 +55,18 @@
 					    <button id="nextMonthBtn" class="btn btn-link px-2">
 					        <i class="menu-icon tf-icons bx bx-caret-right"></i>
 					    </button>
-<!--						  <button class="btn-nav today">Today</button>
-						  <button class="btn-nav prev">←</button>
-						  <button class="btn-nav next">→</button>
-						  <span class="nav-range navbar--range"></span>-->
 						</nav>
 			        </header>
 			        <main id="calendar" class="calendar-area"><!-- Calendar 붙는 곳 --></main>
-			        
 			        
 			      </section>
 			
 			      <!-- 결재·즐겨찾기 세로 스택 -->
 			      <div class="box2Side d-flex flex-column gap-3" style="width:28%;">
+					<section class="panel notice flex-grow-1">
+							        <h5 class="panel-title">📢 최근 공지</h5>
+							        <ul id="noticeList" class="panel-list"> li 동적 삽입 </ul>
+							      </section>
 			        <section class="panel approval flex-fill">
 			          <h5 class="panel-title">📝 결재 목록</h5>
 			          <ul id="approvalList" class="panel-list"><!-- li 동적 삽입 --></ul>
