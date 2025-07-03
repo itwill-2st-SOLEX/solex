@@ -28,7 +28,7 @@
 		LEFT JOIN code_detail pos ON pos.det_id = e.emp_pos_cd
 		LEFT JOIN code_detail dep ON dep.det_id = e.emp_dep_cd
 		LEFT JOIN code_detail team ON team.det_id = e.emp_team_cd
-		WHERE e.emp_num = #{emp_num}
+		WHERE e.emp_id = #{emp_id}
 	</select>
 	
 	<update id="personalDataModify">
@@ -40,6 +40,6 @@
 		emp_pc = #{emp_pc},
 		emp_add = #{emp_add},
 		emp_da = #{emp_da}
-		WHERE emp_num = #{emp_num}
+		WHERE e.emp_id = #{emp_id}
 	</update>
 </mapper>
