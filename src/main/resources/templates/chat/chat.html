@@ -69,7 +69,8 @@
 		src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 	<script th:inline="javascript">
 		/*<![CDATA[*/
-		  const empId = /*[[${session.empNum}]]*/ "";
+		  const empId = /*[[${session.empId}]]*/ "";
+		console.log(empId);
 		/*]]>*/
 	</script>
 	<script src="./js/chat/chat.js"></script>

@@ -13,22 +13,23 @@ public class ChatService {
 	ChatMapper mapper;
 
 	// 사원 목록 조회
-	public List<Map<String, Object>> getEmpList(String empNum) {
-		return mapper.getEmpList(empNum);
+	public List<Map<String, Object>> getEmpList(String empId) {
+		return mapper.getEmpList(empId);
 	}
 
 	// 대화 목록 조회
-	public List<Map<String, Object>> getChatList(String empNum) {
-		return mapper.getChatList(empNum);
+	public List<Map<String, Object>> getChatList(String empId) {
+		return mapper.getChatList(empId);
 	}
 
 	// 채팅방 메세지 불러오기
-	public List<Map<String, Object>> getChatHistory(String empNum, String partnerId) {
-		return mapper.getChatHistory(empNum, partnerId);
+	public List<Map<String, Object>> getChatHistory(String empId, String partnerId) {
+		return mapper.getChatHistory(empId, partnerId);
 	}
 
 	// ChatWebSocketController 디비에 메세지 저장
 	public void saveMessage(Map<String, Object> message) {
+		System.out.println(message);
 		mapper.saveMessage(message);
 	}
 

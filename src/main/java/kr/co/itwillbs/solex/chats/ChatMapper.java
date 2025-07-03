@@ -9,11 +9,11 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ChatMapper {
 	// 사원 목록 조회
-	public List<Map<String, Object>> getEmpList(String empNum);
+	public List<Map<String, Object>> getEmpList(String empId);
 	// 대화 목록 조회
-	public List<Map<String, Object>> getChatList(String empNum);
+	public List<Map<String, Object>> getChatList(String empId);
 	// 채팅방 메세지 불러오기
-	public List<Map<String, Object>> getChatHistory(@Param("empNum") String empNum, @Param("partnerId") String partnerId);
+	public List<Map<String, Object>> getChatHistory(@Param("empId") String empId, @Param("partnerId") String partnerId);
 	// 메세지 디비에 저장
 	public void saveMessage(Map<String, Object> message);
 	// 채팅방 읽음 표시
@@ -27,5 +27,5 @@ public interface ChatMapper {
 	public void deleteChatRoom(@Param("room_id1") String room_id1, @Param("room_id2") String room_id2);
 	// 안읽은 메세지 갯수
 	public int getUnreadMessageCnt(String empId);
-	public List<String> getMyChatRooms(String empNum);
+	public List<String> getMyChatRooms(String empId);
 }

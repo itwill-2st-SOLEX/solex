@@ -218,7 +218,6 @@ function openChatroom(name, targetId) {
 			empId: empId
 		}),
 		success: function() {
-			console.log('읽음 처리 완료');
 			unreadCnt();
 		},
 		error: function() {
@@ -234,7 +233,7 @@ function connectAllChatRooms() {
 
 	stompClient.connect({}, function() {
 		$.ajax({
-			url: '/SOLEX/chats/myRooms',  // 서버에서 내가 포함된 roomId 배열 반환 필요
+			url: '/SOLEX/chats/myRooms',
 			method: 'GET',
 			success: function(roomIds) {
 				if (!Array.isArray(roomIds)) return;
@@ -336,7 +335,7 @@ function renderMessage(message, isMine, isRead) {
 	readStatusDiv.className = `read-status ${isRead ? '' : 'unread'}`;
 
 	msgDiv.textContent = message.content;
-	readStatusDiv.textContent = isRead == 'Y' ? '' : '안읽음';
+	readStatusDiv.textContent == 'Y' ? '' : '안읽음';
 	debugger;
 
 	if (isMine) {
@@ -433,7 +432,7 @@ function unreadCnt() {
 				badge.classList.add('hidden');
 			}
 			// 헤더 배지 업데이트
-			//			updateHeaderBadge(count);
+			updateHeaderBadge(count);
 		},
 		error: function() {
 			console.error('안읽은 메시지 수 불러오기 실패');
@@ -442,14 +441,15 @@ function unreadCnt() {
 }
 
 // 페이지 헤더에 있는 안읽은 메세지
-//function updateHeaderBadge(count) {
-//	const badge = document.getElementById('header-chat-badge');
-//	if (!badge) return;
-//
-//	if (count > 0) {
-//		badge.textContent = count;
-//		badge.classList.remove('d-none');
-//	} else {
-//		badge.classList.add('d-none');
-//	}
-//}
+function updateHeaderBadge(count) {
+	const badge = document.getElementById('header-chat-badge');
+	if (!badge) return;
+
+	if (count > 0) {
+		badge.textContent = count;
+		badge.classList.remove('d-none');
+	} else {
+		badge.classList.add('d-none');
+	}
+}
+//window.unreadCnt = unreadCnt;
