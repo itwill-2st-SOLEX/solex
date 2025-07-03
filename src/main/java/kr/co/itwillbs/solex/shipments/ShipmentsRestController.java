@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.shipments;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,16 +39,20 @@ public class ShipmentsRestController {
 
 
     @PostMapping
-    public ResponseEntity<String> createOrderRequest(@RequestBody Map<String, Object> params, HttpSession httpSession) throws Exception {
+    public ResponseEntity<Map<String, String>>  createOrderRequest(@RequestBody Map<String, Object> params, HttpSession httpSession) throws Exception {
         try {
             String emp_id = (String) httpSession.getAttribute("empId");
             params.put("emp_id", emp_id);
-            System.out.println(params);
             shipmentsService.createOrderRequest(params);
-            return ResponseEntity.ok("정상적으로 처리되었습니다.");
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "정상적으로 처리되었습니다.");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류가 발생했습니다.");
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "서버 내부 오류가 발생했습니다.");
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 	
@@ -56,15 +61,18 @@ public class ShipmentsRestController {
 		Map<String, Object> orderData = shipmentsService.getOrderDetail(odd_id);
 		return orderData;
 	}
-
     @PatchMapping("{odd_id}")
-    public ResponseEntity<String> approveForm(@PathVariable("odd_id") int odd_id) throws Exception {
+    public ResponseEntity<Map<String, String>> approveForm(@PathVariable("odd_id") int odd_id) {
         try {
-            shipmentsService.approveForm(odd_id);
-            return ResponseEntity.ok("정상적으로 처리되었습니다.");
+            shipmentsService.incrementOddSts(odd_id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "정상적으로 처리되었습니다.");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류가 발생했습니다.");
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "서버 내부 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 	

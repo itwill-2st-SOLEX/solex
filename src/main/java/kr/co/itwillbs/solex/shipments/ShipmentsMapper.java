@@ -20,7 +20,7 @@ public interface ShipmentsMapper {
 
 	int createSujuOrderDetail(@Param("list") List<Map<String, Object>> items);
 
-	int approveForm(int ord_id);
+	int incrementOddSts(int odd_id);
 
 	Map<String, Object> selectOrderDetailById(int odd_id);
 	

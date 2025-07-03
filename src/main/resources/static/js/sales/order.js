@@ -457,7 +457,7 @@ function resetOrderStep(step) {
 
 function initDate() {
   const todayStr = new Date().toISOString().split('T')[0];
-  ['ord_end_date', 'ord_pay_date'].forEach(id => {
+  ['odd_end_date', 'odd_pay_date'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.value = todayStr;

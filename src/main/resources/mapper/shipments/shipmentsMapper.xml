@@ -36,16 +36,17 @@
 			ord.ord_da as ORD_DA, -- 주소		
 			ord.pay_type as PAY_TYPE, -- 결제 방식
 			ord.ord_pay as ORD_PAY, -- 결제 금액
-			ord.ord_pay_date as ORD_PAY_DATE, -- 결제 예정일
+			TO_CHAR(ord.ord_pay_date, 'YYYY-MM-DD') as ORD_PAY_DATE, -- 결제 예정일
 			TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE, -- 납품 예정일
-			opt.opt_color as OPT_COLOR,
-			opt.opt_size as OPT_SIZE,
-			opt.opt_height as OPT_HEIGHT,
-			odd.odd_cnt as ODD_CNT,
-			cd2.det_nm as OPT_COLOR_NM,
-			cd3.det_nm as OPT_SIZE_NM,
-			cd4.det_nm as OPT_HEIGHT_NM,
-			odd.odd_cnt as ODD_CNT
+			odd.odd_cnt as QUANTITY,
+			opt.opt_color as COLOR_CODE,
+			opt.opt_size as SIZE_CODE,
+			opt.opt_height as HEIGHT_CODE,
+			cd2.det_nm as COLOR_NAME,
+			cd3.det_nm as SIZE_NAME,
+			cd4.det_nm as HEIGHT_NAME,
+			cli.cli_id as CLI_ID,
+			prd.prd_id as PRD_ID
 		FROM suju_order ord
 		left JOIN client cli ON ord.cli_id = cli.cli_id
 		left join suju_order_detail odd on odd.ord_id = ord.ord_id
@@ -54,7 +55,7 @@
 		left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
 		left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
 		left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
-		WHERE odd.odd_id = #{odd_id};
+		WHERE odd.odd_id = #{odd_id}
 	</select>
 	
 
@@ -118,16 +119,12 @@
 	<!-- 주문 등록 트랜잭션 끝 -->
 
 	<!-- 수주테이블과 수주상세테이블 조인해서 수주 번호에 해당하는 수주 상세들 전부 승인 -->
-	<update id="approveForm" parameterType="int">
-		MERGE INTO suju_order_detail odd
-			USING (
-				SELECT ord.ord_id
-				FROM suju_order ord
-				WHERE ord.ord_id = #{ord_id}
-			) src
-			ON (odd.ord_id = src.ord_id)
-		WHEN MATCHED THEN
-		UPDATE SET odd.odd_sts = 'odd_sts_06', odd.odd_mod_date = SYSDATE + 9/24;
+	<update id="incrementOddSts" parameterType="int">
+		UPDATE suju_order_detail 
+		SET odd_sts = 'odd_sts_' ||
+              			LPAD(TO_CHAR(TO_NUMBER(REGEXP_SUBSTR(odd_sts, '\d+')) + 1), 2, '0'),
+			odd_mod_date = SYSDATE + 9/24
+		WHERE odd_id = #{odd_id}
 	</update>
 
 

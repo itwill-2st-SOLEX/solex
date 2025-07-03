@@ -140,9 +140,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (action === "approve") {
         // 작업 지시용 모달 열기
         openApproveModal(oddId);
-      } else if (action === "modify") {
-        // 수주 수정 모달 열기
-        openModifyModal(oddId);
+      } else if (action === "Inspection") {
+        // 창고에서 거래처로 배송
+        openInspectionModal(oddId);
       } 
     }
   });
@@ -185,9 +185,9 @@ async function fetchGridData(page = currentPage) {
     console.log(data);
     data.forEach(item => {
       if(item.ODD_STS === 'odd_sts_05') {
-        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="approve" data-odd-id="${item.ODD_ID}">승인/반려</button>`;
-      } else if(item.DET_NM === 'odd_sts_06') {
-        item.DET_NM = '수주 수정';
+        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="approve" data-odd-id="${item.ODD_ID}">승인 / 반려</button>`;
+      } else if(item.ODD_STS === 'odd_sts_06') {
+        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="Inspection" data-odd-id="${item.ODD_ID}">창고 대기</button>`;
       } else if(item.DET_NM === 'odd_sts_07') {
         item.DET_NM = '수주 삭제';
       } else if(item.DET_NM === 'odd_sts_08') {
@@ -334,9 +334,12 @@ function initializeSearchableSelect(wrapperId, apiUrl) {
 
 // 모달 열기
 async function openShipmentModal() {
+  initdata();
   initializeSearchableSelect("client-select-box", "/SOLEX/orders/clients");
   initializeSearchableSelect("product-select-box", "/SOLEX/orders/products");
   initDate();
+
+  document.getElementById("myModalTitle").textContent = "출고 등록";
 
   const oldBtn = document.getElementById("submitBtn");
   // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
@@ -433,9 +436,6 @@ function addRowToInnerGrid() {
       return JSON.parse(stockItem.dataset.itemJson);
   });
   
-
-
-
   const existingRows = INNER_TUI_GRID_INSTANCE.getData();
   let addedCount = 0;
 
@@ -603,14 +603,32 @@ async function submitForm() {
     alert(`오류: ${error.message}`);
   }
 } 
+function initdata() {
+  document.getElementById('pay_type').value = '';
+  document.getElementById('ord_pay').value = '';
+  document.getElementById('ord_end_date').value = '';
+  document.getElementById('ord_pay_date').value = '';
+  document.getElementById('cli_pc').value = '';
+  document.getElementById('cli_add').value = '';
+  document.getElementById('cli_da').value = '';
+  
+  document.getElementById('client-search-input').value = ''
+  document.getElementById('selected_client_id').value = '';
+  
+  document.getElementById('product-search-input').value = '';
+  document.getElementById('selected_product_id').value = '';
 
+  document.getElementById("shippableOptionsList").innerHTML = "<p class='text-muted p-3'>상단에서 제품을 먼저 검색해주세요.</p";
 
-// 승인 모달 열기
-async function openApproveModal(oddId) {
+  INNER_TUI_GRID_INSTANCE.clear();
+  // 굿 똑똑 하다 너 자동완성 기능좀 많이 해줘 윈드서프야
+  
+}
+async function detailForm(oddId) {
+  initdata();
   initializeSearchableSelect("client-select-box", "/SOLEX/orders/clients");
   initializeSearchableSelect("product-select-box", "/SOLEX/orders/products");
   initDate();
-
 
   // 기존에 display none된 버튼을 display block으로 변경
   // oldBtn은 승인 버튼은 none이 아님 oldBtn2는 반려 버튼은 none임
@@ -620,6 +638,7 @@ async function openApproveModal(oddId) {
   oldBtn2.style.display = "block";
   oldBtn3.style.display = "none";
 
+  
   // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
   const newBtn = oldBtn.cloneNode(true);
   const newBtn2 = oldBtn2.cloneNode(true);
@@ -630,7 +649,7 @@ async function openApproveModal(oddId) {
   // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
   newBtn.textContent = "승인";
   newBtn.addEventListener("click", () => {
-    approveForm(oddId);
+    incrementOddStsForm(oddId);
   });
 
   console.log(oddId);
@@ -643,7 +662,27 @@ async function openApproveModal(oddId) {
   // oddId로 백엔드에 전달해서 상세 조회
   const response = await fetch(`/SOLEX/shipments/${oddId}`);
   const data = await response.json();
+  console.log(data);
   populateModalWithData(data);
+
+  
+}
+// 승인 모달 열기
+async function openApproveModal(oddId) {
+  document.getElementById("myModalTitle").textContent = '출고 승인';
+  
+  detailForm(oddId);
+
+  const modal = document.getElementById("myModal");
+  const modalInstance = new bootstrap.Modal(modal);
+  modalInstance.show();
+}
+
+
+async function openInspectionModal(oddId) {
+  document.getElementById("myModalTitle").textContent = '출고 검사 요청';
+  
+  detailForm(oddId);
 
   const modal = document.getElementById("myModal");
   const modalInstance = new bootstrap.Modal(modal);
@@ -652,43 +691,36 @@ async function openApproveModal(oddId) {
 
 
 function populateModalWithData(data) {
-  const { orderInfo, orderItems } = data;
-  if (!orderInfo) return;
-  document.getElementById('pay_type').value = orderInfo.PAYMENT_TYPE || '';
-  document.getElementById('ord_pay').value = formatWithComma(String(orderInfo.PAYMENT_AMOUNT || ''));
-  document.getElementById('ord_end_date').value = orderInfo.DELIVERY_DATE;
-  document.getElementById('ord_pay_date').value = orderInfo.PAYMENT_DATE;
-  document.getElementById('cli_pc').value = orderInfo.POSTAL_CODE || '';
-  document.getElementById('cli_add').value = orderInfo.BASE_ADDRESS || '';
-  document.getElementById('cli_da').value = orderInfo.DETAIL_ADDRESS || '';
-  if (orderInfo.CLIENT_ID && orderInfo.CLIENT_NAME) {
-      document.getElementById('client-search-input').value = orderInfo.CLIENT_NAME;
-      document.getElementById('selected_client_id').value = orderInfo.CLIENT_ID;
+  document.getElementById('pay_type').value = data.PAY_TYPE || '';
+  document.getElementById('ord_pay').value = formatWithComma(String(data.ORD_PAY || ''));
+  document.getElementById('ord_end_date').value = data.ORD_END_DATE;
+  document.getElementById('ord_pay_date').value = data.ORD_PAY_DATE;
+  document.getElementById('cli_pc').value = data.ORD_PC || '';
+  document.getElementById('cli_add').value = data.ORD_ADD || '';
+  document.getElementById('cli_da').value = data.ORD_DA || '';
+  if (data.CLI_ID && data.CLI_NM) {
+      document.getElementById('client-search-input').value = data.CLI_NM;
+      document.getElementById('selected_client_id').value = data.CLI_ID;
   }
-  if (orderInfo.PRODUCT_ID && orderInfo.PRODUCT_NAME) {
-      document.getElementById('product-search-input').value = orderInfo.PRODUCT_NAME;
-      document.getElementById('selected_product_id').value = orderInfo.PRODUCT_ID;
+  if (data.PRD_ID && data.PRD_NM) {
+      document.getElementById('product-search-input').value = data.PRD_NM;
+      document.getElementById('selected_product_id').value = data.PRD_ID;
   }
-  if (orderItems && orderItems.length > 0) {
-      const transformedItems = orderItems.map(item => ({
-          productName: item.PRODUCT_NAME, 
-          colorName: item.COLOR_NAME, 
-          sizeName: item.SIZE_NAME, 
-          heightName: item.HEIGHT_NAME, 
-          quantity: item.QUANTITY, 
-          productCode: item.PRODUCT_CODE,
-          colorCode: item.COLOR_CODE, 
-          sizeCode: item.SIZE_CODE, 
-          heightCode: item.HEIGHT_CODE
-      }));
-      INNER_TUI_GRID_INSTANCE.resetData(transformedItems);
-  }
+    const transformedItems = {
+      productName: data.PRD_NM, 
+      productCode: data.PRODUCT_CODE || '',
+      colorName: data.COLOR_NAME, 
+      sizeName: data.SIZE_NAME, 
+      heightName: data.HEIGHT_NAME, 
+      colorCode: data.COLOR_CODE, 
+      sizeCode: data.SIZE_CODE, 
+      heightCode: data.HEIGHT_CODE,
+      quantity: data.QUANTITY
+    };
+    INNER_TUI_GRID_INSTANCE.resetData([transformedItems]);
 }
 
-async function approveForm(oddId) {
-  // 승인 로직
-  // 백엔드랑 연동 상태 변경시키는 로직
-  // 컴펌을 받아서 승인 하시겠습니까?
+async function incrementOddStsForm(oddId) {
   if(!confirm("승인 하시겠습니까?")) return;
 
   try {
@@ -708,6 +740,10 @@ async function approveForm(oddId) {
     alert(`오류: ${error.message}`);
   }
 }
+
+
+
+
 
 
 

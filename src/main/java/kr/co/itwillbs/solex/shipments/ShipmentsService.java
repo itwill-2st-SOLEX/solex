@@ -59,9 +59,9 @@ public class ShipmentsService {
     }
 
     @Transactional(rollbackFor = Exception.class) 
-    public void approveForm(int ord_id) throws Exception {
+    public void incrementOddSts(int odd_id) throws Exception {
         // 주문 상태 변경
-        Integer result = shipmentsMapper.approveForm(ord_id);
+        Integer result = shipmentsMapper.incrementOddSts(odd_id);
         // null 체크 추가
         if (result == null || result <= 0) {
             throw new RuntimeException("주문 승인에 실패했습니다.");
