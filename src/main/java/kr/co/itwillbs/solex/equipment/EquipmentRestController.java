@@ -24,6 +24,11 @@ public class EquipmentRestController {
 	@Autowired
 	EquipmentService equipmentService;
 	
+	@GetMapping("/name") // 
+	public List<Map<String, Object>> getEquipmentName() {
+		return equipmentService.getEquipmentName();
+    }
+	
 	@GetMapping("/data") // 
 	public List<Map<String, Object>> getPagedGridData(
         @RequestParam(name = "page", defaultValue = "0") int page, // 
