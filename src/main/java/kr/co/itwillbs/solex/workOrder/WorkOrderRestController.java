@@ -40,8 +40,6 @@ public class WorkOrderRestController {
 	public void workOrderInsert(@RequestBody List<Map<String, Object>> prdInfo,
 								HttpSession session) {
 		String empId = (String)session.getAttribute("empId");
-		System.out.println(empId);
-		System.out.println(prdInfo);
 		service.workOrderInsert(prdInfo, empId);
 	}
 	
@@ -53,7 +51,9 @@ public class WorkOrderRestController {
 	
 	// 창고 자재 등록
 	@PostMapping("/warehouses")
-	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo) {
-		service.warehousesInsert(prdInfo);
+	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo,
+								 HttpSession session) {
+		String empId = (String)session.getAttribute("empId");
+		service.warehousesInsert(prdInfo, empId);
 	}
 }

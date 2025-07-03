@@ -101,6 +101,18 @@
 	       	   odd_mod_date = sysdate + (9/24)
 	     WHERE odd_id = #{oddId}
 	</update>
+	
+	<insert id="insertSujuHistory">
+		INSERT INTO suju_history (odd_id,
+								  odd_sts,
+								  his_date,
+								  emp_id
+		) VALUES (#{oddId},
+				  'odd_sts_03',
+				  sysdate + (9/24),
+				  #{empId}
+		)
+	</insert>
 <!-- 	창고 조회	 -->
 	<select id="getWarehouses" resultType="map">
 		SELECT w.whs_id  -- 창고 ID
@@ -125,7 +137,7 @@
 		 GROUP BY w.whs_id, w.whs_nm, w.whs_pc, w.whs_add, w.whs_da,
 			      a.are_id, a.are_nm, a.are_max
 	</select>
-<!-- 	창고 이력 등록 -->
+<!-- 	1. 창고 이력 insert -->
 	<insert id="warehousesInsert">
 		INSERT INTO warehouse_history (are_id,
 				    				   whs_his_sts,
@@ -137,7 +149,7 @@
 				  SYSDATE + (9/24)
 		)
 	</insert>
-<!-- 	재고 테이블 업데이트-->
+<!-- 	2. 재고 원장 insert -->
 	<insert id="stockUpdate">
 		INSERT INTO stock_ledger (item_id,
 								  warehouse_id,
@@ -146,7 +158,7 @@
 								  initial_cnt,
 								  remaining_cnt,
 								  stk_cat
-		) values (#{optId},
+		) VALUES (#{optId},
 				  #{warehouseId},
 				  #{areaId},
 				  SYSDATE + (9/24),
@@ -155,23 +167,36 @@
 				  'stock_cat_01'
 		)
 	</insert>
-<!-- 	구역 테이블 -->
+<!-- 	3.구역 update -->
 	<update id="areaUpdate">
 		UPDATE area
 		   SET are_qty = are_qty + #{assignQty}
 		 WHERE are_id = #{areaId}
 	</update>
-<!-- 	구역 디테일 update -->
+<!-- 	4. 구역 디테일 update -->
 	<update id="areaDetailUpdate">
-			UPDATE area_detail
-			   SET are_det_qty = are_det_qty + #{assignQty}
-			 WHERE item_id = #{optId}
-			   AND are_id = #{areaId}
+		UPDATE area_detail
+		   SET are_det_qty = are_det_qty + #{assignQty}
+		 WHERE item_id = #{optId}
+		   AND are_id = #{areaId}
 	</update>
 <!-- 	 5. 수주 detail update -->
 	<update id="sujuDetailUpdate">
-			UPDATE suju_order_detail
-			   SET odd_sts = 'odd_sts_06'
-			 WHERE odd_id = #{oddId}
+		UPDATE suju_order_detail
+		   SET odd_sts = 'odd_sts_06'
+		 WHERE odd_id = #{oddId}
 	</update>
+<!-- 	6. 수주 히스토리 테이블 인서트 -->
+	<insert id="sujuInserthistory">
+		INSERT INTO suju_history (odd_id,
+								  odd_sts,
+								  his_date,
+								  emp_id
+		
+		) VALUES (#{prdInfo.oddId},
+				  'odd_sts_06',
+				  SYSDATE + (9/24),
+				  #{empId}
+		)
+	</insert>
 </mapper>
