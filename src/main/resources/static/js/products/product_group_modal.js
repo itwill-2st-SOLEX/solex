@@ -51,6 +51,21 @@ async function onWriteProduct() {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function showProductModal(mode, data = null) {
     const modalTitle = document.getElementById('productModalLabel');
     const saveProductBtn = document.getElementById('saveProductBtn');
@@ -101,8 +116,8 @@ async function showProductModal(mode, data = null) {
         saveProductBtn.textContent = '등록 완료';
         saveProductBtn.onclick = () => processProductData('register'); 
         if (generateCombinationsBtn) {
-//            generateCombinationsBtn.textContent = '옵션 등록';
-			generateCombinationsBtn.style.display='none';
+//            generateCombinationsBtn.textContent = '옵션 등록'; // 이 줄은 주석 처리 또는 삭제
+			generateCombinationsBtn.style.display='none'; // 버튼 숨김 처리
             generateCombinationsBtn.removeAttribute('disabled'); // 새 제품에 대해 활성화 상태 보장
             // generateCombinationsBtn에 대한 클릭 이벤트는 이제 탭 변경 이벤트에 의해 처리됩니다.
             // 이 특정 요청의 경우, 탭이 디스플레이를 트리거할 것입니다.
@@ -116,7 +131,7 @@ async function showProductModal(mode, data = null) {
         await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit');
         await loadCommonCodesToSelect('prdTypeSelect', 'prd_type');
         
-    } else if (mode === 'edit' && data) {
+    } else if (mode === 'edit' && data) { // ⭐⭐ 이 부분 수정 ⭐⭐
         modalTitle.textContent = '제품 상세정보';
 		
 		try {
@@ -125,6 +140,8 @@ async function showProductModal(mode, data = null) {
 		        return res.json();
 		    });
 		    console.log('Fetched existingProductOptions for edit mode:', existingProductOptions);
+		    // window.currentProductExistingOptions에 실제 데이터 배열을 할당
+            window.currentProductExistingOptions = existingProductOptions; // 서버 응답 전체 객체 할당
 		    await populateSelectPickers(existingProductOptions); // 기존 옵션 전달
 		} catch (error) {
 		    console.error('기존 제품 옵션 로드 실패:', error);
@@ -132,17 +149,31 @@ async function showProductModal(mode, data = null) {
 		}
 		
 		// 250626 제품 이름, 가격, 설명만 수정, 옵션은 추가만 가능, 삭제 불가.
-//		const editableElements = document.getElementsByClassName('read_only');
-//		Array.from(editableElements).forEach(element => {
-//		    element.setAttribute('readonly', 'readonly');
-//		});
-//		
-//		const selectElements = document.querySelectorAll('select');
-//		selectElements.forEach(select => {
-//			select.setAttribute('disabled', 'disabled');
-//		});
-//		saveProductBtn.textContent='수정 완료';
-//		saveProductBtn.onclick = () => processProductData('update'); 
+		const editableElements = document.getElementsByClassName('read_only');
+		Array.from(editableElements).forEach(element => {
+		    element.setAttribute('readonly', 'readonly');
+		});
+		
+		// ⭐⭐ 기존: 모든 select를 비활성화하는 코드 삭제 또는 주석 처리 ⭐⭐
+		// const selectElements = document.querySelectorAll('select');
+		// selectElements.forEach(select => {
+		// 	select.setAttribute('disabled', 'disabled');
+		// });
+        
+        // ⭐⭐ 새로 추가: 필요한 경우 특정 select만 비활성화 (제품 단위, 제품 유형 등) ⭐⭐
+        // 제품 단위와 제품 유형을 수정 모드에서 비활성화하려면 아래 코드를 사용하세요.
+        // 만약 이들도 수정 가능하게 하려면 이 코드도 삭제합니다.
+        if (prdUnitSelectElement) {
+             $(prdUnitSelectElement).prop('disabled', true).selectpicker('refresh');
+        }
+        if (prdTypeSelectElement) {
+             $(prdTypeSelectElement).prop('disabled', true).selectpicker('refresh');
+        }
+        // 멀티 셀렉트 박스 (컬러, 사이즈, 굽)는 활성화 상태를 유지해야 하므로,
+        // 이들을 명시적으로 비활성화하는 코드는 넣지 않습니다.
+
+		saveProductBtn.textContent='수정 완료';
+		saveProductBtn.onclick = () => processProductData('update'); 
 		
 		
         // 모달 필드에 기존 데이터 채우기 (옵션 데이터를 가져오기 전에 미리 채움)
@@ -153,14 +184,13 @@ async function showProductModal(mode, data = null) {
         if (prdCommElement) prdCommElement.value = data.PRD_COMM || '';
         if (prdRegDateElement) prdRegDateElement.value = formatter(data.PRD_REG_DATE, true);
         
-        await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT);
-        await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);
-		await loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
-	    await loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
-		await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
+        await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_UNIT); // 수정: data.PRD_SELECTED_UNIT -> data.PRD_UNIT
+        await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_TYPE); // 수정: data.PRD_SELECTED_TYPE -> data.PRD_TYPE
+		// 이 부분은 loadCommonCodesToSelect가 이미 옵션을 채워주고, 멀티 셀렉트에는 사용되지 않는 것 같으므로 제거하거나 확인 필요
+		// await loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
+	    // await loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
     }
-
-    const modalEl = document.getElementById('productModal');
+	const modalEl = document.getElementById('productModal');
     const productModal = new bootstrap.Modal(modalEl);
 
 	
@@ -358,6 +388,30 @@ async function showProductModal(mode, data = null) {
     productModal.show();
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function getNowForOracle() {
     const now = new Date();
 
@@ -537,9 +591,7 @@ async function populateSelectPickers(existingOptions = []) {
 
     // 2. 수정 모드일 때 기존 옵션들을 드롭다운에서 비활성화/숨김 처리 (이전 가이드와 동일)
 	if (existingOptions && Array.isArray(existingOptions.data) && existingOptions.data.length > 0) {
- 
         console.log('Applying existing options for disable/hide:', existingOptions);
-
         const existingColorIds = new Set(existingOptions.map(opt => String(opt.OPT_COLOR)));
         const existingSizeIds = new Set(existingOptions.map(opt => String(opt.OPT_SIZE)));
         const existingHeightIds = new Set(existingOptions.map(opt => String(opt.OPT_HEIGHT)));
@@ -635,11 +687,13 @@ async function processProductData(mode) {
 	    return;
 	}
 	// DB 중복 확인
-    const isDuplicate = await checkPrdCode(prdCode);
-    if (isDuplicate) {
-       	// 경고 메시지는 이미 checkProductCodeDuplicate 함수 안에서 띄워졌으므로 여기서는 추가 작업 없이 종료
-       	return;
-   	}
+	if (mode === 'register') {
+        const isDuplicate = await checkPrdCode(prdCode);
+        if (isDuplicate) {
+            // 경고 메시지는 이미 checkPrdCode 함수 안에서 띄워졌으므로 여기서는 추가 작업 없이 종료
+            return;
+        }
+	}
     if (!prdPrice || isNaN(prdPrice) || Number(prdPrice) <= 0) { alert("제품 가격을 올바르게 입력해주세요."); return; }
     if (!prdType) { alert("제품 유형을 선택해주세요."); return; }
     if (!prdUnit) { alert("제품 단위를 선택해주세요."); return; }
@@ -673,12 +727,13 @@ async function processProductData(mode) {
 	
 	// ⭐⭐ 4. 수정 모드에서 옵션 중복 유효성 검사 (새로 추가) ⭐⭐
     if (mode === 'update') {
-        const existingOptions = window.currentProductExistingOptions || [];
+//        const existingOptions = window.currentProductExistingOptions || [];
+		const existingOptions = (window.currentProductExistingOptions && window.currentProductExistingOptions.data) || [];
 
-        if (selectedOptions.length === 0) {
-            alert("수정할 옵션 조합을 하나 이상 선택해주세요.");
-            return;
-        }
+//        if (selectedOptions.length === 0) {
+//            alert("수정할 옵션 조합을 하나 이상 선택해주세요.");
+//            return;
+//        }
 
         for (const newOption of selectedOptions) {
             // 현재 선택된 옵션 조합이 기존 옵션들과 정확히 일치하는지 확인
