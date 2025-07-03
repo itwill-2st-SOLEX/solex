@@ -23,7 +23,7 @@ public class QualityRestController {
 	@Autowired
 	public QualityService qualityService;
 	
-	// 재고 리스트
+	// 품질검사 항목 리스트
     @GetMapping("")
     public List<Map<String, Object>> getQualityList(@RequestParam("page") int page, @RequestParam("size") int size) {
     	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
@@ -34,5 +34,14 @@ public class QualityRestController {
     	
 		return qualityService.getQualityList(offset, size);
     }
-  	
+    
+    // 품질검사 항목 등록
+   	@PostMapping("")
+   	public void registerQuality(@RequestBody Map<String, Object> qualityRequest) {
+       	System.out.println("---------------------***********************----------------------");
+   		System.out.println(qualityRequest);
+   		
+   		qualityService.registerQuality(qualityRequest);   	
+   	}
+ 
 }
