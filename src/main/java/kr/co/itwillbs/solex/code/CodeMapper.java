@@ -40,7 +40,7 @@ public interface CodeMapper {
 
 	// 상세공통코드 기존 행 수정
 	void updateDetailCodes(List<Map<String, Object>> updateList);
-	
-	
 
+	List<Map<String, Object>> getQualityNames();
+	
 }

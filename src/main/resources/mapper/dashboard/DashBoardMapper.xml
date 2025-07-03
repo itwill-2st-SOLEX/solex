@@ -19,25 +19,24 @@
 		 ORDER BY ord_reg_date DESC
 		 FETCH FIRST 20 ROWS ONLY
 	</select>
+	
 <!-- 	최근 생산 완료된 제품들 -->
 	<select id="getPrdCompleted" resultType="map">
-		SELECT prd_nm
-			   , prd_code
-			   , prd_color
-			   , prd_size
-			   , prd_height
-			   , odd_sts
-			   , odd_mod_date
-		  FROM vw_suju_summary
-		 WHERE odd_sts IN (
-			  '작업 완료',
-			  '출고 대기(공장 > 창고)',
-			  '창고 대기',
-			  '출고 검사',
-			  '출고 완료'
-		 )
-		   AND odd_isapproval = 'y'
-		 ORDER BY odd_mod_date DESC
+		SELECT s.prd_nm,
+			   s.prd_code,
+			   s.prd_color,
+			   s.prd_size,
+			   s.prd_height,
+			   cd.det_nm AS odd_sts, -- suju history의 상태값
+			   TO_CHAR(h.his_date, 'YYYY-MM-DD') AS his_date
+		  FROM vw_suju_summary s
+		  JOIN suju_history h 
+		    ON s.odd_id = h.odd_id
+		  JOIN code_detail cd
+		    ON h.odd_sts = cd.det_id
+		 WHERE h.odd_sts = 'odd_sts_04'
+		   AND s.odd_isapproval = 'y'
+		 ORDER BY h.his_date DESC
 		 FETCH FIRST 20 ROWS ONLY 
 	</select>
 	
@@ -99,10 +98,10 @@
 <!-- 	불량률 -->
 	<select id="getDefectCnt" resultType="double">
 		SELECT ROUND(
-		        (SUM(NVL(odd_bcount, 0)) / SUM(NVL(odd_actual_cnt, 0))) * 100, 1
+		        (SUM(odd_bcount) / SUM(odd_actual_cnt)) * 100, 1
 			   ) AS defect_rate
 		  FROM suju_order_detail
-		 WHERE TO_CHAR(odd_mod_date, 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM')
+		 WHERE TO_CHAR(odd_mod_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
 	</select>
 	
 <!-- 	상품별 전일 생산량 -->
@@ -168,10 +167,10 @@
 <!-- 	상풀별 불량율 -->
 	<select id="getUpdateDefectCnt" resultType="double">
 		SELECT ROUND(
-		         (SUM(NVL(odd_bcount, 0)) / NULLIF(SUM(NVL(odd_actual_cnt, 0)), 0)) * 100, 1
+		         (SUM(odd_bcount) / NULLIF(SUM(odd_actual_cnt), 0)) * 100, 1
 		       ) AS defectRate
 		  FROM vw_suju_summary
-		 WHERE TO_CHAR(TO_DATE(odd_mod_date, 'YYYY-MM-DD'), 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM')
+		 WHERE TO_CHAR(TO_DATE(odd_mod_date, 'YYYY-MM-DD'), 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
 		   AND prd_code = #{prdCode}
 	</select>
 	

@@ -55,9 +55,7 @@ public class ClientRestController {
 
 	@PostMapping("")
 	public ResponseEntity<Map<String, Object>> createClient(@RequestBody Map<String, Object> param, HttpSession session) {
-		session.setAttribute("emp_id", "200");
-		String emp_id = (String) session.getAttribute("emp_id");
-
+		String emp_id = (String) session.getAttribute("empId");
 		param.put("emp_id", emp_id);
 
 		int rows = clientService.createClient(param);

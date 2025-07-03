@@ -4,6 +4,14 @@
   
 <mapper namespace="kr.co.itwillbs.solex.code.CodeMapper">
 
+
+	<select id="getQualityNames" resultType="map">
+		SELECT cd.det_id AS id,
+               cd.det_nm AS nm
+		FROM code_detail cd
+		WHERE cd.cod_id = 'qua_type'
+	</select>
+	
 	<!-- 공통코드 무한스크롤 -->
 	<select id="selectPagedCodeList" resultType="map">
 	    SELECT

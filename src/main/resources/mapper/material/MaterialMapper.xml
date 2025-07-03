@@ -55,15 +55,14 @@
 	<insert id="registMat">
 		INSERT INTO material(
 			cli_id, mat_cd, mat_nm, mat_price, mat_unit, 
-			mat_comm, mat_reg_date, mat_is_active
+			mat_comm, mat_is_active
 			) VALUES (
-			#{cli_id, jdbcType=NUMERIC},
-			#{mat_cd, jdbcType=VARCHAR},
-			#{mat_nm, jdbcType=VARCHAR},
-			#{mat_price, jdbcType=NUMERIC},
+			#{cliId, jdbcType=NUMERIC},
+			#{matCd, jdbcType=VARCHAR},
+			#{matNm, jdbcType=VARCHAR},
+			#{matPrice, jdbcType=NUMERIC},
 			#{matUnit, jdbcType=VARCHAR},
-			#{mat_comm, jdbcType=VARCHAR},
-			#{mat_reg_date, jdbcType=DATE},
+			#{matComm, jdbcType=VARCHAR},
 			'Y'
 		)
 	</insert>

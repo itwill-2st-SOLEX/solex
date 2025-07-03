@@ -16,4 +16,27 @@
   		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
    </select>
 
+
+	<select id="getEquipmentHistoryDetail" resultType="map">
+  		SELECT  TO_CHAR(eh.eqp_his_start_date , 'YYYY-MM-DD HH24:MI:SS') AS startDate,
+  		TO_CHAR(eh.eqp_his_end_date , 'YYYY-MM-DD HH24:MI:SS') AS endDate,
+		  		eh.eqp_his_reason AS reason
+		FROM    equipment_history eh
+		WHERE   eh.eqp_id = #{eqpId}
+		ORDER BY eh.eqp_his_start_date 
+	</select>
+	
+	<insert id="registerEquipmentHistory">
+		INSERT INTO equipment_history(
+			eqp_id,
+			eqp_his_start_date, 
+			eqp_his_end_date,
+			eqp_his_reason
+		) VALUES (
+			#{eqpId, jdbcType=NUMERIC},
+			TO_DATE(#{startDate}, 'YYYY-MM-DD HH24:MI'),
+			TO_DATE(#{endDate}, 'YYYY-MM-DD HH24:MI'),
+			#{reason, jdbcType=VARCHAR}
+		)
+	</insert>
 </mapper>

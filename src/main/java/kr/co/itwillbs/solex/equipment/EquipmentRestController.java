@@ -24,6 +24,11 @@ public class EquipmentRestController {
 	@Autowired
 	EquipmentService equipmentService;
 	
+	@GetMapping("/name") // 
+	public List<Map<String, Object>> getEquipmentName() {
+		return equipmentService.getEquipmentName();
+    }
+	
 	@GetMapping("/data") // 
 	public List<Map<String, Object>> getPagedGridData(
         @RequestParam(name = "page", defaultValue = "0") int page, // 
@@ -78,7 +83,6 @@ public class EquipmentRestController {
         try {
             // 서비스 메소드 호출 (리턴값이 없으므로 변수에 담지 않음)
             params.put("eqp_code", eqp_code);
-
 
             equipmentService.updateEquipment(params);
             

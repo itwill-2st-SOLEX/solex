@@ -53,5 +53,9 @@ public class CodeService {
 	public void updateDetailCodes(List<Map<String, Object>> updateList) {
 		codeMapper.updateDetailCodes(updateList);
 	}
+	public List<Map<String, Object>> getQualityNames() {
+		// TODO Auto-generated method stub
+		return codeMapper.getQualityNames();
+	}
 
 }

@@ -14,9 +14,9 @@ public class MypageService {
 	
 	
 	// 로그인 된 정보의 마이페이지 가져오기 
-	public Map<String, Object> getEmpData(String empNum) {
+	public Map<String, Object> getEmpData(String empId) {
 		// TODO Auto-generated method stub
-		return mypageMapper.getEmpData(empNum);
+		return mypageMapper.getEmpData(empId);
 	}
 
 

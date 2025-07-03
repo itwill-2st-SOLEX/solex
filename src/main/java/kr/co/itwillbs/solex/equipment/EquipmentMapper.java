@@ -33,6 +33,9 @@ public interface EquipmentMapper {
 
 	List<Map<String, Object>> getTeam(int processId);
 
+
+	List<Map<String, Object>> getEquipmentName();
+
 	// // 주문 상세 조회 쿼리
 	// List<Map<String, Object>> getOrderDetail(@Param("odd_id") String odd_id);
 

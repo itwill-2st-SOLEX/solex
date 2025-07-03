@@ -33,6 +33,7 @@ public class WarehouseRestController {
 		System.out.println("page:" + page + "size: " + size);
     	
     	List<Map<String, Object>> listMap = warehouseService.getWarehouseList(offset, size);
+    	System.out.println(listMap);
     	return listMap;
     }
     
@@ -56,7 +57,7 @@ public class WarehouseRestController {
     
     // 창고 등록
   	@PostMapping("")
-  	public String approvalDocument(@RequestBody Map<String, Object> warehouseRequest) {
+  	public void approvalDocument(@RequestBody Map<String, Object> warehouseRequest) {
   		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
       	Long loginEmpId = 2L;
       	
@@ -64,7 +65,6 @@ public class WarehouseRestController {
   		System.out.println(warehouseRequest);
   		
   		warehouseService.registerWarehouse(warehouseRequest);
-  		return "";
   	}
   	
   	// 창고 수정
