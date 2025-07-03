@@ -10,11 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import kr.co.itwillbs.solex.lot.LotService;
 @Service
 public class MaterialOrdersService {
 
 	@Autowired
 	private MaterialOrdersMapper materialOrdersMapper;
+	
+	@Autowired
+	private LotService lotService;
 	
 	//자재발주 목록
 	public List<Map<String, Object>> getMaterialOrders() {
@@ -53,12 +58,16 @@ public class MaterialOrdersService {
 	// 승인버튼 누르면 insert
 	@Transactional
 	public void materialApprove(Map<String, Object> map) {
+		
+		System.out.println("자재발주 승인 시 받는 데이터 : " + map);
 
 	    int warehistory = materialOrdersMapper.matAppWareHis(map);
 	    int areaDetail = materialOrdersMapper.matAppAreaDetail(map);
 	    int area = materialOrdersMapper.matAppArea(map);
 	    int stockLeger = materialOrdersMapper.matAppStockLeger(map);
 	    materialOrdersMapper.updateApproval(map);
+	    // 자재LOT생성
+	    lotService.createMaterialLot(map);
 
 	    if (warehistory != 1 || areaDetail != 1 || area != 1 || stockLeger != 1) {
 	        throw new IllegalStateException("승인 처리 실패: warehistory=" + warehistory + ", areaDetail=" + areaDetail + ", area=" + area  + ", stockLeger=" + stockLeger );

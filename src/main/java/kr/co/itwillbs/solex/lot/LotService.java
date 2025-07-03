@@ -1,5 +1,8 @@
 package kr.co.itwillbs.solex.lot;
 
+import java.security.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -152,22 +155,18 @@ public class LotService {
         
         // 3. insert 이후 prd_lot_id 조회
         Long prdLotId = lotMapper.selectPrdLotId(lotInfo);
-        System.out.println("생성된 prdLotId : " + prdLotId);
         if (prdLotId == null) return;
 
         // 4. 작업지시 리스트 조회
         List<Map<String, Object>> workOrders = lotMapper.selectWorkOrdersByOddId(oddId);
-        System.out.println("조회한 작업지시 리스트 : " + workOrders);
 
         for (Map<String, Object> wrk : workOrders) {
             wrk.put("prdLotId", prdLotId);
-            System.out.println("작업지시(반복) : " + wrk);
             // 5. process_lot insert
             lotMapper.insertProcessLot(wrk);
             
             // 6. insert 이후 prc_lot_id 조회
             Long prcLotId = lotMapper.selectPrcLotId(wrk);
-            System.out.println("생성된 prcLotId : " + prcLotId);
             if (prcLotId == null) continue;
 
             // 7. 매핑 insert
@@ -176,6 +175,15 @@ public class LotService {
             mapping.put("prcLotId", prcLotId);
             lotMapper.insertProductProcessMapping(mapping);
         }
+    }
+    // ---------------- 자재 입고 시 ----------------
+    public void createMaterialLot(Map<String, Object> map) {
+        // 필요한 정보 구성
+        String matLotCode = "MAT-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "-" + 001;
+        map.put("mat_lot_code", matLotCode);
+
+        // insert
+        lotMapper.insertMaterialLot(map);
     }
 
 }

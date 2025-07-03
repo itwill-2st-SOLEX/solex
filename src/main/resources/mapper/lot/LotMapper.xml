@@ -55,13 +55,15 @@
 	<!-- 자재리스트 -->
 	<select id="selectMaterialNodes" resultType="map">
 		SELECT 
-			'mat_' || ml.mat_lot_id AS id,
-			m.mat_nm || ' (' || m.mat_cd || ')' AS text,
-			0 AS children
-		FROM prdLot_matLot_mapping pmm
-		JOIN material_lot ml ON pmm.mat_lot_id = ml.mat_lot_id
+		    'mat_' || ml.mat_lot_id AS id,
+		    m.mat_nm || ' (' || m.mat_cd || ')' AS text,
+		    0 AS children
+		FROM product_lot pl
+		JOIN suju_order_detail sod ON pl.odd_id = sod.odd_id
+		JOIN sujuOrdDetail_matLot_mapping som ON sod.odd_id = som.odd_id
+		JOIN material_lot ml ON som.matlot_id = ml.mat_lot_id
 		JOIN material m ON ml.mat_id = m.mat_id
-		WHERE pmm.prd_lot_id = #{prdLotId}
+		WHERE pl.prd_lot_id = #{prdLotId}
 	</select>
 	
 	<!-- 설비리스트 -->
@@ -91,6 +93,7 @@
 	        cd4.det_nm AS "status",
 	        cd5.det_nm AS "productType",
 	        cd6.det_nm AS "height",
+	        sod.odd_cnt AS "orderCount",
 	        pl.prd_lot_start_date AS "startDate",
 	        pl.prd_lot_end_date AS "endDate"
 	    FROM product_lot pl
@@ -117,8 +120,8 @@
 	            prc.prc_code AS "processCode",
 	            pl.erp_nm AS "operatorName",
 	            pl.erp_num AS "operatorNum",
-	            pl.prc_lot_start_date AS "processStartDate",
-	            pl.prc_lot_end_date AS "processEndDate",
+	            NVL(pl.prc_lot_start_date, "생산대기중") AS "processStartDate",
+	            NVL(pl.prc_lot_end_date,"생산대기중") AS "processEndDate",
 	            wp.wpo_jcount AS "successCount",
 	            NVL(qh.qhi_bcount, 0) AS "failCount",
 	            e.eqp_name AS "usedEquipmentName",
@@ -152,13 +155,14 @@
             ml.mat_lot_code AS "materialLot",
             m.mat_nm AS "materialName",
             m.mat_cd AS "materialCode",
-            ml.mat_sort AS "materialCount",
+            smm.used_qty AS "materialCount",
             ml.mat_date AS "materialDate",
 			c.cli_nm AS "materialPartner",
 			c.CLI_MGR_NAME AS "materialManager",
 			c.CLI_MGR_PHONE AS "materialPhone"
         FROM material_lot ml
         JOIN material m ON ml.mat_id = m.mat_id
+        JOIN sujuorddetail_matlot_mapping smm ON ml.mat_lot_id = smm.matlot_id
         JOIN client c ON m.cli_id = c.cli_id
         WHERE ml.mat_lot_id = #{matLotId}
     </select>
@@ -297,5 +301,22 @@
             #{prcLotId}
         )
     </insert>
+    
+    <!-- 자재 입고 시 -->
+    <insert id="insertMaterialLot" parameterType="map">
+	    INSERT INTO material_lot (
+	        mat_lot_code,
+	        mat_id,
+	        mat_date,
+	        mat_sort,
+	        are_id
+	    ) VALUES (
+	        #{mat_lot_code},
+	        #{mat_id},
+	        sysdate,
+	        #{whs_his_cnt},
+	        #{are_id}
+	    )
+	</insert>
     
 </mapper>

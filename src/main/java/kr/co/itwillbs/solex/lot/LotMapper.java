@@ -52,5 +52,7 @@ public interface LotMapper {
     Long selectPrcLotId(Map<String, Object> param);
     // 7. 매핑 insert
     void insertProductProcessMapping(Map<String, Object> param);
+    // ---------------- 자재 입고 시 ----------------
+	void insertMaterialLot(Map<String, Object> map);
 
 }

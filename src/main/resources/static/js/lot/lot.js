@@ -12,31 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 
-	// 저장 테스트
-	document.getElementById('lotSaveBtn').addEventListener('click', () => {
-		const oddId = document.getElementById('oddId').value;
-
-		debugger;
-		fetch('/SOLEX/lot/product/save', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ oddId: Number(oddId) })
-		})
-		.then(res => res.json())
-		.then(data => {
-			if (data.success) {
-				alert('✅ 저장 성공!');
-			} else {
-				console.error('⚠ 서버 오류:', data.message);
-				alert('❌ 저장 실패: ' + data.message);
-			}
-		})
-		.catch(err => {
-			console.error('❌ 예외 발생:', err);
-			alert('요청 처리 중 오류 발생: ' + err.message);
-		});
-	});
-
 });
 
 // LOT계층 트리구조 생성
@@ -112,6 +87,7 @@ function showLotDetail(data) {
 		document.getElementById('color').textContent = data.color;
 		document.getElementById('height').textContent = data.height;
 		document.getElementById('status').textContent = data.status;
+		document.getElementById('orderCount').textContent = data.orderCount;
 		document.getElementById('startDate').textContent = formatDate(data.startDate);
 		document.getElementById('endDate').textContent = formatDate(data.endDate);
 	} else if (type === 'process') {

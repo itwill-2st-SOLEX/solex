@@ -105,14 +105,4 @@ public class LotRestController {
 	    return Collections.emptyMap();
 	}
 	
-	// ---------------- 작업지시 등록 시 ----------------
-	@PostMapping("/product/save")
-	public Map<String, Object> insertAllLotByOddId(@RequestBody Map<String, Object> param) {
-        Long oddId = Long.valueOf(param.get("oddId").toString());
-        lotService.insertLotCascade(oddId);
-        
-        return Map.of("success", true);
-	}
-
-
 }
