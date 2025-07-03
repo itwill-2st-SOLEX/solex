@@ -30,9 +30,10 @@ public class MaterialOrdersRestController {
 	
 	@PostMapping("/registration")
 	public void materialOrderRegist(@RequestBody  Map<String, Object> matordMap, HttpSession session) {
-		String emp_id = (String) session.getAttribute("emp_id");
+		
+		String emp_id = (String) session.getAttribute("empId");
 		System.out.println("emp_id = " + emp_id);
-		matordMap.put(emp_id, "emp_id");
+		matordMap.put("emp_id", emp_id);
 		System.out.println("mat ord map = " + matordMap);
 		materialOrdersService.materialOrderRegist(matordMap);	
 	}
@@ -50,7 +51,6 @@ public class MaterialOrdersRestController {
 		
 		int num = Integer.parseInt(matId);
 		
-
 		return materialOrdersService.getWarehouse(num);
 	}
 	
