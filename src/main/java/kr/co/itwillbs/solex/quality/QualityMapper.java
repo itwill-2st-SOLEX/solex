@@ -11,4 +11,6 @@ public interface QualityMapper {
 
 	List<Map<String, Object>> getQualityList(@Param("offset") int offset, @Param("size") int size);
 
+	void registerQuality(Map<String, Object> qualityRequest);
+
 }
