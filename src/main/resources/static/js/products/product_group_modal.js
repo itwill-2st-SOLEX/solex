@@ -536,7 +536,7 @@ async function populateSelectPickers(existingOptions = []) {
 
     // 2. 수정 모드일 때 기존 옵션들을 드롭다운에서 비활성화/숨김 처리 (이전 가이드와 동일)
 	if (existingOptions && Array.isArray(existingOptions.data) && existingOptions.data.length > 0) {
-
+ 
         console.log('Applying existing options for disable/hide:', existingOptions);
 
         const existingColorIds = new Set(existingOptions.map(opt => String(opt.OPT_COLOR)));
