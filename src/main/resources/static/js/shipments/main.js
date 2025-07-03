@@ -21,7 +21,7 @@ const grid = new tui.Grid({
     {header: "거래처", name: "CLI_NM", align: "center", sortable: true },
     {header: "거래처 대표자", name: "CLI_CEO", align: "center", sortable: true },
     {header: "거래처 대표자 전화번호", name: "CLI_PHONE", align: "center", sortable: true },
-    {header: "배송지", name: "ORD_ADDRESS", align: "center", width: 200, sortable: true },
+    {header: "배송지", name: "ORD_ADDRESS", align: "center", width: 350, sortable: true },
     {header: "납품 요청일",name: "ORD_END_DATE",align: "center",sortable: true},
     {header: "상태", name: "DET_NM", align: "center", sortable: true },
     {header: "상태 변경일",name: "ORD_MOD_DATE",align: "center",sortable: true}
@@ -91,7 +91,7 @@ function formatWithCommaAndCaret(input) {
 // 3. DOM 로드 후 실행될 코드
 document.addEventListener("DOMContentLoaded", async function () {
   createInnerGrid();
-  document.getElementById("openPurchaseModalBtn").addEventListener("click", openPurchaseModal);
+  document.getElementById("openShipmentModalBtn").addEventListener("click", openShipmentModal);
   document.getElementById("findPostCodeBtn").addEventListener("click", findPostCode);
   document.getElementById("addSelectedStockBtn").addEventListener("click", addRowToInnerGrid);
   document.getElementById("deleteSelectedRowsBtn").addEventListener("click", deleteSelectedRows);
@@ -137,9 +137,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       const action = target.dataset.action; // data-action 값을 가져옴
 
 
-      if (action === "create") {
+      if (action === "approve") {
         // 작업 지시용 모달 열기
-        openPurchaseModal();
+        openApproveModal();
       }
     }
   });
@@ -310,7 +310,7 @@ function initializeSearchableSelect(wrapperId, apiUrl) {
         getProductOptionsData(value);
       }
 
-      wrapper.classList.remove(ACTIVE_CLASS); // 선택 후 드롭다운 닫기
+      wrapper.classList.remove(ACTIVE_CLASS); // 선택 후 드롭다운 닫기  
     }
   });
 
@@ -319,7 +319,7 @@ function initializeSearchableSelect(wrapperId, apiUrl) {
 }
 
 // 모달 열기
-async function openPurchaseModal() {
+async function openShipmentModal() {
   initializeSearchableSelect("client-select-box", "/SOLEX/orders/clients");
   initializeSearchableSelect("product-select-box", "/SOLEX/orders/products");
   initDate();
@@ -593,3 +593,50 @@ async function submitForm() {
     alert(`오류: ${error.message}`);
   }
 } 
+
+
+// 승인 모달 열기
+async function openApproveModal() {
+  initializeSearchableSelect("client-select-box", "/SOLEX/orders/clients");
+  initializeSearchableSelect("product-select-box", "/SOLEX/orders/products");
+  initDate();
+
+  const oldBtn = document.getElementById("submitBtn");
+  // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
+  const newBtn = oldBtn.cloneNode(true);
+  // 2. 기존 버튼을 새로운 버튼으로 교체
+  oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
+  newBtn.textContent = "등록";
+  newBtn.addEventListener("click", () => {
+    submitForm();
+  });
+
+  const modal = document.getElementById("myModal");
+  const modalInstance = new bootstrap.Modal(modal);
+  modalInstance.show();
+}
+
+// 검색어 입력 시 (keyup)
+async function fetchSelectData(url, keyword = "") {
+  try {
+    const params = new URLSearchParams();
+    if (keyword.trim()) params.append("searchKeyword", keyword.trim());
+    const response = await fetch(`${url}?${params.toString()}`);
+    if (!response.ok) return [];
+    const rawData = await response.json();
+    if (url.includes("clients"))
+      return rawData.map((item) => ({
+        value: item.CLI_ID,
+        label: item.CLI_NM,
+      }));
+    if (url.includes("products"))
+      return rawData.map((item) => ({
+        value: item.PRD_ID,
+        label: item.PRD_NM,
+      }));
+    return [];
+  } catch (error) {
+    return [];
+  }
+}
