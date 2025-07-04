@@ -18,12 +18,32 @@ public class CodeRestController {
 	@Autowired
 	private CodeService codeService;
 	
-	// 공통코드 무한스크롤
+	// 공통코드
 	@GetMapping("/code/quality")
 	public List<Map<String, Object>> getQualityNames() {
 		return codeService.getQualityNames();
-		
 	}
+	
+	@GetMapping("/code/position")
+	public List<Map<String, Object>> getPositionNames() {
+		return codeService.getPositionNames();
+	}
+	
+	@GetMapping("/code/category")
+	public List<Map<String, Object>> getCategoryNames(@RequestParam("posCd") String posCd) {
+		return codeService.getCategoryNames(posCd);
+	}
+	
+	@GetMapping("/code/department")
+	public List<Map<String, Object>> getDepartmentNames(@RequestParam("catCd") String catCd) {
+		return codeService.getDepartmentNames(catCd);
+	}
+	
+	@GetMapping("/code/team")
+	public List<Map<String, Object>> getTeamNames() {
+		return codeService.getTeamNames();
+	}
+	
 	
 	// 공통코드 무한스크롤
 	@GetMapping("/code/data")

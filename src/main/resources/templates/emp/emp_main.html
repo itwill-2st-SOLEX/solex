@@ -1,57 +1,170 @@
 <!DOCTYPE html>
-<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org" 
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layouts/layout}">
 
 <head>
-	<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
-	<!-- <meta charset="UTF-8"> -->
 	<title>사원 관리</title>
+	<link rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 	<link rel="stylesheet" th:href="@{/css/emp/emp_main.css}">
 	<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script th:src="@{/js/emp/emp_main.js}"></script>
-	</head>
+</head>
 
 <body>
-	
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			
-			<h2>사원목록</h2>
+			<h2>사원 목록</h2>
 			<div id="global-checkbox-container">
-			     <input type="checkbox" id="check-all">
-			     <label for="check-all">퇴사자 포함</label>
-			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">사원등록</button>
-			 </div>
-			 <div id="grid"></div>
-			<!-- 본문 영역 여기서부터 작성-->
+				<button type="button" 
+						class="btn custom-btn-blue float-end mb-4" 
+						id="registerModalBtn" 
+						data-bs-toggle="modal" 
+						data-bs-target="#exampleModal">
+					사원 등록
+				</button>
+			</div>
+			
 			<div class="custom-content">
-
-				<!-- 그리드 작성 시 width 없이 사용. -->
-				<!-- <div id="editor"></div> -->
-
 				<div id="grid"></div>
 			</div>
 		</div>
 		<!-- 등록모달창 -->
 		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable modal-xl">
-			    <div class="modal-content">
-			      <div class="modal-header">
-			        <h3 class="modal-title" id="exampleModalLabel">사원등록</h3>
-			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			      </div>
-			      <div class="modal-body">
-					        <!-- 여기에 JS가 form을 생성하여 삽입할 예정 -->
+				<div class="modal-content">
+					<!-- ── Header ──────────────────────────────────────────────────────────── -->
+					<div class="modal-header border-0 pb-1">
+						<h3 class="modal-title fw-semibold" id="exampleModalLabel">사원 등록</h3>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
+		
+					<!-- ── Body ─────────────────────────────────────────────────────────────── -->
+					<div class="modal-body pt-0">
+						<div class="container-fluid">
+							<div class="row g-4">
+								<!-- 📷 Left pane : 사진 & 업로드 -->
+								<div class="col-md-4 text-center">
+									<label class="form-label fw-semibold">사진</label>
+									<img id="emp_img_preview" src="/SOLEX/assets/img/emp/simple_person_pic.jpg"
+										 class="w-100 rounded shadow-sm mb-3" style="aspect-ratio:4/5;object-fit:cover;" />
+									<input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
+								</div>
+		
+								<!-- 📝 Right pane : 입력 필드 -->
+								<div class="col-md-8">
+									<form id="empForm" class="form-section">
+										<div class="row g-3">
+											<!-- 이름 & 입사일 -->
+											<div class="col-md-6">
+												<label for="empNm" class="form-label">이름</label>
+												<input type="text" class="form-control" id="empNm" name="emp_nm" required>
+											</div>
+											<div class="col-md-6">
+												<label for="empHire" class="form-label">입사일</label>
+												<input type="date" class="form-control" id="empHire" name="emp_hire" required>
+											</div>
+		
+											<!-- 성별 & 생년월일 -->
+											<div class="col-md-6 d-flex align-items-end">
+												<div class="me-3">
+													<label class="form-label d-block mb-1">성별</label>
+													<div class="btn-group" role="group" aria-label="gender switcher">
+														<input type="radio" class="btn-check" name="emp_gd" id="genderM" value="M" autocomplete="off" checked>
+														<label class="btn btn-outline-primary" for="genderM">남</label>
+														<input type="radio" class="btn-check" name="emp_gd" id="genderW" value="W" autocomplete="off">
+														<label class="btn btn-outline-primary" for="genderW">여</label>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<label for="emp_birth" class="form-label">생년월일</label>
+												<input type="text" class="form-control" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="990101" required>
+												<input type="hidden" name="emp_pw" id="emp_pw">
+											</div>
+		
+											<!-- 연락처 -->
+											<div class="col-12">
+												<label class="form-label">연락처</label>
+												<div class="input-group">
+													<input type="text" id="emp_phone1" class="form-control" placeholder="010" required>
+													<span class="input-group-text">-</span>
+													<input type="text" id="emp_phone2" class="form-control" placeholder="1234" required>
+													<span class="input-group-text">-</span>
+													<input type="text" id="emp_phone3" class="form-control" placeholder="5678" required>
+												</div>
+												<input type="hidden" name="emp_phone" id="emp_phone">
+											</div>
+		
+											<!-- 이메일 -->
+											<div class="col-12">
+												<label class="form-label">이메일</label>
+												<div class="input-group">
+													<input type="text" id="emp_email1" class="form-control" placeholder="example" required>
+													<span class="input-group-text">@</span>
+													<input type="text" id="emp_email2" class="form-control" placeholder="company.com" required>
+												</div>
+												<input type="hidden" name="emp_email" id="emp_email">
+											</div>
+		
+											<!-- 직급/사원/부서/팀 -->
+											<div class="col-md-6">
+												<label for="empPosCd" class="form-label">직급</label>
+												<select name="empPosCd" id="empPosCd" class="form-select" required>
+													<option value="">-- 직급을 선택하세요 --</option>
+												</select>
+											</div>
+											<div class="col-md-6">
+												<label for="empCatCd" class="form-label">종류</label>
+												<select name="empCatCd" id="empCatCd" class="form-select" required>
+													<option value="">-- 종류를 선택하세요 --</option>
+												</select>
+											</div>
+											<div class="col-md-6">
+												<label for="empDepCd" class="form-label">부서</label>
+												<select name="empDepCd" id="empDepCd" class="form-select" required>
+													<option value="">-- 부서를 선택하세요 --</option>
+												</select>
+											</div>
+											<div class="col-md-6">
+												<label for="empTeamCd" class="form-label">팀</label>
+												<select name="empTeamCd" id="empTeamCd" class="form-select" required>
+													<option value="">-- 팀을 선택하세요 --</option>
+												</select>
+											</div>
+		
+											<!-- 주소 -->
+											<div class="col-12">
+												<label class="form-label">주소</label>
+												<div class="input-group mb-2">
+													<input type="text" id="sample6_postcode" name="emp_pc" class="form-control" placeholder="우편번호" required>
+													<button type="button" class="btn btn-outline-secondary" onclick="sample6_execDaumPostcode()">우편번호 찾기</button>
+												</div>
+												<input type="text" id="sample6_address" name="emp_add" class="form-control mb-2" placeholder="주소" required>
+												<input type="text" id="sample6_detailAddress" name="emp_da" class="form-control mb-2" placeholder="상세주소" required>
+												<input type="text" id="sample6_extraAddress" class="form-control" placeholder="참고항목">
+											</div>
+										</div>
+									</form>
+								</div> <!-- col-md-8 -->
+							</div> <!-- row -->
+						</div> <!-- container-fluid -->
+					</div> <!-- modal-body -->
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+						<button type="submit" class="btn btn-primary" id="registerBtn">등록</button>
+					</div>	  
 				</div>
-			</div>	
+			</div>
 		</div>
 	</th:block>
-
-
+	<th:block layout:fragment="script">
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script th:src="@{/js/emp/emp_main.js}"></script>
+		<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	</th:block>
 </body>
-
 </html>

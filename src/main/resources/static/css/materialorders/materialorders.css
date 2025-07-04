@@ -15,7 +15,14 @@
   color: red;
   font-weight: bold; /* 선택 사항 */
 }
-
+.approval-table th,
+.approval-table td {
+	font-weight: bold;
+	border: 1px solid #999999;
+	text-align: center;
+	padding: 8px;
+	font-size: 14px;
+}
 #dateRange,
 #dept-nm,
 #dept-nms,
@@ -60,6 +67,9 @@
 #last-day,
 #dates {
 	margin-left: 70px;
+}
+.approval-line{
+	display: flex;
 }
 
 .btn-purple {

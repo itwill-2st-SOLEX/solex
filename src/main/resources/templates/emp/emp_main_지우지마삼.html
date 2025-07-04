@@ -5,22 +5,13 @@
 
 <head>
 	<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
-	<title>자재 발주관리</title>
-	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-	<link rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-	<link rel="stylesheet" th:href="@{/css/materialorders/materialorders.css}" />	
-	<script th:inline="javascript">
-	    /*  세션에 emp_id 가 123 이라면
-	        아래 줄이 브라우저에 도착할 때
-	        const empId = 123;
-	        로 변합니다.                              */
-	    const empId = /*[[${session.emp_id}]]*/ "";
-	</script>
+	<!-- <meta charset="UTF-8"> -->
+	<title>사원 관리</title>
+	<link rel="stylesheet" th:href="@{/css/emp/emp_main.css}">
+	<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script th:src="@{/js/material_orders/material_orders_main.js}"></script>
-	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
-</head>
+	<script th:src="@{/js/emp/emp_main.js}"></script>
+	</head>
 
 <body>
 	
@@ -28,25 +19,29 @@
 	<th:block layout:fragment="content">
 		<div class="custom-body container-xxl flex-grow-1 container-p-y">
 			
-			<h2>자재 발주 목록</h2>
+			<h2>사원목록</h2>
 			<div id="global-checkbox-container">
-			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">자재발주등록</button>
+			<button type="button" class="btn custom-btn-blue float-end mb-4" id="RegisterModalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">사원등록</button>
 			 </div>
 			 <div id="grid"></div>
-			 <div class="custom-content">
-			 <div id="grid"></div>
+			<!-- 본문 영역 여기서부터 작성-->
+			<div class="custom-content">
+
+				<!-- 그리드 작성 시 width 없이 사용. -->
+				<!-- <div id="editor"></div> -->
+
+				<div id="grid"></div>
 			</div>
-			</div>
-	<!-- 등록모달창 -->
+		</div>
+		<!-- 등록모달창 -->
 		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-dialog-scrollable modal-lg">
+			<div class="modal-dialog modal-dialog-scrollable modal-xl">
 			    <div class="modal-content">
 			      <div class="modal-header">
-			        <h5 class="modal-title" id="exampleModalLabel">자재 발주등록</h5>
+			        <h3 class="modal-title" id="exampleModalLabel"></h3>
 			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			      </div>
-			      <div class="modal-body">	
-			      	
+			      <div class="modal-body">
 					        <!-- 여기에 JS가 form을 생성하여 삽입할 예정 -->
 					</div>
 				</div>
