@@ -140,4 +140,43 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('네트워크 오류 또는 요청 처리 중 문제가 발생했습니다.');
         }
     });
+	
+	// ⭐ 일괄 BOM 저장 버튼 로직 ⭐
+	const bomSaveBatchButton = document.getElementById('bom-save-batch'); // HTML에 추가한 버튼 ID
+    if (bomSaveBatchButton) {
+        bomSaveBatchButton.addEventListener('click', async function() {
+            const checkedOptIds = window.getCheckedOptIds(); // product_group_list.js 에서 정의된 함수
+
+            if (checkedOptIds.length < 2) { // 버튼 가시성 로직에 따라 이 메시지는 뜰 일이 없겠지만 방어적으로 추가
+                alert("일괄 저장할 제품을 2개 이상 선택해주세요.");
+                return;
+            }
+
+            console.log("일괄 저장 대상 OPT_ID 목록:", checkedOptIds);
+
+            // 현재 bom_grid의 변경사항 추출 (단일 제품의 BOM 변경사항)
+            const changes = bom_grid.getModifiedRows();
+            const { createdRows, updatedRows, deletedRows } = changes; // deletedRows도 포함하여 서버로 보낼 수 있습니다.
+
+            // 변경사항 없음 체크
+            if (createdRows.length === 0 && updatedRows.length === 0 && deletedRows.length === 0) {
+                alert('저장할 BOM 변경 내용이 없습니다. 현재 표시된 BOM에 대한 변경사항이 없거나, 다른 제품이 선택되어 있을 수 있습니다.');
+                return;
+            }
+			
+			// 필드 검증 (단건 저장과 동일하게 적용)
+            const requiredFields = ['MAT_NM', 'BOM_CNT', 'BOM_UNIT', 'BOM_COMM'];
+            const invalidRows = [...createdRows, ...updatedRows].filter(row =>
+                requiredFields.some(field => row[field] === '')
+            );
+            if (invalidRows.length > 0) {
+                alert("필수 항목이 입력되지 않은 BOM 행이 있습니다. 모든 변경사항을 입력해야 합니다.");
+                return;
+            }
+			
+			
+			
+		});
+	}
+	
 });
