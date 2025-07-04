@@ -321,6 +321,7 @@ async function showProductModal(mode, data = null) {
                        {
                            header: '색상', 
                            name: 'COLORNAME',
+						   className: 'color_option',
 						   align: 'center',
 						   sortable: true ,
                            filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
