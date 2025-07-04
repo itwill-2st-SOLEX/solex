@@ -92,7 +92,7 @@ public class EmpRestController {
         return data;
     }
     
- // 수정 모달(업데이트)
+    // 수정 모달(업데이트)
  	@PutMapping("/modify")
  	public void modify_post(@RequestBody HashMap<String, Object> empModifyMap) {
  		System.out.println("Received empData: " + empModifyMap);

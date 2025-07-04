@@ -28,9 +28,9 @@ public class MypageRestController {
 		
 		String empId = (String) session.getAttribute("empId");
 		System.out.println("empId = " + empId);
-		Map<String, Object> empData = mypageService.getEmpData(empId); 
-		System.out.println("@@@@@@@@@@@@@@@ " + empData);
-		return empData;
+		
+		return mypageService.getEmpData(empId);
+		
 	}
 	
 	//마이페이지 수정 
