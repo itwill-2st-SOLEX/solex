@@ -1,58 +1,49 @@
-<th:block xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<th:block xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:fragment="header">
-	<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<!-- 	마이페이지 css입니다 -->
+	<script
+		src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	<!-- 	마이페이지 css입니다 -->
 	<link rel="stylesheet" th:href="@{/css/emp/emp_main.css}">
 	<div class="costom-inner">
-		<nav class="costom-nav layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
+		<nav
+			class="costom-nav layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
 			id="layout-navbar">
-			<div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
+			<div
+				class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
 				<a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
 					<i class="icon-base bx bx-menu icon-md"></i>
 				</a>
 			</div>
 
-			<div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
-				<!-- Search -->
-				<div class="navbar-nav align-items-center me-auto">
-					<div class="nav-item d-flex align-items-center">
-						<span class="w-px-22 h-px-22"><i class="icon-base bx bx-search icon-md"></i></span>
-						<input type="text" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none"
-							placeholder="Search..." aria-label="Search..." />
-					</div>
-				</div>
-				<!-- /Search -->
+			<div
+				class="navbar-nav-right d-flex align-items-center justify-content-end"
+				id="navbar-collapse">
 
 				<ul class="navbar-nav flex-row align-items-center ms-md-auto">
 					<!-- 메신저 -->
-					<li class="me-4">
-						<a class="dropdown-item" href="#" onclick="openMessengerPopup(event)">
-							<span class="d-flex align-items-center align-middle position-relative">
-								<i class="menu-icon tf-icons bx bx-message-rounded" style="font-size: 1.6rem;"></i>
-<!--								<span id="header-chat-badge" class="badgerounded-pill bg-danger position-absolute"-->
-<!--									style="font-size: 0.6rem; min-width: 1rem; height: 1rem;-->
-<!--					                   top: 75%; right: 56px; transform: translate(50%, -50%);"> -->
-<!--								</span>-->
-
-								<span class="flex-grow-1 align-middle ms-2">메신저</span>
-							</span>
-						</a>
-					</li>
-					</span>
-					</a>
-					</li>
+					<li class="me-4"><a class="dropdown-item" href="#"
+						onclick="openMessengerPopup(event)"> <span
+							class="d-flex align-items-center align-middle position-relative">
+								<i class="tf-icons bx bx-message-rounded"
+								style="font-size: 1.6rem;"></i> <span id="chat-badge"
+								class="badgerounded-pill bg-danger position-absolute text-white d-flex justify-content-center align-items-center"
+								style="font-size: 0.6rem; min-width: 1rem; height: 1rem; top: 75%; right: 51px; transform: translate(50%, -50%); border-radius: 50%;">
+							</span> <span class="flex-grow-1 align-middle ms-2">메신저</span>
+						</span>
+					</a></li>
 
 					<!-- User -->
-					<li class="nav-item navbar-dropdown dropdown-user dropdown">
-						<a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
-							data-bs-toggle="dropdown">
+					<li class="nav-item navbar-dropdown dropdown-user dropdown"><a
+						class="nav-link dropdown-toggle hide-arrow p-0"
+						href="javascript:void(0);" data-bs-toggle="dropdown">
 							<div class="avatar avatar-online">
-								<img th:src="@{/assets/img/avatars/1.png}" alt class="w-px-40 h-auto rounded-circle" />
+								<img th:src="@{/assets/img/avatars/1.png}" alt
+									class="w-px-40 h-auto rounded-circle" />
 							</div>
-						</a>
+					</a>
 						<ul class="dropdown-menu dropdown-menu-end">
-							<li>
-								<a class="dropdown-item" href="#">
+							<li><a class="dropdown-item" href="#">
 									<div class="d-flex">
 										<div class="flex-shrink-0 me-3">
 											<div class="avatar avatar-online">
@@ -65,48 +56,46 @@
 											<small class="text-body-secondary">Admin</small>
 										</div>
 									</div>
-								</a>
-							</li>
+							</a></li>
 							<li>
 								<div class="dropdown-divider my-1"></div>
 							</li>
-							<li>
-								<a class="dropdown-item" href="#" onclick="openMypagePopup(event)"> 
-									<i class="icon-base bx bx-user icon-md me-3"></i><span>마이페이지</span>
-								</a>
-							</li>
+							<li><a class="dropdown-item" href="#"
+								onclick="openMypagePopup(event)"> <i
+									class="icon-base bx bx-user icon-md me-3"></i><span>마이페이지</span>
+							</a></li>
 							<li>
 								<div class="dropdown-divider my-1"></div>
 							</li>
-							<li>
-								<a href="#" class="dropdown-item"
-									onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+							<li><a href="#" class="dropdown-item"
+								onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
 									<i class="icon-base bx bx-power-off icon-md me-3"></i><span>로그아웃</span>
-								</a>
-							</li>
-							<form id="logoutForm" action="/SOLEX/logout" method="post" style="display:none;"></form>
-						</ul>
-					</li>
+							</a></li>
+							<form id="logoutForm" action="/SOLEX/logout" method="post"
+								style="display: none;"></form>
+						</ul></li>
 					<!--/ User -->
 				</ul>
 			</div>
 		</nav>
 	</div>
-	
-<!-- ✨ Mypage 모달창 띄우기 위해  -->
-	<div class="modal fade" id="mypageModal" tabindex="-1" aria-hidden="true">
-	  <div class="modal-dialog modal-dialog-scrollable modal-xl">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <h5 class="modal-title" id="exampleModalLabel">마이페이지</h5>
-	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-	      </div>
-	      <!-- JS에서 이 부분을 채움 -->
-	      <div class="modal-body"></div>
-	    </div>
-	  </div>
+
+	<!-- ✨ Mypage 모달창 띄우기 위해  -->
+	<div class="modal fade" id="mypageModal" tabindex="-1"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">마이페이지</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<!-- JS에서 이 부분을 채움 -->
+				<div class="modal-body"></div>
+			</div>
+		</div>
 	</div>
-					
+
 	<script>
 		function openMessengerPopup(event) {
 			event.preventDefault();
@@ -117,7 +106,29 @@
 				popup.focus();
 			}
 		}
-		
+	
+		function unreadCnt() {
+			$.ajax({
+				url: '/SOLEX/chats/unreadCount',
+				method: 'GET',
+				success: function(count) {
+					const badge = document.getElementById('chat-badge');
+					if (!badge) return;
+					if (count > 0) {
+						badge.textContent = count;
+						badge.classList.remove('d-none');
+					} else {
+						badge.classList.add('d-none');
+					}
+				},
+				error: function() {
+					console.error('안읽은 메시지 수 불러오기 실패');
+				}
+			});
+		}
+		document.addEventListener('DOMContentLoaded', function () {
+			unreadCnt();
+		});
 		//마이페이지 누르면 로그인 한 사원의 마이페이지 모달 열리게 
 		async function openMypagePopup(event) {
 			event.preventDefault();
@@ -380,15 +391,5 @@
 		        }
 		    }).open();
 		}
-		/*
-		document.addEventListener('DOMContentLoaded', function () {
-		    // chat.js가 먼저 로드되어서 unreadCnt 함수가 정의되어 있어야 함
-		    if (typeof unreadCnt === 'function') {
-		      unreadCnt();
-		    } else {
-		      console.warn('unreadCnt 함수가 정의되어 있지 않습니다.');
-		    }
-		  });
-		  */
 	</script>
 </th:block>

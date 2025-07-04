@@ -1,102 +1,76 @@
-/* 이 밑에꺼 아이디줘서 고치기 */
-/* 	label, span{ */
-/* 		padding: 7px 0px 7px 0px !important; */
-/* 	} */
-
-#labelId, #spanId {
-	padding: 7px 0px 7px 0px !important; 
+@charset "UTF-8";
+#docTypeSelect {
+	width: 180px;
+}
+.approval-table {
+	border-collapse: collapse;
+	margin-bottom: 16px;
+	margin-right: 25px;
+}
+.text-blue {
+  color: #4169E1;
+  font-weight: bold; /* 선택 사항 */
+}
+.text-red {
+  color: red;
+  font-weight: bold; /* 선택 사항 */
 }
 
-    input[type="text"] {
-      border: 1px solid #aaa;
-    }
-	#emp_phone1, #emp_phone2, #emp_phone3{
-		width: 15% !important;
-	}
-	
-	#emp_email1, #emp_email2 {
-		width: 23% !important;
-	}
-	
-	#genderM{
-		padding-right: 30px !important; 
-	}
-	#emp_img{
-		width: 90% !important;
-	}
-	
-	.col-3 {
-	    flex: 0 0 auto;
-	    width: 20% !important;
-	
-	}
+#dateRange,
+#dept-nm,
+#dept-nms,
+#emp-nm,
+#docdept_position,
+#emp-id,
+#emp-nm,
+#curr-rank,
+#transfer-dept,
+#curr-rank,
+#transfer-posi,
+#emp-nms,
+#curr-nm,
+#cost-detail,
+#promotion-posi,
+#dept-team,
+.team,
+#curr-team,
+#promotion-team,
+#transfer-team,
+#curr-ranks,
+#dept-teams,
+#job-posit,
+#job-posits {
+	width: 310px;
+}
+.doc-type01,
+.doc-type02,
+.doc-type04,
+.doc-type05,
+.doc-type03 {
+	display: flex;
+}
+#curr-ranks,
+#emp-nms,
+#cost-detail,
+#job-posi,
+#curr-team,
+#promotion-posi,
+#transfer-team,
+#dept-teams,
+#last-day,
+#dates {
+	margin-left: 70px;
+}
 
-/*     button { */
-/*       padding: 6px 12px; */
-/*       border: 1px solid #888; */
-/*       background-color: #f8f8f8; */
-/*       cursor: pointer; */
-/*     } */
+.btn-purple {
+   color: #4169E1;
+   background-color: #fff;
+}
 
-/*     button:hover { */
-/*       background-color: #e0e0e0; */
-/*     } */
-
-/*     table { */
-/*       width: 100%; */
-/*       border-collapse: collapse; */
-/*     } */
-
-/*     th, td { */
-/*       border: 1px solid #999; */
-/*       padding: 8px; */
-/*       text-align: center; */
-/*     } */
-
-/*     th { */
-/*       background-color: #f2f2f2; */
-/*     } */
-    
-/*     .form-select{ */
-/*     	width: 53% !important; */
-/* 		margin: 1.5% !important;     */
-/*     } */
-    
-/*     .form-control #emp_phone1, #emp_phone2, #emp_phone3 { */
-/*     	width: 21% !important; */
-/*     } */
-/*     .form-control d-inline-block w-25{ */
-/*     	width: 34% !important; */
-/*     } */
-    
-/*     .inline-container span { */
-/*         display: inline-block !important; */
-/*         margin-right: 10px !important; */
-/*     } */
-    
-    .mb-3{
-    	margin:0% 0% 0% 1% !important;
-    }
-    
-    #sample6_postcode{
-    	margin: 0% 0% 2% 0% !important;
-    }
-    
-    #sample6_address, #sample6_detailAddress{
-    	width: 96% !important;
-    	margin: 0% 0% 2% 0% !important;
-    }
-    
-    #sample6_extraAddress{
-    	width: 96% !important;
-    	margin: 0% 0% 2% 0% !important;
-    	border-radius: 5% !important;
-    }
-    
-   #email1{
-   	margin: 0% 1% 0% 0% !important;
-   }
-   
-   #email2{
-   	margin: 0% 0% 0% 1% !important;
-   }
+.btn-purple:hover,
+.btn-purple:focus,
+.btn-check:checked + .btn-purple {
+  color: #fff;
+  background-color: #365acb; 
+  border-color: #365acb;
+  }

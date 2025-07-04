@@ -13,22 +13,23 @@ public class ChatService {
 	ChatMapper mapper;
 
 	// 사원 목록 조회
-	public List<Map<String, Object>> getEmpList(String empNum) {
-		return mapper.getEmpList(empNum);
+	public List<Map<String, Object>> getEmpList(String empId) {
+		return mapper.getEmpList(empId);
 	}
 
 	// 대화 목록 조회
-	public List<Map<String, Object>> getChatList(String empNum) {
-		return mapper.getChatList(empNum);
+	public List<Map<String, Object>> getChatList(String empId) {
+		return mapper.getChatList(empId);
 	}
 
 	// 채팅방 메세지 불러오기
-	public List<Map<String, Object>> getChatHistory(String empNum, String partnerId) {
-		return mapper.getChatHistory(empNum, partnerId);
+	public List<Map<String, Object>> getChatHistory(String empId, String partnerId) {
+		return mapper.getChatHistory(empId, partnerId);
 	}
 
 	// ChatWebSocketController 디비에 메세지 저장
 	public void saveMessage(Map<String, Object> message) {
+		System.out.println(message);
 		mapper.saveMessage(message);
 	}
 
@@ -58,12 +59,8 @@ public class ChatService {
 		String room_id1 = "room_" + empId + "_" + partnerId;
 		String room_id2 = "room_" + partnerId + "_" + empId;
 
-		System.out.println("room_id1: " + room_id1);
-		System.out.println("room_id2: " + room_id2);
-
 		// 현재 상태 조회
 		int currentStatus = mapper.getChatRoomStatus(room_id1, room_id2);
-		System.out.println("currentStatus: " + currentStatus);
 
 		if (currentStatus == 0) {
 			// 한 명 나감 처리
