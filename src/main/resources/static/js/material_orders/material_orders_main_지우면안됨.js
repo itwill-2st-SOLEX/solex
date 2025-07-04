@@ -1,5 +1,4 @@
 $(function() {
-	
     // 현재 페이지
     let currentPage = 0;
 
@@ -25,29 +24,24 @@ $(function() {
             { header: '발주설명', name: 'matComm', align: 'center', width: 600 },
             { header: '발주수량', name: 'matQty', align: 'center', width: 99 },
             { header: '발주 요청일', name: 'matRegDate', align: 'center', width: 118 },
-			{
-			    header: '승인/반려',
-			    name: 'mat_ord_sts',
-			    align: 'center',
-			    width: 230,
-			    formatter: ({ value, rowKey }) => {
-			        // 'mat_ord_sts_01'는 '승인'으로 표시
-			        if (value === 'mat_ord_sts_01') {
-			            return '승인';
-			        }
-			        // 'mat_ord_sts_02'는 '반려'로 표시
-			        if (value === 'mat_ord_sts_02') {
-			            return '반려';
-			        }
+            {
+                header: '승인/반려',
+                name: 'mat_ok',
+                align: 'center',
+                width: 230,
+                formatter: ({ value, rowKey }) => {
+                    // 값이 '승인' 또는 '반려'라면 그대로 출력
+                    if (value === '승인' || value === '반려') return value;
 
-			        // 위의 조건에 해당하지 않는 경우 (값이 null 등) 버튼 렌더링
-			        return `
-			            <button class="btn btn-secondary" name="approval" data-row-key="${rowKey}">승인</button>
-			            <button class="btn btn-secondary" name="deny" data-row-key="${rowKey}">반려</button>`;
-			    }
-			}
+                    // 아직 미처리 → 버튼 렌더링
+                    return `
+                        <button class="btn btn-secondary" name="approval" data-row-key="${rowKey}">승인</button>
+                        <button class="btn btn-secondary" name="deny"     data-row-key="${rowKey}">반려</button>`;
+                }
+            }
         ]
     }); //tui 그리드 가져오기 끝
+
 
     //자재 발주 목록 조회
     async function loadMatList(page) {
@@ -118,48 +112,51 @@ $(function() {
 			alert('자재 목록 로딩 실패');
 		}
 	}
-	//------------------------------------------------------------------
-	// 저장 될 창고 가져오는 함수 - select box
-	async function fetchAndPopulateWarehouse(selectElement, matId){
-		selectElement.innerHTML = '<option value="">-- 창고 선택 --</option>';
-		console.log('matId' , matId);
-		const url = matId ? `/SOLEX/material_orders/getWarehouse?matId=${matId}`: '/SOLEX/material_orders/getWarehouse';
-		
-		const response = await fetch(url); 
-		const warehouseList = await response.json(); // 리스트 받아오기
-		
-		warehouseList.forEach(whs => {
-			const option = document.createElement('option');
-			option.value = whs.WHS_ID;
-			option.textContent = whs.WHS_NM;
-			selectElement.appendChild(option);
-		});
-	}			
+	
+	
+	  // 저장 될 창고 가져오는 함수 - select box
+	  async function fetchAndPopulateWarehouse(matId) {
+	      selectElement.innerHTML = '<option value="">-- 창고 선택 --</option>';
+	      console.log('matId', matId);
+	      const url = matId ? `/SOLEX/material_orders/getWarehouse?matId=${matId}` : '/SOLEX/material_orders/getWarehouse';
 
-	// 저장 될 구역 가져오는 함수 - select box
-	async function fetchAndPopulateArea(selectElement, whsId, matId){
-		selectElement.disabled = false;
-		
-		selectElement.innerHTML = '<option value="">-- 구역 선택--</option>';
-		
-		if(!whsId){
-			selectElement.disabled = true;
-			return;
-		}
-		
-		const response = await fetch(`/SOLEX/material_orders/getArea?whsId=${whsId}&matId=${matId}`);
-		const area = await response.json(); // 리스트 받아오기
-		
-		area.forEach(a => {
-			const option = document.createElement('option');
-			option.value = a.ARE_ID;
-			option.textContent = a.ARE_NM;
-			selectElement.appendChild(option);
-		});
-	}			
+	      const response = await fetchJson(url);
+	      const warehouseList = await response.json(); // 리스트 받아오기
 
+	      warehouseList.forEach(whs => {
+	          const option = document.createElement('option');
+	          option.value = whs.WHS_ID;
+	          option.textContent = whs.WHS_NM;
+	          selectElement.appendChild(option);
+	      });
+	  }
+
+	  // 저장 될 구역 가져오는 함수 - select box
+	  async function fetchAndPopulateArea(selectElement, whsId, matId) {
+	      selectElement.disabled = false;
+
+	      selectElement.innerHTML = '<option value="">-- 구역 선택--</option>';
+
+	      if (!whsId) {
+	          selectElement.disabled = true;
+	          return;
+	      }
+
+	      const response = await fetchJson(`/SOLEX/material_orders/getArea?whsId=${whsId}&matId=${matId}`);
+	      const area = await response.json(); // 리스트 받아오기
+
+	      area.forEach(a => {
+	          const option = document.createElement('option');
+	          option.value = a.ARE_ID;
+	          option.textContent = a.ARE_NM;
+	          selectElement.appendChild(option);
+	      });
+	  }
+	  
 	const $materialOrdersModal  = $('#exampleModal');
 	$materialOrdersModal .on('show.bs.modal', fetchAndPopulateMaterial);   // 자재id
+	  
+	  
 	  
 	  
     // 자재발주등록 내에서 등록버튼
@@ -201,10 +198,19 @@ $(function() {
         }
     });
 		
+		
+	
+	
 
     // 승인버튼 누르면 모달창뜨게
     grid.on('click', async ev => {
-		const btn = ev.nativeEvent.target.closest('button'); // <-- 'btn' is defined here
+        // ev.targetType === 'cell' 일 때만 처리
+        if (ev.columnName !== 'mat_ok') return;
+
+        // 클릭된 실제 DOM 버튼
+        const btn = ev.nativeEvent.target.closest('button');
+        if (!btn) return;
+
         // 행 rowKey 얻기
         const rowKey = ev.rowKey;
         const rowData = grid.getRow(rowKey);
@@ -229,22 +235,13 @@ $(function() {
 
                 // 2) 성공하면 UI 갱신
                 alert('반려되었습니다.');
-                grid.setValue(rowKey, 'mat_ord_sts', '반려');   // 버튼 → '반려' 텍스트
+                grid.setValue(rowKey, 'mat_ok', '반려');   // 버튼 → '반려' 텍스트
             } catch (err) {
                 console.error('[반려 요청 오류]', err);
                 alert('서버 통신 중 오류가 발생했습니다.');
             }
         }
     });
-	
-	
-	// mat_ord_sts에 따라 승인 / 반려 값 고정
-	
-//	if(){
-//		
-//	}else{
-//		
-//	}
 
     // 모달 오픈
     async function openModal(mode, rowKey = null) {
@@ -365,8 +362,8 @@ $(function() {
 
                     // grid와 rowKey가 유효한지 다시 한번 확인
                     if (rowKey !== null && rowKey !== undefined && grid && typeof grid.setValue === 'function') {
-                        grid.setValue(Number(rowKey), 'mat_ord_sts', '승인'); // rowKey를 Number로 다시 변환
-                        grid.refreshCell(Number(rowKey), 'mat_ord_sts');
+                        grid.setValue(Number(rowKey), 'mat_ok', '승인'); // rowKey를 Number로 다시 변환
+                        grid.refreshCell(Number(rowKey), 'mat_ok');
                         console.log('Grid 업데이트 성공.');
                     } else {
                         console.error('Grid 업데이트 실패: rowKey 또는 grid 객체 유효성 문제.');

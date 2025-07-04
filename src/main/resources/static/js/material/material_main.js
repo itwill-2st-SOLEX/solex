@@ -9,8 +9,8 @@ $(function() {
 	    bodyHeight: 500,
 	    autoWidth: true,
 	    columns: [
-	        { header: '자재ID', name: 'matId', align : 'center', sortable: true, width:90}, 
-	        { header: '거래처ID', name: 'cliId', align : 'center', sortable: true, width:90}, 
+			{ header: '자재ID', name: 'matId', align : 'center', sortable: true, width:90}, 
+			{ header: '거래처ID', name: 'cliId', align : 'center', sortable: true, width:90}, 
 	        { header: '자재코드', name: 'matCd', align : 'center', sortable: true}, 
 	        { header: '자재명', name: 'matNm', align : 'center', filter: 'select'},
 	        { header: '단위', name: 'matUnit', align : 'center', filter: 'select' , width:85},
