@@ -32,8 +32,8 @@ public class InspectionService {
 	}
 	
 	//작업 현황 모두 가져오기
-	public List<Map<String, Object>> getManagerList(Map params){
-		return inspectionMapper.getManagerList(params);
+	public List<Map<String, Object>> getInspectionList(Map params){
+		return inspectionMapper.getInspectionList(params);
 	}
 	
 	//사원이 실적 등록할 때 마다 작업수량 업데이트

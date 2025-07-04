@@ -20,34 +20,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
-@RequestMapping("/inspection/api")
+@RequestMapping("/quality/api/inspection")
 public class InspectionRestController {
 
     private final OrderRequestsService orderRequestsService;
 
-    private final DocumentController documentController;
 
-    private final OrderController orderController;
 
 	@Autowired
 	public InspectionService inspectionService;
 	
 	//로그인 구현 필요
-	// 26->29->23->75->85->88
-	Long empId = 26L;
+	Long empId = null;
 
 
-    InspectionRestController(OrderController orderController, DocumentController documentController, OrderRequestsService orderRequestsService) {
-        this.orderController = orderController;
-        this.documentController = documentController;
+    InspectionRestController(OrderRequestsService orderRequestsService) {
         this.orderRequestsService = orderRequestsService;
     }
 
 	
 	//내 부서 정보
 	@GetMapping("/managerSummary")
-	public Map<String, Object> getManagerSummary() {
+	public Map<String, Object> getManagerSummary(HttpSession httpSession) {
+		empId = Long.parseLong(httpSession.getAttribute("empId").toString());
+	
 	    Map<String, Object> result = inspectionService.getManagerSummary(empId);
 	    System.out.println(result);
 
@@ -56,7 +55,7 @@ public class InspectionRestController {
 
 	// 모든 작업 목록 가져오기
 	@GetMapping("/managerList")
-	public Map<String, Object> getManagerList(@RequestParam(name = "page", required = false) Integer page,
+	public Map<String, Object> getInspectionList(@RequestParam(name = "page", required = false) Integer page,
 								         @RequestParam(name = "size", required = false) Integer size,
 								         @RequestParam("empId") Long empId,
 								         @RequestParam("yearMonth") String yearMonth) {
@@ -68,11 +67,13 @@ public class InspectionRestController {
 	    params.put("yearMonth", yearMonth);
 	    
 	    // 내 작업 전체 목록
-	    List<Map<String, Object>> managerList = inspectionService.getManagerList(params);
-	    //int vacationCount = managerService.getManagerCount(empId);
+	    List<Map<String, Object>> inspectionList = inspectionService.getInspectionList(params);
 
 	    Map<String, Object> result = new HashMap<>();
-	    result.put("list", managerList);
+	    result.put("list", inspectionList);
+
+		System.out.println("result : " + result);
+	    
 	    
 	    return result;
 	}

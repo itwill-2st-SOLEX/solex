@@ -35,8 +35,8 @@ const grid = new tui.Grid({
         ]
     },
     columns: [
-        { header: '지시번호', name: 'wrkId', align: 'center', width: 70 },
-        { header: '제품코드', name: 'prdCd', align: 'center', filter: 'select' },
+        { header: '수주상세번호', name: 'oddId', align: 'center', width: 100 },
+        { header: '제품코드', name: 'prdId', align: 'center', filter: 'select' },
         { header: '제품명', name: 'prdNm', align: 'center', filter: 'select', width: 180 },
 
         { header: '컬러', name: 'prdColor', align: 'center', filter: 'select', width: 80 },
@@ -44,50 +44,18 @@ const grid = new tui.Grid({
         { header: '굽높이', name: 'prdHeight', align: 'center', filter: 'select', width: 80 },
 
         { header: '수주', name: 'oddCnt', align: 'center', sortable: true, width: 80 },
-        { header: '지시', name: 'wpoOcount', align: 'center', sortable: true, width: 80 },
-        { header: '완료', name: 'wpoJcount', align: 'center', sortable: true, width: 80 },
         {
             header: '불량',
             name: 'qhiBcount',
             align: 'center',
             sortable: true,
             width: 80,
-            defaultValue: 0,
-            editor: customTextEditor,		//숫자만 입력하도록 설정
-			// 입력이 불가능할때는 '-' 표시하기
-			// 생산중만 회색으로 표시
-			// 불량수량 입력 후에는 불량수량 계속 표시하기
-            formatter: ({ row, value }) => {
-                if ((row.wpoStatus).slice(-2) >= '04') {
-                    return value;
-                }
-                return `<span style="color: #aaa;">-</span>`;
-            }
-        },
-        {
-            header: '진행률',
-            name: 'wpoProRate',
-            align: 'center',
-			// 작업률 표시
-            formatter: ({ value }) => {
-                const rate = parseFloat(value) || 0;
-                return `
-                    <div class="progress" style="height: 20px; position: relative;">
-                        <div class="progress-bar progress-bar-striped bg-success" 
-                             role="progressbar" 
-                             style="width: ${rate}%;"
-                             aria-valuenow="${rate}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                        </div>
-                        <span class="progress-text">${rate}%</span>
-                    </div>
-                `;
-            }
+            defaultValue: 0
+            
         },
         { header: '납품예정일', name: 'ordEndDate', align: 'center', sortable: true },
-        { header: '진행상태', name: 'wpoStatusName', align: 'center', filter: 'select', className: 'bold-text' },
-        { header: '작업지시', name: 'wpoBtn', align: 'center', editable: false, width: 100 },
+        { header: '진행상태', name: 'StatusName', align: 'center', filter: 'select', className: 'bold-text' },
+        { header: '작업지시', name: 'Btn', align: 'center', editable: false, width: 100 },
     ],
 });
 
@@ -112,9 +80,9 @@ function bindScrollEvent() {
 // 품질검사 중일 때만 불량수량 입력 가능
 grid.on('editingStart', ev => {
     const row = grid.getRow(ev.rowKey);
-    if (ev.columnName === 'qhiBcount' && row?.wpoStatus !== 'wpo_sts_04') {
+    if (ev.columnName === 'qhiBcount' && row?.Status !== 'odd_sts_07') {
         ev.stop();
-        alert('품질검사 후 등록해주세요');
+        alert('품질검사 후 등록해주세asdasdasdasda요');
     }
 });
 
@@ -131,14 +99,7 @@ grid.on('editingFinish', ev => {
 
 // 목록 클릭 시 작업 내역 모달 표시
 grid.on('click', async ev => {
-	//작업지시 버튼눌렀을 때는 모달창 표시하지 않기
-	if (ev.columnName === 'wpoBtn' || ev.columnName === 'qhiBcount') return; 
 	
-    const row = grid.getRow(ev.rowKey);
-    if (!row) return;
-	
-	// wpoId 하나만 넘기면 내부에서 목록을 불러와 그리드 생성
-    await showWorkerDetailModal(row.wpoId, row);
 });
 
 //화면에 년, 월 표시
@@ -186,24 +147,21 @@ document.getElementById('grid').addEventListener('click', async e => {
 	// 버튼 종류 구분 (클래스명 또는 버튼 텍스트 등)
 	// updateStatus(작업id, 변경될 상태값)
     if (target.tagName === 'BUTTON') {
-        const wpoId = target.getAttribute('data-id');
-        if (!wpoId) return;
+        const oddId = target.getAttribute('data-id');
+        if (!oddId) return;
 
-        if (target.classList.contains('start-btn')) {			// 작업시작 버튼
-            await updateStatus(wpoId, 'wpo_sts_02');			// 공정진행중
-			
-        } else if (target.classList.contains('quality-btn')) {	//품질검사 버튼
-            await updateStatus(wpoId, 'wpo_sts_04');			// 품질검사 중
+        if (target.classList.contains('quality-btn')) {	//품질검사 버튼
+            await updateStatus(oddId, 'odd_sts_07');			// 품질검사 중
 
         } else if (target.classList.contains('transfer-btn')) {	//검사 완료 버튼
 			
 			// 편집 중이면 편집 종료 → grid 데이터 반영 (원래 있는거) 
             await grid.finishEditing();
 
-			// wpoId에 해당하는 행 key 찾기
+			// oddId에 해당하는 행 key 찾기
             const bcount = (() => {
                 const data = grid.getData();
-                const rowKey = data.findIndex(row => row.wpoId == wpoId);
+                const rowKey = data.findIndex(row => row.oddId == oddId);
                 return grid.getValue(rowKey, 'qhiBcount');
             })();
 
@@ -212,10 +170,10 @@ document.getElementById('grid').addEventListener('click', async e => {
                 return;
             }
 
-            await updateStatus(wpoId, 'wpo_sts_05', Number(bcount));	// 품질검사완료
+            await updateStatus(oddId, 'odd_sts_08', Number(bcount));	// 품질검사완료
 
         } else if (target.classList.contains('success-btn')) {			//공정이관
-            await updateStatus(wpoId, 'wpo_sts_09');					//공정이관완료
+            await updateStatus(oddId, 'odd_sts_09');					//공정이관완료
         }
     }
 });
@@ -291,8 +249,9 @@ function dateFormatter(date, includeTime = false) {
 // 공정 요약 정보 불러오기
 async function managerSummary() {
     try {
-        const res = await fetch(`/SOLEX/inspection/api/managerSummary`);
+        const res = await fetch(`/SOLEX/quality/api/inspection/managerSummary`);
         const data = await res.json();
+        console.log(data);
 
         empId = data.EMP_ID;
 
@@ -314,54 +273,27 @@ async function managerSummary() {
 async function managerList(page) {
     try {
 		const ym = currentMonth.format('YYYYMM');
-        const url = `/SOLEX/operator/api/managerList?page=${page}&size=${pageSize}&empId=${empId}&yearMonth=${ym}`;
+        const url = `/SOLEX/quality/api/inspection/managerList?page=${page}&size=${pageSize}&empId=${empId}&yearMonth=${ym}`;
         const res = await fetch(url);
         const data = await res.json();
+        console.log(data);
 
         const list = data.list;
-        const hasInProgress = list.some(n => n.WPO_STATUS === 'wpo_sts_02');
+        
 
         const gridData = list.map(n => {
-            let btn = '';
-            const bcount = n.QHI_BCOUNT || 0;
-			
-			// 불량 개수 제외하고 진행률 계산
-            const wpoProRate = n.ODD_CNT > 0
-                ? Math.round(((n.WPO_JCOUNT - bcount) / n.ODD_CNT) * 1000) / 10
-                : 0;
-            const wpoStatus = n.WPO_STATUS;
-
-            if (wpoStatus === 'wpo_sts_01' && !hasInProgress) {
-                btn = `<button class="btn start-btn btn-sm btn-primary" data-id="${n.WPO_ID}">작업시작</button>`;
-            } else if (wpoStatus === 'wpo_sts_02') {
-                btn = '';
-            } else if (wpoStatus === 'wpo_sts_03') {
-                btn = `<button class="btn quality-btn btn-sm btn-info" data-id="${n.WPO_ID}">품질검사</button>`;
-            } else if (wpoStatus === 'wpo_sts_04') {
-                btn = `<button class="btn transfer-btn btn-sm btn-warning" data-id="${n.WPO_ID}">검사완료</button>`;
-            } else if (wpoStatus === 'wpo_sts_05') {
-                btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WPO_ID}">공정이관</button>`;
-            } else if (wpoStatus === 'wpo_sts_09') {
-                btn = '';
-            }
-
             return {
-                wpoId: n.WPO_ID,
-                wrkId: n.WRK_ID,
-                prdCd: n.PRD_CODE,
-                prdNm: n.PRD_NM,
-                prdColor: n.PRD_COLOR,
-                prdSize: n.PRD_SIZE,
-                prdHeight: n.PRD_HEIGHT,
-                oddCnt: n.ODD_CNT,
-                wpoOcount: n.WPO_OCOUNT,
-                wpoJcount: n.WPO_JCOUNT,
-                qhiBcount: n.QHI_BCOUNT,
-                wpoProRate: wpoProRate,
-                wpoStatusName: n.WPO_STATUS_NAME,
-                wpoStatus: n.WPO_STATUS,
-                ordEndDate: dateFormatter(new Date(n.ORD_END_DATE)) || '-',
-                wpoBtn: btn
+                oddId: n.ODDID,
+                prdId: n.PRDID,
+                prdNm: n.PRDNM,
+                prdColor: n.PRDCOLOR,
+                prdSize: n.PRDSIZE,
+                prdHeight: n.PRDHEIGHT,
+                oddCnt: n.ODDCNT,
+                qhiBcount: n.QHI_BCOUNT || 0,
+                ordEndDate: dateFormatter(new Date(n.ORDENDDATE)) || '-',
+                StatusName : n.ODDSTS === 'odd_sts_07' ? '품질검사대기' : n.ODDSTS,
+                Btn : n.ODDSTS === `odd_sts_07` ? `<button class="btn quality-btn btn-sm btn-info" data-id="${n.ODDID}">품질검사</button>` : ''
             };
         });
 
@@ -380,30 +312,9 @@ async function managerList(page) {
     }
 }
 
-// 상태 업데이트 및 재조회 함수
-async function updateStatus(wpoId, newStatus, qhiBcount = null) {
-    try {
-        const body = { wpoId, wpoStatus: newStatus };
-		//불량 수량 확인
-        if (qhiBcount !== null) {
-            body.qhiBcount = qhiBcount;	// 불량 수량도 함께 보냄
-        }
-
-        const res = await fetch(`/SOLEX/operator/api/updateStatus`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
-        if (!res.ok) throw new Error('상태 업데이트 실패');
-
-		//성공시 페이지 재호출	
-        currentPage = 0;
-        await managerList(currentPage);
-    } catch (e) {
-        alert('상태 업데이트 중 오류가 발생했습니다.');
-        console.error(e);
-    }
+// 
+async function updateStatus() {
+    
 }
 
 // 작업 내역 모달 표시 함수
