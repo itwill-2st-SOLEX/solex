@@ -42,5 +42,13 @@ public interface CodeMapper {
 	void updateDetailCodes(List<Map<String, Object>> updateList);
 
 	List<Map<String, Object>> getQualityNames();
+
+	List<Map<String, Object>> getPositionNames();
+
+	List<Map<String, Object>> getCategoryNames(String posCd);
+
+	List<Map<String, Object>> getDepartmentNames(String depCd);
+
+	List<Map<String, Object>> getTeamNames();
 	
 }
