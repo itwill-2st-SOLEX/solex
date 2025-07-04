@@ -18,6 +18,7 @@
 			e.emp_pc as "empPc",
 			e.emp_add as "empAdd",
 			e.emp_da as "empDa",
+			e.emp_img as EMP_IMG,
 			TO_CHAR(e.emp_hire,'YYYY-MM-DD') as "empHire",
 			cat.det_nm  AS empCatCd,
 	        pos.det_nm  AS empPosCd,

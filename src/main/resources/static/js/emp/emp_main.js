@@ -207,6 +207,23 @@ $(function() {
         }
     });
 	
+	// 사진 선택 시 미리보기 기능
+	$('#emp_img').on('change', function(event) {
+		const file = event.target.files[0];
+		if (file) {
+			const reader = new FileReader();
+			
+			// 파일 읽기가 완료되면 실행될 콜백 함수
+			reader.onload = function(e) {
+				// img 태그의 src 속성을 읽은 파일 데이터(Data URL)로 설정
+				$('#emp_img_preview').attr('src', e.target.result);
+			};
+			
+			// 파일을 Data URL 형태로 읽기 시작
+			reader.readAsDataURL(file);
+		}
+	});
+	
 	
 	
 	// 사원 등록
@@ -275,6 +292,8 @@ $(function() {
 	$employeeModal.on('hidden.bs.modal', function () {
 		$empForm[0].reset(); // 폼 필드 리셋
 		$('#emp_img_preview').attr('src', '/SOLEX/assets/img/emp/simple_person_pic.jpg'); // 이미지 미리보기 초기화
+		
+		$('#emp_img').val(''); // 파일 선택 필드의 값을 명시적으로 비워줍니다.
 		
 		// 동적으로 로드된 셀렉트 박스들 초기 상태로 복원
         resetSelectBox($empCatCd, '종류', true);

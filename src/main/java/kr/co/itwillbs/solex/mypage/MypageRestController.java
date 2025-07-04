@@ -37,10 +37,10 @@ public class MypageRestController {
 	public Map<String, Object> getEmpData(HttpSession session) {
 		
 		String empId = (String) session.getAttribute("empId");
-//		System.out.println("empId = " + empId);
-		Map<String, Object> empData = mypageService.getEmpData(empId); 
-//		System.out.println("@@@@@@@@@@@@@@@ " + empData);
-		return empData;
+		System.out.println("empId = " + empId);
+		
+		return mypageService.getEmpData(empId);
+		
 	}
 	
 	//마이페이지 수정 

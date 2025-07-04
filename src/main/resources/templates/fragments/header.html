@@ -81,17 +81,20 @@
 	</div>
 
 	<!-- ✨ Mypage 모달창 띄우기 위해  -->
-	<div class="modal fade" id="mypageModal" tabindex="-1"
-		aria-hidden="true">
+	<div class="modal fade" id="mypageModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-scrollable modal-xl">
 			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">마이페이지</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"
-						aria-label="Close"></button>
+				<div class="modal-header border-0 pb-1">
+					<h3 class="modal-title fw-semibold" id="exampleModalLabel">마이페이지</h3>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<!-- JS에서 이 부분을 채움 -->
-				<div class="modal-body"></div>
+				<div class="modal-body pt-0">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+					<button type="submit" class="btn btn-primary" id="mypageModifyBtn">수정</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -129,228 +132,216 @@
 		document.addEventListener('DOMContentLoaded', function () {
 			unreadCnt();
 		});
-		//마이페이지 누르면 로그인 한 사원의 마이페이지 모달 열리게 
+		
+		
+		// "마이페이지" 메뉴 클릭 시 실행
 		async function openMypagePopup(event) {
 			event.preventDefault();
 			
-			const response = await fetch(`/SOLEX/mypage/empData`);
-			const empData = await response.json();
-			openModal(empData);
-		}
-		
-		//마이페이지 모달창 내부
-		async function openModal(empData){
-			
-			const modalElement = document.getElementById('mypageModal');
-			const modal = new bootstrap.Modal(modalElement);
-			const modalBody = modalElement.querySelector('.modal-body');
-			modalBody.innerHTML = '';
-			
-			// 2️⃣ 매핑 함수: 코드가 없거나 매핑이 안 돼 있으면 원본 그대로 리턴
-			const labelOf = (codeKey, codeValue) => CODE_LABEL[codeKey]?.[codeValue] ?? codeValue;
-			
-			// 기본 이미지 경로
-			const defaultImg = '/assets/img/emp/simple_person_pic.jpg';
-			
-			const {
-			 	empNm      = '',
-			 	empPc      = '',
-			 	empAdd     = '',
-			    empDa      = '',
-			    empEmail   = '',
-			    empPhone   = '',
-			    empHire    = '',
-			    empBirth   = '',
-			    empGd      = '',
-			    EMPPOSCD   = '',
-			    EMPCATCD   = '',
-			    EMPDEPCD   = '',
-			    EMPTEAMCD  = '',
-			    empImg: empImgUrl = ''
-			} = empData;
-			
-			
-			// 핸드폰·이메일 분리(필요하면)
-			const [hp1 = '', hp2 = '', hp3 = ''] = empPhone.split('-');
-			const [em1 = '', em2 = '']           = empEmail.split('@');	  
-				  
-			const form = document.createElement('form');
-			form.id = 'mypageForm';
-			form.innerHTML = `
-				<div class="row mb-4">
-				  <div class="col-3">
-				    <label>사진</label>
-				    <img id="emp_img_preview" alt="사진 미리보기"
-				    	src="${empImgUrl ? empImgUrl : defaultImg}" //이미지 없을땐 기본이미지, 외에는 지가 설정한 이미지 
-				         style="width:173px; height:208px; border-radius:4px; object-fit:cover; display:block; margin-bottom:10px;" />
-				    <input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
-				  </div>
-	
-				  <!-- 🧾 오른쪽: 나머지 입력 폼 -->
-				  <div class="col-9">
-				    <div class="row mb-3">
-				      <div class="col">
-				        <label>이름</label>
-				        <input type="text" class="form-control" name="emp_nm" value="${empNm}" required>
-				      </div>
-				      <div class="col">
-				        <label>입사일</label>
-				        <input type="date" class="form-control" name="emp_hire" value="${empHire}" readonly>
-				      </div>
-				    </div>
-	
-				    <div class="row mb-3">
-				      <div class="col">
-				        <label>성별</label><br>
-				        <label id="genderM"><input type="radio" name="emp_gd" value="M" checked> 남</label>
-				        <label><input type="radio" name="emp_gd" value="W"> 여</label>
-				      </div>
-				      <div class="col">
-				        <label>생년월일</label>
-				        <input type="text" class="form-control" name="emp_birth" id="emp_birth" pattern="\\d{6}" value="${empBirth}" placeholder="ex)990101" readonly>
-				        <input type="hidden" name="emp_pw" id="emp_pw">
-				      </div>
-				    </div>
-	
-				    <div class="row mb-3">
-				      <div class="col">
-				        <label>연락처</label><br>
-				        <input type="text" id="emp_phone1" class="form-control d-inline-block w-25" value="${hp1}" required> -
-				        <input type="text" id="emp_phone2" class="form-control d-inline-block w-25" value="${hp2}" required> -
-				        <input type="text" id="emp_phone3" class="form-control d-inline-block w-25" value="${hp3}" required>
-				        <input type="hidden" name="emp_phone" id="emp_phone">
-				      </div>
-				    </div>
-	
-				    <div class="row mb-3">
-				      <div class="col">
-				        <label>이메일</label><br>
-				        <input type="text" id="emp_email1" class="form-control d-inline-block w-25" value="${em1}" required> @
-				        <input type="text" id="emp_email2" class="form-control d-inline-block w-25" value="${em2}" required>
-				        <input type="hidden" name="emp_email" id="emp_email">
-				      </div>
-				    </div>
-	
-				    <div class="row mb-3">
-				      <div class="col">
-				        <label>직급</label>
-				        <input type="text" class="form-control d-inline-block" name="emp_pos_cd" value ="${EMPPOSCD}" readonly><br>
-				      </div>
-				      <div class="col">
-				        <label>사원</label>
-				        	<input type="text" class="form-control d-inline-block" name="emp_cat_cd" value="${EMPCATCD}" readonly><br>
-				      </div>
-				    </div>
-	
-				    <div class="row mb-3">
-				      <div class="col">
-				        <label>부서</label>
-				        	<input type="text" class="form-control d-inline-block" name="emp_dep_cd" value="${EMPDEPCD}" readonly><br>
-				      </div>
-				      <div class="col">
-				        <label>팀</label>
-				        	<input type="text" class="form-control d-inline-block" name="emp_team_cd" value="${EMPTEAMCD}" readonly><br>
-				      </div>
-				    </div>
-	
-				    <div class="row mb-3">
-				      <div class="col">
-				        <label>주소</label><br>
-				        <input type="text" id="sample6_postcode" name="emp_pc" class="form-control d-inline-block w-25" value="${empPc}" required>
-				        <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-				        <input type="text" id="sample6_address" name="emp_add" class="form-control" value="${empAdd}" required>
-				        <input type="text" id="sample6_detailAddress" name="emp_da" class="form-control" value="${empDa}" required>
-				        <input type="text" id="sample6_extraAddress" class="form-control" placeholder="참고항목">
-				      </div>
-				    </div>
-				  </div>
-				</div>
-
-		<div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-			<button type="submit" class="btn custom-btn-blue btn-success" id="modifyBtn">등록</button>
-		</div>
-		`;
-			modalBody.appendChild(form); // 최종 폼 삽입
-				
-			modal.show();
-		
-			// 사진 파일 선택 → 미리보기
-			const imgInput   = document.getElementById('emp_img');
-			const imgPreview = document.getElementById('emp_img_preview');
-
-		
-			
-			imgInput.addEventListener('change', e => {
-			  const file = e.target.files[0];
-			  if (!file) {                      // 선택 취소한 경우
-			    imgPreview.style.display = 'none';
-			    imgPreview.src = defaultImg;
-			    return;
-			  }
-			  const reader = new FileReader();
-			  reader.onload = evt => {
-			    imgPreview.src = evt.target.result;   // 선택한 이미지 표시
-			  };
-			  reader.readAsDataURL(file);             // 이미지 파일 → base64 읽기
-			});
-			
-		    // 수정 버튼
-		    modalBody.querySelector('#modifyBtn').onclick = async () => {
-				/* 1️⃣ 먼저 병합해서 input value를 갱신 */
-				const fullPhone = [
-				    document.getElementById('emp_phone1')?.value || '',
-				    document.getElementById('emp_phone2')?.value || '',
-				    document.getElementById('emp_phone3')?.value || ''
-				].join('-');
-				document.getElementById('emp_phone').value = fullPhone;
-	
-				const fullEmail = [
-				    document.getElementById('emp_email1')?.value || '',
-				    document.getElementById('emp_email2')?.value || ''
-		  		].join('@');
-		  		document.getElementById('emp_email').value = fullEmail;
-	
-				/* 2️⃣ 값이 채워진 뒤에 FormData를 다시 생성 */
-				const form = document.getElementById('mypageForm');
-				const formData = new FormData(form);
-	
-				const fileObj = formData.get('emp_img');
-				
-				/* 3️⃣ payload를 만들 때는 formData 또는 직접 변수 사용  */
-				const payload = {
-				    emp_nm   : formData.get('emp_nm'),
-				    emp_phone: fullPhone,                           // ← 직접 변수 사용
-				    emp_email: fullEmail,                           // ← 직접 변수 사용
-				    emp_pc   : formData.get('emp_pc'),
-				    emp_add  : formData.get('emp_add'),
-				    emp_da   : formData.get('emp_da')
-		  		};
-	
-				console.log('payload', payload);  // 모든 값이 채워졌는지 확인
-				const fd = new FormData();
-	          
-
-			    fd.append(
-						  'emp',
-						  new Blob([JSON.stringify(payload)], { type: 'application/json' })
-						 );
-			    
-			    // 4-2) 파일이 선택돼 있으면 ‘emp_img’ 파트로 첨부
-			    if (fileObj && fileObj.size > 0) {
-			      fd.append('emp_img', fileObj); // fileObj를 emp_img라는 이름으로 넣는다
-			    }
-				
-	            const response = await fetch('/SOLEX/mypage/personalDataModify', {
-			    	method : 'PUT',
-			    	body   : fd
-				});
-	            
-	            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-	            alert('수정 완료');
-	            modalInstance.hide();
+			try {
+				const response = await fetch(`/SOLEX/mypage/empData`);
+				if (!response.ok) throw new Error('사원 정보를 불러오는데 실패했습니다.');
+				const empData = await response.json();
+				openModalWithData(empData);
+			} catch (error) {
+				console.error(error);
+				alert(error.message);
 			}
 		}
+		
+		// 마이페이지 모달창을 데이터로 채우고 보여주는 함수
+		function openModalWithData(empData){
+			
+			const modalElement = document.getElementById('mypageModal');
+			if (!modalElement) return;
+
+			const modal = new bootstrap.Modal(modalElement);
+			const modalBody = modalElement.querySelector('.modal-body');
+			modalBody.innerHTML = ''; // 이전 내용 초기화
+			
+			const {
+			 	empNm, empPc, empAdd, empDa, empEmail, empPhone,
+			 	empHire, empBirth, empGd,
+			 	EMPPOSCD, EMPCATCD, EMPDEPCD, EMPTEAMCD, empProfileImg // 📸 프로필 이미지 경로 추가
+			} = empData;
+				  
+			// 핸드폰·이메일 분리
+			const [hp1 = '', hp2 = '', hp3 = ''] = empPhone ? empPhone.split('-') : [];
+			const [em1 = '', em2 = ''] = empEmail ? empEmail.split('@') : [];
+			
+			// 📸 보여줄 이미지 경로 결정 (사용자 프로필 이미지 or 기본 이미지)
+			const profileImgSrc = empProfileImg || '/SOLEX/assets/img/emp/simple_person_pic.jpg';
+
+			// 모달 바디에 들어갈 Form HTML 생성
+			const formHTML = `
+				<form id="mypageForm" onsubmit="return false;">
+					<div class="container-fluid">
+						<div class="row g-4">
+							<div class="col-md-4 text-center">
+								<label class="form-label fw-semibold">사진</label>
+								<img id="emp_img_preview" src="${profileImgSrc}"
+										class="w-100 rounded shadow-sm mb-3" style="aspect-ratio:4/5;object-fit:cover;" />
+								<input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*">
+							</div>
+							
+							<div class="col-md-8">
+								<div class="row g-3">
+									<div class="col-md-6">
+										<label for="empNm" class="form-label">이름</label>
+										<input type="text" class="form-control" id="empNm" name="emp_nm" value="${empNm || ''}" required>
+									</div>
+									<div class="col-md-6">
+										<label for="empHire" class="form-label">입사일</label>
+										<input type="text" class="form-control" id="empHire" name="emp_hire" value="${empHire || ''}" readonly>
+									</div>
+									
+									<div class="col-md-6 d-flex align-items-end">
+										<div class="me-3">
+											<label class="form-label d-block mb-1">성별</label>
+											<div class="btn-group" role="group" aria-label="gender switcher">
+												<input type="radio" class="btn-check" name="emp_gd" id="genderM" value="M" ${empGd === 'M' ? 'checked' : ''} disabled>
+												<label class="btn btn-outline-primary" for="genderM">남</label>
+												<input type="radio" class="btn-check" name="emp_gd" id="genderW" value="W" ${empGd === 'W' ? 'checked' : ''} disabled>
+												<label class="btn btn-outline-primary" for="genderW">여</label>
+											</div>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<label for="emp_birth" class="form-label">생년월일</label>
+										<input type="text" class="form-control" name="emp_birth" id="emp_birth" value="${empBirth || ''}" readonly>
+									</div>
+									
+									<div class="col-12">
+										<label class="form-label">연락처</label>
+										<div class="input-group">
+											<input type="text" id="emp_phone1" class="form-control" value="${hp1}" placeholder="010" required>
+											<span class="input-group-text">-</span>
+											<input type="text" id="emp_phone2" class="form-control" value="${hp2}" placeholder="1234" required>
+											<span class="input-group-text">-</span>
+											<input type="text" id="emp_phone3" class="form-control" value="${hp3}" placeholder="5678" required>
+										</div>
+										<input type="hidden" name="emp_phone" id="emp_phone">
+									</div>
+	
+									<div class="col-12">
+										<label class="form-label">이메일</label>
+										<div class="input-group">
+											<input type="text" id="emp_email1" class="form-control" value="${em1}" placeholder="example" required>
+											<span class="input-group-text">@</span>
+											<input type="text" id="emp_email2" class="form-control" value="${em2}" placeholder="company.com" required>
+										</div>
+										<input type="hidden" name="emp_email" id="emp_email">
+									</div>
+	
+									<div class="col-md-6">
+										<label class="form-label">직급</label>
+										<input type="text" class="form-control" value="${EMPPOSCD}" readonly>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">종류</label>
+										<input type="text" class="form-control" value="${EMPCATCD}" readonly>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">부서</label>
+										<input type="text" class="form-control" value="${EMPDEPCD}" readonly>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">팀</label>
+										<input type="text" class="form-control" value="${EMPTEAMCD}" readonly>
+									</div>
+									
+									<div class="col-12">
+										<label class="form-label">주소</label>
+										<div class="input-group mb-2">
+											<input type="text" id="sample6_postcode" name="emp_pc" class="form-control" placeholder="우편번호" value="${empPc || ''}" required>
+											<button type="button" class="btn btn-outline-secondary" onclick="sample6_execDaumPostcode()">우편번호 찾기</button>
+										</div>
+										<input type="text" id="sample6_address" name="emp_add" class="form-control mb-2" placeholder="주소" value="${empAdd || ''}" required>
+										<input type="text" id="sample6_detailAddress" name="emp_da" class="form-control" placeholder="상세주소" value="${empDa || ''}" required>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			`;
+			modalBody.innerHTML = formHTML;
+				
+			// 📸 사진 파일 선택 시 미리보기 업데이트 (이벤트 위임 사용)
+			modalBody.addEventListener('change', e => {
+				if (e.target.id === 'emp_img') {
+					const file = e.target.files[0];
+					if (file) {
+						const reader = new FileReader();
+						reader.onload = evt => {
+							document.getElementById('emp_img_preview').src = evt.target.result;
+						};
+						reader.readAsDataURL(file);
+					}
+				}
+			});
+
+			modal.show();
+		}
+
+		// "수정" 버튼 클릭 이벤트
+		document.getElementById('mypageModifyBtn').addEventListener('click', async () => {
+			// 1. 수정 가능한 데이터들을 가져오기
+			// 연락처, 이메일 병합
+			const fullPhone = [
+				document.getElementById('emp_phone1')?.value,
+				document.getElementById('emp_phone2')?.value,
+				document.getElementById('emp_phone3')?.value
+			].join('-');
+			
+			const fullEmail = [
+				document.getElementById('emp_email1')?.value,
+				document.getElementById('emp_email2')?.value
+			].join('@');
+
+			// 2. 서버에 보낼 payload 객체 생성 (JSON으로 보낼 텍스트 데이터)
+			const payload = {
+				empNm: document.getElementById('empNm').value,
+				empPhone: fullPhone,
+				empEmail: fullEmail,
+				empPc: document.getElementById('sample6_postcode').value,
+				empAdd: document.getElementById('sample6_address').value,
+				empDa: document.getElementById('sample6_detailAddress').value
+			};
+			
+			// 3. FormData 생성 및 데이터 추가
+			const formData = new FormData();
+			
+			// JSON 데이터를 Blob으로 변환하여 'emp' 파트에 추가
+			formData.append('emp', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+
+			// 이미지 파일을 'emp_img' 파트에 추가
+			const imgFile = document.getElementById('emp_img').files[0];
+			if (imgFile) {
+				formData.append('emp_img', imgFile);
+			}
+
+			// 4. 서버로 FormData 전송
+			try {
+				const response = await fetch('/SOLEX/mypage/personalDataModify', {
+					method: 'PUT',
+					body: formData // headers에 Content-Type을 지정하지 않아야 브라우저가 자동으로 multipart/form-data로 설정함
+				});
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					throw new Error(`수정 실패: ${errorText}`);
+				}
+				
+				alert(`수정이 완료되었습니다.`);
+				const modalInstance = bootstrap.Modal.getInstance(document.getElementById('mypageModal'));
+				modalInstance.hide();
+
+			} catch (error) {
+				console.error('수정 요청 실패:', error);
+				alert(error.message);
+			}
+		});
 		
 		function sample6_execDaumPostcode() {	
 		    new daum.Postcode({
