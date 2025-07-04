@@ -75,7 +75,7 @@ public class ManagerRestController {
 		String sessionId = (String) session.getAttribute("empId");
     	Long empId = Long.parseLong(sessionId);
 		
-		map.put("empId", empId);		
+		map.put("empId", empId);
 		
 		managerService.updateWpoSts(map);
 		

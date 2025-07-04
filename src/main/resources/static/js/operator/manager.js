@@ -53,7 +53,6 @@ const grid = new tui.Grid({
             align: 'center',
             sortable: true,
             width: 80,
-            defaultValue: 0,
             editor: customTextEditor,		//숫자만 입력하도록 설정
 			// 입력이 불가능할때는 '-' 표시하기
 			// 생산중만 회색으로 표시
@@ -325,7 +324,7 @@ async function managerList(page) {
 
         const gridData = list.map(n => {
             let btn = '';
-            const bcount = n.QHI_BCOUNT || 0;
+            const bcount = n.QHI_BCOUNT //|| 0;
 			
 			// 불량 개수 제외하고 진행률 계산
             const wpoProRate = n.ODD_CNT > 0
