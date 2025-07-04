@@ -182,7 +182,6 @@ async function fetchGridData(page = currentPage) {
     // 3. 응답 데이터를 JSON으로 파싱
     const data = await response.json();
 
-    console.log(data);
     data.forEach(item => {
       if(item.ODD_STS === 'odd_sts_05') {
         item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="approve" data-odd-id="${item.ODD_ID}">승인 / 반려</button>`;
@@ -341,7 +340,14 @@ async function openShipmentModal() {
 
   document.getElementById("myModalTitle").textContent = "출고 등록";
 
+  // 기존에 display none된 버튼을 display block으로 변경
+  // oldBtn은 승인 버튼은 none이 아님 oldBtn2는 반려 버튼은 none임
   const oldBtn = document.getElementById("submitBtn");
+  const oldBtn2 = document.getElementById("rejectBtn");
+  const oldBtn3 = document.getElementById("closeBtn");
+  oldBtn2.style.display = "none";
+  oldBtn3.style.display = "block";
+
   // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
   const newBtn = oldBtn.cloneNode(true);
   // 2. 기존 버튼을 새로운 버튼으로 교체
@@ -351,6 +357,21 @@ async function openShipmentModal() {
   newBtn.addEventListener("click", () => {
     submitForm();
   });
+
+
+  const newBtn2 = oldBtn2.cloneNode(true);
+  
+  // 2. 기존 버튼을 새로운 버튼으로 교체
+  oldBtn2.parentNode.replaceChild(newBtn2, oldBtn2);
+  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
+  newBtn2.textContent = "닫기";
+  newBtn2.addEventListener("click", () => {
+    closeModal();
+  });
+
+
+
+  enableForm(false);
 
   const modal = document.getElementById("myModal");
   const modalInstance = new bootstrap.Modal(modal);
@@ -506,7 +527,17 @@ function setupInteractiveList(containerId) {
 }
 
 function deleteSelectedRows() {
-  INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+  // id가 myModalTitle의 값을 파악해서 출고 등록이면 행 삭제 가능.
+  // 근데 제품 삭제를 할 수 있는데 1개 이하로 떨어질 수 없음.
+  if(INNER_TUI_GRID_INSTANCE.getData().length === 1) {
+    if(document.getElementById("myModalTitle").textContent === "출고 등록") {
+      INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+    } else {
+      alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
+    }    
+  } else {
+    INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+  }
 }
 
 // 콤마제거
@@ -652,7 +683,7 @@ async function detailForm(oddId) {
     incrementOddStsForm(oddId);
   });
 
-  console.log(oddId);
+  
 
   newBtn2.textContent = "반려";
   newBtn2.addEventListener("click", () => {
@@ -662,11 +693,36 @@ async function detailForm(oddId) {
   // oddId로 백엔드에 전달해서 상세 조회
   const response = await fetch(`/SOLEX/shipments/${oddId}`);
   const data = await response.json();
-  console.log(data);
+  
   populateModalWithData(data);
 
-  
+
+
+  // 입력창들을 변경못하게 disabled
+  enableForm(true);
 }
+
+// 활성화 펑션 매개변수를 받아서 활성화
+function enableForm(disabled) {
+  // disabled가 true면 disabled, false면 enabled
+  document.getElementById('pay_type').disabled = disabled;
+  document.getElementById('ord_pay').disabled = disabled;
+  document.getElementById('ord_end_date').disabled = disabled;
+  document.getElementById('ord_pay_date').disabled = disabled;
+  document.getElementById('cli_pc').disabled = disabled;
+  document.getElementById('cli_add').disabled = disabled;
+  document.getElementById('cli_da').disabled = disabled;
+  document.getElementById('client-search-input').disabled = disabled;
+  document.getElementById('selected_client_id').disabled = disabled;
+  document.getElementById('product-search-input').disabled = disabled;
+  document.getElementById('selected_product_id').disabled = disabled;
+  document.getElementById('findPostCodeBtn').disabled = disabled;
+  document.getElementById('addSelectedStockBtn').disabled = disabled;
+  document.getElementById('resetBtn').disabled = disabled;
+}
+
+
+
 // 승인 모달 열기
 async function openApproveModal(oddId) {
   document.getElementById("myModalTitle").textContent = '출고 승인';
@@ -691,33 +747,34 @@ async function openInspectionModal(oddId) {
 
 
 function populateModalWithData(data) {
-  document.getElementById('pay_type').value = data.PAY_TYPE || '';
-  document.getElementById('ord_pay').value = formatWithComma(String(data.ORD_PAY || ''));
-  document.getElementById('ord_end_date').value = data.ORD_END_DATE;
-  document.getElementById('ord_pay_date').value = data.ORD_PAY_DATE;
-  document.getElementById('cli_pc').value = data.ORD_PC || '';
-  document.getElementById('cli_add').value = data.ORD_ADD || '';
-  document.getElementById('cli_da').value = data.ORD_DA || '';
-  if (data.CLI_ID && data.CLI_NM) {
-      document.getElementById('client-search-input').value = data.CLI_NM;
-      document.getElementById('selected_client_id').value = data.CLI_ID;
+  const orderData = data[0];
+  document.getElementById('pay_type').value = orderData.PAY_TYPE || '';
+  document.getElementById('ord_pay').value = formatWithComma(String(orderData.ORD_PAY || ''));
+  document.getElementById('ord_end_date').value = orderData.ORD_END_DATE;
+  document.getElementById('ord_pay_date').value = orderData.ORD_PAY_DATE;
+  document.getElementById('cli_pc').value = orderData.ORD_PC || '';
+  document.getElementById('cli_add').value = orderData.ORD_ADD || '';
+  document.getElementById('cli_da').value = orderData.ORD_DA || '';
+  if (orderData.CLI_ID && orderData.CLI_NM) {
+      document.getElementById('client-search-input').value = orderData.CLI_NM;
+      document.getElementById('selected_client_id').value = orderData.CLI_ID;
   }
-  if (data.PRD_ID && data.PRD_NM) {
-      document.getElementById('product-search-input').value = data.PRD_NM;
-      document.getElementById('selected_product_id').value = data.PRD_ID;
-  }
-    const transformedItems = {
-      productName: data.PRD_NM, 
-      productCode: data.PRODUCT_CODE || '',
-      colorName: data.COLOR_NAME, 
-      sizeName: data.SIZE_NAME, 
-      heightName: data.HEIGHT_NAME, 
-      colorCode: data.COLOR_CODE, 
-      sizeCode: data.SIZE_CODE, 
-      heightCode: data.HEIGHT_CODE,
-      quantity: data.QUANTITY
+
+  // 이게 여러 행이 될 수도 있어서 foreach로
+  const transformedItems = data.map(item => {
+    return {
+      productName: item.PRD_NM, 
+      productCode: item.PRODUCT_CODE || '',
+      colorName: item.COLOR_NAME, 
+      sizeName: item.SIZE_NAME, 
+      heightName: item.HEIGHT_NAME, 
+      colorCode: item.COLOR_CODE, 
+      sizeCode: item.SIZE_CODE, 
+      heightCode: item.HEIGHT_CODE,
+      quantity: item.QUANTITY
     };
-    INNER_TUI_GRID_INSTANCE.resetData([transformedItems]);
+  });
+  INNER_TUI_GRID_INSTANCE.resetData(transformedItems);
 }
 
 async function incrementOddStsForm(oddId) {
@@ -730,7 +787,7 @@ async function incrementOddStsForm(oddId) {
       headers: { 'Content-Type': 'application/json' },
     });
     const result = await response.json();
-    console.log(result);
+    
     if (!response.ok) {
       throw new Error(result.message || '서버 처리 중 오류가 발생했습니다.');
     }

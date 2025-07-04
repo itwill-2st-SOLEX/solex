@@ -57,10 +57,11 @@ public class ShipmentsRestController {
     }
 	
 	@GetMapping("{odd_id}") // 
-	public Map<String, Object> getOrderDetail(@PathVariable("odd_id") int odd_id) throws Exception {
-		Map<String, Object> orderData = shipmentsService.getOrderDetail(odd_id);
+	public List<Map<String, Object>> getOrderDetail(@PathVariable("odd_id") int odd_id) throws Exception {
+		List<Map<String, Object>> orderData = shipmentsService.getOrderDetail(odd_id);
 		return orderData;
 	}
+
     @PatchMapping("{odd_id}")
     public ResponseEntity<Map<String, String>> approveForm(@PathVariable("odd_id") int odd_id) {
         try {

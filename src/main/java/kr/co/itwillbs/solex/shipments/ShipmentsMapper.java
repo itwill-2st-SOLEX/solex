@@ -22,7 +22,7 @@ public interface ShipmentsMapper {
 
 	int incrementOddSts(int odd_id);
 
-	Map<String, Object> selectOrderDetailById(int odd_id);
+	List<Map<String, Object>> selectOrderDetailById(int odd_id);
 	
 	
 	

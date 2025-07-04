@@ -26,8 +26,8 @@ public class ShipmentsService {
 	
 	
 	@Transactional(readOnly = true)
-	public Map<String, Object> getOrderDetail(int ord_id) {
-		Map<String, Object> orderData = shipmentsMapper.selectOrderDetailById(ord_id);
+	public List<Map<String, Object>> getOrderDetail(int ord_id) {
+		List<Map<String, Object>> orderData = shipmentsMapper.selectOrderDetailById(ord_id);
 		return orderData;
 	}
     

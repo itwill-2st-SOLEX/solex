@@ -112,7 +112,7 @@
 				#{item.quantity},
 				#{item.odd_sts},
 				SYSDATE + 9/24,
-				'y'
+				'n'
 			FROM DUAL
 		</foreach>
 	</insert>
@@ -123,7 +123,8 @@
 		UPDATE suju_order_detail 
 		SET odd_sts = 'odd_sts_' ||
               			LPAD(TO_CHAR(TO_NUMBER(REGEXP_SUBSTR(odd_sts, '\d+')) + 1), 2, '0'),
-			odd_mod_date = SYSDATE + 9/24
+			odd_mod_date = SYSDATE + 9/24,
+			odd_isapproval = 'y'
 		WHERE odd_id = #{odd_id}
 	</update>
 
