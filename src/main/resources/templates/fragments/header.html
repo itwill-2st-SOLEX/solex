@@ -138,6 +138,9 @@
 			// 2️⃣ 매핑 함수: 코드가 없거나 매핑이 안 돼 있으면 원본 그대로 리턴
 			const labelOf = (codeKey, codeValue) => CODE_LABEL[codeKey]?.[codeValue] ?? codeValue;
 			
+			// 기본 이미지 경로
+			const defaultImg = '/assets/img/emp/simple_person_pic.jpg';
+			
 			const {
 			 	empNm      = '',
 			 	empPc      = '',
@@ -151,9 +154,11 @@
 			    EMPPOSCD   = '',
 			    EMPCATCD   = '',
 			    EMPDEPCD   = '',
-			    EMPTEAMCD   = ''
+			    EMPTEAMCD  = '',
+			    empImg: empImgUrl = ''
 			} = empData;
-				  
+			
+			
 			// 핸드폰·이메일 분리(필요하면)
 			const [hp1 = '', hp2 = '', hp3 = ''] = empPhone.split('-');
 			const [em1 = '', em2 = '']           = empEmail.split('@');	  
@@ -165,7 +170,7 @@
 				  <div class="col-3">
 				    <label>사진</label>
 				    <img id="emp_img_preview" alt="사진 미리보기"
-				    	src="/SOLEX/assets/img/emp/simple_person_pic.jpg"
+				    	src="${empImgUrl ? empImgUrl : defaultImg}" //이미지 없을땐 기본이미지, 외에는 지가 설정한 이미지 
 				         style="width:173px; height:208px; border-radius:4px; object-fit:cover; display:block; margin-bottom:10px;" />
 				    <input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
 				  </div>
@@ -252,13 +257,33 @@
 
 		<div class="modal-footer">
 			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-			<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
+			<button type="submit" class="btn custom-btn-blue btn-success" id="modifyBtn">등록</button>
 		</div>
 		`;
 			modalBody.appendChild(form); // 최종 폼 삽입
 				
 			modal.show();
 		
+			// 사진 파일 선택 → 미리보기
+			const imgInput   = document.getElementById('emp_img');
+			const imgPreview = document.getElementById('emp_img_preview');
+
+		
+			
+			imgInput.addEventListener('change', e => {
+			  const file = e.target.files[0];
+			  if (!file) {                      // 선택 취소한 경우
+			    imgPreview.style.display = 'none';
+			    imgPreview.src = defaultImg;
+			    return;
+			  }
+			  const reader = new FileReader();
+			  reader.onload = evt => {
+			    imgPreview.src = evt.target.result;   // 선택한 이미지 표시
+			  };
+			  reader.readAsDataURL(file);             // 이미지 파일 → base64 읽기
+			});
+			
 		    // 수정 버튼
 		    modalBody.querySelector('#modifyBtn').onclick = async () => {
 				/* 1️⃣ 먼저 병합해서 input value를 갱신 */
@@ -279,6 +304,8 @@
 				const form = document.getElementById('mypageForm');
 				const formData = new FormData(form);
 	
+				const fileObj = formData.get('emp_img');
+				
 				/* 3️⃣ payload를 만들 때는 formData 또는 직접 변수 사용  */
 				const payload = {
 				    emp_nm   : formData.get('emp_nm'),
@@ -290,46 +317,29 @@
 		  		};
 	
 				console.log('payload', payload);  // 모든 값이 채워졌는지 확인
+				const fd = new FormData();
+	          
+
+			    fd.append(
+						  'emp',
+						  new Blob([JSON.stringify(payload)], { type: 'application/json' })
+						 );
+			    
+			    // 4-2) 파일이 선택돼 있으면 ‘emp_img’ 파트로 첨부
+			    if (fileObj && fileObj.size > 0) {
+			      fd.append('emp_img', fileObj); // fileObj를 emp_img라는 이름으로 넣는다
+			    }
 				
-				try {
-		            const response = await fetch('/SOLEX/mypage/personalDataModify', {
-				    	method : 'PUT',
-				   		headers: { 'Content-Type': 'application/json' },
-				    	body   : JSON.stringify(payload)
-					});
-
-		            alert(`수정 완료`);
-		            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-		            modalInstance.hide();
-		        } catch (error) {
-		            alert('수정 실패');
-		        }	
-	  	
+	            const response = await fetch('/SOLEX/mypage/personalDataModify', {
+			    	method : 'PUT',
+			    	body   : fd
+				});
+	            
+	            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+	            alert('수정 완료');
+	            modalInstance.hide();
 			}
-		    
 		}
-// 			// 사진 파일 선택 → 미리보기
-// 		const imgInput   = document.getElementById('emp_img');
-// 		const imgPreview = document.getElementById('emp_img_preview');
-
-		
-// 		// 기본 이미지 경로
-// 		const defaultImg = '/assets/img/emp/simple_person_pic.jpg';
-		
-// 		imgInput.addEventListener('change', e => {
-// 		  const file = e.target.files[0];
-// 		  if (!file) {                      // 선택 취소한 경우
-// 		    imgPreview.style.display = 'none';
-// 		    imgPreview.src = defaultImg;
-// 		    return;
-// 		  }
-
-// 		  const reader = new FileReader();
-// 		  reader.onload = evt => {
-// 		    imgPreview.src = evt.target.result;   // 선택한 이미지 표시
-// 		  };
-// 		  reader.readAsDataURL(file);             // 이미지 파일 → base64 읽기
-// 		});
 		
 		function sample6_execDaumPostcode() {	
 		    new daum.Postcode({

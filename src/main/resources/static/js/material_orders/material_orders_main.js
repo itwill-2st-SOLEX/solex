@@ -146,12 +146,14 @@ $(function() {
 		  }
 		  if (btn.name === 'deny') {
 			try {
+				
 		      const res = await fetch('/SOLEX/material_orders/materialDeny', {
 		        method : 'POST',
 		        headers: { 'Content-Type': 'application/json' },
 		        body   : JSON.stringify({ mat_ord_id: rowData.matOrdId })  // 필요한 키만 전송
 		      });
 
+			  
 			  if (!res.ok) {
 				  const msg = await res.text();
 				  alert('반려 실패: ' + msg);
@@ -340,34 +342,46 @@ $(function() {
 					const whsIdValue = document.getElementById('whsId').value; // 창고 id - ok
 					
 					console.log('areIdValue = ', areIdValue , 'whsHisCntVal = ', whsHisCntVal, 'matIdValue = ', matIdValue );
+					console.log("rowkey : " + rowKey);
+					console.log("rowdata : " + rowData);
+//					debugger;
 					
-				    const res = await fetch('/SOLEX/material_orders/materialApprove', {
-				        method : 'POST',
-				        headers: {'Content-Type':'application/json'},
-				        body   : JSON.stringify({
-							 mat_ord_id: rowData.matOrdId,
-							 mat_id: matIdValue,
-							 are_id: areIdValue,
-							 whs_his_cnt: whsHisCntVal,
-							 whs_id: whsIdValue
-						  })
-				     });
-				  
+
+					// ==========================================
+					try {
+					    const res = await fetch('/SOLEX/material_orders/materialApprove', {
+					        method : 'POST',
+					        headers: {'Content-Type':'application/json'},
+					        body   : JSON.stringify({
+								 mat_ord_id: rowData.matOrdId,
+								 mat_id: matIdValue,
+								 are_id: areIdValue,
+								 whs_his_cnt: whsHisCntVal,
+								 whs_id: whsIdValue
+							  })
+							 
+					     });
+						 
+						 alert(res.ok);
+					} catch(e) {
+						alert("에러 : " + e);
+					}
+
 			      if (res.ok) {
 			        alert('승인 완료');
 			        modal.hide();
 
 					//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
 					grid.setValue(rowKey, 'mat_ok', '승인');
-					
 					grid.refreshCell(rowKey, 'mat_ok');
 					
 			      } else{
 					console.log('error = ' , await res.text());
 					alert('승인 실패');
 				  } 
-				    };
-				  }
+			    };
+			  }
+			  
 			  modal.show();
 										
 									

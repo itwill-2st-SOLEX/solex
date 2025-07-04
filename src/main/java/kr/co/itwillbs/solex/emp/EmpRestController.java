@@ -34,7 +34,7 @@ public class EmpRestController {
 	
 	// 인사등록
 	@PostMapping("")
-	public void registerEmployee(@RequestPart("emp") Map<String, Object> empMap, @RequestPart("emp_img") MultipartFile file,   HttpServletRequest request) throws IOException {
+	public void registerEmployee(@RequestPart("emp") Map<String, Object> empMap, @RequestPart("emp_img") MultipartFile file,HttpServletRequest request) throws IOException {
 		
 		//사진등록을 위한 코드
 		 // ① 파일 저장 경로

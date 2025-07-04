@@ -34,12 +34,13 @@
 	<update id="personalDataModify">
 		UPDATE employee
 		SET 
+		emp_img = #{emp_img, jdbcType=VARCHAR},
 		emp_nm = #{emp_nm},
 		emp_phone = #{emp_phone},
 		emp_email = #{emp_email},
 		emp_pc = #{emp_pc},
 		emp_add = #{emp_add},
 		emp_da = #{emp_da}
-		WHERE e.emp_id = #{emp_id}
+		WHERE emp_id = #{empId}
 	</update>
 </mapper>

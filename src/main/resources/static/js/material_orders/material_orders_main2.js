@@ -349,14 +349,14 @@ $(function() {
 							 whs_id: whsIdValue
 						  })
 				     });
-				  
+					 const text = await res.text();  // JSON이 아닐 수도 있음
+					 console.log('응답 내용:', text);
 			      if (res.ok) {
 			        alert('승인 완료');
 			        modal.hide();
 
 					//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
 					grid.setValue(rowKey, 'mat_ok', '승인');
-					
 					grid.refreshCell(rowKey, 'mat_ok');
 					
 			      } else{
