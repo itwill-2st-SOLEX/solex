@@ -182,9 +182,9 @@
 	    SELECT COUNT(*)
 	      FROM PRODUCT_OPTION
 	     WHERE prd_id = #{prd_id}
-	       AND opt_color = #{opt_color}
-	       AND opt_size = #{opt_size}
-	       AND opt_height = #{opt_height}
+	       AND opt_color = #{opt_color, jdbcType=VARCHAR}
+	       AND opt_size = #{opt_size, jdbcType=VARCHAR}
+	       AND opt_height = #{opt_height, jdbcType=VARCHAR}
 	</select>
 	
 	

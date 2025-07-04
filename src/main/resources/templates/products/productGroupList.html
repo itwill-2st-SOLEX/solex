@@ -62,11 +62,14 @@
 									                    <label for="prd_type" class="form-label">제품 유형<span style="color:red">*</span></label>
 														<br>
 														<select id="prdTypeSelect" class="form-select"></select>
+														<input type="text" id="prdTypeDisplay" class="form-control" readonly style="display: none;"><!-- ✅ 수정용 -->
+														
 									                </div>
 									                <div class="col">
 										            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
 														<br>
 														<select id="prdUnitSelect" class="form-select"></select>
+														<input type="text" id="prdUnitDisplay" class="form-control" readonly style="display: none;"><!-- ✅ 수정용 -->
 										            </div>
 										        </div>
 								                <div class="row mb-4">
@@ -133,27 +136,27 @@
 												            <p class="text-muted mt-2"></p>
 												        </div>
 												        <div class="tab-pane fade" id="allOptionsContent" role="tabpanel" aria-labelledby="all-options-tab">
-												        	<div class="tab-pane fade show active" id="myOptionsPanel" role="tabpanel" aria-labelledby="myOptionsTab">
+<!-- 												        	<div class="tab-pane fade show active" id="myOptionsPanel" role="tabpanel" aria-labelledby="myOptionsTab"> -->
 														        <div class="row mb-3">
 														            <div class="col-md-4">
-														                <label for="colorMultiSelect" class="form-label">컬러 선택</label>
+<!-- 														                <label for="colorMultiSelect" class="form-label">컬러 선택</label> -->
 														                <select id="colorMultiSelect" class="selectpicker w-100" multiple data-live-search="true" data-actions-box="true" title="컬러 선택"></select>
 														            </div>
 														            <div class="col-md-4">
-														                <label for="sizeMultiSelect" class="form-label">사이즈 선택</label>
+<!-- 														                <label for="sizeMultiSelect" class="form-label">사이즈 선택</label> -->
 														                <select id="sizeMultiSelect" class="selectpicker w-100" multiple data-live-search="true" data-actions-box="true" title="사이즈 선택"></select>
 														            </div>
 														            <div class="col-md-4">
-														                <label for="heightMultiSelect" class="form-label">굽 선택</label>
+<!-- 														                <label for="heightMultiSelect" class="form-label">굽 선택</label> -->
 														                <select id="heightMultiSelect" class="selectpicker w-100" multiple data-live-search="true" data-actions-box="true" title="굽 선택">
 														                </select>
 														            </div>
 														        </div>
 														
-														        <div id="selectedCombinationsDisplay" class="mt-4 p-3 border rounded" style="min-height: 100px;">
-														            <p class="text-muted">선택된 컬러/사이즈/굽 조합에 따라 제품 옵션이 생성됩니다.</p>
-														        </div>
-														    </div>
+<!-- 														        <div id="selectedCombinationsDisplay" class="mt-4 p-3 border rounded" style="min-height: 100px;"> -->
+<!-- 														            <p class="text-muted">선택된 컬러/사이즈/굽 조합에 따라 제품 옵션이 생성됩니다.</p> -->
+<!-- 														        </div> -->
+<!-- 														    </div> id=myOptionsPanel -->
 												        </div>
 												    </div>
 												

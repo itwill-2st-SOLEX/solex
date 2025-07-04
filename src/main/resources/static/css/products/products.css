@@ -95,7 +95,7 @@
 
 /* 공정순서 시작 */
 #prd_process {
-    height: 150px; /* Adjust the height as needed */
+    height: 120px; /* Adjust the height as needed */
     overflow-y: auto;
 }
 /* 공정순서 끝 */
@@ -154,4 +154,8 @@
 .dropdown-menu.show {
   z-index: 9999 !important;
   display: block !important;
+}
+.dropdown-menu.inner {
+  max-height: 200px;
+  overflow-y: auto;
 }
