@@ -7,7 +7,6 @@ $(function() {
 		bodyHeight: 580,
 		scrollY: true,
 		data: [],
-		rowHeaders: ['checkbox'],
 		header: {
 			height: 80,
 			complexColumns: [
@@ -22,7 +21,20 @@ $(function() {
 			{ header: '주문 상세 번호', name: 'odd_id', align: 'center' },
 			{ header: '제품코드', name: 'prd_code', align: 'center', filter: 'select' },
 			{ header: '제품명', name: 'prd_nm', align: 'center', filter: 'select' },
-			{ header: '진행현황', name: 'odd_sts', align: 'center', sortable: 'true', className: 'clickable-cell' },
+			{
+				header: '진행현황',
+				name: 'odd_sts',
+				align: 'center',
+				sortable: 'true',
+				className: 'clickable-cell',
+				renderer: {
+					styles: {
+						color: '#007BFF',
+						textDecoration: 'underline',
+						cursor: 'pointer'
+					}
+				}
+			},
 			{ header: '목표생산수량', name: 'odd_cnt', align: 'center', filter: 'select' },
 			{ header: '실제생산수량', name: 'odd_actual_cnt', align: 'center', filter: 'select' },
 			{ header: '제품컬러', name: 'prd_color', align: 'center', filter: 'select' },
@@ -414,7 +426,7 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 			const modalEl = document.getElementById('AssignWarehouseModal');
 			const modal = bootstrap.Modal.getInstance(modalEl);
 			modal.hide();
-			
+
 			window.location.reload();
 		},
 		error: function(xhr, status, error) {
