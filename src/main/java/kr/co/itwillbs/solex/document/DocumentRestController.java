@@ -38,21 +38,19 @@ public class DocumentRestController {
 	// 로그인한 사원정보 들고오기
 	@GetMapping("/employee/info")
 	public Map<String, Object> empInfo(HttpSession session) {
-//		[TODO] 로그인 만들어지면 넘겨주기
-//		session.getAttribute("emp_id");
-		int emp_id = 35;
+		String empIdStr = (String) session.getAttribute("empId");
+		Integer emp_id = Integer.valueOf(empIdStr);
 		return service.getEmpInfo(emp_id);
 	}
 	
 	// 기안서 등록
 	@PostMapping("register/drafts")
-	public void registerDarafts(@RequestBody Map<String, Object> map) {
-//		[TODO] 로그인 만들어지면 넘겨주기
-//		session.getAttribute("emp_id");
+	public void registerDarafts(@RequestBody Map<String, Object> map,
+								HttpSession session) {
+		String empIdStr = (String) session.getAttribute("empId");
+		Integer emp_id = Integer.valueOf(empIdStr);
 		
-// 		로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	long loginEmpId = 35L;
-		service.registerDarafts(map, loginEmpId);
+		service.registerDarafts(map, emp_id);
 	}
 	
 	// 기안서 상세조회 

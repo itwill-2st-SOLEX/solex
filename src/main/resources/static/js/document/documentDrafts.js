@@ -8,10 +8,21 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '기안서 번호', name: 'doc_id', align : 'center' },
-			{ header: '기안서 종류', name: 'doc_type',align : 'center', sortable: 'true' },
-			{ header: '결재상태', name: 'doc_sts', sortable: 'true',align : 'center' },
-			{ header: '등록일', name: 'doc_reg_time', align : 'center' }
+			{
+				header: '기안서 번호',
+				name: 'doc_id',
+				align: 'center',
+				renderer: {
+					styles: {
+						color: '#007BFF',
+						textDecoration: 'underline',
+						cursor: 'pointer'
+					}
+				}
+			},
+			{ header: '기안서 종류', name: 'doc_type', align: 'center', sortable: 'true' },
+			{ header: '결재상태', name: 'doc_sts', sortable: 'true', align: 'center' },
+			{ header: '등록일', name: 'doc_reg_time', align: 'center' }
 		]
 	});
 
@@ -363,8 +374,8 @@ $(function() {
 			const bodyLabel = document.createElement("td");
 			bodyLabel.innerText = "결재";
 			rowEl.appendChild(bodyLabel);
-//			const returnReason = data.APL_RREMARK || "";
-			
+			//			const returnReason = data.APL_RREMARK || "";
+
 			// 반려 사유 textarea 추가
 			if (data.APL_STS && data.APL_STS.includes("반려") && data.APL_RREMARK) {
 				const form = document.querySelector("#detailModal .modal-body");

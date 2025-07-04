@@ -44,7 +44,7 @@ public class DocumentService {
 	
 	// 기안서 등록
 	@Transactional
-	public void registerDarafts(Map<String, Object> map, long loginEmpId) {
+	public void registerDarafts(Map<String, Object> map, int loginEmpId) {
 		map.put("emp_id", loginEmpId);
 		map.put("doc_reg_time", LocalDateTime.now());
 		
