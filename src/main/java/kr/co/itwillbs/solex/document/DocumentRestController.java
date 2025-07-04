@@ -44,7 +44,7 @@ public class DocumentRestController {
 	}
 	
 	// 기안서 등록
-	@PostMapping("register/drafts")
+	@PostMapping("/drafts")
 	public void registerDarafts(@RequestBody Map<String, Object> map,
 								HttpSession session) {
 		String empIdStr = (String) session.getAttribute("empId");
