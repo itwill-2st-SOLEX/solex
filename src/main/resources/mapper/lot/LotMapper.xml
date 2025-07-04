@@ -160,7 +160,6 @@
 		    ON sod.odd_id = wo.odd_id
 		JOIN work_process wp
 		    ON wp.wrk_id = wo.wrk_id
-		   AND wp.wpo_status = pl.prc_lot_status
 		   AND wpo_step = (
 		       SELECT MAX(wp1.wpo_step)
 		       FROM work_process wp1
@@ -423,6 +422,14 @@
 	          ON wp.wrk_id = wo.wrk_id
 	        WHERE wp.wpo_id = #{wpoId}
 	    )
+	</update>
+	
+	<!-- 창고 배정 시 제품LOT 상태값 변경 -->
+	<!-- 1. 제품 LOT 상태를 완료(lot_status_03)로 변경 -->
+	<update id="updatePrdLotStatusToComplete" parameterType="int">
+	    UPDATE product_lot
+	    SET prd_lot_status = 'lot_status_03' -- ✅ 완료 상태로 변경
+	    WHERE odd_id = #{oddId}
 	</update>
     
 </mapper>

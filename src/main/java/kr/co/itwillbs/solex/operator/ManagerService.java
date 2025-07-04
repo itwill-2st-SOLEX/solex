@@ -167,6 +167,7 @@ public class ManagerService {
 					//수주 테이블에 업데이트				
 					stepInfo.put("wpoId", stepInfo.get("WPO_ID"));
 					stepInfo.put("oddModDate", LocalDateTime.now());	//변경일
+					stepInfo.put("empID", Long.parseLong(map.get("empId").toString()));
 					
 					//수주 디테일에 작업완료로 상태 변경, 불량개수/생산량 업데이트
 					managerMapper.updateSujuDetail(stepInfo);	

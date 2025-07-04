@@ -64,6 +64,9 @@ public interface LotMapper {
 	boolean isFirstProcess(Long wpoId);
 	// 2. 최상위 LOT 상태를 '진행중(lot_status_02)'으로 변경
 	void updatePrdLotStatusToInProgress(Long wpoId);
+	// ---------------- 창고 배정 시 제품LOT 상태값 변경 ----------------
+	// 1. 제품 LOT 상태를 완료(lot_status_03)로 변경
+	void updatePrdLotStatusToComplete(Integer oddId);
 
 
 }

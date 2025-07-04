@@ -69,5 +69,7 @@ public class WorkOrderService {
 		mapper.sujuDetailUpdate(prdInfo);
 		// 6. 수주 히스토리 테이블 인서트
 		mapper.sujuInserthistory(prdInfo, empId);
+		// ✅ 7. 제품LOT 상태값 '완료(lot_status_03)'로 변경
+	    lotService.updatePrdLotStatusToComplete((Integer) prdInfo.get("oddId"));
 	}
 }

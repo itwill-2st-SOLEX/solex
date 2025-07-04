@@ -214,4 +214,10 @@ public class LotService {
 	    }
 	}
 
+	// ---------------- 창고 배정 시 제품LOT 상태값 변경 ----------------
+	public void updatePrdLotStatusToComplete(Integer oddId) {
+		// 1. 제품 LOT 상태를 완료(lot_status_03)로 변경
+	    lotMapper.updatePrdLotStatusToComplete(oddId);
+	}
+
 }

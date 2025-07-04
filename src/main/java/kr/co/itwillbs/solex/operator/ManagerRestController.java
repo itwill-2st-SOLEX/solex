@@ -35,7 +35,7 @@ public class ManagerRestController {
 	
 	//로그인 구현 필요
 	// 26->29->23->75->85->88
-	Long empId = 26L;
+	Long empId = 100L;
 
 
     ManagerRestController(OrderController orderController, DocumentController documentController, OrderRequestsService orderRequestsService) {
