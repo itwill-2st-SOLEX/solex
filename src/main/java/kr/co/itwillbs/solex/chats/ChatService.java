@@ -59,12 +59,8 @@ public class ChatService {
 		String room_id1 = "room_" + empId + "_" + partnerId;
 		String room_id2 = "room_" + partnerId + "_" + empId;
 
-		System.out.println("room_id1: " + room_id1);
-		System.out.println("room_id2: " + room_id2);
-
 		// 현재 상태 조회
 		int currentStatus = mapper.getChatRoomStatus(room_id1, room_id2);
-		System.out.println("currentStatus: " + currentStatus);
 
 		if (currentStatus == 0) {
 			// 한 명 나감 처리

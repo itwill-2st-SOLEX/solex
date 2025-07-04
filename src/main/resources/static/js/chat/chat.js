@@ -242,7 +242,6 @@ function connectAllChatRooms() {
 				roomIds.forEach(roomId => {
 					stompClient.subscribe(`/topic/chatroom/${roomId}`, function(msg) {
 						const message = JSON.parse(msg.body);
-						debugger;
 						const isMine = String(message.sender) === String(empId);
 
 						const isChatroomHidden = document.getElementById('view-chatroom').classList.contains('hidden');
@@ -266,7 +265,7 @@ function connectAllChatRooms() {
 								}),
 								success: function() {
 									console.log('읽음 처리 완료');
-
+debugger;
 									renderMessage({
 										senderName: isMine ? '나' : message.sender_nm,
 										content: message.content
@@ -276,11 +275,11 @@ function connectAllChatRooms() {
 								},
 								error: function() {
 									console.error('읽음 처리 실패');
-
+									
 									renderMessage({
 										senderName: isMine ? '나' : message.sender_nm,
 										content: message.content
-									}, isMine, false);
+									}, isMine, message.isRead);
 								}
 							});
 						} else {
@@ -289,9 +288,10 @@ function connectAllChatRooms() {
 								senderName: isMine ? '나' : message.sender_nm,
 								content: message.content
 							}, isMine, message.isRead);
-
+							debugger;
 							showChatBadge();
 							unreadCnt();
+							fetchChatList();
 						}
 					});
 				});
@@ -316,7 +316,6 @@ function sendMessage() {
 		content: content,
 		roomId: currentRoomId,
 		type: 'CHAT',
-		isRead: false 
 	};
 
 	stompClient.send('/app/chat.send', {}, JSON.stringify(message));
@@ -332,10 +331,10 @@ function renderMessage(message, isMine, isRead) {
 
 	wrapper.className = `message-wrapper ${isMine ? 'sent' : 'received'}`;
 	msgDiv.className = `message ${isMine ? 'sent' : 'received'}`;
-	readStatusDiv.className = `read-status ${isRead ? '' : 'unread'}`;
+	readStatusDiv.className = `read-status ${isRead === 'Y' ? '' : 'unread'}`;;
 
 	msgDiv.textContent = message.content;
-	readStatusDiv.textContent == 'Y' ? '' : '안읽음';
+	readStatusDiv.textContent = isRead === true ? '' : '안읽음';
 	debugger;
 
 	if (isMine) {
@@ -431,25 +430,9 @@ function unreadCnt() {
 			} else {
 				badge.classList.add('hidden');
 			}
-			// 헤더 배지 업데이트
-//			updateHezzaderBadge(count);
 		},
 		error: function() {
 			console.error('안읽은 메시지 수 불러오기 실패');
 		}
 	});
 }
-
-// 페이지 헤더에 있는 안읽은 메세지
-//function updateHeaderBadge(count) {
-//	const badge = document.getElementById('header-chat-badge');
-//	if (!badge) return;
-//
-//	if (count > 0) {
-//		badge.textContent = count;
-//		badge.classList.remove('d-none');
-//	} else {
-//		badge.classList.add('d-none');
-//	}
-//}
-//window.unreadCnt = unreadCnt;

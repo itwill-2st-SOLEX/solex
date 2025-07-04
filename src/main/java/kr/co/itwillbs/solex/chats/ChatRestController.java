@@ -67,6 +67,7 @@ public class ChatRestController {
 	    return service.getUnreadMessageCnt(empId);
 	}
 	
+	// 현재 참여중인 대화방
 	@GetMapping("/myRooms")
 	public List<String> getMyChatRooms(HttpSession session) {
 	    String empId = (String) session.getAttribute("empId");

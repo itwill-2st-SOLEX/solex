@@ -124,6 +124,7 @@
 	       AND is_read = 'N'
 	       AND leave_status != 2
 	</select>
+<!-- 	현재 참여중인 대화방  -->
 	<select id="getMyChatRooms" resultType="String">
 	    SELECT DISTINCT room_id
 	      FROM messenger
