@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import kr.co.itwillbs.solex.lot.LotService;
 import kr.co.itwillbs.solex.orderrequest.OrderRequestsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ public class ManagerService {
 	
 	@Autowired
 	ManagerMapper managerMapper;
+	
+	@Autowired
+	LotService lotService;
 
     ManagerService(OrderRequestsService orderRequestsService) {
         this.orderRequestsService = orderRequestsService;
@@ -79,6 +83,8 @@ public class ManagerService {
 				map.put("wpoStartDate", LocalDateTime.now());
 				
 				managerMapper.updateWpoSts02(map);
+				// ✅ 최초 공정이라면 LOT 상태를 '진행중'으로 변경
+				lotService.updatePrdLotStatusWhenProcessStarts(wpoId);
 				break;
 				
 			case "wpo_sts_03":

@@ -92,8 +92,8 @@ function showLotDetail(data) {
 		document.getElementById('endDate').textContent = formatDate(data.endDate);
 	} else if (type === 'process') {
 		document.getElementById('detail-process').style.display = 'block';
-		document.getElementById('processName').textContent = data.processName;
-		document.getElementById('processCode').textContent = data.processCode;
+		document.getElementById('departmentName').textContent = data.departmentName;
+		document.getElementById('teamName').textContent = data.teamName;
 		document.getElementById('operatorName').textContent = data.operatorName;
 		document.getElementById('operatorNum').textContent = data.operatorNum;
 		document.getElementById('processStatus').textContent = data.processStatus;

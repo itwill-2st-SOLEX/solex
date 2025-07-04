@@ -55,6 +55,8 @@ public class WorkOrderService {
 	// 창고 자재 등록
 	@Transactional
 	public void warehousesInsert(Map<String, Object> prdInfo, String empId) {
+		System.out.println("창고배정 클릭 시 파라미터 prdInfo : " + prdInfo + ", empId : " + empId);
+		
 		// 1. 창고 이력 insert
 		mapper.warehousesInsert(prdInfo);
 		// 2. 재고 원장 insert

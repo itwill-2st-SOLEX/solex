@@ -39,7 +39,6 @@ public class MaterialOrdersService {
 
 	// 창고 select box 가져오는 코드 
 	public List<Map<String, Object>> getWarehouse(Integer matId) {
-		System.out.println(matId);
 		return materialOrdersMapper.getWarehouse(matId);
 	}
 	
@@ -51,7 +50,6 @@ public class MaterialOrdersService {
 	
 	public List<Map<String, Object>> getMaterialOrderList(int offset, int size) {
 		List<Map<String, Object>> list = materialOrdersMapper.getMaterialOrderList(offset, size);
-		System.out.println("list = " + list);
 		return list;
 	}
 	
@@ -59,8 +57,6 @@ public class MaterialOrdersService {
 	@Transactional
 	public void materialApprove(Map<String, Object> map) {
 		
-		System.out.println("자재발주 승인 시 받는 데이터 : " + map);
-
 	    int warehistory = materialOrdersMapper.matAppWareHis(map);
 	    int areaDetail = materialOrdersMapper.matAppAreaDetail(map);
 	    int area = materialOrdersMapper.matAppArea(map);

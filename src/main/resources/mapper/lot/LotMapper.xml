@@ -140,17 +140,17 @@
     <select id="selectProcessLotDetail" parameterType="long" resultType="map">
 	    SELECT
 		    pl.prc_lot_id,
-		    prc.prc_nm AS "processName",
-		    prc.prc_code AS "processCode",
-		    pl.erp_nm AS "operatorName",
-		    pl.erp_num AS "operatorNum",
-		    wp.wpo_start_date AS "processStartDate",
-		    wp.wpo_end_date AS "processEndDate",
-		    wp.wpo_jcount AS "successCount",  -- ✅ 공정별 생산수량
-		    NVL(qh.qhi_bcount, 0) AS "failCount",  -- ✅ 공정별 불량수량
-		    e.eqp_name AS "usedEquipmentName",
-		    e.eqp_code AS "usedEquipmentCode",
-		    cd.det_nm AS "processStatus"
+		    dep_cd.det_nm AS "departmentName",     	-- 담당부서명
+		    team_cd.det_nm AS "teamName",          	-- 담당팀명
+		    pl.erp_nm AS "operatorName",           	-- 공정장 이름
+		    pl.erp_num AS "operatorNum",			-- 공정장 사번
+		    wp.wpo_start_date AS "processStartDate",-- 공정시작일
+		    wp.wpo_end_date AS "processEndDate",    -- 공정종료일
+		    wp.wpo_jcount AS "successCount",        -- 공정별 생산수량
+		    NVL(qh.qhi_bcount, 0) AS "failCount",   -- 공정별 불량수량
+		    e.eqp_name AS "usedEquipmentName",      -- 사용설비명
+		    e.eqp_code AS "usedEquipmentCode",      -- 사용설비코드
+		    cd.det_nm AS "processStatus"            -- 공정진행상태
 		FROM process_lot pl
 		JOIN product_lot pl2
 		    ON pl.prd_lot_id = pl2.prd_lot_id
@@ -160,14 +160,14 @@
 		    ON sod.odd_id = wo.odd_id
 		JOIN work_process wp
 		    ON wp.wrk_id = wo.wrk_id
-		   AND wp.wpo_status = pl.prc_lot_status -- ✅ 같은 상태
+		   AND wp.wpo_status = pl.prc_lot_status
 		   AND wpo_step = (
 		       SELECT MAX(wp1.wpo_step)
 		       FROM work_process wp1
 		       JOIN work_order wo1 ON wp1.wrk_id = wo1.wrk_id
 		       WHERE wp1.wrk_id = wo1.wrk_id
 		         AND prc_id = pl.prc_id
-		   ) -- ✅ 해당 공정ID만
+		   )
 		LEFT JOIN quality_history qh
 		    ON wp.wpo_id = qh.qhi_target_id
 		JOIN process prc
@@ -175,7 +175,14 @@
 		JOIN equipment e
 		    ON pl.eqp_id = e.eqp_id
 		JOIN code_detail cd
-    		ON wp.wpo_status = cd.det_id
+		    ON wp.wpo_status = cd.det_id
+		-- ✅ 공정장 → employee → 부서명/팀명
+		LEFT JOIN employee emp
+		    ON pl.erp_num = emp.emp_num
+		LEFT JOIN code_detail dep_cd
+		    ON emp.emp_dep_cd = dep_cd.det_id
+		LEFT JOIN code_detail team_cd
+		    ON emp.emp_team_cd = team_cd.det_id
 		WHERE pl.prc_lot_id = #{prcLotId}
 	</select>
 
@@ -242,7 +249,7 @@
 	              AND po2.opt_color = po.opt_color
 	        ), 0) + 1, 3, '0') AS "prd_lot_sort",
             SYSDATE AS "prd_lot_start_date",
-            'lot_status_02' AS "prd_lot_status"
+            'lot_status_01' AS "prd_lot_status"
         FROM suju_order_detail sod
         JOIN product_option po ON sod.opt_id = po.opt_id
         JOIN product p ON po.prd_id = p.prd_id
@@ -377,14 +384,45 @@
 	        mat_id,
 	        mat_date,
 	        mat_sort,
-	        are_id
+	        are_id,
+	        mat_cnt
 	    ) VALUES (
 	        #{mat_lot_code},
 	        #{mat_id},
 	        sysdate,
 	        #{mat_sort},
-	        #{are_id}
+	        #{are_id},
+	        #{whs_his_cnt}
 	    )
 	</insert>
+	
+	<!-- 최초 공정 시작 시 제품LOT 상태값 변경 -->
+	<!-- 1. 최초 공정인지 확인 -->
+	<select id="isFirstProcess" parameterType="long" resultType="boolean">
+	    SELECT CASE
+		           WHEN wp.wpo_step = 1
+		           THEN 1
+		           ELSE 0
+		       END AS is_first_process
+		FROM work_process wp
+		WHERE wp.wpo_id = #{wpoId}
+	</select>
+	
+	<!-- 2. 최상위 LOT 상태를 '진행중(lot_status_02)'으로 변경 -->
+	<update id="updatePrdLotStatusToInProgress" parameterType="long">
+	    UPDATE product_lot
+	    SET prd_lot_status = 'lot_status_02'
+	    WHERE prd_lot_id = (
+	        SELECT pl.prd_lot_id
+	        FROM product_lot pl
+	        JOIN suju_order_detail sod
+	          ON pl.odd_id = sod.odd_id
+	        JOIN work_order wo
+	          ON sod.odd_id = wo.odd_id
+	        JOIN work_process wp
+	          ON wp.wrk_id = wo.wrk_id
+	        WHERE wp.wpo_id = #{wpoId}
+	    )
+	</update>
     
 </mapper>

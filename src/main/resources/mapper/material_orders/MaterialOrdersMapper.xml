@@ -93,8 +93,8 @@
 	
 <!-- 	승인 버튼 누르면 update - 구역 Area -->
 	<update id="matAppArea" parameterType="map">
-		UPDATE area 
-		SET are_qty = #{whs_his_cnt}
+		UPDATE area
+		SET are_qty = are_qty + #{whs_his_cnt}
 		WHERE are_id = #{are_id}
 	</update>
 	

@@ -156,11 +156,9 @@ public class LotService {
         // 3. insert 이후 prd_lot_id 조회
         Long prdLotId = lotMapper.selectPrdLotId(lotInfo);
         if (prdLotId == null) return;
-        System.out.println("prdLotId : " + prdLotId);
 
         // 4. 작업지시 리스트 조회
         List<Map<String, Object>> workOrders = lotMapper.selectWorkOrdersByOddId(oddId);
-        System.out.println("workOrders : " + workOrders);
 
         for (Map<String, Object> wrk : workOrders) {
             wrk.put("prdLotId", prdLotId);
@@ -198,9 +196,22 @@ public class LotService {
 
         map.put("mat_lot_code", matLotCode);
         map.put("mat_sort", sort);
+        
+        System.out.println("map : " + map);
 
         // 3. material_lot insert
         lotMapper.insertMaterialLot(map);
     }
+
+    // ---------------- 최초 공정 시작 시 제품LOT 상태값 변경 ----------------
+	public void updatePrdLotStatusWhenProcessStarts(Long wpoId) {
+		// 1. 최초 공정인지 확인
+	    boolean isFirstProcess = lotMapper.isFirstProcess(wpoId);
+
+	    if (isFirstProcess) {
+	        // 2. 최상위 LOT 상태를 '진행중(lot_status_02)'으로 변경
+	        lotMapper.updatePrdLotStatusToInProgress(wpoId);
+	    }
+	}
 
 }
