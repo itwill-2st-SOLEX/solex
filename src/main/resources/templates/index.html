@@ -26,8 +26,13 @@
 	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/utc.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/locale/ko.js"></script> 
 	
+	<link rel="stylesheet" th:href="@{/css/document/documentDrafts.css}" />
 	<link rel="stylesheet" th:href="@{/css/main/style.css}" />
 
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+	<script th:src="@{/js/notice/notice.js}"></script>
+<!-- 	<script th:src="@{/js/document/documentDrafts.js}"></script> -->
 	<script th:src="@{/js/main/script.js}"></script>
 	
 	
@@ -64,12 +69,37 @@
 			      <!-- 결재·즐겨찾기 세로 스택 -->
 			      <div class="box2Side d-flex flex-column gap-3" style="width:28%;">
 					<section class="panel notice flex-grow-1">
-							        <h5 class="panel-title">📢 최근 공지</h5>
-							        <ul id="noticeList" class="panel-list"> li 동적 삽입 </ul>
-							      </section>
-			        <section class="panel approval flex-fill">
+				        <h5 class="panel-title">📢 최근 공지</h5>
+					  <span class="text-more mt-1">
+					      <a th:href="@{/notice}" class="small">+ 더보기</a>
+					  </span>
+				        <ul id="noticeList" class="panel-list">
+						  <!-- 3건 반복 -->
+						  <li th:each="n : ${mainNotices}" class="d-flex justify-content-between notice-item" th:attr="data-id=${n['NOT_ID']}">
+						       <a href="#" class="notice-link" th:text="${n['NOT_TT']}"></a>
+						      <span th:text="${#dates.format(n['NOT_REG_DATE'], 'yyyy-MM-dd')}" class="text-muted small"></span>
+						  </li>
+						</ul>
+				      </section>
+			        <section class="panel approval flex-grow-1">
 			          <h5 class="panel-title">📝 결재 목록</h5>
-			          <ul id="approvalList" class="panel-list"><!-- li 동적 삽입 --></ul>
+			          <span class="text-more mt-1">
+					      <a th:href="@{/approval/drafts}" class="small">+ 더보기</a>
+					  </span>
+			          <ul id="approvalList" class="panel-list">
+			          		<!-- 3건 반복 -->
+						  <li th:each="doc : ${mainDocs}" class="d-flex justify-content-between document-item" th:attr="data-id=${doc.DOC_ID},data-type=${doc.DOC_TYPE_CODE}">
+						       <span class="status" th:text="${doc.DOC_STS}" 
+						       		  th:classappend="${doc.DOC_STS == '결재'} ? ' wait' :
+											         (${doc.DOC_STS == '승인'} ? ' approved' :
+											         (${doc.DOC_STS == '반려'} ? ' rejected' : ''))"></span>
+ 
+						       		<a href="#" class="document-link" th:text="${doc.DOC_TYPE}"></a>
+
+							   <span th:text="${doc.DOC_REG_TIME}" class="text-muted small"></span>
+							   
+						  </li>
+			          </ul>
 			        </section>
 			
 			        <section class="panel favorites flex-fill">
@@ -81,10 +111,54 @@
 			
 			  </div><!-- /custom-content -->
 			</div><!-- /custom-body -->
-		
+			
+			<!-- Modal -->
+			<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
+			  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">공지사항</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			      </div>
+				  <!-- 모달 내용 표시 -->
+			      <div class="modal-body big-box" id="showModal"></div>
+				  <!-- 모달 버튼 표시 -->
+			      <div class="modal-footer" id="modalFooter"> </div>
+			  </div>
+			</div>
+			</div>
+			
+			<!-- 상세 모달 -->
+			<div class="modal fade" id="detailModal" tabindex="-1"
+				aria-labelledby="detailModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h2 class="modal-title" id="detailModalLabel">기안서 상세조회</h2>
+						</div>
+						<div class="approval-line">
+							<table class="approval-table ms-auto">
+								<thead>
+									<tr></tr>
+									<!-- JS가 여기에 <th>를 동적으로 추가함 -->
+								</thead>
+								<tbody>
+									<tr></tr>
+									<!-- JS가 여기에 <td>를 동적으로 추가함 -->
+								</tbody>
+							</table>
+						</div>
+						<!-- 					상세조회 js에서 채움 -->
+						<div class="modal-body"></div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+								data-bs-dismiss="modal">닫기</button>
+						</div>
+					</div>
+				</div>
+			</div>
 	</th:block>
-	
-	
+
 	
 </body>
 </html>

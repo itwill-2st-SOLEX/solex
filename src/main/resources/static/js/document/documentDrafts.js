@@ -407,6 +407,8 @@ $(function() {
 			alert("상세 조회에 실패했습니다.");
 		}
 	}
+	
+	window.openDetailModal = openDetailModal;
 });
 //로그인한 사원정보 넣어주기
 function fillEmployeeInfo() {
@@ -439,3 +441,5 @@ function onDateRangeChange() {
 	document.getElementById('startDate').value = startDate || '';
 	document.getElementById('endDate').value = endDate || '';
 }
+
+

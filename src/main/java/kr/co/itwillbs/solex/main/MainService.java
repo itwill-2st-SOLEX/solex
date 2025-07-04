@@ -12,7 +12,12 @@ public class MainService {
 	@Autowired
 	private MainMapper mainMapper;
 	
-	public List<Map<String, Object>> mainNotice() {
-		return mainMapper.mainNotice();
+	public List<Map<String, Object>> mainNoticeList() {
+		return mainMapper.mainNoticeList();
 	}
+	
+	public List<Map<String, Object>> mainDocumentList(Long empId) {
+		return mainMapper.mainDocumentList(empId);
+	}
+
 }

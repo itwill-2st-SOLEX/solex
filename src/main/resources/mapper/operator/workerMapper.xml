@@ -3,17 +3,19 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
   <mapper namespace="kr.co.itwillbs.solex.operator.WorkerMapper">	
+  
+  	<select id="getWorkerInfo">
+  		SELECT e.emp_id, e.emp_num, e.emp_nm, e.emp_dep_nm || ' ' || e.emp_team_nm as dep_nm
+        FROM VIEW_EMPLOYEE e
+            JOIN EMPLOYEE emp ON e.emp_id = emp.emp_id
+        WHERE e.emp_id = #{empId}
+  	</select>
 
   	<!-- 현재 작업중인 공정 정보 가져오기 -->
   	<select id="getWorkerSummary">
 		SELECT *
 		FROM (         
 		SELECT
-			my_emp.emp_id,
-			my_emp.emp_num,
-			my_emp.emp_nm,
-		    my_emp.emp_dep_nm || ' ' || my_emp.emp_team_nm AS dep_nm,		
-			
 		    vs.prd_code,			
 		    vs.prd_nm,				
 		    vs.prd_color || ' / ' || vs.prd_size || 'mm / ' || vs.prd_height || 'ea' AS prd_option,
@@ -45,6 +47,7 @@
 		    ) my_emp
 				LEFT JOIN work_process wp 
 				    ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
+				    AND (wp.wpo_status != 'wpo_sts_00' AND wp.wpo_status != 'wpo_sts_01')
 				LEFT JOIN work_order wo 
 				    ON wp.wrk_id = wo.wrk_id
 				JOIN process p 

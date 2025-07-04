@@ -20,34 +20,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
 @RequestMapping("/operator/api")
 public class ManagerRestController {
 
-    private final OrderRequestsService orderRequestsService;
-
-    private final DocumentController documentController;
-
-    private final OrderController orderController;
-
 	@Autowired
 	public ManagerService managerService;
-	
-	//로그인 구현 필요
-	// 26->29->23->75->85->88
-	Long empId = 102L;
 
-
-    ManagerRestController(OrderController orderController, DocumentController documentController, OrderRequestsService orderRequestsService) {
-        this.orderController = orderController;
-        this.documentController = documentController;
-        this.orderRequestsService = orderRequestsService;
-    }
-
-	
 	//내 부서 정보
 	@GetMapping("/managerSummary")
-	public Map<String, Object> getManagerSummary() {
+	public Map<String, Object> getManagerSummary(HttpSession session) {
+		
+		String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
+
 	    Map<String, Object> result = managerService.getManagerSummary(empId);
 	    System.out.println(result);
 
@@ -58,8 +46,11 @@ public class ManagerRestController {
 	@GetMapping("/managerList")
 	public Map<String, Object> getManagerList(@RequestParam(name = "page", required = false) Integer page,
 								         @RequestParam(name = "size", required = false) Integer size,
-								         @RequestParam("empId") Long empId,
-								         @RequestParam("yearMonth") String yearMonth) {
+								         @RequestParam("yearMonth") String yearMonth, 
+								         HttpSession session) {
+		
+		String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);
@@ -79,7 +70,10 @@ public class ManagerRestController {
 	
 	// 작업 순서 업데이트
 	@PatchMapping("/updateStatus")
-	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map) {
+	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map, HttpSession session) {
+		
+		String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 		
 		map.put("empId", empId);		
 		
@@ -90,7 +84,10 @@ public class ManagerRestController {
 	
 	//불량수량 저장
 	@PostMapping("/saveBcount")
-	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map) {
+	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map, HttpSession session) {
+		
+		String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 		System.out.println("save : " + map);
 		return ResponseEntity.ok().build();
 	
@@ -99,9 +96,12 @@ public class ManagerRestController {
 	// 각 사원별 작업내역 모달표시
     @GetMapping("/workerReport/{wpoId}")
     public Map<String, Object> apiWorkerReport(@PathVariable("wpoId") Long wpoId,
-					    		@RequestParam(name = "page", required = false) Integer page,
-						         @RequestParam(name = "size", required = false) Integer size
-						         ) {
+									    		@RequestParam(name = "page", required = false) Integer page,
+										        @RequestParam(name = "size", required = false) Integer size, 
+										        HttpSession session ) {
+    	
+    	String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
     	
     	Map<String, Object> params = new HashMap<>();
     	
@@ -127,8 +127,10 @@ public class ManagerRestController {
     
     // 실적 수정
     @PatchMapping("/workerCount")
-    public ResponseEntity<?> updateWorkerCount(@RequestBody Map<String, Object> map) {
-        
+    public ResponseEntity<?> updateWorkerCount(@RequestBody Map<String, Object> map, HttpSession session) {
+    	String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
+    	
     	map.put("wreDate", LocalDateTime.now());
     	
     	System.out.println(map);

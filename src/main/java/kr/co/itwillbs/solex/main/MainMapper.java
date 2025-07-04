@@ -7,5 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface MainMapper {
-	List<Map<String, Object>> mainNotice() ;
+	List<Map<String, Object>> mainNoticeList() ;
+	
+	List<Map<String, Object>> mainDocumentList(Long empId);
 }
