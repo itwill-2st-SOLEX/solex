@@ -218,7 +218,6 @@ function openChatroom(name, targetId) {
 			empId: empId
 		}),
 		success: function() {
-			console.log('읽음 처리 완료');
 			unreadCnt();
 		},
 		error: function() {
@@ -234,7 +233,7 @@ function connectAllChatRooms() {
 
 	stompClient.connect({}, function() {
 		$.ajax({
-			url: '/SOLEX/chats/myRooms',  // 서버에서 내가 포함된 roomId 배열 반환 필요
+			url: '/SOLEX/chats/myRooms',
 			method: 'GET',
 			success: function(roomIds) {
 				if (!Array.isArray(roomIds)) return;
@@ -243,7 +242,6 @@ function connectAllChatRooms() {
 				roomIds.forEach(roomId => {
 					stompClient.subscribe(`/topic/chatroom/${roomId}`, function(msg) {
 						const message = JSON.parse(msg.body);
-						debugger;
 						const isMine = String(message.sender) === String(empId);
 
 						const isChatroomHidden = document.getElementById('view-chatroom').classList.contains('hidden');
@@ -267,7 +265,6 @@ function connectAllChatRooms() {
 								}),
 								success: function() {
 									console.log('읽음 처리 완료');
-
 									renderMessage({
 										senderName: isMine ? '나' : message.sender_nm,
 										content: message.content
@@ -277,11 +274,11 @@ function connectAllChatRooms() {
 								},
 								error: function() {
 									console.error('읽음 처리 실패');
-
+									
 									renderMessage({
 										senderName: isMine ? '나' : message.sender_nm,
 										content: message.content
-									}, isMine, false);
+									}, isMine, message.isRead);
 								}
 							});
 						} else {
@@ -290,9 +287,10 @@ function connectAllChatRooms() {
 								senderName: isMine ? '나' : message.sender_nm,
 								content: message.content
 							}, isMine, message.isRead);
-
+							debugger;
 							showChatBadge();
 							unreadCnt();
+							fetchChatList();
 						}
 					});
 				});
@@ -316,8 +314,7 @@ function sendMessage() {
 		receiver: partnerId,
 		content: content,
 		roomId: currentRoomId,
-		type: 'CHAT',
-		isRead: false 
+		type: 'CHAT'
 	};
 
 	stompClient.send('/app/chat.send', {}, JSON.stringify(message));
@@ -325,30 +322,16 @@ function sendMessage() {
 }
 
 // 메시지 렌더링
-function renderMessage(message, isMine, isRead) {
+function renderMessage(message, isMine) {
 	const chatMessages = document.getElementById('chatMessages');
 	const wrapper = document.createElement('div');
 	const msgDiv = document.createElement('div');
-	const readStatusDiv = document.createElement('div');
 
 	wrapper.className = `message-wrapper ${isMine ? 'sent' : 'received'}`;
 	msgDiv.className = `message ${isMine ? 'sent' : 'received'}`;
-	readStatusDiv.className = `read-status ${isRead ? '' : 'unread'}`;
-
 	msgDiv.textContent = message.content;
-	readStatusDiv.textContent = isRead == 'Y' ? '' : '안읽음';
-	debugger;
 
-	if (isMine) {
-		// 내가 보낸 메시지는 읽음 상태가 왼쪽에 먼저
-		wrapper.appendChild(readStatusDiv);
-		wrapper.appendChild(msgDiv);
-	} else {
-		// 상대 메시지는 메시지 본문 먼저, 그 다음 읽음 상태
-		wrapper.appendChild(msgDiv);
-		wrapper.appendChild(readStatusDiv);
-	}
-
+	wrapper.appendChild(msgDiv);
 	chatMessages.appendChild(wrapper);
 	chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -432,24 +415,9 @@ function unreadCnt() {
 			} else {
 				badge.classList.add('hidden');
 			}
-			// 헤더 배지 업데이트
-			//			updateHeaderBadge(count);
 		},
 		error: function() {
 			console.error('안읽은 메시지 수 불러오기 실패');
 		}
 	});
 }
-
-// 페이지 헤더에 있는 안읽은 메세지
-//function updateHeaderBadge(count) {
-//	const badge = document.getElementById('header-chat-badge');
-//	if (!badge) return;
-//
-//	if (count > 0) {
-//		badge.textContent = count;
-//		badge.classList.remove('d-none');
-//	} else {
-//		badge.classList.add('d-none');
-//	}
-//}

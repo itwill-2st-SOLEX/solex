@@ -33,6 +33,8 @@ public interface EmpMapper {
 	//수정한 내용을 등록하기 위한 
 	int modifyMap(Map<String, Object> empModifyMap);
 
+	Long findManagerId(Map<String, String> managerEmp);
+
 
 
 }

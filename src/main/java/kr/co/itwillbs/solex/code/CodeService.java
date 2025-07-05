@@ -3,6 +3,8 @@ package kr.co.itwillbs.solex.code;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,33 @@ public class CodeService {
 	public List<Map<String, Object>> getQualityNames() {
 		// TODO Auto-generated method stub
 		return codeMapper.getQualityNames();
+	}
+	public List<Map<String, Object>> getPositionNames() {
+		// TODO Auto-generated method stub
+		return codeMapper.getPositionNames();
+	}
+	public List<Map<String, Object>> getCategoryNames(String posCd) {
+		// TODO Auto-generated method stub
+		return codeMapper.getCategoryNames(posCd);
+	}
+	public List<Map<String, Object>> getDepartmentNames(String catCd) {
+		
+		String depCd = null;
+		if ("cat_01".equals(catCd)) {
+			depCd = "dep_erp";
+		} 
+		else if ("cat_02".equals(catCd)) {
+			depCd = "dep_mes";
+		}
+		else {
+			throw new RuntimeException();
+		}
+		
+		return codeMapper.getDepartmentNames(depCd);
+	}
+	public List<Map<String, Object>> getTeamNames() {
+		// TODO Auto-generated method stub
+		return codeMapper.getTeamNames();
 	}
 
 }

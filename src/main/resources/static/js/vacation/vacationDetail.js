@@ -114,7 +114,7 @@ async function vacationDetail(page) {
 		
 		
 		// 무한스크롤 페이지, 검색어 url로 전달
-		let url = `/SOLEX/vacation/api/detail?page=${page}&size=${pageSize}&empId=${empId}`;
+		let url = `/SOLEX/vacation/api/detail?page=${page}&size=${pageSize}`;
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈

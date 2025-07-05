@@ -28,8 +28,9 @@ public class DocumentService {
     }
 	
 	// 기안서 목록 무한스크롤
-	public List<Map<String, Object>> getDraftList(int offset, int size) {
-        return documentMapper.selectDraftList(offset, size);
+	public List<Map<String, Object>> getDraftList(int offset, int size, int emp_id) {
+		System.out.println(emp_id);
+        return documentMapper.selectDraftList(offset, size, emp_id);
     }
 	
 	// 직급 공통코드 불러오기
@@ -44,7 +45,7 @@ public class DocumentService {
 	
 	// 기안서 등록
 	@Transactional
-	public void registerDarafts(Map<String, Object> map, long loginEmpId) {
+	public void registerDarafts(Map<String, Object> map, int loginEmpId) {
 		map.put("emp_id", loginEmpId);
 		map.put("doc_reg_time", LocalDateTime.now());
 		

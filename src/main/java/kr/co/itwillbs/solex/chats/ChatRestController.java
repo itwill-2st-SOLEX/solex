@@ -27,23 +27,23 @@ public class ChatRestController {
 	// 사원 목록 조회
 	@GetMapping("/emp")
 	public List<Map<String,Object>> getEmpList (HttpSession session) {
-		String empNum = (String)session.getAttribute("empNum");
-		return service.getEmpList(empNum);
+		String empId = (String)session.getAttribute("empId");
+		return service.getEmpList(empId);
 	}
 	
 	// 대화 목록 조회
 	@GetMapping("/list")
 	public List<Map<String, Object>> getChatList(HttpSession session) {
-		String empNum = (String)session.getAttribute("empNum");
-		return service.getChatList(empNum);
+		String empId = (String)session.getAttribute("empId");
+		return service.getChatList(empId);
 	}
 	
 	// 채팅방 메세지 불러오기
 	@GetMapping("/history/{partnerId}")
 	public List<Map<String, Object>> getChatHistory(@PathVariable("partnerId") String partnerId,
 													HttpSession session) {
-		String empNum = (String)session.getAttribute("empNum");
-		return service.getChatHistory(empNum, partnerId);
+		String empId = (String)session.getAttribute("empId");
+		return service.getChatHistory(empId, partnerId);
 	}
 	
 	// 채팅방 읽음 수정
@@ -62,14 +62,14 @@ public class ChatRestController {
 	// 안읽은 메세지 갯수
 	@GetMapping("/unreadCount")
 	public int getUnreadCount(HttpSession session) {
-	    String empId = (String) session.getAttribute("empNum");
+	    String empId = (String) session.getAttribute("empId");
 	    return service.getUnreadMessageCnt(empId);
 	}
 	
+	// 현재 참여중인 대화방
 	@GetMapping("/myRooms")
 	public List<String> getMyChatRooms(HttpSession session) {
-	    String empNum = (String) session.getAttribute("empNum");
-	    System.out.println("as" + service.getMyChatRooms(empNum));
-	    return service.getMyChatRooms(empNum);
+	    String empId = (String) session.getAttribute("empId");
+	    return service.getMyChatRooms(empId);
 	}
 }
