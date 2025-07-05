@@ -138,5 +138,12 @@ public class ClientRestController {
         Map<String, Object>  taxType = clientService.queryBizNumber(bizNumber);
         return ResponseEntity.ok(Map.of("taxType", taxType));
     }
+
+
+    @GetMapping("/client-is-active")
+    public List<Map<String, String>> getClientIsActive() throws Exception {
+        List<Map<String, String>> clientIsActive = clientService.getClientIsActive();
+        return clientIsActive;
+    }
 	
 }
