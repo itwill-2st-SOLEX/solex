@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface WorkerMapper {
 	Map<String, Object> getWorkerSummary(Long empId);
 	
+	Map<String, Object> getWorkerInfo(Long empId);
+	
 	void insertWorkCount(Map map);
 	
 	List<Map<String, Object>> getWorkerList(Map map);

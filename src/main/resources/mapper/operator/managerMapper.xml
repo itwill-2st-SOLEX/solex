@@ -8,19 +8,22 @@
   	<!-- 로그인한 사람에 해당하는 공정 정보 가져오기 -->
   	<select id="getManagerSummary">
   	                
-		SELECT DISTINCT pr.prc_code,         <!-- 공정코드 -->
-		       		    pr.prc_nm,         <!-- 공정이름 -->
-		       		    cd1.det_nm || ' ' || cd2.det_nm AS dep_nm,  <!-- 부서 + 팀명 -->
-		       		    qi.qua_nm,		       		    
-		       		    ve.emp_id
-  		FROM   process pr JOIN work_order wo      ON pr.prc_id = wo.prc_id 
-                  		  JOIN work_process wp    ON wo.wrk_id = wp.wrk_id 
-  						  JOIN quality_item qi    ON pr.qua_id = qi.qua_id
-  						  JOIN code_detail cd1    ON pr.det_id = cd1.det_id      
-  						  JOIN code_detail cd2    ON wp.wpo_team = cd2.det_id   
-  						  JOIN view_employee ve   ON ve.emp_dep_nm = cd1.det_nm
-                         									AND ve.emp_team_nm = cd2.det_nm
- 		WHERE ve.emp_id = #{empId}
+		SELECT  DISTINCT
+		        pr.prc_code,
+		        pr.prc_nm,
+		        cd1.det_nm || ' ' || cd2.det_nm            AS dep_nm,
+		        qi.qua_nm,
+		        ve.emp_id,
+		        ve.emp_pos_nm
+		FROM   view_employee ve                                -- ① 기준 테이블
+				LEFT JOIN   code_detail   cd1 ON ve.emp_dep_nm  = cd1.det_nm
+				LEFT JOIN   code_detail   cd2 ON ve.emp_team_nm = cd2.det_nm
+				LEFT JOIN   process       pr  ON pr.det_id      = cd1.det_id
+				LEFT JOIN   work_order    wo  ON wo.prc_id      = pr.prc_id
+				LEFT JOIN   work_process  wp  ON wp.wrk_id      = wo.wrk_id
+				                               AND wp.wpo_team  = cd2.det_id
+				LEFT JOIN   quality_item  qi  ON qi.qua_id      = pr.qua_id
+		WHERE ve.emp_id =#{empId}
   	</select>
   	
   	<!-- 자신에게 해당하는 작업현황 전체 목록 가져오기 -->
@@ -195,35 +198,35 @@
   	<!-- 현재 작업중인 공정의 총 공정단계 수, 주문id찾기 -->
   	<select id="selectStepInfo">
 	    SELECT
-		    wp1.wpo_id,
-		    wp1.wrk_id,
-		    wo1.odd_id,
+		    wp1.wpo_id as "wpoId",
+		    wp1.wrk_id as "wrkId",
+		    wo1.odd_id as "oddId",
 		    
 		    <!-- 총 공정 개수 -->
 		    (SELECT COUNT(*)
 		     FROM work_process wpx
 		     JOIN work_order  wox ON wpx.wrk_id = wox.wrk_id
-		     WHERE wox.odd_id = wo1.odd_id)   AS total_steps,
+		     WHERE wox.odd_id = wo1.odd_id)   AS "totalSteps",
 		    
 		    <!-- 현재 공정 순서 -->
-		    TO_NUMBER(wp1.wpo_step)           AS step,
+		    TO_NUMBER(wp1.wpo_step)           AS "step",
 		    
 		    <!-- 다음 공정 번호 -->
 		    ( SELECT MIN(TO_NUMBER(wp2.wpo_step))
 		     FROM work_process wp2
 		     JOIN work_order   wo2 ON wp2.wrk_id = wo2.wrk_id
 		     WHERE wo2.odd_id = wo1.odd_id
-		       AND TO_NUMBER(wp2.wpo_step) = TO_NUMBER(wp1.wpo_step) + 1) AS next_step,
+		       AND TO_NUMBER(wp2.wpo_step) = TO_NUMBER(wp1.wpo_step) + 1) AS "nextStep",
 		    
-		    wp1.wpo_jcount,
-		    NVL(qh.qhi_bcount,0)             AS bcount,
+		    wp1.wpo_jcount as "wpoJcount",
+		    NVL(qh.qhi_bcount,0)             AS "bcount",
 		    
 		    <!-- 다음 공정 ID(한 건만 필요하면 MIN/ROWNUM)  -->
 		     (SELECT MIN(wp2.wpo_id)          
 		     FROM work_process wp2
 		     	JOIN work_order   wo2 ON wp2.wrk_id = wo2.wrk_id
 		     WHERE wo2.odd_id = wo1.odd_id
-		       AND TO_NUMBER(wp2.wpo_step) = TO_NUMBER(wp1.wpo_step) + 1) AS next_wpo_id
+		       AND TO_NUMBER(wp2.wpo_step) = TO_NUMBER(wp1.wpo_step) + 1) AS "nextWpoId"
 		
 		FROM   work_process   wp1
 		JOIN   work_order     wo1 ON wp1.wrk_id = wo1.wrk_id
@@ -263,13 +266,8 @@
      	
 	<!-- 	>> 수주 히스토리에 마지막 공정이 완료된 후 히스토리 추가 -->
 	<insert id="insertSujuHistory">
-		INSERT iNTO suju_history (
-			odd_id,
-			odd_sts,
-			his_date,
-			emp_id
-		)
-		VALUES(#{ODD_ID}, 'odd_sts_04', #{oddModDate}, #{empID})
+		INSERT iNTO suju_history(odd_id, odd_sts, his_date, emp_id)
+		VALUES(#{oddId}, 'odd_sts_04', #{oddModDate}, #{empId})
 	</insert>
   	
   	<!-- 그리드에서 현황 클릭했을 때 사원 작업 현황 표시하기 -->

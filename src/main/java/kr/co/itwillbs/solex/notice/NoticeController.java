@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,12 +20,13 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/notice")
+@PreAuthorize("hasAnyRole('1','2','3','4','5')")
 public class NoticeController {
 
 	@Autowired
 	private NoticeService noticeService;
 	
-	Long empId = 11L;
+	Long empId = 90L;
 
 
     // 공지사항 페이지로 단순 이동
