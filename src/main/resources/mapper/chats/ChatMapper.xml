@@ -41,7 +41,7 @@
 		    SELECT MAX(MSG_ID)
 		    FROM messenger
 		    WHERE (sender_id = #{empId} OR receiver_id = #{empId})
-		       OR (receiver_id = #{empId} AND sender_id = #{empId})
+<!--		       OR (receiver_id = #{empId} AND sender_id = #{empId})-->
 		      AND (leave_id != #{empId})
 		    GROUP BY 
 		        CASE 

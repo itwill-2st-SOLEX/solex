@@ -63,7 +63,6 @@ public class ChatRestController {
 	@GetMapping("/unreadCount")
 	public int getUnreadCount(HttpSession session) {
 	    String empId = (String) session.getAttribute("empId");
-	    System.out.println(service.getUnreadMessageCnt(empId));
 	    return service.getUnreadMessageCnt(empId);
 	}
 	
@@ -71,7 +70,6 @@ public class ChatRestController {
 	@GetMapping("/myRooms")
 	public List<String> getMyChatRooms(HttpSession session) {
 	    String empId = (String) session.getAttribute("empId");
-	    System.out.println("as" + service.getMyChatRooms(empId));
 	    return service.getMyChatRooms(empId);
 	}
 }

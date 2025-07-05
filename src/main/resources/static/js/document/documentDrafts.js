@@ -58,16 +58,16 @@ $(function() {
 		}
 	});
 
-	async function fetchCodeOptions(groupId) {
-		try {
-			const response = await fetch(`/SOLEX/approval/api/codes?group=${groupId}`);
-			const data = await response.json();
-			return data.map(({ DET_ID, DET_NM }) => `<option value="${DET_ID}">${DET_NM}</option>`).join("");
-		} catch (error) {
-			console.error(`${groupId} 코드 불러오기 실패:`, error);
-			return "<option disabled>불러오기 실패</option>";
-		}
-	}
+//	async function fetchCodeOptions(groupId) {
+//		try {
+//			const response = await fetch(`/SOLEX/approval/api/codes?group=${groupId}`);
+//			const data = await response.json();
+//			return data.map(({ DET_ID, DET_NM }) => `<option value="${DET_ID}">${DET_NM}</option>`).join("");
+//		} catch (error) {
+//			console.error(`${groupId} 코드 불러오기 실패:`, error);
+//			return "<option disabled>불러오기 실패</option>";
+//		}
+//	}
 
 	// 기안서 종류별 동적 화면 구성
 	const formTemplates = {
@@ -238,13 +238,13 @@ $(function() {
 			minuteIncrement: 30
 		});
 
-		if (selected === 'doc_type_03') {
-			const positionOptions = await fetchCodeOptions('position');
-			$('#docPositionSelect').html(`<option value="">선택하세요</option>${positionOptions}`);
-
-			const deptOptions = await fetchCodeOptions('dept');
-			$('#docDeptSelect').html(`<option value="">선택하세요</option>${deptOptions}`);
-		}
+//		if (selected === 'doc_type_03') {
+//			const positionOptions = await fetchCodeOptions('position');
+//			$('#docPositionSelect').html(`<option value="">선택하세요</option>${positionOptions}`);
+//
+//			const deptOptions = await fetchCodeOptions('dept');
+//			$('#docDeptSelect').html(`<option value="">선택하세요</option>${deptOptions}`);
+//		}
 	});
 
 	$('#docTypeSelect').trigger('change');
@@ -299,7 +299,7 @@ $(function() {
 			const formData = new FormData(form);
 			const jsonObject = Object.fromEntries(formData.entries());
 
-			const response = await fetch("/SOLEX/approval/register/drafts", {
+			const response = await fetch("/SOLEX/approval/drafts", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(jsonObject)
