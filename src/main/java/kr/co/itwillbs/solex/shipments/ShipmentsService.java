@@ -48,7 +48,10 @@ public class ShipmentsService {
         for (Map<String, Object> item : items) {
             item.put("ord_id", orderId);
             item.put("odd_sts", "odd_sts_05");
+            
+
         }
+        
 
         // 주문 상태 변경
         Integer result = shipmentsMapper.createSujuOrderDetail(items);

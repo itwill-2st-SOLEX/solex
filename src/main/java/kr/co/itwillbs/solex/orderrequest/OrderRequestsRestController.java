@@ -31,6 +31,7 @@ public class OrderRequestsRestController {
         @RequestParam(name = "pageSize", defaultValue = "20") int pageSize
     ) throws Exception {
         List<Map<String, Object>> list = orderRequestsService.getPagedGridDataAsMap(page, pageSize);
+        System.out.println(list);
         return list; 
     }
 	

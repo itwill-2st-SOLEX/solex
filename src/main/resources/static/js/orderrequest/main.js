@@ -168,17 +168,22 @@ async function openWorkInstructionModal(selectedId) {
     const statusClass = material.STK_MATERIAL_STATUS.includes('부족') ? 'text-danger' : 'text-success';
     // 불량율 계산 10%
     const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.05); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+	
+	  const shortageCnt = finalRequiredCnt - material.STK_MATERIAL_CNT;
     // 각 자재 정보를 div로 감싸서 간격을 줍니다.
     return `
-        <div style="margin-bottom: 10px;">
-            <strong>${material.MAT_NM}</strong>
-            <div style="padding-left: 15px;">
-                - 단위당 필요 갯수 : ${material.BOM_CNT}, 
-                총 필요 갯수(+불량율 5%) : ${finalRequiredCnt}, 
-                현 재고 : ${material.STK_MATERIAL_CNT}개 
-                <strong class="${statusClass}">${material.STK_MATERIAL_STATUS}</strong>
-            </div>
+      <div style="margin-bottom: 10px;">
+        <strong>${material.MAT_NM}</strong>
+        <div style="padding-left: 15px;">
+          - 단위당 필요 갯수 : ${material.BOM_CNT}개
+          <br>
+          - 총 필요 갯수(+불량율 5%) : ${finalRequiredCnt}개
+          <br>
+          - 현 재고 : ${material.STK_MATERIAL_CNT}개
+          <br>
+          ${ shortageCnt > 0 ? `${shortageCnt}개 <strong class="text-danger">부족</strong>` : `<strong class="text-success">생산 가능</strong>` }
         </div>
+      </div>
     `;
 });
 
@@ -246,7 +251,7 @@ async function openMaterialRequestModal(selectedId) {
           <br>
           - 현 재고 : ${material.STK_MATERIAL_CNT}개
           <br>
-          ${ shortageCnt > 0 ? `${shortageCnt}개 <strong class="text-danger">부족</strong>` : `${-shortageCnt}개 <strong class="text-success">여유</strong>` }
+          ${ shortageCnt > 0 ? `${shortageCnt}개 <strong class="text-danger">부족</strong>` : `<strong class="text-success">생산 가능</strong>` }
         </div>
       </div>
     `;

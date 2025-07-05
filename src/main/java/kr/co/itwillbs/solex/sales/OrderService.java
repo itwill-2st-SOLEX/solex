@@ -112,7 +112,10 @@ public class OrderService {
 
         // 2. 주문 상세 항목 목록 조회 (두 번째 DB 호출)
         List<Map<String, Object>> orderItems = orderMapper.selectOrderItemsByOrderId(ord_id);
-
+        // null 이면 예외 처리
+        if(orderInfo.get("PRODUCT_ID") == null) {
+            throw new RuntimeException("상세 주문 항목이 없습니다. ID: " + ord_id);
+        }
         // 3. 선택 가능한 전체 옵션 목록 조회 (세 번째 DB 호출)
         //    - 1번에서 조회한 상품 ID(PRODUCT_ID)를 파라미터로 사용합니다.
         //    - DB에서 대문자로 반환될 수 있으므로 대문자 키로 조회합니다.
