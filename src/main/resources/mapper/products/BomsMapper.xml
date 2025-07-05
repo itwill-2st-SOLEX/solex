@@ -118,4 +118,31 @@
             #{bomId}
         </foreach>
     </delete>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <select id="getPrdIdByOptId" parameterType="string" resultType="string">
+        SELECT PRD_ID
+        FROM PROD_OPTION_TBL
+        WHERE OPT_ID = #{optId}
+    </select>
+
+    <select id="getBomByOptIdAndMatId" resultType="map">
+        SELECT BOM_ID, OPT_ID, MAT_ID, BOM_CNT, BOM_UNIT, BOM_COMM, PRD_ID
+        FROM BOM_TBL
+        WHERE OPT_ID = #{optId} AND MAT_ID = #{matId}
+    </select>
+    
 </mapper>	

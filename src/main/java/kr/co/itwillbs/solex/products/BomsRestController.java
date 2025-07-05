@@ -78,6 +78,82 @@ public class BomsRestController {
 		
 		return Map.of("success", true);
 	}
+	
+	 // ⭐ 새로 추가할 일괄 BOM 저장 API 엔드포인트 ⭐
+    @PostMapping("/batchSave")
+    public ResponseEntity<Map<String, Object>> batchSaveBom(@RequestBody Map<String, Object> payload) {
+        Map<String, Object> response = new HashMap<>();
+        System.out.println("response : " + response);
+        return null;
+//        try {
+//            // 1. 요청 페이로드에서 데이터 추출
+//            // targetOptIds: BOM을 적용할 제품 옵션 ID 목록 (프론트에서 prod_grid 체크박스로 선택된 것들)
+//            List<String> targetOptIds = (List<String>) payload.get("targetOptIds");
+//            
+//            // bomChanges: 현재 bom_grid의 변경 사항 (생성, 수정, 삭제된 행 정보)
+//            Map<String, List<Map<String, Object>>> bomChanges = 
+//                (Map<String, List<Map<String, Object>>>) payload.get("bomChanges");
+//
+//            // bomChanges 내의 각 리스트 추출
+//            List<Map<String, Object>> createdRows = bomChanges.getOrDefault("createdRows", List.of()); // Java 9+
+//            List<Map<String, Object>> updatedRows = bomChanges.getOrDefault("updatedRows", List.of()); // Java 9+
+//            // List.of() 대신 Collections.emptyList() 사용 가능 (Java 8)
+//            // List<Map<String, Object>> createdRows = bomChanges.getOrDefault("createdRows", Collections.emptyList());
+//            // List<Map<String, Object>> updatedRows = bomChanges.getOrDefault("updatedRows", Collections.emptyList());
+//            // List<Map<String, Object>> deletedRows = bomChanges.getOrDefault("deletedRows", Collections.emptyList()); 
+//            // 현재 전략에서는 deletedRows는 Service에서 직접 처리하므로 여기서는 필수가 아님
+//
+//            if (targetOptIds == null || targetOptIds.isEmpty()) {
+//                response.put("success", false);
+//                response.put("message", "일괄 저장할 대상 제품(OPT_ID)이 지정되지 않았습니다.");
+//                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+//            }
+//
+//            // 2. 서비스 호출
+//            // bomChanges 전체 Map을 넘겨주거나, createdRows, updatedRows를 각각 넘겨줍니다.
+//            // 여기서는 createdRows, updatedRows만 넘겨 최종 상태를 구성하는 전략을 따릅니다.
+//            bomsService.processBatchBomSave(targetOptIds, createdRows, updatedRows);
+//
+//            response.put("success", true);
+//            response.put("message", targetOptIds.size() + "개의 제품에 BOM이 성공적으로 일괄 저장되었습니다.");
+//            return new ResponseEntity<>(response, HttpStatus.OK);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace(); // 서버 로그에 스택 트레이스 출력
+//            response.put("success", false);
+//            response.put("message", "BOM 일괄 저장 중 오류가 발생했습니다: " + e.getMessage());
+//            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+    }
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	// 단위 셀렉트바 옵션들
 	@GetMapping("/materialList")
 	public List<Map<String, Object>> getmaterialList() {
