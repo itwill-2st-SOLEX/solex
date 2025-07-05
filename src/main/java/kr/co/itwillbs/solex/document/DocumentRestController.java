@@ -24,9 +24,12 @@ public class DocumentRestController {
 
 	// 무한스크롤
 	@GetMapping("/api/drafts")
-    public List<Map<String, Object>> getDraftList(@RequestParam("page") int page, @RequestParam("size") int size) {
+    public List<Map<String, Object>> getDraftList(@RequestParam("page") int page, @RequestParam("size") int size,
+    											  HttpSession session) {
 		int offset = page * size;
-        return service.getDraftList(offset, size);
+		String empIdStr = (String) session.getAttribute("empId");
+		Integer emp_id = Integer.valueOf(empIdStr);
+        return service.getDraftList(offset, size, emp_id);
     }
 	
 	// 직급 공통코드 불러오기 
@@ -44,7 +47,7 @@ public class DocumentRestController {
 	}
 	
 	// 기안서 등록
-	@PostMapping("register/drafts")
+	@PostMapping("/drafts")
 	public void registerDarafts(@RequestBody Map<String, Object> map,
 								HttpSession session) {
 		String empIdStr = (String) session.getAttribute("empId");

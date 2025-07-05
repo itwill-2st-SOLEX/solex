@@ -37,7 +37,6 @@ public class ChatService {
 	public void chatRead(Map<String, Object> readInfo) {
 		String roomId = (String) readInfo.get("roomId");
 
-		// ✅ roomId 분해
 		String[] parts = roomId.split("_");
 		String id1 = parts[1];
 		String id2 = parts[2];
@@ -58,7 +57,6 @@ public class ChatService {
 
 		String room_id1 = "room_" + empId + "_" + partnerId;
 		String room_id2 = "room_" + partnerId + "_" + empId;
-
 		// 현재 상태 조회
 		int currentStatus = mapper.getChatRoomStatus(room_id1, room_id2);
 

@@ -24,6 +24,7 @@
 		    ON d.doc_type = c.det_id
 		  LEFT JOIN code_detail s 
 		    ON d.doc_sts  = s.det_id
+		 WHERE emp_id = #{emp_id}
 		 ORDER BY doc_reg_time DESC
         OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
   	</select>
