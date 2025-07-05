@@ -32,8 +32,7 @@ public class EmpRestController {
 	@PostMapping("")
 	public void registerEmployee(
 			@RequestPart("emp") Map<String, Object> empMap, 
-			@RequestPart("emp_img") MultipartFile file,   
-			HttpServletRequest request) throws IOException {
+			@RequestPart("emp_img") MultipartFile file) throws IOException {
 		
 		System.out.println("------------------------------------------   인사등록시 컨트롤러에 들어오는 Map ------------------------------------------");
 		System.out.println(empMap);

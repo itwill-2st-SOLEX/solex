@@ -133,7 +133,6 @@
 			unreadCnt();
 		});
 		
-		
 		// "마이페이지" 메뉴 클릭 시 실행
 		async function openMypagePopup(event) {
 			event.preventDefault();
@@ -169,8 +168,10 @@
 			const [hp1 = '', hp2 = '', hp3 = ''] = empPhone ? empPhone.split('-') : [];
 			const [em1 = '', em2 = ''] = empEmail ? empEmail.split('@') : [];
 			
-			// 📸 보여줄 이미지 경로 결정 (사용자 프로필 이미지 or 기본 이미지)
-			const profileImgSrc = empProfileImg || '/SOLEX/assets/img/emp/simple_person_pic.jpg';
+			// ✅ 수정: empProfileImg가 있을 때만 경로를 만들고, 없으면 기본 이미지를 사용합니다.
+			const profileImgSrc = empProfileImg 
+                ? `/SOLEX/uploads/${empProfileImg}` 
+                : '/SOLEX/assets/img/emp/simple_person_pic.jpg';
 
 			// 모달 바디에 들어갈 Form HTML 생성
 			const formHTML = `
@@ -286,8 +287,7 @@
 
 		// "수정" 버튼 클릭 이벤트
 		document.getElementById('mypageModifyBtn').addEventListener('click', async () => {
-			// 1. 수정 가능한 데이터들을 가져오기
-			// 연락처, 이메일 병합
+			// 1. 연락처, 이메일 병합
 			const fullPhone = [
 				document.getElementById('emp_phone1')?.value,
 				document.getElementById('emp_phone2')?.value,
@@ -299,7 +299,7 @@
 				document.getElementById('emp_email2')?.value
 			].join('@');
 
-			// 2. 서버에 보낼 payload 객체 생성 (JSON으로 보낼 텍스트 데이터)
+			// 2. 서버에 보낼 텍스트 데이터(payload) 생성
 			const payload = {
 				empNm: document.getElementById('empNm').value,
 				empPhone: fullPhone,
@@ -309,36 +309,36 @@
 				empDa: document.getElementById('sample6_detailAddress').value
 			};
 			
-			// 3. FormData 생성 및 데이터 추가
-			const formData = new FormData();
-			
-			// JSON 데이터를 Blob으로 변환하여 'emp' 파트에 추가
-			formData.append('emp', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+            // 3. FormData 객체 생성 및 텍스트 데이터 추가
+			const finalFormData = new FormData(); 
+		    finalFormData.append(
+		        'emp',
+		        new Blob([JSON.stringify(payload)], { type: 'application/json' })
+		    );
 
-			// 이미지 파일을 'emp_img' 파트에 추가
-			const imgFile = document.getElementById('emp_img').files[0];
-			if (imgFile) {
-				formData.append('emp_img', imgFile);
-			}
-
+            // ✅ 수정: 사용자가 새로 선택한 파일이 있을 경우에만 FormData에 추가
+            const fileInput = document.getElementById('emp_img');
+            if (fileInput.files.length > 0) {
+                finalFormData.append('emp_img', fileInput.files[0]);
+            }
+	
 			// 4. 서버로 FormData 전송
 			try {
 				const response = await fetch('/SOLEX/mypage/personalDataModify', {
 					method: 'PUT',
-					body: formData // headers에 Content-Type을 지정하지 않아야 브라우저가 자동으로 multipart/form-data로 설정함
+					body: finalFormData
 				});
 
 				if (!response.ok) {
-					const errorText = await response.text();
-					throw new Error(`수정 실패: ${errorText}`);
-				}
+                    const errorText = await response.text();
+                    throw new Error(`수정 실패: ${errorText}`);
+                }
 				
-				alert(`수정이 완료되었습니다.`);
-				const modalInstance = bootstrap.Modal.getInstance(document.getElementById('mypageModal'));
-				modalInstance.hide();
+				alert(`수정이 완료되었습니다.^^`);
+				bootstrap.Modal.getInstance(document.getElementById('mypageModal')).hide();
 
 			} catch (error) {
-				console.error('수정 요청 실패:', error);
+				console.error('수정 실패 !@!#@!#!', error);
 				alert(error.message);
 			}
 		});
@@ -346,38 +346,14 @@
 		function sample6_execDaumPostcode() {	
 		    new daum.Postcode({
 		        oncomplete: function(data) {
-		            // 주소 변수
-		            var addr = ''; // 주소
-		            var extraAddr = ''; // 참고항목
-
-		            // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
-		            if (data.userSelectedType === 'R') { // 도로명 주소
+		            var addr = '';
+		            if (data.userSelectedType === 'R') {
 		                addr = data.roadAddress;
-		            } else { // 지번 주소
+		            } else {
 		                addr = data.jibunAddress;
 		            }
-
-		            // 참고항목
-		            if(data.userSelectedType === 'R'){
-		                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-		                    extraAddr += data.bname;
-		                }
-		                if(data.buildingName !== '' && data.apartment === 'Y'){
-		                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-		                }
-		                if(extraAddr !== ''){
-		                    extraAddr = ' (' + extraAddr + ')';
-		                }
-		                document.getElementById("sample6_extraAddress").value = extraAddr;
-		            } else {
-		                document.getElementById("sample6_extraAddress").value = '';
-		            }
-
-		            // 우편번호와 주소 정보를 해당 필드에 넣는다.
 		            document.getElementById('sample6_postcode').value = data.zonecode;
 		            document.getElementById("sample6_address").value = addr;
-
-		            // 상세주소 입력칸으로 포커스 이동
 		            document.getElementById("sample6_detailAddress").focus();
 		        }
 		    }).open();

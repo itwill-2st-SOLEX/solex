@@ -1,22 +1,15 @@
 <!DOCTYPE html>
 <!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org" 
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layouts/layout}">
 
 <head>
 	<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
 	<title>자재 발주관리</title>
 	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-	<link rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 	<link rel="stylesheet" th:href="@{/css/materialorders/materialorders.css}" />	
-	<script th:inline="javascript">
-	    /*  세션에 emp_id 가 123 이라면
-	        아래 줄이 브라우저에 도착할 때
-	        const empId = 123;
-	        로 변합니다.                              */
-	    const empId = /*[[${session.emp_id}]]*/ "";
-	</script>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script th:src="@{/js/material_orders/material_orders_main.js}"></script>
 	<script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
@@ -37,7 +30,6 @@
 						자재발주등록
 				</button>
 		 	</div>
-			<div id="grid"></div>
 			<div class="custom-content">
 				<div id="grid"></div>
 			</div>
@@ -62,7 +54,7 @@
 							<div class="col">
 								<label>발주 수량</label>
 								<div>
-									<input type="number" class="form-control d-inline-block" name= "mat_qty" id="mayQty" required>
+									<input type="number" class="form-control d-inline-block" name= "mat_qty" id="matQty" required>
 								</div>
 							</div>
 						</div>
@@ -71,12 +63,6 @@
 								<label>발주 요청일</label>
 								<div>
 									<input type="date" class="form-control" name= "mat_reg_date" id="matRegDate" required>
-								</div>
-							</div>
-							<div class="col">
-								<label>발주 요청자</label>
-								<div>
-									<input type="text" class="form-control" id="empId" value="${empId}" readonly disabled>
 								</div>
 							</div>
 						</div>

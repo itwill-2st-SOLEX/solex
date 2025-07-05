@@ -43,32 +43,19 @@ public class MypageRestController {
 		
 	}
 	
-	//마이페이지 수정 
+	// 마이페이지 수정
 	@PutMapping("/personalDataModify")
-	public void putMethodName(@RequestPart("emp") Map<String, Object> personalModifyMap, @RequestPart("emp_img") MultipartFile file, HttpSession session, HttpServletRequest request) throws IOException {
-		System.out.println(personalModifyMap);
-		//사진등록을 위한 코드
-		 // ① 파일 저장 경로
-	    String uploadDir = "C:/solex_uploads/emp";
-        Files.createDirectories(Paths.get(uploadDir));
-        String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-        String filename = UUID.randomUUID() + "." + ext;
-        Path savePath = Paths.get(uploadDir, filename);
-        file.transferTo(savePath.toFile());
+    public void modifyPersonalData(
+            @RequestPart("emp") Map<String, Object> empMap,
+            @RequestPart(value = "emp_img", required = false) MultipartFile file, // ✅ 'required = false'로 설정
+            HttpSession session) throws IOException {
 
-        // 이미지 URL & emp_id 만들기
-        String url = request.getContextPath() + "/uploads/emp/" + filename;
         String empId = (String) session.getAttribute("empId");
-
-        // Map에 추가
-        personalModifyMap.put("emp_img", url);
-		personalModifyMap.put("empId", empId);
+        
+        System.out.println("------------------------------------------   마이페이지 수정시 컨트롤러에 들어오는 Map ------------------------------------------");
+		System.out.println("personalModifyMap = " + empMap);
 		
-		
-		System.out.println("personalModify = " + personalModifyMap);
-		System.out.println("################# keys: " + personalModifyMap.keySet());
-		mypageService.personalDataModify(personalModifyMap);
-	}
-	
+		mypageService.modifyPersonalData(empId, empMap, file);
+    }
 	
 }

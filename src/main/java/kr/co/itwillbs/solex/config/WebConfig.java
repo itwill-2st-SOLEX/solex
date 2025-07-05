@@ -8,16 +8,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // application.properties 파일에 설정된 파일 업로드 경로를 가져옵니다.
-    @Value("${file.upload-dir}")
+    // application.properties 또는 yml 파일에 설정한 파일 업로드 경로를 주입받습니다.
+    @Value("${file.upload-dir}") // 예: C:/dev/uploads/
     private String uploadDir;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // '/images/**' 형태의 URL 요청이 오면,
-        // 'file:///실제업로드경로/' 에서 파일을 찾아 제공합니다.
-        // 예를 들어, /images/abc.jpg 요청은 C:/uploads/emp/abc.jpg 파일을 찾아 보여줍니다.
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + uploadDir);
+        /*
+         * "/uploads/**" URL 요청이 오면
+         * "file:///C:/dev/uploads/" 디렉토리에서 파일을 찾아 제공하라는 의미입니다.
+         *
+         * 중요: 외부 경로를 설정할 때는 "file:///" 접두사를 꼭 붙여야 합니다.
+         */
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:///" + uploadDir);
     }
 }

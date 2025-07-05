@@ -265,9 +265,9 @@ $(function() {
 	        'emp',
 	        new Blob([JSON.stringify(payload)], { type: 'application/json' })
 	    );
-	    if (file) { // 파일이 있는 경우에만 추가
-	        finalFormData.append('emp_img', file);
-	    }
+	        
+		finalFormData.append('emp_img', file);
+	    
 		
 		try {
 			const response = await fetch('/SOLEX/emp', { // 사원 등록을 처리할 서버 URL

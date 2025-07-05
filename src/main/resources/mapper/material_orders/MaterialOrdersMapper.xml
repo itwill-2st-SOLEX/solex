@@ -44,7 +44,7 @@
 		(mat_id, mat_qty, mat_reg_date, mat_comm, emp_id)
 		VALUES (
 		#{matId, jdbcType=NUMERIC},
-		#{mayQty, jdbcType=NUMERIC},
+		#{matQty, jdbcType=NUMERIC},
 		#{matRegDate, jdbcType=DATE},
 		#{matComm, jdbcType=VARCHAR},
 		#{emp_id, jdbcType=VARCHAR}
