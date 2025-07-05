@@ -23,7 +23,7 @@ public interface NoticeMapper {
 	int updateNotice(Map<String, Object> param);
 
 	//글 삭제
-	int deleteNotice(int notId);
+	int deleteNotice(Long notId);
 	
 	Map<String, Object> getEmployeeInfo(Long empId);
 }

@@ -24,12 +24,15 @@
 .panel-title {
   font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: .75rem;
+  margin-bottom: 1rem;
   white-space: nowrap;
 }
 
+
+
 /* 리스트 */
 .panel-list {
+  position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -37,6 +40,7 @@
   flex: 1 1 auto;
   /* font-size: . NineFive Five timesSeven;   0.95rem 까지 쓰면 Korean fix*??? ignore */
 }
+
 .panel-list li {
   margin-bottom: .4rem;
   white-space: nowrap;
@@ -64,20 +68,15 @@
 /* ─── Box 레이아웃 ─── */
 .custom-content { display: flex; flex-direction: column; gap: var(--gap); }
 
-.box1 { /* 3‑분할 */
-  display: flex;
-  gap: var(--gap);
-  height: 200px;
-}
 
-.box1 .notice  { flex: 0 0 41%; }  /* 넓게 */
-.box1 .price   { flex: 0 0 27%; }
-.box1 .product { flex: 0 0 27%; }
 
 .box2 { /* 달력 + 사이드 */
   display: flex;
   gap: var(--gap);
 }
+
+.panel.notice  { height: 200px !important; }
+.panel.approval{ height: 200px !important; }
 
 /* ─── Calendar ─── */
 .calendar { padding: 0; }
@@ -107,7 +106,7 @@
 .toastui-calendar-root,
 .toastui-calendar-layout {
   width: 100%;
-  min-height: 500px;   /* 필요 시 조정 */
+  min-height: 680px;   /* 필요 시 조정 */
 }
 
 /* close 버튼을 Date‑Picker 위로 올리기 */
@@ -117,9 +116,210 @@
 }
 
 /* 팝업 폼에서 Location 입력 필드를 완전히 숨김 */
-.tui-calendar-form-item.tui-calendar-form-item-location {
+/*.toastui-calendar-dropdown-section.toastui-calendar-state-section,*/
+.toastui-calendar-popup-section-item.toastui-calendar-popup-section-location,
+#calendar > div.toastui-calendar-floating-layer > div.toastui-calendar-event-form-popup-slot > div > form > div.toastui-calendar-form-container > div:nth-child(3),
+.toastui-calendar-popup-section-private {
     display: none !important;
 }
+
+.toastui-calendar-popup-section-item.toastui-calendar-popup-section-title {
+	width: 100%;
+}
+
+.toastui-calendar-popup-button,
+.toastui-calendar-dropdown-menu	 {
+	font-weight: 700;
+}
+/* 
+.toastui-calendar-dropdown-section .toastui-calendar-content {
+	line-height: 0 !important;
+} */
+
+.toastui-calendar-content {
+	padding-left: 5px !important;
+}
+
+.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(1)>.toastui-calendar-dot{
+	background-color: #66B3FF;
+}
+
+.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(2)>.toastui-calendar-dot{
+	background-color: #FF8A4D;
+}
+
+.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(3)>.toastui-calendar-dot{
+	background-color: #90A4AE;
+}
+
+.toastui-calendar-template-popupIsAllday {
+	color: #444;
+	font-weight: 500;
+}
+
+.toastui-calendar-day-name-item.toastui-calendar-month {
+	width:500px !important;
+}
+
+.toastui-calendar-detail-item.toastui-calendar-detail-item-indent{
+	display: none;
+}
+
+
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) {
+	display: flex;
+	align-items: center;
+}
+
+
+div.toastui-calendar-event-detail-popup-slot > div > div.toastui-calendar-detail-container{
+	font-size: 20rem;
+}
+
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) > span.toastui-calendar-content > span > div,
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(3) > span.toastui-calendar-content {
+	font-weight: 500;
+}
+
+
+
+#monthLabel {
+	color: #444;
+	font-size: 1.2rem;
+	font-weight: 400;
+}
+
+
+div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui-calendar-content {
+	margin-bottom: 20px;
+}
+
+
+/* ───────── 📢 최근 공지 ───────── */
+.panel.notice .panel-list li, .panel.approval .panel-list li {
+  /* 한 줄로 제목 + 날짜 배치 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .5rem;
+
+  /* 링크 영역 전부 클릭 가능하도록 padding */
+  padding: .30rem .25rem;
+  border-radius: 6px;
+}
+
+.panel.notice .panel-list li a, .panel.approval .panel-list li a  {
+  flex: 1 1 0;
+  font-weight: 500;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel.notice .panel-list li span, .panel.approval .panel-list li span {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+
+.panel.notice .panel-list li:hover, .panel.approval .panel-list li:hover {
+  background: #f5f7fb;
+  cursor: pointer;
+}
+
+.panel.approval .status         { font-weight: 600; }
+.panel.approval .status.wait    { color: #ff9800; }  /* 결재(대기) */
+.panel.approval .status.approved{ color: #0a7d39; }  /* 승인 */
+.panel.approval .status.rejected{ color: #e53935; }  /* 반려 */
+
+
+/* “+ 더보기” 행 */
+
+.panel.notice.flex-grow-1, .panel.approval.flex-grow-1 {
+	position: relative;
+}
+.panel.notice.flex-grow-1 > span, .panel.approval.flex-grow-1 > span {
+	position: absolute;
+	top: 10px;
+	right: 20px;
+}
+.panel.notice.flex-grow-1 > span > a, .panel.approval.flex-grow-1 > span > a {
+	z-index: 10;
+  color: var(--brand);
+  font-size: .8rem;
+  font-weight: 600;
+  padding: 4px;
+}
+
+
+.panel.notice.flex-grow-1 > span:hover, .panel.approval.flex-grow-1 > span:hover {
+	z-index: 10;
+  background: transparent;
+  cursor: pointer;
+}
+
+
+
+
+/* 모달창 css */
+
+.custom-modal-header {
+  border-bottom: 1px solid #ccc;
+}
+
+
+.custom-modal-content {
+  padding-top : 30px;
+  height: 450px;
+  line-height: 1.6;
+  color: #333;
+  min-height: 150px;
+}
+
+.custom-modal-detail {
+  padding: 10px;
+}
+
+
+.custom-modal-title {
+  margin: 0 0 40px 0;
+  font-weight: 600;
+  font-size: 1.6rem;
+  
+}
+
+.custom-modal-meta {
+  list-style: none;
+  padding: 0 40px 0 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+
+.custom-modal-meta li {
+  margin-bottom: 5px;
+  display: flex;
+}
+
+.custom-modal-meta li span {
+	display: inline-block;
+}
+
+.custom-modal-meta li strong {
+	margin-right: 30px;
+}
+
+
+
+
+
+
+
 
 
 /* ─── 반응형 (≤ LG) ─── */
