@@ -6,10 +6,13 @@ import java.util.Map;
 
 import kr.co.itwillbs.solex.code.CodeController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/vacation/api")
@@ -18,14 +21,12 @@ public class VacationRestController {
 
 	@Autowired
 	public VacationService vacationService;
-	
-	//로그인 구현 필요
-	Long empId = 35L;
 
-	
 	//내 휴가 요약 정보
 	@GetMapping("/summary")
-	public Map<String, Object> getVacationSummary() {
+	public Map<String, Object> getVacationSummary(HttpSession session) {
+		String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 		
 	    Map<String, Object> result = vacationService.getVacationSummary(empId);
 	    
@@ -37,9 +38,10 @@ public class VacationRestController {
 	@GetMapping("/detail")
 	public Map<String, Object> getVacationDetail(@RequestParam(name = "page", required = false) Integer page,
 										         @RequestParam(name = "size", required = false) Integer size,
-										         @RequestParam("empId") Long empId) {
+										         HttpSession session) {
 
-	    //Long userId = Long.parseLong(empId);
+		String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);
@@ -59,10 +61,14 @@ public class VacationRestController {
 	
 	//연차 목록
 	@GetMapping("/list")
+	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	public Map<String, Object> getVacationList(@RequestParam("page") int page, 
 										       @RequestParam("size") int size,
-										       @RequestParam(name="keyword", required = false) String keyword) {
-		
+										       @RequestParam(name="keyword", required = false) String keyword,
+										       HttpSession session) {
+		String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
+    	
 		Map<String, Object> params = new HashMap<>();
 		
 		//Long userId = Long.parseLong(empId);

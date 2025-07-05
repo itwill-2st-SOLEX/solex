@@ -16,29 +16,44 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
 @RequestMapping("/operator/api")
 public class WorkerRestController {
 
 	@Autowired
 	public WorkerService workerService;
-	
-	//로그인 구현 필요
-	Long empId = 26L;
 
 	
 	//내 부서 정보
 	@GetMapping("/workerSummary")
-	public Map<String, Object> getWorkerSummary() {
+	public Map<String, Object> getWorkerSummary(HttpSession session ) {
+    	
+    	String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
+    	
+    	Map empInfo = workerService.getWorkerInfo(empId);
 		
 	    Map<String, Object> result = workerService.getWorkerSummary(empId);
+	    
+	    if (result == null) {
+	    	System.out.println(empInfo);
+	    	return empInfo;
+	    }
+	    
+	    result.putAll(empInfo);
+	   
 	    System.out.println("summary : " +  result);
 	    return result;
 	}
 	
 	//사원 실적 등록
 	@PostMapping("/insertCount")
-	public ResponseEntity<?> insertWorkCount(@RequestBody  Map<String, Object> map) {
+	public ResponseEntity<?> insertWorkCount(@RequestBody  Map<String, Object> map, HttpSession session ) {
+    	
+    	String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 		
 		workerService.insertWorkCount(map);
 		return ResponseEntity.ok().build();
@@ -46,9 +61,12 @@ public class WorkerRestController {
 	
 	@GetMapping("/workerList")
 	public Map<String, Object> getWorkerReportList(//@RequestParam(name = "page", required = false) Integer page,
-												        // @RequestParam(name = "size", required = false) Integer size,
-												         @RequestParam("empId") Long empId,
-												         @RequestParam("wpoId") Long wpoId) {
+										          //@RequestParam(name = "size", required = false) Integer size,
+										          @RequestParam("wpoId") Long wpoId,
+										          HttpSession session ) {
+    	
+    	String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 		
 		Map<String, Object> params = new HashMap<>();
 		
@@ -65,7 +83,11 @@ public class WorkerRestController {
 	}
 	
 	@PatchMapping("/updateMemo")
-	public ResponseEntity<?> updateMemo(@RequestBody Map<String, Object> map) {
+	public ResponseEntity<?> updateMemo(@RequestBody Map<String, Object> map,
+										HttpSession session ) {
+    	
+    	String sessionId = (String) session.getAttribute("empId");
+    	Long empId = Long.parseLong(sessionId);
 
 	    Long wreId   = ((Number) map.get("wreId")).longValue();
 	    String memo  = (String) map.get("newMemo");

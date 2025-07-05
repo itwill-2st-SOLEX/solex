@@ -58,7 +58,7 @@
 	</update>
 	
 	<!--글 삭제 -->
-	<delete id="deleteNotice"  parameterType="int">
+	<delete id="deleteNotice">
 		DELETE 
 		FROM notice
 		WHERE not_id=#{notId} 
@@ -79,6 +79,7 @@
 		FROM employee e JOIN view_employee ve ON e.emp_id = ve.emp_id 
 		WHERE e.EMP_ID = #{empId}
 	</select>
+
   </mapper>
   
   

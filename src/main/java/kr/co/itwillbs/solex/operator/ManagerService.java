@@ -13,14 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ManagerService {
 
-    private final OrderRequestsService orderRequestsService;
-	
 	@Autowired
 	ManagerMapper managerMapper;
-
-    ManagerService(OrderRequestsService orderRequestsService) {
-        this.orderRequestsService = orderRequestsService;
-    }
 	
 	//로그인한 사람에 해당하는 공정 정보 가져오기
 	public Map<String, Object> getManagerSummary(Long empId) {
@@ -127,7 +121,7 @@ public class ManagerService {
 			// 상태 : wpo_sts_05 -> wpo_sts_09 -->
 				map.put("wpoEndDate", LocalDateTime.now());
 				
-				System.out.println("9 : " + map);
+				System.out.println("map : " + map);
 				//>> 현재 공정 완료처리하기
 				managerMapper.updateWpoSts09_curr(map);
 				
@@ -136,17 +130,21 @@ public class ManagerService {
 				//>> 현재 공정 정보와 다음에 수행해야할 공정의 정보 찾아오기
 				Map stepInfo = managerMapper.selectStepInfo(wpoId);
 				
+				//stepInfo.putAll(map);
+				
+				System.out.println(stepInfo);
 				//다음 공정 정보 업데이트할 정보 전달
-				int jcount = ((Number) stepInfo.get("WPO_JCOUNT")).intValue();
-				int bcount = ((Number) stepInfo.get("BCOUNT")).intValue();
+				int jcount = ((Number) stepInfo.get("wpoJcount")).intValue();
+				int bcount = ((Number) stepInfo.get("bcount")).intValue();
 				
 				stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
-
+				
+				System.out.println("stepInfo : " + stepInfo);
 				
 				//다음 공정이 존재하면
-				if (stepInfo.get("NEXT_WPO_ID") != null ) {
+				if (stepInfo.get("NextWpoId") != null ) {
 
-					int nextWpoId = ((Number) stepInfo.get("NEXT_WPO_ID")).intValue();
+					int nextWpoId = ((Number) stepInfo.get("NextWpoId")).intValue();
 					
 					stepInfo.put("wpoNewStatus", "wpo_sts_01");		//상태값 공정대기
 					stepInfo.put("wpoStartDate", LocalDateTime.now());	//공정시작일
@@ -159,8 +157,9 @@ public class ManagerService {
 					
 					//마지막 공정이면
 					//수주 테이블에 업데이트				
-					stepInfo.put("wpoId", stepInfo.get("WPO_ID"));
+					/* stepInfo.put("wpoId", stepInfo.get("WPO_ID")); */
 					stepInfo.put("oddModDate", LocalDateTime.now());	//변경일
+					stepInfo.put("empId", map.get("empId"));
 					
 					//수주 디테일에 작업완료로 상태 변경, 불량개수/생산량 업데이트
 					managerMapper.updateSujuDetail(stepInfo);	

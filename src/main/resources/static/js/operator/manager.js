@@ -3,6 +3,7 @@ let currentPage = 0;
 const pageSize = 10;
 const gridHeight = 390;
 let empId = null;
+let loginPos = null;
 let workerGrid;
 let sumGrid;
 
@@ -52,7 +53,6 @@ const grid = new tui.Grid({
             align: 'center',
             sortable: true,
             width: 80,
-            defaultValue: 0,
             editor: customTextEditor,		//숫자만 입력하도록 설정
 			// 입력이 불가능할때는 '-' 표시하기
 			// 생산중만 회색으로 표시
@@ -295,6 +295,7 @@ async function managerSummary() {
         const data = await res.json();
 
         empId = data.EMP_ID;
+		loginPos = data.EMP_POS_NM;
 
         document.getElementById('prcCode').textContent = data.PRC_CODE || '-';
         document.getElementById('prcName').textContent = data.PRC_NM || '-';
@@ -314,7 +315,7 @@ async function managerSummary() {
 async function managerList(page) {
     try {
 		const ym = currentMonth.format('YYYYMM');
-        const url = `/SOLEX/operator/api/managerList?page=${page}&size=${pageSize}&empId=${empId}&yearMonth=${ym}`;
+        const url = `/SOLEX/operator/api/managerList?page=${page}&size=${pageSize}&yearMonth=${ym}`;
         const res = await fetch(url);
         const data = await res.json();
 
@@ -323,28 +324,31 @@ async function managerList(page) {
 
         const gridData = list.map(n => {
             let btn = '';
-            const bcount = n.QHI_BCOUNT || 0;
+            const bcount = n.QHI_BCOUNT //|| 0;
 			
 			// 불량 개수 제외하고 진행률 계산
             const wpoProRate = n.ODD_CNT > 0
                 ? Math.round(((n.WPO_JCOUNT - bcount) / n.ODD_CNT) * 1000) / 10
                 : 0;
             const wpoStatus = n.WPO_STATUS;
+			
+			if (loginPos != '사원') {
 
-            if (wpoStatus === 'wpo_sts_01' && !hasInProgress) {
-                btn = `<button class="btn start-btn btn-sm btn-primary" data-id="${n.WPO_ID}">작업시작</button>`;
-            } else if (wpoStatus === 'wpo_sts_02') {
-                btn = '';
-            } else if (wpoStatus === 'wpo_sts_03') {
-                btn = `<button class="btn quality-btn btn-sm btn-info" data-id="${n.WPO_ID}">품질검사</button>`;
-            } else if (wpoStatus === 'wpo_sts_04') {
-                btn = `<button class="btn transfer-btn btn-sm btn-warning" data-id="${n.WPO_ID}">검사완료</button>`;
-            } else if (wpoStatus === 'wpo_sts_05') {
-                btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WPO_ID}">공정이관</button>`;
-            } else if (wpoStatus === 'wpo_sts_09') {
-                btn = '';
-            }
-
+	            if (wpoStatus === 'wpo_sts_01' && !hasInProgress) {
+	                btn = `<button class="btn start-btn btn-sm btn-primary" data-id="${n.WPO_ID}">작업시작</button>`;
+	            } else if (wpoStatus === 'wpo_sts_02') {
+	                btn = '';
+	            } else if (wpoStatus === 'wpo_sts_03') {
+	                btn = `<button class="btn quality-btn btn-sm btn-info" data-id="${n.WPO_ID}">품질검사</button>`;
+	            } else if (wpoStatus === 'wpo_sts_04') {
+	                btn = `<button class="btn transfer-btn btn-sm btn-warning" data-id="${n.WPO_ID}">검사완료</button>`;
+	            } else if (wpoStatus === 'wpo_sts_05') {
+	                btn = `<button class="btn success-btn btn-sm btn-success" data-id="${n.WPO_ID}">공정이관</button>`;
+	            } else if (wpoStatus === 'wpo_sts_09') {
+	                btn = '';
+	            }
+			
+			}
             return {
                 wpoId: n.WPO_ID,
                 wrkId: n.WRK_ID,

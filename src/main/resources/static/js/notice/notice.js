@@ -8,6 +8,12 @@ let editorLoaded = false;
 let searchKeyword = '';
 let empId = null;
 
+let loginEmpId = null;
+
+const params = new URLSearchParams(window.location.search);
+const openId = params.get('openId');
+if (openId) openNotice(openId);  // Ajax → showNoticeModal
+
 // ToastUI Grid 생성
 const grid = new tui.Grid({
     el: document.getElementById('grid'),
@@ -27,11 +33,19 @@ const grid = new tui.Grid({
 
 // 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
 window.addEventListener('DOMContentLoaded', () => {
-		
-	searchKeyword = document.getElementById('searchInput').value.trim();
-    noticeList(currentPage, searchKeyword);
-	document.getElementById('searchBtn').addEventListener('click', searchNotice);
-	document.getElementById('writeBtn').addEventListener('click', onWriteNotice);
+	fetch('/SOLEX/notice/api/userinfo')
+	    .then(res => res.json())
+	    .then(data => {
+	        // data.EMP_ID는 NoticeRestController의 getEmployeeInfo에서 추가한 현재 로그인한 사용자 사번
+	        loginEmpId = String(data.loginId); 
+	        console.log("현재 로그인한 사용자 사번:", loginEmpId);
+		})
+				
+					
+		searchKeyword = document.getElementById('searchInput').value.trim();
+	    noticeList(currentPage, searchKeyword);
+		document.getElementById('searchBtn').addEventListener('click', searchNotice);
+		document.getElementById('writeBtn').addEventListener('click', onWriteNotice);
 	
 });
 
@@ -96,8 +110,6 @@ async function noticeList(page, keyword = '') {
         if (keyword) {
             url += `&keyword=${encodeURIComponent(keyword)}`;
         }
-		
-		
 		
         const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
         const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
@@ -180,13 +192,15 @@ async function changeNotice(mode, noticeId = null) {
 		method = 'PUT';
 	  
 	} else if (mode == 'delete') {
-		url = `/SOLEX/notice/${noticeId}`;
+		url = `/SOLEX/notice/api/${noticeId}`;
 		method = 'DELETE';
 	  
 	}
 	
 	//삭제와 등록/수정 구분하기
 	if (mode == 'delete') {
+		
+		
 		if (!confirm('정말 삭제하시겠습니까?')) return;
 		
 	} else {
@@ -270,7 +284,9 @@ function noticeDelMode(noticeId) {
 function showNoticeModal(mode, data = {}) {
     const modalContainer = document.getElementById('showModal');
     const modalFooter = document.getElementById('modalFooter');
+	const isOwner = data.EMP_ID && String(data.EMP_ID) === loginEmpId;
     const isEditable = (mode == 'new' || mode == 'edit');
+	const isView  = mode === 'view';
     const now = new Date();
 
     const title = isEditable ? 
@@ -280,6 +296,13 @@ function showNoticeModal(mode, data = {}) {
     const content = isEditable ?
         `<div id="editor"></div>` :
         `${(data.NOT_CON || '내용 없음').replace(/\n/g, '<br>')}`; // \n줄바꿈 , /g 전역 검색 플래그
+		
+	const editableBtns = `
+	        ${isOwner && isView ? `
+	            <button class="btn custom-btn-blue mt-3" onclick="noticeEditMode(${data.NOT_ID})">수정</button>
+	            <button class="btn custom-btn-blue mt-3" onclick="changeNotice('delete', ${data.NOT_ID})">삭제</button>
+	        ` : ''}
+	    `;
 
     modalContainer.innerHTML = `
         <div class="custom-modal-detail">
@@ -289,17 +312,19 @@ function showNoticeModal(mode, data = {}) {
 					<li><strong>부서명 </strong> <span id="modalDept">${data.EMP_DEP_NM == '공통' ? '-' : data.EMP_DEP_NM}</span></li>
                     <li><strong>작성자 </strong> <span id="modalWriter">${data.EMP_NM}</span> &nbsp; </li>
                     <li><strong>등록일 </strong> <span id="modalDate">${data.NOT_REG_DATE ? dateFormatter(data.NOT_REG_DATE, true) : dateFormatter(now)}</span></li>
-					                </ul>
+				</ul>
             </div>
             <div class="custom-modal-content" id="modalContent">${content}</div>
         </div>
     `;
 
     modalFooter.innerHTML = `
-        ${mode === 'view' ? `<button class="btn custom-btn-blue mt-3" onclick="noticeEditMode(${data.NOT_ID})">수정</button>` : ''}
-		${mode === 'view' ? `<button class="btn custom-btn-blue mt-3" onclick="changeNotice('delete', ${data.NOT_ID})">삭제</button>` : ''}
-        ${isEditable ? `<button class="btn custom-btn-blue mt-3"  onclick="changeNotice('${mode}', ${data.NOT_ID || null})">저장</button>` : ''}
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+	${editableBtns}
+	        ${['new','edit'].includes(mode) ? `
+	            <button class="btn custom-btn-blue mt-3"
+	                    onclick="changeNotice('${mode}', ${data.NOT_ID || 'null'})">저장</button>
+	        ` : ''}
+	        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
     `;
 
     // 모달 표시
