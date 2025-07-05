@@ -142,41 +142,84 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 	
 	// ⭐ 일괄 BOM 저장 버튼 로직 ⭐
-	const bomSaveBatchButton = document.getElementById('bom-save-batch'); // HTML에 추가한 버튼 ID
-    if (bomSaveBatchButton) {
-        bomSaveBatchButton.addEventListener('click', async function() {
-            const checkedOptIds = window.getCheckedOptIds(); // product_group_list.js 에서 정의된 함수
+	document.getElementById('bom-save-batch').addEventListener('click', async function () {
+	    const checkedOptIds = window.getCheckedOptIds(); // 좌측에서 선택한 옵션 ID들
 
-            if (checkedOptIds.length < 2) { // 버튼 가시성 로직에 따라 이 메시지는 뜰 일이 없겠지만 방어적으로 추가
-                alert("일괄 저장할 제품을 2개 이상 선택해주세요.");
-                return;
-            }
+	    if (!checkedOptIds || checkedOptIds.length < 2) {
+	        alert("일괄 저장할 제품 옵션을 2개 이상 선택해주세요.");
+	        return;
+	    }
 
-            console.log("일괄 저장 대상 OPT_ID 목록:", checkedOptIds);
+	    // 현재 그리드에서 수정된 BOM 추출
+	    const { createdRows, updatedRows } = bom_grid.getModifiedRows();
 
-            // 현재 bom_grid의 변경사항 추출 (단일 제품의 BOM 변경사항)
-            const changes = bom_grid.getModifiedRows();
-            const { createdRows, updatedRows, deletedRows } = changes; // deletedRows도 포함하여 서버로 보낼 수 있습니다.
+	    if (createdRows.length === 0 && updatedRows.length === 0) {
+	        alert('저장할 BOM 변경 내용이 없습니다.');
+	        return;
+	    }
 
-            // 변경사항 없음 체크
-            if (createdRows.length === 0 && updatedRows.length === 0 && deletedRows.length === 0) {
-                alert('저장할 BOM 변경 내용이 없습니다. 현재 표시된 BOM에 대한 변경사항이 없거나, 다른 제품이 선택되어 있을 수 있습니다.');
-                return;
-            }
-			
-			// 필드 검증 (단건 저장과 동일하게 적용)
-            const requiredFields = ['MAT_NM', 'BOM_CNT', 'BOM_UNIT', 'BOM_COMM'];
-            const invalidRows = [...createdRows, ...updatedRows].filter(row =>
-                requiredFields.some(field => row[field] === '')
-            );
-            if (invalidRows.length > 0) {
-                alert("필수 항목이 입력되지 않은 BOM 행이 있습니다. 모든 변경사항을 입력해야 합니다.");
-                return;
-            }
-			
-			
-			
-		});
-	}
-	
+	    // 필수 항목 검증
+	    const requiredFields = ['MAT_NM', 'BOM_CNT', 'BOM_UNIT', 'BOM_COMM'];
+		const allRows = [...createdRows, ...updatedRows];
+		
+		const invalidRows = allRows.filter(row =>
+		  requiredFields.some(field => {
+		    const value = row[field];
+		    return value === undefined || value === null || value.toString().trim() === '';
+		  })
+		);
+
+	    if (invalidRows.length > 0) {
+	        alert("필수 항목이 누락된 BOM이 있습니다.");
+	        return;
+	    }
+
+	    // ✅ createdRows 를 checkedOptIds 개수만큼 복제
+	    const batchPayload = [];
+
+	    checkedOptIds.forEach(optId => {
+	        allRows.forEach(row => {
+	            batchPayload.push({
+					BOM_ID: row.BOM_ID || null, // update의 경우에 필요
+	                OPT_ID: optId,
+	                MAT_ID: row.MAT_ID,
+	                BOM_CNT: row.BOM_CNT,
+	                BOM_UNIT: row.BOM_UNIT,
+	                BOM_COMM: row.BOM_COMM
+	            });
+	        });
+	    });
+
+		if (batchPayload.length === 0) {
+	        alert('일괄 저장 실패: 저장할 데이터가 없습니다.');
+	        return;
+	    }
+		
+	    // ✅ 저장 요청 (updateBomInfo를 재활용)
+	    try {
+	        const response = await fetch('/SOLEX/boms/api/save', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json'
+	            },
+	            body: JSON.stringify({ 
+					createdRows: [], // batchPayload 전부 update로 처리함(merge) 
+					updatedRows: batchPayload }) // update
+	        });
+
+	        const result = await response.json();
+
+	        if (result.success) {
+	            alert('일괄 저장 성공!');
+	            // 선택된 첫 번째 OPT_ID로 다시 조회
+	            window.bom_grid.clear();
+	            window.loadBomList(checkedOptIds[0]);
+	        } else {
+	            alert('일괄 저장 실패: ' + (result.message || '알 수 없는 오류'));
+	        }
+	    } catch (err) {
+	        console.error(err);
+	        alert('저장 중 오류 발생');
+	    }
+	});
 });

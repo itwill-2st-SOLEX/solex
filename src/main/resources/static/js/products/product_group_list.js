@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		  { header: '선택된색상', name: 'OPT_COLOR', hidden: true },
 		  { header: '선택된굽', name: 'OPT_HEIGHT', hidden: true },
 		  { header: '선택된사이즈', name: 'OPT_SIZE', hidden: true },
-	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 150,
+	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 130,
 			filter:
 			{
 	            type: 'text',
@@ -75,18 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	            showClearBtn: true
 	        }
 		  },
-	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true ,
-			filter:
-			{
-	            type: 'text',
-	            showApplyBtn: true,
-	            showClearBtn: true
-	        }
-		  },
-	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true  },
-		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true },
-		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true },
-		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true}
+	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true, filter: 'select'},
+	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true, filter: 'select'  },
+		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true, filter: 'select' },
+		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true, filter: 'select' },
+		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true, filter: 'select'}
 	    ]
 	});
 

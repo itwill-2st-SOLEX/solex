@@ -30,29 +30,29 @@
 		 OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
 	</select>
 	
-	<insert id="insertBomInfo" parameterType="map">
-	    INSERT ALL
-	    <foreach collection="list" item="bom">
-	        INTO BOM (
-	        	      OPT_ID
-	        	    , MAT_ID
-	        	    , BOM_CNT
-	        	    , BOM_UNIT
-	        	    , BOM_COMM
-	        		, BOM_REG_DATE
-	        		, BOM_MOD_DATE
-	        	   )
-	        VALUES (
-	                  #{bom.OPT_ID}
-	                , #{bom.MAT_ID}
-	                , #{bom.BOM_CNT}
-	                , #{bom.BOM_UNIT}
-	                , #{bom.BOM_COMM}
-	                , SYSDATE + 9/24 
-	                , SYSDATE + 9/24 )
-	    </foreach>
-	    SELECT 1 FROM DUAL
-	</insert>
+<!-- 	<insert id="insertBomInfo" parameterType="map"> -->
+<!-- 	    INSERT ALL -->
+<!-- 	    <foreach collection="list" item="bom"> -->
+<!-- 	        INTO BOM ( -->
+<!-- 	        	      OPT_ID -->
+<!-- 	        	    , MAT_ID -->
+<!-- 	        	    , BOM_CNT -->
+<!-- 	        	    , BOM_UNIT -->
+<!-- 	        	    , BOM_COMM -->
+<!-- 	        		, BOM_REG_DATE -->
+<!-- 	        		, BOM_MOD_DATE -->
+<!-- 	        	   ) -->
+<!-- 	        VALUES ( -->
+<!-- 	                  #{bom.OPT_ID} -->
+<!-- 	                , #{bom.MAT_ID} -->
+<!-- 	                , #{bom.BOM_CNT} -->
+<!-- 	                , #{bom.BOM_UNIT} -->
+<!-- 	                , #{bom.BOM_COMM} -->
+<!-- 	                , SYSDATE + 9/24  -->
+<!-- 	                , SYSDATE + 9/24 ) -->
+<!-- 	    </foreach> -->
+<!-- 	    SELECT 1 FROM DUAL -->
+<!-- 	</insert> -->
 	
 	<!-- BOM 기존 행 수정 -->
 	<update id="updateBomInfo" parameterType="map">
@@ -60,7 +60,7 @@
         target USING (
         <foreach collection="list" item="bom" separator="UNION ALL">
           SELECT
-                 #{bom.BOM_ID} AS BOM_ID,        
+                 #{bom.BOM_ID, jdbcType=NUMERIC} AS BOM_ID,        
                  #{bom.OPT_ID} AS OPT_ID,        
                  #{bom.MAT_ID} AS MAT_ID,        
                  #{bom.BOM_CNT} AS BOM_CNT,      
@@ -69,7 +69,10 @@
             FROM DUAL
         </foreach>
     ) src
-        ON (target.BOM_ID = src.BOM_ID)            
+        ON (
+        	 target.OPT_ID = src.OPT_ID
+    	 AND target.MAT_ID = src.MAT_ID
+        )            
       WHEN MATCHED THEN
     UPDATE SET
            target.BOM_CNT = src.BOM_CNT,       

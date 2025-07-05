@@ -58,7 +58,7 @@ public class BomsRestController {
 	
 	@PostMapping("/save")
 	public Map<String, Object> saveBomInfo(@RequestBody Map<String, List<Map<String, Object>>> map) {
-		
+		System.out.println("save 함수의 데이터 : " + map);
 		List<Map<String, Object>> insertList = map.get("createdRows");
 	    List<Map<String, Object>> updateList = map.get("updatedRows");
 	    
@@ -68,7 +68,7 @@ public class BomsRestController {
 
 	    // 상세공통코드 신규 행 추가
 	    if (insertList != null && !insertList.isEmpty()) {
-	    	bomsService.insertBomInfo(insertList);
+	    	bomsService.updateBomInfo(insertList);
 	    }
 
 	    // 상세공통코드 기존 행 수정
