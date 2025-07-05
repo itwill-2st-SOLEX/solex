@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const { att_in_time, att_out_time, det_nm, att_id } = attendanceData;
 
 
-        // 숨겨진 att_id 필드 설정
+        // 숨겨진 att_id 필드 설정??? 필요한가??? - 0706 04:48
         if (att_id) {
-            currentAttIdInput.value = att_id;
+            currentAttIdInput.value = attendanceData.att_id;
             console.log('숨겨진 필드 ATT_ID 설정됨:', currentAttIdInput.value);
         } else {
             currentAttIdInput.value = '';
@@ -72,10 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 출근 시간 표시 및 버튼 상태 업데이트
         if (att_in_time) {
-            const date = new Date(att_in_time);
-            punchInTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-            punchInButton.disabled = true;
-            punchInButton.style.opacity = '0.6';
+//            const date = new Date(att_in_time);
+//            punchInTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+//            punchInButton.disabled = true;
+//            punchInButton.style.opacity = '0.6';
+			punchInButton.style.display = 'none';
 
             if (!att_out_time) { // 출근은 했지만 아직 퇴근을 안 했을 경우
                 punchOutButton.disabled = false;
@@ -85,27 +86,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 punchOutButton.style.opacity = '0.6';
             }
         } else { // 출근 기록이 없는 경우
-            punchInTimeSpan.textContent = '--:--';
-            punchInButton.disabled = false;
+//            punchInTimeSpan.textContent = '--:--';
+            punchInButton.disabled = false; // 출근 버튼 있음. 
             punchInButton.style.opacity = '1';
-            punchOutButton.disabled = true;
-            punchOutButton.style.opacity = '0.6';
+            punchOutButton.disabled = true; // 퇴근 버튼 숨김. 
+            punchOutButton.style.opacity = '0.6'; // 퇴근 버튼 흐리게.
         }
 
         // 퇴근 시간 표시 업데이트
-        if (att_out_time) {
-            const date = new Date(att_out_time);
-            punchOutTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-        } else {
-            punchOutTimeSpan.textContent = '--:--';
-        }
+//        if (att_out_time) {
+//            const date = new Date(att_out_time);
+//            punchOutTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+//        } else {
+//            punchOutTimeSpan.textContent = '--:--';
+//        }
 
         // 출퇴근 상태 표시 업데이트
-        if (det_nm) {
-            punchStatusSpan.textContent = det_nm;
-        } else {
-            punchStatusSpan.textContent = '--';
-        }
+//        if (det_nm) {
+//            punchStatusSpan.textContent = det_nm;
+//        } else {
+//            punchStatusSpan.textContent = '--';
+//        }
 
       	// 총 근무 시간 계산 및 업데이트: 분리된 함수 사용
       	totalWorkTimeSpan.textContent = calculateFormattedWorkTime(att_in_time, att_out_time);
@@ -144,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. 출근 버튼 클릭 시 DB에 기록 ---
     punchInButton.addEventListener('click', () => {
+		
         $.ajax({
             url: PUNCH_IN_URL,
             method: 'POST',
@@ -163,11 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. 퇴근 버튼 클릭 시 DB에 기록 ---
     punchOutButton.addEventListener('click', () => {
-        // 출근 기록이 없으면 퇴근 불가 (서버에서도 검증 필요)
-        if (punchInTimeSpan.textContent === '--:--') {
-            alert('출근 기록이 없습니다. 먼저 출근 등록을 해주세요.');
-            return;
-        }
 
         const currentAttId = currentAttIdInput.value; // 숨겨진 필드에서 att_id 가져오기
         console.log('전송하려는 ATT_ID:', currentAttId);

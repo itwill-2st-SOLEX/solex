@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpSession;
+
 @RestController
 @RequestMapping("/attendance/api")
 public class AttendanceRestController {
@@ -30,21 +35,21 @@ public class AttendanceRestController {
 	@Autowired
 	private AttendanceService attendanceService;
 	
-	long loginEmpId = 7L; // 임시 ID
-
-	
 	// 근태현황조회
 	@GetMapping("/data")
-	public Map<String, Object> getAttendanceDataByMonth( // 반환 타입을 DTO로 변경
+	public Map<String, Object> getAttendanceDataByMonth(
+			@AuthenticationPrincipal User user,
 	        @RequestParam("year") int year,
 	        @RequestParam("month") int month,
 	        @RequestParam(value = "resultType", required = false) String resultType,
 			@RequestParam(name="keyword", required = false) String keyword,
 			@RequestParam(name = "page", required = false) Integer page,
-			@RequestParam(name = "size", required = false) Integer size
+			@RequestParam(name = "size", required = false) Integer size,
+			HttpSession session
 			) {
-
+		String loginEmpId = (String)session.getAttribute("empId");
 		
+		System.out.println("controller에서 emp id 가져오나? " + loginEmpId);
 		// 로그인한 사용자의 직급등 사원정보 가져오기
 		Map<String,Object> info = attendanceService.getEmployeeInfo(loginEmpId);
 		
@@ -101,8 +106,9 @@ public class AttendanceRestController {
 	
 	// 오늘 출퇴근 현황 조회 API
     @GetMapping("/today")
-    public ResponseEntity<Map<String, Object>> getTodayAttendanceStatus() {
-    	System.out.println("/api/today - get");
+    public ResponseEntity<Map<String, Object>> getTodayAttendanceStatus(HttpSession session) {
+    	
+    	String loginEmpId = (String)session.getAttribute("empId");
 
     	
         Optional<Map<String, Object>> attendanceRecord = attendanceService.getTodayAttendanceStatus(loginEmpId);
@@ -145,7 +151,9 @@ public class AttendanceRestController {
     // 출근 등록 API
     @PostMapping("/punch-in")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> punchIn() {
+    public ResponseEntity<Map<String, Object>> punchIn(HttpSession session) {
+    	String loginEmpId = (String)session.getAttribute("empId");
+
 
         try {
             Map<String, Object> result = attendanceService.recordPunchIn(loginEmpId);
@@ -161,9 +169,9 @@ public class AttendanceRestController {
     
     // 퇴근 등록 API
     @PostMapping("/punch-out")
-    public ResponseEntity<Map<String, Object>> punchOut(@RequestBody Map<String, Object> requestData) {
-    	
-//    	System.out.println("requestData : " + requestData); {att_id=135}
+    public ResponseEntity<Map<String, Object>> punchOut(@RequestBody Map<String, Object> requestData, HttpSession session) {
+    	String loginEmpId = (String)session.getAttribute("empId");
+
     	String attIdString = String.valueOf(requestData.get("att_id"));
     	Long attId = Long.parseLong(attIdString);
 
