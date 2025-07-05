@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.shipments.ShipmentsMapper">
+  	<select id="selectPagedOrderDataAsMap" parameterType="Map" resultType="Map">
+  	SELECT
+		odd.odd_id as ODD_ID, -- 수주 상세 번호
+		cli.cli_nm as CLI_NM, -- 거래처명
+		cli.cli_ceo as CLI_CEO, -- 거래처 대표자
+		cli.cli_phone as CLI_PHONE, -- 거래처 대표자 전화번호
+		ord.ord_add || ' ' || ord.ord_da as ORD_ADDRESS, -- 주소		
+		odd.odd_sts as ODD_STS,
+		cd.det_nm as DET_NM,
+		TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE, -- 수정일
+		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE -- 납품 예정일
+	FROM suju_order ord
+	left JOIN client cli ON ord.cli_id = cli.cli_id
+	left join suju_order_detail odd on odd.ord_id = ord.ord_id
+	left JOIN product_option opt ON opt.opt_id = odd.opt_id
+	left JOIN code_detail cd ON odd.odd_sts = cd.det_id
+	WHERE odd.odd_sts in ('odd_sts_05', 'odd_sts_06', 'odd_sts_07', 'odd_sts_08', 'odd_sts_09') -- '수주 등록' 상태인 것들만 조회
+    ORDER BY odd.odd_id asc
+    OFFSET #{offset} ROWS
+    FETCH NEXT #{limit} ROWS ONLY
+	</select>
+
+	<!-- 수주 상세 조회 -->
+	<select id="selectOrderDetailById" parameterType="int" resultType="map">
+		 SELECT
+			odd.odd_id as ODD_ID, -- 수주 상세 번호
+			cli.cli_nm as CLI_NM, -- 거래처명
+			prd.prd_nm as PRD_NM, -- 제품명
+			ord.ord_pc as ORD_PC,
+			ord.ord_add as ORD_ADD,
+			ord.ord_da as ORD_DA, -- 주소		
+			ord.pay_type as PAY_TYPE, -- 결제 방식
+			ord.ord_pay as ORD_PAY, -- 결제 금액
+			TO_CHAR(ord.ord_pay_date, 'YYYY-MM-DD') as ORD_PAY_DATE, -- 결제 예정일
+			TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE, -- 납품 예정일
+			odd.odd_cnt as QUANTITY,
+			opt.opt_color as COLOR_CODE,
+			opt.opt_size as SIZE_CODE,
+			opt.opt_height as HEIGHT_CODE,
+			cd2.det_nm as COLOR_NAME,
+			cd3.det_nm as SIZE_NAME,
+			cd4.det_nm as HEIGHT_NAME,
+			cli.cli_id as CLI_ID,
+			prd.prd_id as PRD_ID
+		FROM suju_order ord
+		left JOIN client cli ON ord.cli_id = cli.cli_id
+		left join suju_order_detail odd on odd.ord_id = ord.ord_id
+		left JOIN product_option opt ON opt.opt_id = odd.opt_id
+		left join product prd on prd.prd_id = opt.prd_id
+		left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+		left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+		left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
+		WHERE odd.odd_id = #{odd_id}
+	</select>
+	
+
+	<!-- 주문 생성 -->
+	<insert id="createOrderRequest" parameterType="map" keyProperty="ord_id" keyColumn="ord_id" useGeneratedKeys="true">
+		insert into suju_order
+		(
+			cli_id,
+			emp_id,
+			ord_reg_date,
+			ord_end_date,
+			ord_pc,
+			ord_add,
+			ord_da,
+			ord_pay,
+			ord_pay_date,
+			ord_mod_date,
+			pay_type
+		)
+		values
+		(
+			#{cli_id},
+			#{emp_id},
+			SYSDATE + 9/24,
+			#{ord_end_date},
+			#{ord_pc},
+			#{ord_add},
+			#{ord_da},
+			#{ord_pay},
+			#{ord_pay_date},
+			SYSDATE + 9/24,
+			#{pay_type}
+		)
+	</insert>
+
+	<!-- 수주상세테이블 등록 -->
+	<insert id="createSujuOrderDetail" parameterType="java.util.List">
+    INSERT INTO suju_order_detail (
+        ord_id, 
+        opt_id, 
+        odd_cnt,
+        odd_sts,
+        odd_mod_date,
+        odd_isapproval
+    )
+		<foreach item="item" collection="list" separator="UNION ALL">
+			SELECT
+				#{item.ord_id},
+				(SELECT opt_id from product_option 
+				WHERE prd_id = #{item.productCode} 
+				and opt_color = #{item.colorCode}
+				and opt_size = #{item.sizeCode}
+				and opt_height = #{item.heightCode}),
+				#{item.quantity},
+				#{item.odd_sts},
+				SYSDATE + 9/24,
+				'n'
+			FROM DUAL
+		</foreach>
+	</insert>
+	<!-- 주문 등록 트랜잭션 끝 -->
+
+	<!-- 수주테이블과 수주상세테이블 조인해서 수주 번호에 해당하는 수주 상세들 전부 승인 -->
+	<update id="incrementOddSts" parameterType="int">
+		UPDATE suju_order_detail 
+		SET odd_sts = 'odd_sts_' ||
+              			LPAD(TO_CHAR(TO_NUMBER(REGEXP_SUBSTR(odd_sts, '\d+')) + 1), 2, '0'),
+			odd_mod_date = SYSDATE + 9/24,
+			odd_isapproval = 'y'
+		WHERE odd_id = #{odd_id}
+	</update>
+
+
+  
+</mapper>

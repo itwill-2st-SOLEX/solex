@@ -257,8 +257,7 @@ function attachModalEventListeners() {
     handler('findPostCodeBtn', findPostCode);
     handler('addRowBtn', addRowToInnerGrid);
     handler('resetOptionFormsBtn', resetOptionForms);
-    handler('deleteSelectedRowsBtn', () => { if(INNER_TUI_GRID_INSTANCE) INNER_TUI_GRID_INSTANCE.removeRows(INNER_TUI_GRID_INSTANCE.getCheckedRowKeys()); });
-    handler('resetItemsBtn', () => { if(INNER_TUI_GRID_INSTANCE) INNER_TUI_GRID_INSTANCE.clear(); });
+    handler('deleteSelectedRowsBtn', deleteSelectedRows);
     attachNumericFormatter('odd_pay');
 
     document.getElementById('myModal').addEventListener('click', function(e){
@@ -457,8 +456,15 @@ function resetOrderStep(step) {
 }
 
 function initDate() {
-    const todayStr = new Date().toISOString().split('T')[0];
-    ['odd_end_date', 'odd_pay_date'].forEach(id => { const el = document.getElementById(id); if (el) el.value = todayStr; });
+  const todayStr = new Date().toISOString().split('T')[0];
+  ['odd_end_date', 'odd_pay_date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = todayStr;
+      // 선택 가능한 가장 빠른 날짜를 오늘로 설정합니다. (이전 날짜 비활성화)
+      el.min = todayStr;
+    }
+  });
 }
 
 const debounce = (fn, delay = 300) => { let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); }; };
@@ -523,4 +529,8 @@ async function submitForm() {
     } catch (error) {
         alert(`오류: ${error.message}`);
     }
+}
+
+function deleteSelectedRows() {
+    INNER_TUI_GRID_INSTANCE.removeCheckedRows();
 }
