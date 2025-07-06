@@ -126,34 +126,6 @@ public class BomsRestController {
 //        }
     }
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	// 단위 셀렉트바 옵션들
 	@GetMapping("/materialList")
 	public List<Map<String, Object>> getmaterialList() {
