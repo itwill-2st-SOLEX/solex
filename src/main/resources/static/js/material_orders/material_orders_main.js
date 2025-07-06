@@ -24,6 +24,7 @@ $(function() {
             {
                 header: '승인/반려',
                 name: 'mat_ord_sts',
+				sortable: true,
                 align: 'center',
                 width: 230,
                 formatter: ({ value, rowKey }) => {
