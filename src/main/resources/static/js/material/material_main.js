@@ -214,7 +214,72 @@ $(function() {
 		  $modal.find('input, textarea').val('');
 		  $modal.find('select').prop('selectedIndex', 0);   // 첫 옵션으로
 		});
+	// 유효성 검사 해보쟛
+	const matCdInput = document.getElementById('matCd');
+	const matNmInput = document.getElementById('matNm');
+	const cliIdSelect = document.getElementById('cliId');
+	const matUnitSelect = document.getElementById('matUnit');
+	const matCommInput = document.getElementById('matComm');
+	const matPriceInput = document.getElementById('matPrice');
 	
+	
+	//동일한 문자 반복 방지를 위한 함수임
+	function hasTripleRepeats(str) {
+	  // (.)\1{2,} : 어떤 문자(.)가(\1) 2번 이상({2,}) 더 반복되는 경우를 찾습니다.
+	  const regex = /(.)\1{2,}/;
+	  return regex.test(str);
+	}
+	
+	// 유효성 검사 함수
+	function validateForm() {
+	    const matCd = matCdInput.value;
+	    const matNm = matNmInput.value;
+	    const cliId = cliIdSelect.value;
+	    const matUnit = matUnitSelect.value;
+	    const matPrice = matPriceInput.value;
+	    const matComm = matCommInput.value;
+
+	    // 1. 필수 입력 값 확인
+	    if (!matCd || !matNm || !cliId || !matUnit || !matPrice || !matComm) {
+	        alert('필수 입력 항목(*)을 모두 채워주세요.');
+	        return false;
+	    }
+
+	    // 2. 자재코드 유효성 검사 (영문/숫자 4자리)
+	    // -> 숫자 4자리로만 제한하려면 /^\d{4}$/ 로 변경
+	    // -> 영어 4자리로만 제한하려면 /^[a-zA-Z]{4}$/ 로 변경
+	    const matCdRegex = /^[a-zA-Z0-9]{4}$/;
+	    if (!matCdRegex.test(matCd)) {
+	        alert('자재코드는 영문 또는 숫자 4자리로 입력해야 합니다.');
+	        matCdInput.focus();
+	        return false;
+	    }
+
+	    // 3. 가격 유효성 검사
+	    if (isNaN(matPrice) || Number(matPrice) < 1) {
+	        alert('가격은 1 이상의 숫자만 입력 가능합니다.');
+	        matPriceInput.focus();
+	        return false;
+	    }
+
+		// 4. 설명 최소 10자 이상
+		if(matComm.length < 10){
+			alert('자재 설명은 최소 10자 이상 입력해주세요');
+	        return false;
+		}
+		
+		// 5. 설명(matComm) 연속 반복 글자 검사 
+		if (hasTripleRepeats(matComm)) {
+		    alert('설명에 동일한 글자를 3번 이상 연속으로 사용할 수 없습니다.');
+		    matCommInput.focus();
+		    return false;
+		}
+	    // 모든 유효성 검사 통과
+	    return true;
+	}
+
+		
+		
 	// 자재 등록
 	$('#submitMaterial').on('click', async function () {
 		
@@ -240,24 +305,25 @@ $(function() {
 			matComm   : matComm,
 			matPrice    : matPrice
 	  	};
-				
-		try {
+		if(validateForm())	{
+			console.log('유효성 검사 통과!');	
 	    	const res = await fetch('/SOLEX/material', {  // ← POST 엔드포인트
 	  			method  : 'POST',
 	      		headers : { 'Content-Type': 'application/json' },
 	      		body    : JSON.stringify(payload)
 	    	});
-	    	if (!res.ok) throw new Error(`에러러러러러러`);
-
-	    	alert('자재가 등록되었습니다@@');
-	    	$modal.modal('hide');
-
-	    	// 목록 새로고침
-	    	currentPage = 0;
-	    	loadDrafts(currentPage);
-  		} catch (err) {
-    		console.error('자재 등록 실패', err);
-    		alert('자재 등록 실패');
-  		}
+			
+			if(res.ok){
+		    	alert('자재가 등록되었습니다@@');
+		    	$modal.modal('hide');
+	
+		    	// 목록 새로고침
+		    	currentPage = 0;
+		    	loadDrafts(currentPage);
+				
+			} else {
+	    		alert('자재등록에 실패하셨습니다@@');
+			}
+		}	
 	});		
 });
