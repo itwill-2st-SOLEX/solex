@@ -284,6 +284,52 @@
 
 			modal.show();
 		}
+		
+		//폼 제출 전 유효성 검사!
+		function validateForm() {
+			
+			
+		    // 1. 이름 유효성 검사 (2~4자)
+		    const empNm = document.getElementById('empNm');
+			if(!empNm.value){
+				alert('이름을 입력해주세요');
+			} else if (empNm.value.length < 2 || empNm.value.length > 4) {
+			    alert('이름은 최소 2자이상 입력해주세요.');
+			    empNm.focus();
+			    return false;
+			}
+
+		    // 2. 연락처 유효성 검사 (010-xxxx-xxxx)
+		    const empPhone1 = document.getElementById('emp_phone1');
+		    const empPhone2 = document.getElementById('emp_phone2');
+		    const empPhone3 = document.getElementById('emp_phone3');
+		    const phonePattern = /^010-\d{4}-\d{4}$/;
+		    const fullPhoneNumber = `${empPhone1.value}-${empPhone2.value}-${empPhone3.value}`;
+			
+			if(!fullPhoneNumber){
+				alert('연락처를 입력해주세요');
+			} else if (!phonePattern.test(fullPhoneNumber)) {
+		        alert('연락처 형식이 올바르지 않습니다.');
+		        empPhone1.focus();
+		        return false;
+		    }
+		   
+		    // 필수 입력 필드 확인 (입사일, 이메일 등)
+		    const requiredFields = document.querySelectorAll('#empForm [required]');
+		    for (const field of requiredFields) {
+		        if (!field.value) {
+		            // 필드에 연결된 label 텍스트를 가져옵니다.
+		            const label = field.closest('.col-md-6, .col-12, .col-md-4')?.querySelector('label');
+		            const fieldName = label ? label.innerText.replace('*', '').trim() : field.name || field.id;
+		            alert(`'${fieldName}' 를 입력해주세요.`);
+		            field.focus();
+		            return false;
+		        }
+		    }
+
+		    // 모든 검사를 통과하면 true 반환
+		    return true;
+		}
 
 		// "수정" 버튼 클릭 이벤트
 		document.getElementById('mypageModifyBtn').addEventListener('click', async () => {
@@ -323,23 +369,28 @@
             }
 	
 			// 4. 서버로 FormData 전송
-			try {
-				const response = await fetch('/SOLEX/mypage/personalDataModify', {
-					method: 'PUT',
-					body: finalFormData
-				});
-
-				if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`수정 실패: ${errorText}`);
-                }
+			
+			if (validateForm()) {
+				console.log('유효성 검사 통과!');
 				
-				alert(`수정이 완료되었습니다.^^`);
-				bootstrap.Modal.getInstance(document.getElementById('mypageModal')).hide();
-
-			} catch (error) {
-				console.error('수정 실패 !@!#@!#!', error);
-				alert(error.message);
+				try {
+					const response = await fetch('/SOLEX/mypage/personalDataModify', {
+						method: 'PUT',
+						body: finalFormData
+					});
+	
+					if (!response.ok) {
+	                    const errorText = await response.text();
+	                    throw new Error(`수정 실패: ${errorText}`);
+	                }
+					
+					alert(`수정이 완료되었습니다.`);
+					bootstrap.Modal.getInstance(document.getElementById('mypageModal')).hide();
+	
+				} catch (error) {
+					console.error('수정 실패 !@!#@!#!', error);
+					alert(error.message);
+				}
 			}
 		});
 		

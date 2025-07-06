@@ -82,7 +82,6 @@ public class MaterialOrdersRestController {
 	public ResponseEntity<Void> materialDeny(@RequestBody Map<String, Object> map) {
 		materialOrdersService.updateDeny(map);
 		
-		log.info(">>>>>>>>>> 확인");
 	    return ResponseEntity.ok().build();
 	}
 	

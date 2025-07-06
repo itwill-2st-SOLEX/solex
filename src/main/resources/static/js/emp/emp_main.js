@@ -71,7 +71,79 @@ $(function() {
   	   	return true; // 이 함수는 값을 조합하는 역할만 하고, 유효성 검사는 각 버튼의 이벤트 리스너에서 수행합니다.
 	}
 	
-	
+	//폼 제출 전 유효성 검사!
+	function validateForm() {
+		
+	    // 0. 사진등록 유효성 검사
+	    const empImg = document.getElementById('emp_img');
+		if (empImg.files.length === 0) {
+		    alert('사진을 등록해주세요');
+		    return false;
+		}
+		
+	    // 1. 이름 유효성 검사 (2~4자)
+	    const empNm = document.getElementById('empNm');
+		if(!empNm.value){
+			alert('이름을 입력해주세요');
+		} else if (empNm.value.length < 2 || empNm.value.length > 4) {
+		    alert('이름은 최소 2자이상 입력해주세요.');
+		    empNm.focus();
+		    return false;
+		}
+
+
+	    // 2. 성별 선택 유효성 검사
+	    const genderM = document.getElementById('genderM');
+	    const genderW = document.getElementById('genderW');
+	    if (!genderM.checked && !genderW.checked) {
+	        alert('성별을 선택해주세요.');
+	        return false;
+	    }
+
+	    // 3. 생년월일 유효성 검사 (6자리, 3번째 자리 0/1, 5번째 자리 0/1/2/3)
+	    const empBirth = document.getElementById('emp_birth');
+	    const birthPattern = /^\d{2}[01]\d[0-3]\d$/;
+		if(!empBirth.value){
+			alert('생년월일을 입력해주세요');
+		} else if (!birthPattern.test(empBirth.value)) {
+	        alert('생년월일 형식이 올바르지 않습니다.\n(예: 990101, 6자리 숫자로 입력해주세요)');
+	        empBirth.focus();
+	        return false;
+	    }
+		
+	    
+	    // 4. 연락처 유효성 검사 (010-xxxx-xxxx)
+	    const empPhone1 = document.getElementById('emp_phone1');
+	    const empPhone2 = document.getElementById('emp_phone2');
+	    const empPhone3 = document.getElementById('emp_phone3');
+	    const phonePattern = /^010-\d{4}-\d{4}$/;
+	    const fullPhoneNumber = `${empPhone1.value}-${empPhone2.value}-${empPhone3.value}`;
+		
+		if(!fullPhoneNumber){
+			alert('연락처를 입력해주세요');
+		} else if (!phonePattern.test(fullPhoneNumber)) {
+	        alert('연락처 형식이 올바르지 않습니다.');
+	        empPhone1.focus();
+	        return false;
+	    }
+	   
+
+	    // 필수 입력 필드 확인 (사진, 입사일, 이메일 등)
+	    const requiredFields = document.querySelectorAll('#empForm [required]');
+	    for (const field of requiredFields) {
+	        if (!field.value) {
+	            // 필드에 연결된 label 텍스트를 가져옵니다.
+	            const label = field.closest('.col-md-6, .col-12, .col-md-4')?.querySelector('label');
+	            const fieldName = label ? label.innerText.replace('*', '').trim() : field.name || field.id;
+	            alert(`'${fieldName}' 를 입력해주세요.`);
+	            field.focus();
+	            return false;
+	        }
+	    }
+
+	    // 모든 검사를 통과하면 true 반환
+	    return true;
+	}
 	
 	// 직급, 종류, 부서, 팀  셀렉트 박스 부분 시작
 	
@@ -225,7 +297,6 @@ $(function() {
 	});
 	
 	
-	
 	// 사원 등록
 	const $empForm = $('#empForm');
 	const $registerBtn = $('#registerBtn');
@@ -236,7 +307,7 @@ $(function() {
 		// 1. 연락처, 이메일 값 병합
 		beforeSubmit();
 		
-		// 1. 폼 요소에서 FormData 객체를 먼저 생성합니다.
+		// 2. 폼 요소에서 FormData 객체를 먼저 생성합니다.
 	    const formElement = document.getElementById('empForm');
 	    const formData = new FormData(formElement); 
 		
@@ -269,23 +340,28 @@ $(function() {
 		finalFormData.append('emp_img', file);
 	    
 		
-		try {
+       // 모든 유효성 검사를 통과하면 폼을 제출
+		if (validateForm()) {
+            console.log('유효성 검사 통과!');
+            document.getElementById('empForm').submit(); // 실제 폼 제출이 필요할 때 주석 해제
 			const response = await fetch('/SOLEX/emp', { // 사원 등록을 처리할 서버 URL
 				method: 'POST',
 				body: finalFormData 
 			});
-			if (!response.ok) throw new Error(`에러러러러러러`);
 			
-			alert('인사 등록이 완료되었습니다^^');
-			$employeeModal.modal('hide');
+			if(response.ok){
+				alert('인사 등록이 완료되었습니다');
+				$employeeModal.modal('hide');
+				
+				currentPage = 0;
+				loadDrafts(currentPage);
+				
+			} else {
+				alert('인사등록에 실패하셨습니다. \n 다시 시도해주세요');
+			}
 			
-			currentPage = 0;
-			loadDrafts(currentPage);
+       }
 
-		} catch (error) {
-			console.error('인사 등록 실패:', error);
-			alert(`인사 등록에 실패했습니다...ㅠㅠ`);
-		}
 	});
 
 	// 모달이 닫힐 때 폼 초기화

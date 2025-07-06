@@ -47,7 +47,7 @@
 							<div class="row g-4">
 								<!-- 📷 Left pane : 사진 & 업로드 -->
 								<div class="col-md-4 text-center">
-									<label class="form-label fw-semibold">사진</label>
+<!-- 									<label class="form-label fw-semibold">사진 <span style="color:red">*</span></label> -->
 									<img id="emp_img_preview" src="/SOLEX/assets/img/emp/simple_person_pic.jpg"
 										 class="w-100 rounded shadow-sm mb-3" style="aspect-ratio:4/5;object-fit:cover;" />
 									<input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" required>
@@ -59,18 +59,18 @@
 										<div class="row g-3">
 											<!-- 이름 & 입사일 -->
 											<div class="col-md-6">
-												<label for="empNm" class="form-label">이름</label>
+												<label for="empNm" class="form-label">이름 <span style="color:red">*</span></label>
 												<input type="text" class="form-control" id="empNm" name="emp_nm" required>
 											</div>
 											<div class="col-md-6">
-												<label for="empHire" class="form-label">입사일</label>
+												<label for="empHire" class="form-label">입사일 <span style="color:red">*</span></label>
 												<input type="date" class="form-control" id="empHire" name="emp_hire" required>
 											</div>
 		
 											<!-- 성별 & 생년월일 -->
 											<div class="col-md-6 d-flex align-items-end">
 												<div class="me-3">
-													<label class="form-label d-block mb-1">성별</label>
+													<label class="form-label d-block mb-1">성별 <span style="color:red">*</span></label>
 													<div class="btn-group" role="group" aria-label="gender switcher">
 														<input type="radio" class="btn-check" name="emp_gd" id="genderM" value="M" autocomplete="off">
 														<label class="btn btn-outline-primary" for="genderM">남</label>
@@ -80,14 +80,14 @@
 												</div>
 											</div>
 											<div class="col-md-6">
-												<label for="emp_birth" class="form-label">생년월일</label>
+												<label for="emp_birth" class="form-label">생년월일 <span style="color:red">*</span></label>
 												<input type="text" class="form-control" name="emp_birth" id="emp_birth" pattern="\\d{6}" placeholder="990101" required>
 												<input type="hidden" name="emp_pw" id="emp_pw">
 											</div>
 		
 											<!-- 연락처 -->
 											<div class="col-12">
-												<label class="form-label">연락처</label>
+												<label class="form-label">연락처 <span style="color:red">*</span></label>
 												<div class="input-group">
 													<input type="text" id="emp_phone1" class="form-control" placeholder="010" required>
 													<span class="input-group-text">-</span>
@@ -100,36 +100,36 @@
 		
 											<!-- 이메일 -->
 											<div class="col-12">
-												<label class="form-label">이메일</label>
+												<label class="form-label">이메일 <span style="color:red">*</span></label>
 												<div class="input-group">
 													<input type="text" id="emp_email1" class="form-control" placeholder="example" required>
 													<span class="input-group-text">@</span>
-													<input type="text" id="emp_email2" class="form-control" placeholder="company.com" required>
+													<input type="text" id="emp_email2" class="form-control" placeholder="solex.com" required>
 												</div>
 												<input type="hidden" name="emp_email" id="emp_email">
 											</div>
 		
 											<!-- 직급/사원/부서/팀 -->
 											<div class="col-md-6">
-												<label for="empPosCd" class="form-label">직급</label>
+												<label for="empPosCd" class="form-label">직급 <span style="color:red">*</span></label>
 												<select name="empPosCd" id="empPosCd" class="form-select" required>
 													<option value="">-- 직급을 선택하세요 --</option>
 												</select>
 											</div>
 											<div class="col-md-6">
-												<label for="empCatCd" class="form-label">종류</label>
+												<label for="empCatCd" class="form-label">종류 <span style="color:red">*</span></label>
 												<select name="empCatCd" id="empCatCd" class="form-select" required>
 													<option value="">-- 종류를 선택하세요 --</option>
 												</select>
 											</div>
 											<div class="col-md-6">
-												<label for="empDepCd" class="form-label">부서</label>
+												<label for="empDepCd" class="form-label">부서 <span style="color:red">*</span></label>
 												<select name="empDepCd" id="empDepCd" class="form-select" required>
 													<option value="">-- 부서를 선택하세요 --</option>
 												</select>
 											</div>
 											<div class="col-md-6">
-												<label for="empTeamCd" class="form-label">팀</label>
+												<label for="empTeamCd" class="form-label">팀 <span style="color:red">*</span></label>
 												<select name="empTeamCd" id="empTeamCd" class="form-select" required>
 													<option value="">-- 팀을 선택하세요 --</option>
 												</select>
@@ -137,7 +137,7 @@
 		
 											<!-- 주소 -->
 											<div class="col-12">
-												<label class="form-label">주소</label>
+												<label class="form-label">주소 <span style="color:red">*</span></label>
 												<div class="input-group mb-2">
 													<input type="text" id="sample6_postcode" name="emp_pc" class="form-control" placeholder="우편번호" required>
 													<button type="button" class="btn btn-outline-secondary" onclick="sample6_execDaumPostcode()">우편번호 찾기</button>
