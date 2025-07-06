@@ -24,7 +24,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/localeData.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/timezone.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/utc.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/locale/ko.js"></script> 
+
 	
 	<link rel="stylesheet" th:href="@{/css/document/documentDrafts.css}" />
 	<link rel="stylesheet" th:href="@{/css/main/style.css}" />
@@ -32,8 +32,8 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 	<script th:src="@{/js/notice/notice.js}"></script>
-<!-- 	<script th:src="@{/js/document/documentDrafts.js}"></script> -->
-	<script th:src="@{/js/main/script.js}"></script>
+ 	<script th:src="@{/js/main/calendar.js}"></script> 
+	<script th:src="@{/js/main/panels.js}"></script>
 	
 	
 
@@ -60,7 +60,13 @@
 					    <button id="nextMonthBtn" class="btn btn-link px-2">
 					        <i class="menu-icon tf-icons bx bx-caret-right"></i>
 					    </button>
-						</nav>
+					</nav>
+						
+					<div class="cate-legend ms-auto">   <!-- ← cate-color → cate-legend  -->
+					  <div class="item company"><span></span>회사</div>
+					  <div class="item team1"><span></span>팀</div>
+					  <div class="item personal"><span></span>개인</div>
+					</div>
 			        </header>
 			        <main id="calendar" class="calendar-area"><!-- Calendar 붙는 곳 --></main>
 			        
@@ -68,17 +74,58 @@
 			
 			      <!-- 결재·즐겨찾기 세로 스택 -->
 			      <div class="box2Side d-flex flex-column gap-3" style="width:28%;">
+					<section class="panel favorites flex-fill">
+								          <h5 class="panel-title">⭐ 즐겨찾기</h5>
+								          <ul id="favoriteMenus" class="panel-list">
+										    <!-- ERP 직원 전용 -->
+											<!--<li th:if="${userType == 'ERP'}">
+											        <a href="/SOLEX/vacation/detail">
+											            <i class="menu-icon tf-icons bx bx-calendar me-1"></i>연차 현황
+											        </a>
+											    </li>
+											    <li th:if="${userType == 'ERP'}">
+											        <a href="/SOLEX/approval/drafts/new">
+											            <i class="menu-icon tf-icons bx bx-file me-1"></i>기안서 작성
+											        </a>
+											    </li>
+											    <li th:if="${userType == 'ERP'}">
+											        <a href="/SOLEX/orders/new">
+											            <i class="menu-icon tf-icons bx bx-briefcase me-1"></i>수주 등록
+											        </a>
+											    </li>
+
+											     mes즐겨찾기 
+											    <li th:if="${userType == 'MES'}">
+											        <a href="/SOLEX/vacation/detail">
+											            <i class="menu-icon tf-icons bx bx-calendar me-1"></i>연차 현황
+											        </a>
+											    </li>
+											    <li th:if="${userType == 'MES'}">
+											        <a href="/SOLEX/workOrders">
+											            <i class="menu-icon tf-icons bx bx-slider me-1"></i>작업지시 조회
+											        </a>
+											    </li>
+											    <li th:if="${userType == 'MES'}">
+											        <a href="/SOLEX/production/progress">
+											            <i class="menu-icon tf-icons bx bx-photo-album me-1"></i>생산 진행현황
+											        </a>
+											    </li>-->
+											
+										  </ul>
+								        </section>
 					<section class="panel notice flex-grow-1">
 				        <h5 class="panel-title">📢 최근 공지</h5>
 					  <span class="text-more mt-1">
 					      <a th:href="@{/notice}" class="small">+ 더보기</a>
 					  </span>
 				        <ul id="noticeList" class="panel-list">
-						  <!-- 3건 반복 -->
-						  <li th:each="n : ${mainNotices}" class="d-flex justify-content-between notice-item" th:attr="data-id=${n['NOT_ID']}">
-						       <a href="#" class="notice-link" th:text="${n['NOT_TT']}"></a>
-						      <span th:text="${#dates.format(n['NOT_REG_DATE'], 'yyyy-MM-dd')}" class="text-muted small"></span>
-						  </li>
+							<!--<li th:if="${#lists.isEmpty(mainNotices)}"
+							     class="text-none small py-2 px-1">최근 공지가 없습니다.</li>
+							   3건 반복 
+							  <li th:each="n : ${mainNotices}" class="d-flex justify-content-between notice-item" th:attr="data-id=${n['NOT_ID']}">
+							       <a href="#" class="notice-link" th:text="${n['NOT_TT']}"></a>
+							      <span th:text="${#dates.format(n['NOT_REG_DATE'], 'yyyy-MM-dd')}" class="text-muted small"></span>
+							  </li>-->
 						</ul>
 				      </section>
 			        <section class="panel approval flex-grow-1">
@@ -87,7 +134,9 @@
 					      <a th:href="@{/approval/drafts}" class="small">+ 더보기</a>
 					  </span>
 			          <ul id="approvalList" class="panel-list">
-			          		<!-- 3건 반복 -->
+						<!--<li th:if="${#lists.isEmpty(approvalList)}"
+													     class="text-none small py-2 px-1">최근 결재문서가 없습니다.</li>
+			          		 3건 반복 
 						  <li th:each="doc : ${mainDocs}" class="d-flex justify-content-between document-item" th:attr="data-id=${doc.DOC_ID},data-type=${doc.DOC_TYPE_CODE}">
 						       <span class="status" th:text="${doc.DOC_STS}" 
 						       		  th:classappend="${doc.DOC_STS == '결재'} ? ' wait' :
@@ -98,14 +147,11 @@
 
 							   <span th:text="${doc.DOC_REG_TIME}" class="text-muted small"></span>
 							   
-						  </li>
+						  </li>-->
 			          </ul>
 			        </section>
 			
-			        <section class="panel favorites flex-fill">
-			          <h5 class="panel-title">⭐ 즐겨찾기</h5>
-			          <ul id="favoriteMenus" class="panel-list"><!-- li 동적 삽입 --></ul>
-			        </section>
+			        
 			      </div>
 			    </div><!-- /box2 -->
 			

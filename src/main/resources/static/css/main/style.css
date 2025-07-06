@@ -20,18 +20,47 @@
   min-height: 0;         /* flex 아이템 높이 계산용 */
 }
 
+
+
 /* 제목 */
 .panel-title {
   font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.2rem;
   white-space: nowrap;
 }
 
+.cate-legend{
+  display:flex;
+  align-items:center;
+  gap:.9rem;                /* 아이템 사이 간격 */
+  font-size:.9rem;
+  user-select:none;
+}
+
+.cate-legend .item{
+  display:flex;
+  align-items:center;
+  gap:.35rem;
+  font-weight:500;
+  color:#555;
+}
+
+.cate-legend .item span{         /* 작은 원형 표시 */
+  display:inline-block;
+  width:14px;height:14px;
+  border-radius:50%;
+}
+
+/* 각각의 색상만 따로 지정 */
+.cate-legend .company  span{background:#ff5583;}
+.cate-legend .team1     span{background:#00a9ff;}
+.cate-legend .personal span{background:#ffbb3b;}
 
 
 /* 리스트 */
 .panel-list {
+	height: 100%; 
   position: relative;
   list-style: none;
   margin: 0;
@@ -41,8 +70,25 @@
   /* font-size: . NineFive Five timesSeven;   0.95rem 까지 쓰면 Korean fix*??? ignore */
 }
 
+.panel-list .text-none.small {
+	 position: absolute;
+	 top: 40%;
+	 left: 50%;
+	 transform: translate(-50%, -50%); /* ① X·Y 축 모두 가운데 정렬 */
+
+	 
+	 text-align: center;   /* ③ 글자 가운데 */
+	 color: var(--text-muted);
+	 pointer-events: none; /* ④ 클릭 이벤트 막기(선택) */
+
+	 /* 필요하다면 글자 크기·패딩 조절 */
+	 padding: .25rem 0;
+	 font-size: .85rem;
+}
+
 .panel-list li {
-  margin-bottom: .4rem;
+  margin-top: .8rem;
+  margin-bottom: .8rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -54,15 +100,14 @@
   color: var(--brand);
 }
 
-/* 매출액 전용 */
-.price-value {
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.2;
+.tui-popup-detail-author{
+  margin-top:4px;
+  font-size:.9rem;
+  color:#444;
 }
-.price-sub {
-  font-size: .85rem;
-  color: var(--text-muted);
+.tui-popup-detail-author .tui-icon{
+  margin-right:4px;
+  vertical-align:-2px;
 }
 
 /* ─── Box 레이아웃 ─── */
@@ -75,12 +120,13 @@
   gap: var(--gap);
 }
 
-.panel.notice  { height: 200px !important; }
-.panel.approval{ height: 200px !important; }
 
 /* ─── Calendar ─── */
 .calendar { padding: 0; }
 .calendar-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
   padding: .75rem 1rem;
   border-bottom: 1px solid var(--panel-border);
 }
@@ -161,9 +207,6 @@
 	width:500px !important;
 }
 
-.toastui-calendar-detail-item.toastui-calendar-detail-item-indent{
-	display: none;
-}
 
 
 div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) {
@@ -204,7 +247,7 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
   gap: .5rem;
 
   /* 링크 영역 전부 클릭 가능하도록 padding */
-  padding: .30rem .25rem;
+  padding: .20rem .20rem;
   border-radius: 6px;
 }
 
@@ -241,7 +284,7 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 }
 .panel.notice.flex-grow-1 > span, .panel.approval.flex-grow-1 > span {
 	position: absolute;
-	top: 10px;
+	top: 15px;
 	right: 20px;
 }
 .panel.notice.flex-grow-1 > span > a, .panel.approval.flex-grow-1 > span > a {
@@ -259,7 +302,71 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
   cursor: pointer;
 }
 
+/* 일정 상세보기 공통 텍스트 스타일 */
+.toastui-calendar-popup-section.toastui-calendar-section-detail,
+.tui-popup-detail-author,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-category,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-priority {
 
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #444;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+div.toastui-calendar-detail-item.toastui-calendar-detail-item-indent > span.toastui-calendar-content > span > div,
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) > span.toastui-calendar-content,
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(3) > span.toastui-calendar-content {
+	font-size: 0.8rem;
+}
+.toastui-calendar-detail-item-indent {
+	display: flex;
+	align-items: center;
+	padding-left: 0 !important;
+	text-indent: 0 !important;
+}
+
+.toastui-calendar-icon{
+	margin-top: 5px;	
+}
+
+/* 작성자 아이콘 */
+.tui-popup-detail-author .tui-icon,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-priority .tui-icon,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-category .tui-icon {
+  vertical-align: middle;
+  margin-right: 4px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* 중요도(일반/중요) 텍스트 색상 통일 */
+.toastui-calendar-popup-section.toastui-calendar-popup-section-priority span {
+  color: #555;
+  font-weight: 600;
+}
+
+/* 카테고리(회사/팀/개인) 배경색 + 글자색 */
+.toastui-calendar-popup-section.toastui-calendar-popup-section-category span {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* 카테고리별 색상 */
+.toastui-calendar-popup-section-category .company span {
+  background-color: #ff5583;
+}
+.toastui-calendar-popup-section-category .team1 span {
+  background-color: #00a9ff;
+}
+.toastui-calendar-popup-section-category .personal span {
+  background-color: #ffbb3b;
+}
 
 
 /* 모달창 css */
@@ -316,16 +423,137 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 
 
 
+/* ─── 태블릿 이하 (≤ 991.98 px) ─── */
+@media (max-width: 991.98px){
+	
+	.toastui-calendar-month .toastui-calendar-month-daygrid {
+		height: 80vh;
+	}
+
+  /* 1) 달력과 사이드 묶음 세로 배치 */
+  .box2{
+	
+    flex-direction: column;   /* 달력 위, 패널 아래 */
+    gap: var(--gap);
+  }
+  
+  .box2Side {
+	width: 100% !important;
+  }
 
 
-
-
-
-
-/* ─── 반응형 (≤ LG) ─── */
-@media (max-width: 992px) {
-  .box1 { flex-direction: column; height: auto; }
-  .box2 { flex-direction: column; }
-  .box2Side { width: 100% !important; flex-direction: row; }
-  .box2Side .panel { flex: 1 1 0; }
 }
+
+/* 예시: 달력과 같은 컨테이너가 ‘높이:100%’ 인 경우 */
+.box2Side{
+/*    flex: 0 0 100%;*/                 /* 부모가 주는 높이 그대로 차지 */
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.box2Side > .panel{
+    flex: 0 0 calc((100% - 2 * var(--gap)) / 3);
+    max-height: calc((100% - 2 * var(--gap)) / 3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.box2Side > .panel .panel-list{
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+
+
+
+
+
+
+
+/* ───────────── 즐겨찾기(Favorites) 전용 스타일 ───────────── */
+
+/* 1. 패널 자체 크기 */
+
+/* 2. 2×2 카드 그리드 */
+.panel.favorites .panel-list{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);   /* 가로 2칸 */
+    gap:12px;
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+
+/* 3. 카드 1개(링크) – 아이콘 ↕ 텍스트 수직 배치 */
+.panel.favorites .panel-list li a{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+    width:100%;
+    padding:14px 10px;
+    border-radius:10px;
+    background:#f8f9fa;
+    font-size:.9rem;
+    color:#495057;
+    text-decoration:none;
+    transition:background .2s, box-shadow .2s;
+}
+.panel.favorites .panel-list li a:hover{
+    background:#eef3ff;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+
+/* 4. 아이콘 크기·색상 통일 */
+.panel.favorites .panel-list i.menu-icon{
+    font-size:1.6rem;
+    color:var(--bs-primary,#696cff);
+    line-height:1;
+}
+
+/* 5. 사이드 메뉴 안 ‘즐겨찾기 토글’ 버튼 ☆/★ */
+.menu-item{ position:relative; }           /* 기준 잡기 */
+.fav-toggle{
+    position:absolute;                     /* 메뉴 글자 왼쪽 원형 아이콘 자리 */
+    left:28px;                             /* ← 필요 시 조정 */
+    top:50%; transform:translateY(-50%);
+    background:none; border:0; cursor:pointer;
+    font-size:1.2rem; line-height:1;
+    color:rgb(159, 158, 145);                         
+}
+/* 기본은 ☆ */
+.fav-toggle::before{ content:'\2606'; font-size: 1rem; }
+
+/* on 클래스가 붙으면 ★ */
+.fav-toggle.on::before{ content:'\2605'; font-size: 1rem;} /* ★ */
+
+
+.menu .menu-sub > .menu-item > .menu-link::before {
+	background-color: #fff;
+}
+
+
+
+
+
+/*즐겨찾기 고정*/
+/*.panel.favorites .panel-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    padding:0;
+    list-style:none;
+}
+
+.panel.favorites .panel-list li{
+    flex:0 0 calc(33.333% - 12px);    
+}
+
+@media (max-width:991.98px){
+    .panel.favorites .panel-list li{
+        flex:0 0 calc(33% - 12px);
+    }
+}*/

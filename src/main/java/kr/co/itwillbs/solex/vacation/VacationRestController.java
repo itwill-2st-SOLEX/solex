@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import kr.co.itwillbs.solex.code.CodeController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -24,12 +24,11 @@ public class VacationRestController {
 
 	//내 휴가 요약 정보
 	@GetMapping("/summary")
-	public Map<String, Object> getVacationSummary(HttpSession session) {
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
-		
+	public Map<String, Object> getVacationSummary(@SessionAttribute("empId") Long empId) {
+
 	    Map<String, Object> result = vacationService.getVacationSummary(empId);
 	    
+	    System.out.println(result);
 	    return result;
 	}
 
@@ -38,10 +37,7 @@ public class VacationRestController {
 	@GetMapping("/detail")
 	public Map<String, Object> getVacationDetail(@RequestParam(name = "page", required = false) Integer page,
 										         @RequestParam(name = "size", required = false) Integer size,
-										         HttpSession session) {
-
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+										         @SessionAttribute("empId") Long empId) {
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);
@@ -65,14 +61,10 @@ public class VacationRestController {
 	public Map<String, Object> getVacationList(@RequestParam("page") int page, 
 										       @RequestParam("size") int size,
 										       @RequestParam(name="keyword", required = false) String keyword,
-										       HttpSession session) {
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+										       @SessionAttribute("empId") Long empId) {
     	
 		Map<String, Object> params = new HashMap<>();
-		
-		//Long userId = Long.parseLong(empId);
-		
+
 		//사원 이름, 부서 가져오기
 		Map<String,Object> info = vacationService.getEmployeeInfo(empId);
 				
