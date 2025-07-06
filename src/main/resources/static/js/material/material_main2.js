@@ -21,7 +21,7 @@ $(function() {
 				  },
 			},
 	        { header: '설명', name: 'mat_comm', align : 'center', width:300, editor: 'text'},
-	        { header: '등록일', name: 'matRegDate', align : 'center', sortable: true},
+	        { header: '등록일', name: 'matRegDate', align : 'center',filter: 'select'},
 	        { header: '사용여부', name: 'mat_is_active', align : 'center' , sortable: true, width:75,
 				editor: {
 				    type: 'select',
@@ -71,87 +71,77 @@ $(function() {
 	loadDrafts(currentPage); //최조 1페이지 로딩
 	grid.on('scrollEnd', () =>  loadDrafts(currentPage)); // 스크롤 끝나면 다음 페이지 로딩
 
-	//유효성검사를 위한 함수
-	function validateCell(grid, rowKey, columnName, value, oldValue) {
-	    // 가격(mat_price) 유효성 검사
-	    if (columnName === 'mat_price') {
-	        const parsedValue = parseFloat(value);
-	        if (isNaN(parsedValue) || parsedValue <= 0) {
-	            alert('가격은 유효한 숫자이며 0보다 작을 수 없습니다.');
-	            grid.setValue(rowKey, columnName, oldValue, false); // 값 되돌리기
-	            return false; // 유효성 실패
-	        }
-	    }
-
-	    // 자재 설명(mat_comm) 유효성 검사
-	    if (columnName === 'mat_comm') {
-	        const trimmedValue = value.trim();
-	        if (!trimmedValue) {
-	            alert('자재 설명 입력은 필수입니다.');
-	            grid.setValue(rowKey, columnName, oldValue, false); // 값 되돌리기
-	            return false; // 유효성 실패
-	        }
-	        if (trimmedValue.length < 10) {
-	            alert('자재 설명은 10글자 이상 입력해주세요.');
-	            grid.setValue(rowKey, columnName, oldValue, false); // 값 되돌리기
-	            return false; // 유효성 실패
-	        }
-	    }
-
-	    // 모든 유효성 검사를 통과한 경우
-	    return true;
-	}
+	
+	grid.off('afterChange'); // 이 라인을 추가하세요.
 	
 	//테이블에서 바로 수정할 수 있는 코드 
-	grid.on('afterChange', async (ev) => {
+	grid.on('afterChange', async (ev) => { // 그리드에서 셀이 편집될때 afterchange 이벤트가 발생
 	    for (const change of ev.changes) {
 	        const { rowKey, columnName, value, oldValue } = change;
-
-	        // 1. 정의된 유효성 검사 함수를 호출
-	        const is_valid = validateCell(grid, rowKey, columnName, value, oldValue);
-
-	        // 2. 유효성 검사를 통과한 경우에만 백엔드 업데이트 실행
-	        if (is_valid) {
-	            const rowData = grid.getRow(rowKey);
-	            const matId = rowData.matId;
-
-	            const updatePayload = {
-	                matId: matId,
-	                n: columnName,
-	                v: value
-	            };
-
-	            // 서버 전송 로직 (try-catch)
-	            try {
-	                const response = await fetch('/SOLEX/material/updateGridCell', { 
-	                    method: 'PUT',
-	                    headers: {
-	                        'Content-Type': 'application/json',
-	                    },
-	                    body: JSON.stringify(updatePayload)
-	                });
-
-	                const result = await response.json();
-
-	                if (response.ok && result.status === 'success') {
-	                    console.log('Material update successful:', result);
-	                    alert('자재 정보가 성공적으로 업데이트되었습니다.');
-	                } else {
-	                    console.error('Material update failed from server:', result.message);
-	                    alert(`자재 정보 업데이트 실패: ${result.message}`);
-	                    grid.setValue(rowKey, columnName, oldValue, false);
-	                }
-
-	            } catch (error) {
-	                console.error('Error updating material:', error);
-	                alert(`자재 정보 업데이트 실패: ${error.message}`);
+			
+			if (columnName === 'mat_price') { 
+	            const parsedValue = parseFloat(value);
+	            if (isNaN(parsedValue) || parsedValue <= 0) {
+	                alert('가격은 유효한 숫자이며 0보다 작을 수 없습니다. 원래 값으로 되돌립니다.');
+	                // 유효하지 않은 경우, 강제로 원래 값으로 되돌립니다.
 	                grid.setValue(rowKey, columnName, oldValue, false);
+	                continue; // 다음 변경으로 넘어갑니다. (백엔드 전송 방지)
 	            }
 	        }
-	        // is_valid가 false이면 아무 작업도 하지 않고 다음 변경으로 넘어갑니다.
-	        // (validateCell 함수 내부에서 이미 alert과 값 복원이 처리됨)
+			
+			if (columnName === 'mat_comm') {
+			    const trimmedValue = value.trim(); // 입력값의 양쪽 공백을 제거한 값을 변수에 저장
+
+			    // 1. 빈 값인지 확인
+			    if (!trimmedValue) { // 공백 제거 후 값이 없는지 확인
+			        alert('자재 설명 입력은 필수입니다.');
+			        grid.setValue(rowKey, columnName, oldValue, false); // 필요하다면 이전 값으로 되돌리기
+			    } 
+			    // 2. 글자 수 확인 (else if 사용)
+			    else if (trimmedValue.length < 10) { // 입력된 텍스트의 길이를 확인
+			        alert('자재 설명은 10글자 이상 입력해주세요.');
+			        grid.setValue(rowKey, columnName, oldValue, false); // 필요하다면 이전 값으로 되돌리기
+			    }
+			}
+			
+	        const rowData = grid.getRow(rowKey);
+	        const matId = rowData.matId;
+
+	        // 여기서 백엔드로 변경된 값을 담아 전송함 
+	        const updatePayload = {
+	            matId: matId,
+				n: columnName,
+	            v: value
+			}
+
+	        try {
+	            const response = await fetch('/SOLEX/material/updateGridCell', { // Your backend API endpoint
+	                method: 'PUT', 
+	                headers: {
+	                    'Content-Type': 'application/json',
+	                },
+	                body: JSON.stringify(updatePayload)
+	            });
+
+	            const result = await response.json();
+				
+				if (response.ok && result.status === 'success') {
+				       console.log('Material update successful:', result);
+				       alert('자재 정보가 성공적으로 업데이트되었습니다.');
+				   } else {
+				       // 백엔드에서 에러 응답을 보낸 경우 (result.status === 'error')
+				       console.error('Material update failed from server:', result.message);
+				       alert(`자재 정보 업데이트 실패: ${result.message}`);
+				       grid.setValue(rowKey, columnName, oldValue, false);
+				   }
+				
+	        } catch (error) {
+	            console.error('Error updating material:', error);
+	            alert(`자재 정보 업데이트 실패: ${error.message}`);
+	            grid.setValue(rowKey, columnName, oldValue, false); 
+	        }
 	    }
-	}); // 테이블 수정코드 fin
+	}); //테이블 수정코드 fin
 	
 	/**  공통: JSON 응답(fetch) ― 바디가 없으면 기본값 반환 */
 	async function fetchJson(url, defaultValue = null) {
