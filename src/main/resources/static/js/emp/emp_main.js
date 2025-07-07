@@ -9,14 +9,15 @@ $(function() {
 		scrollY: true,
 	    data: [],
 	    columns: [
-	        { header: '사번', name: 'empNum', align : 'center', sortable: true}, 
+	        { header: '사번', name: 'empNum', align : 'center', sortable: true, renderer: { styles: { color: '#007BFF', textDecoration: 'underline', cursor: 'pointer' } } }, 
 	        { header: '카테고리', name: 'empCatCd', align : 'center', filter: 'select'},
 	        { header: '부서', name: 'empDepCd', align : 'center', filter: 'select' },
 	        { header: '팀', name: 'empTeamCd', align : 'center', filter: 'select'},
 	        { header: '직급', name: 'empPosCd', align : 'center', filter: 'select'},
 	        { header: '사원명', name: 'empNm', align : 'center'},
 	        { header: '연락처', name: 'empPhone', align : 'center'},
-	        { header: '입사일', name: 'empHire', align : 'center' , sortable: true}	    ]
+	        { header: '입사일', name: 'empHire', align : 'center' , sortable: true}
+		]
 	});
 
 	// 사원 목록 조회 
@@ -32,13 +33,22 @@ $(function() {
 		        empPosCd: row.empPosCd,
 				empNm: row.empNm,
 				empPhone: row.empPhone,
-				empHire: row.empHire
+				empHire: row.empHire,
+				// --- 상세보기(수정) 모달에서 필요한 추가 데이터 ---
+				empGd: row.empGd,
+				empBirth: row.empBirth,
+				empEmail: row.empEmail,
+				empPc: row.empPc,
+				empAdd: row.empAdd,
+				empDa: row.empDa,
+				empProfileImg: row.empProfileImg 
 	  		}));
 
 			page === 0 ? grid.resetData(data) : grid.appendRows(data);
       		currentPage++;
 
       		if (data.length < pageSize) grid.off("scrollEnd");
+			
     	} catch (error) {
       		console.error('사원 목록 조회 실패:', error);
     	}
@@ -47,6 +57,14 @@ $(function() {
   	loadDrafts(currentPage); //최조 1페이지 로딩
 	grid.on('scrollEnd', () =>  loadDrafts(currentPage)); // 스크롤 끝나면 다음 페이지 로딩
 
+	grid.on('click', (ev) => {
+		if (ev.columnName === 'empNum') {
+			const rowData = grid.getRow(ev.rowKey);
+			console.log(rowData);
+			openCorrectModal(rowData);       
+		}
+	});
+	
 	// 폼 제출 전 전화번호, 이메일 병합
 	function beforeSubmit() {
 
@@ -312,7 +330,7 @@ $(function() {
 	    const formData = new FormData(formElement); 
 		
 		const payload = {
-	        emp_nm: formData.get('emp_nm'), // 누락된 '이름' 추가
+	        emp_nm: formData.get('emp_nm'), 
 	        emp_birth: formData.get('emp_birth').replace(/\./g, '-'),
 	        emp_hire: formData.get('emp_hire'),
 	        emp_gd: document.querySelector('input[name="emp_gd"]:checked')?.value,
@@ -359,7 +377,6 @@ $(function() {
 			} else {
 				alert('인사등록에 실패하셨습니다. \n 다시 시도해주세요');
 			}
-			
        }
 
 	});
@@ -376,5 +393,141 @@ $(function() {
         resetSelectBox($empDepCd, '부서', true);
         resetSelectBox($empTeamCd, '팀', true);
 	});
+	
+	//사원 수정
+	async function openCorrectModal(empData) {
+		console.log('empData = ' , empData);
+		const modalElement = document.getElementById('mypageModal');
+		if (!modalElement) return;
 
+		const modal = new bootstrap.Modal(modalElement);
+		const modalBody = modalElement.querySelector('.modal-body');
+		modalBody.innerHTML = ''; // 이전 내용 초기화
+		
+		const {
+		 	empNm, empPc, empAdd, empDa, empEmail, empPhone,
+		 	empHire, empBirth, empGd,
+		 	empPosCd, empCatCd, empDepCd, empTeamCd, empProfileImg
+		} = empData;
+			  
+		// 핸드폰·이메일 분리
+		const [hp1 = '', hp2 = '', hp3 = ''] = empPhone ? empPhone.split('-') : [];
+		const [em1 = '', em2 = ''] = empEmail ? empEmail.split('@') : [];
+		
+		// ✅ 수정: empProfileImg가 있을 때만 경로를 만들고, 없으면 기본 이미지를 사용합니다.
+		const profileImgSrc = empProfileImg 
+            ? `/SOLEX/uploads/${empProfileImg}` 
+            : '/SOLEX/assets/img/emp/simple_person_pic.jpg';
+
+		// 모달 바디에 들어갈 Form HTML 생성
+		const formHTML = `
+			<form id="mypageForm" onsubmit="return false;">
+				<div class="container-fluid">
+					<div class="row g-4">
+						<div class="col-md-4 text-center">
+							<label class="form-label fw-semibold">사진</label>
+							<img id="emp_img_preview" src="${profileImgSrc}"
+									class="w-100 rounded shadow-sm mb-3" style="aspect-ratio:4/5;object-fit:cover;" />
+							<input type="file" class="form-control" name="emp_img" id="emp_img" accept="image/*" readonly>
+						</div>
+						
+						<div class="col-md-8">
+							<div class="row g-3">
+								<div class="col-md-6">
+									<label for="empNm" class="form-label">이름</label>
+									<input type="text" class="form-control" id="empNm" name="emp_nm" value="${empNm || ''}" readonly>
+								</div>
+								<div class="col-md-6">
+									<label for="empHire" class="form-label">입사일</label>
+									<input type="text" class="form-control" id="empHire" name="emp_hire" value="${empHire || ''}" readonly>
+								</div>
+								
+								<div class="col-md-6 d-flex align-items-end">
+									<div class="me-3">
+										<label class="form-label d-block mb-1">성별</label>
+										<div class="btn-group" role="group" aria-label="gender switcher">
+											<input type="radio" class="btn-check" name="emp_gd" id="genderM" value="M" ${empGd === 'M' ? 'checked' : ''} readonly>
+											<label class="btn btn-outline-primary" for="genderM">남</label>
+											<input type="radio" class="btn-check" name="emp_gd" id="genderW" value="W" ${empGd === 'W' ? 'checked' : ''} readonly>
+											<label class="btn btn-outline-primary" for="genderW">여</label>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<label for="emp_birth" class="form-label">생년월일</label>
+									<input type="text" class="form-control" name="emp_birth" id="emp_birth" value="${empBirth || ''}" readonly>
+								</div>
+								
+								<div class="col-12">
+									<label class="form-label">연락처</label>
+									<div class="input-group">
+										<input type="text" id="emp_phone1" class="form-control" value="${hp1}" placeholder="010" readonly>
+										<span class="input-group-text">-</span>
+										<input type="text" id="emp_phone2" class="form-control" value="${hp2}" placeholder="1234" readonly>
+										<span class="input-group-text">-</span>
+										<input type="text" id="emp_phone3" class="form-control" value="${hp3}" placeholder="5678" readonly>
+									</div>
+									<input type="hidden" name="emp_phone" id="emp_phone">
+								</div>
+
+								<div class="col-12">
+									<label class="form-label">이메일</label>
+									<div class="input-group">
+										<input type="text" id="emp_email1" class="form-control" value="${em1}" placeholder="example" readonly>
+										<span class="input-group-text">@</span>
+										<input type="text" id="emp_email2" class="form-control" value="${em2}" placeholder="company.com" readonly>
+									</div>
+									<input type="hidden" name="emp_email" id="emp_email">
+								</div>
+
+								<div class="col-md-6">
+									<label class="form-label">직급</label>
+									<input type="text" class="form-control" value="${empPosCd || ''}" readonly>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">종류</label>
+									<input type="text" class="form-control" value="${empCatCd}" readonly>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">부서</label>
+									<input type="text" class="form-control" value="${empDepCd}" readonly>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">팀</label>
+									<input type="text" class="form-control" value="${empTeamCd}" name="emp_team_cd" readonly>
+								</div>
+								
+								<div class="col-12">
+									<label class="form-label">주소</label>
+									<div class="input-group mb-2">
+										<input type="text" id="sample6_postcode" name="emp_pc" class="form-control" placeholder="우편번호" value="${empPc || ''}" readonly>
+										<button type="button" class="btn btn-outline-secondary" onclick="sample6_execDaumPostcode()">우편번호 찾기</button>
+									</div>
+									<input type="text" id="sample6_address" name="emp_add" class="form-control mb-2" placeholder="주소" value="${empAdd || ''}" readonly>
+									<input type="text" id="sample6_detailAddress" name="emp_da" class="form-control" placeholder="상세주소" value="${empDa || ''}" readonly>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		`;
+		modalBody.innerHTML = formHTML;
+			
+		// 📸 사진 파일 선택 시 미리보기 업데이트 (이벤트 위임 사용)
+		modalBody.addEventListener('change', e => {
+			if (e.target.id === 'emp_img') {
+				const file = e.target.files[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = evt => {
+						document.getElementById('emp_img_preview').src = evt.target.result;
+					};
+					reader.readAsDataURL(file);
+				}
+			}
+		});
+
+		modal.show();
+	}
 });
