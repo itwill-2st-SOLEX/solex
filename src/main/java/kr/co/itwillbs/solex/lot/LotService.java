@@ -179,7 +179,7 @@ public class LotService {
     // ---------------- 자재 입고 시 ----------------
     public void createMaterialLot(Map<String, Object> map) {
     	// 1. 자재ID를 통해 자재코드 조회
-    	Long mat_id = Long.parseLong((String) map.get("mat_id"));
+    	Long mat_id = Long.valueOf(String.valueOf(map.get("mat_id")));
     	String matCode = lotMapper.selectMaterialCodeById(mat_id);
     	
     	map.put("mat_code", matCode);
@@ -215,8 +215,9 @@ public class LotService {
 	}
 
 	// ---------------- 창고 배정 시 제품LOT 상태값 변경 ----------------
-	public void updatePrdLotStatusToComplete(Integer oddId) {
+	public void updatePrdLotStatusToComplete(Map<String, Object> prdInfo) {
 		// 1. 제품 LOT 상태를 완료(lot_status_03)로 변경
+		Integer oddId = Integer.valueOf(String.valueOf(prdInfo.get("oddId")));
 	    lotMapper.updatePrdLotStatusToComplete(oddId);
 	}
 

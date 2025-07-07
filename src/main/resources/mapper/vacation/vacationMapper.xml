@@ -43,7 +43,7 @@
 	                 ELSE TRUNC(w4 - #{sysdate})
 	            END AS days_left 
 		  FROM emp e
-		  JOIN vacation v 
+		  LEFT JOIN vacation v 
 		    ON e.emp_id = v.emp_id
 		 WHERE e.emp_id = #{empId}
 	</select>
@@ -85,7 +85,7 @@
 		FROM emp e
 		 		LEFT JOIN vacation v  ON e.emp_id = v.emp_id
 		        LEFT JOIN view_employee ve ON e.emp_id = ve.emp_id 
-				WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) > TO_NUMBER(SUBSTR(#{empPosCd}, -2))
+				WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) >= TO_NUMBER(SUBSTR(#{empPosCd}, -2))
 					<choose>
 				<!-- 팀장 조건 -->
 				<when test="empTeamCd != 'team_00'">
