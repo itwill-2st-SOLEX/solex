@@ -66,7 +66,7 @@ public class OrderRequestsService {
     public void orderMaterialRequest(Map<String, Object> params) throws Exception {
         
 
-         // 자재 주문  
+        // 자재 주문  
         Integer materialOrderStatus = orderRequestsMapper.insertMaterialOrder(params);
         System.out.println(materialOrderStatus);
         
@@ -85,20 +85,19 @@ public class OrderRequestsService {
         }
     }
 
+    public void checkMaterial(Map<String, Object> params) throws Exception {
+        List<String> stockStatus = orderRequestsMapper.checkMaterial(params);
+        
+        // registration_status 이 결과안에 '등록안됨'이 있으면 예외 발생
+        for(String registration_status : stockStatus) {
+            if("등록안됨".equals(registration_status)) {
+                throw new RuntimeException("재고가 등록되어 있지 않습니다.");
+            }
+        }
+        
+    }
+
+
 }
 
 
-
-// 설비 정보, 공정 정보
-
-// 두개의 테이블에 대한 매핑테이블
-
-// 와이?!?!?!?!?!?!?!?!??!?
-// 공정 하나의 여려개 가능
-// 공정에 여러 설비가 들어가니깐.
-// 
-
-// 굿
-
-// 설비 테이블 + 공정 테이블 = 매핑 테이블	
-// 언제까지?

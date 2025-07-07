@@ -47,7 +47,8 @@ function initializeMainPage() {
             { header: '배송지', name: 'ORD_ADDRESS', width: 300, align: 'center', sortable: true },
             { header: '납품 요청일', name: 'ORD_END_DATE', align: 'center', sortable: true },
             { header: '상태 변경일', name: 'ORD_MOD_DATE', align: 'center', sortable: true }
-        ],
+        ]
+       
     });
     TUI_GRID_INSTANCE.on('scrollEnd', () => { if (hasMoreData && !isLoading) { currentPage++; fetchGridData(); } });
     TUI_GRID_INSTANCE.on('click', (ev) => { if (ev.columnName === 'ORD_ID') openDetailModal(TUI_GRID_INSTANCE.getRow(ev.rowKey).ORD_ID); });
@@ -345,6 +346,32 @@ function populateModalWithData(data) {
         }));
         INNER_TUI_GRID_INSTANCE.resetData(transformedItems);
     }
+    
+    // orderItems의 ODD_STS가 하나라도 수주등록이 아니라면 거래처명, 상품명, 수량, 배송지, 납품요청일, 상태, 상태변경일을 disabled
+    if(orderItems.some(item => item.ODD_STS !== '수주 등록')) {
+        enableForm(false);
+    } else {
+        enableForm(true);
+    }
+
+
+
+}
+
+function enableForm(isEnabled) {
+    document.getElementById('client-search-input').disabled = !isEnabled;
+    document.getElementById('product-search-input').disabled = !isEnabled;
+    document.getElementById('odd_end_date').disabled = !isEnabled;
+    document.getElementById('odd_pay_date').disabled = !isEnabled;
+    document.getElementById('opt_color').disabled = !isEnabled;
+    document.getElementById('opt_size').disabled = !isEnabled;
+    document.getElementById('opt_height').disabled = !isEnabled;
+
+    document.getElementById('cli_pc').disabled = !isEnabled;
+    document.getElementById('cli_add').disabled = !isEnabled;
+    document.getElementById('cli_da').disabled = !isEnabled;
+    document.getElementById('odd_pay').disabled = !isEnabled;
+    document.getElementById('pay_type').disabled = !isEnabled;
 }
 
 async function fetchGridData() {
@@ -648,7 +675,7 @@ function deleteSelectedRows() {
             } else if (deletedIds.length > 0 && skippedIds.length > 0) {
                 alert(`일부 주문(${skippedIds.join(', ')})은 삭제할 수 없습니다. 나머지 항목은 삭제되었습니다.`);
             } else if (deletedIds.length === 0 && skippedIds.length > 0) {
-                alert(`선택된 모든 주문(${skippedIds.join(', ')})은 삭제할 수 없습니다.`);
+                alert(`선택된 주문(${skippedIds.join(', ')})은 삭제할 수 없습니다.`);
             // 백엔드가 비어있는 deletedIds와 채워진 skippedIds를 보낼 때
             } else {
                 alert(message);
@@ -665,10 +692,8 @@ function deleteSelectedRows() {
 }
 
 async function loadGridData(ord_id) {
-    console.log("그리드 데이터 다시 로드 시작..."+ ord_id);
     const response = await fetch(`/SOLEX/orders/${ord_id}`);
     const fullOrderData = await response.json();
-    console.log("그리드 데이터 다시 로드 완료:", fullOrderData);
     const orderInfo = fullOrderData.orderInfo || {};
     const orderItems = fullOrderData.orderItems || [];
     if (orderItems && orderItems.length > 0) {
