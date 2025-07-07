@@ -89,13 +89,20 @@ async function vacationSummary() {
 	        const res = await fetch(url);  // 1. 서버에 요청 → 응답 도착까지 기다림
 	        const data = await res.json();  // 2. 응답을 JSON으로 파싱 → 객체로 바꿈
 			
+			const start = data.PERIOD_START
+			              ? dateFormatter(new Date(data.PERIOD_START))
+			              : '-';
+			const end   = data.PERIOD_END
+			              ? dateFormatter(new Date(data.PERIOD_END))
+			              : '-';
+						  
 			console.log(data)
 			
 			empId = data.EMP_ID;
 			
 			document.getElementById('empNm').textContent = data.EMP_NM || '-';
 			document.getElementById('empHire').textContent = dateFormatter(new Date(data.EMP_HIRE))  || '-';
-			document.getElementById('periodEnd').textContent = dateFormatter(new Date(data.PERIOD_END)) || '-';
+			document.getElementById('periodDay').textContent =`${start} ~ ${end}`;
 			document.getElementById('daysLeft').textContent = data.DAYS_LEFT != null ? `(D-${data.DAYS_LEFT})` : '';
 			document.getElementById('vacTotal').textContent = data.VAC_TOTAL || 0;
 			document.getElementById('vacUsed').textContent = data.VAC_USED || 0;

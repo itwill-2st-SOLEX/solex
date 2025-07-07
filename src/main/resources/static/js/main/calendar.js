@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 		console.log(loginEmp)
 	    /* ① 프로필 영역 업데이트 */
-	    document.getElementById('empDept').textContent = loginEmp.empDepNm || '';
-	    document.getElementById('empTeam' ).textContent = loginEmp.empTeamNm  || '';
-	    document.getElementById('empPos' ).textContent = loginEmp.empPosNm  || '';
+	    document.getElementById('empDept').textContent = loginEmp.empDepNm == '공통' ? '' : loginEmp.empDepNm;
+	    document.getElementById('empTeam' ).textContent = loginEmp.empTeamNm == '공통' ? '' : loginEmp.empTeamNm;
+	    document.getElementById('empPos' ).textContent = loginEmp.empPosNm  == '공통' ? '' : loginEmp.empPosNm;
 	    document.getElementById('empNm').textContent = loginEmp.empNm  || '';
 	    document.getElementById('empNum').textContent = `(${loginEmp.empNum})` || '';
 
@@ -114,14 +114,22 @@ function initCalendar() {
             popupDetailTitle: ({ title }) =>
                 `<strong style="color:#111; font-size: 1.5em; display: block; margin-bottom: 5px;">${title}</strong>`,
             popupDetailAttendees: ({ attendees = [], raw = {} } = {}) => {
+
                 if (attendees.length === 0) return '';
                 const { id, name } = attendees[0];
                 const { depNm = '', teamNm = '', posNm = '' } = raw;
-                return `
-                    <div class="tui-popup-detail-item">
-                        <i class="toastui-calendar-ic-user"></i>
-                        <span style="font-weight:500;">작성자</span> : ${depNm} ${teamNm} ${name} ${posNm}
-                    </div>`;
+				const writerInfo = [depNm == '공통' ? null : depNm, 
+									teamNm == '공통' ? null : teamNm, 
+									name, 
+									posNm == '공통' ? null :  posNm]
+				  .filter(Boolean)        // null·undefined·'' 제거
+				  .join(' ');             // 한 칸씩 띄워서 붙이기
+
+				return `
+				  <div class="tui-popup-detail-item">
+				    <i class="toastui-calendar-ic-user"></i>
+				    <span style="font-weight:500;">작성자</span> : ${writerInfo}
+				  </div>`;
             },
             // 일정 상세보기 날짜 표시
             popupDetailDate: ({ start, end, isAllday }) => {
@@ -243,12 +251,25 @@ function initCalendar() {
 
         // 서버에서 받은 calId로 캘린더에 일정 즉시 추가
         calendar.createEvents([{
-            ...ev,
-            id: String(saved.calId),
-            empId: loginEmp.empId,
-            isReadOnly: false,
-            raw: { empId: loginEmp.empId },
-            calendarId: ev.calendarId
+			id        : String(saved.calId),
+			    calendarId: ev.calendarId,
+			    title     : ev.title,
+			    start     : ev.start,
+			    end       : ev.end,
+			    isAllday  : ev.isAllday,
+			    state     : ev.state,
+			    isReadOnly: false,
+			    attendees : [{
+			      id  : loginEmp.empId,
+			      name: loginEmp.empNm,
+			      type: 'required'
+			    }],
+			    raw: {
+			      empId : loginEmp.empId,
+			      depNm : loginEmp.empDepNm,
+			      teamNm: loginEmp.empTeamNm,
+			      posNm : loginEmp.empPosNm
+			    }
         }]);
     });
 
@@ -288,15 +309,18 @@ function initCalendar() {
     });
 
     /* ---------- 일정 삭제 처리 ---------- */
-    calendar.on('beforeDeleteEvent', async ({ id }) => {
-		const ev = calendar.getEvent(id);
-		    if(ev.isReadOnly) {
-		        alert('이 일정은 삭제할 수 없습니다.');
-		        return false;
-		    }
+    calendar.on('beforeDeleteEvent', async ({id, calendarId}) => {
+		
+		const ev = calendar.getEvent(id, calendarId);
+		
+	    if(ev.isReadOnly) {
+	        alert('이 일정은 삭제할 수 없습니다.');
+	        return false;
+	    }
 
         const res = await fetch(`/SOLEX/main/api/calendar/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+			credentials: 'include'
         });
 
         if (!res.ok) {
@@ -304,9 +328,11 @@ function initCalendar() {
             console.error(await res.text());
             return;
         }
+		
+		calendar.deleteEvent(id, calendarId);    
 
         // 삭제 후 전체 일정 다시 불러오기
-        await loadMonthlyData();
+        //await loadMonthlyData();
     });
 
     updateCalendarAndLabel();

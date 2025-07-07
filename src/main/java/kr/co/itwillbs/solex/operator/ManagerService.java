@@ -61,7 +61,7 @@ public class ManagerService {
 	}
 	
 	// 작업 상태 업데이트 
-	//@Transactional
+	@Transactional
 	public void updateWpoSts(Map<String, Object> map) {
 		
 		//String wrkId = (String) map.get("wrkId");
@@ -136,18 +136,13 @@ public class ManagerService {
 				
 				//>> 현재 공정 정보와 다음에 수행해야할 공정의 정보 찾아오기
 				Map stepInfo = managerMapper.selectStepInfo(wpoId);
-				
-				//stepInfo.putAll(map);
-				
-				System.out.println(stepInfo);
+								
 				//다음 공정 정보 업데이트할 정보 전달
 				int jcount = ((Number) stepInfo.get("wpoJcount")).intValue();
 				int bcount = ((Number) stepInfo.get("bcount")).intValue();
 				
 				stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
-				
-				System.out.println("nextWpoId : " + stepInfo.get("nextWpoId"));
-				System.out.println("nextWpoId : " + stepInfo);
+
 				
 				//다음 공정이 존재하면
 				if (stepInfo.get("nextWpoId") != null ) {
