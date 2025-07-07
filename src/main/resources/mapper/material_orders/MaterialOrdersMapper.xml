@@ -11,12 +11,13 @@
 			mat_ord_id as "matOrdId",
 			mat_id as "matId",
 			emp_id as "empId",
-			mat_qty as "matQty",
+			TO_CHAR(mat_qty,'FM999,999,999') as "matQty",
 			mat_reg_date as "matRegDate",
 			mat_eta_date as "matEtaDate",
 			mat_ata_date as "matAtaDate",
 			mat_lmd_date as "matLmdDate",
-			mat_comm as "matComm"
+			mat_comm as "matComm",
+			mat_ord_sts as "matOrdSts"
 		FROM material_orders
 		ORDER BY mat_ord_id
 	</select>
@@ -26,12 +27,13 @@
 			mat_ord_id as "matOrdId",
 			mat_id as "matId",
 			emp_id as "empId",
-			mat_qty as "matQty",
+			TO_CHAR(mat_qty,'FM999,999,999') as "matQty",
 			TO_CHAR(mat_reg_date, 'yyyy-MM-dd') as "matRegDate",
 			TO_CHAR(mat_eta_date, 'yyyy-MM-dd') as "matEtaDate",
 			TO_CHAR(mat_ata_date, 'yyyy-MM-dd') as "matAtaDate",
 			TO_CHAR(mat_lmd_date, 'yyyy-MM-dd') as "matLmdDate",
-			mat_comm as "matComm"
+			mat_comm as "matComm",
+			mat_ord_sts as "matOrdSts"
 		FROM material_orders
 		ORDER BY mat_ord_id
 	</select>
@@ -39,13 +41,12 @@
 <!-- 	자재발주 등록 -->
 	<insert id="materialOrderRegist">
 		INSERT INTO material_orders
-		(mat_id, mat_qty, mat_reg_date, mat_ata_date, mat_comm, emp_id)
+		(mat_id, mat_qty, mat_reg_date, mat_comm, emp_id)
 		VALUES (
-		#{mat_id, jdbcType=NUMERIC},
-		#{mat_qty, jdbcType=NUMERIC},
-		#{mat_reg_date, jdbcType=DATE},
-		#{mat_ata_date, jdbcType=DATE},
-		#{mat_comm, jdbcType=VARCHAR},
+		#{matId, jdbcType=NUMERIC},
+		#{matQty, jdbcType=NUMERIC},
+		#{matRegDate, jdbcType=DATE},
+		#{matComm, jdbcType=VARCHAR},
 		#{emp_id, jdbcType=VARCHAR}
 		)
 	</insert>
@@ -94,7 +95,7 @@
 <!-- 	승인 버튼 누르면 update - 구역 Area -->
 	<update id="matAppArea" parameterType="map">
 		UPDATE area 
-		SET are_qty = #{whs_his_cnt}
+		SET are_qty = are_qty + #{whs_his_cnt}
 		WHERE are_id = #{are_id}
 	</update>
 	

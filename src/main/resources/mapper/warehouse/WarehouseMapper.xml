@@ -29,7 +29,7 @@
    </select>
    
    <select id="selectWarehouseDetail" resultType="map">
-		SELECT wh.whs_id AS whs_nm, 
+		SELECT wh.whs_nm AS whs_nm, 
   			   emp.emp_nm || '(' || emp.emp_num || ')' as mgr_nm,
   			   a.are_id,
   			   a.are_nm

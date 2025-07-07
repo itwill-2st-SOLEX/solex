@@ -58,23 +58,23 @@ $(function() {
 	/* ② 코드 → tui.Grid 컬럼 배열 */
 	const STOCK_COLUMNS = {
 	  area_type_01: [                     // 자재
-	    { header: '번호',    name: 'mat_num',  align: 'center', width: 100 },
-	    { header: '자재명', name: 'item_nm', align: 'center', sortable: true },
-		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
-		{ header: '구역명', name: 'area_nm',  align: 'right' },
-	    { header: '재고량', name: 'qty',  align: 'right' },
-		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
+	    { header: '번호',    name: 'mat_num',      align: 'center', width: 80 },
+	    { header: '자재명',  name: 'item_nm',      align: 'center', sortable: true, filter: 'text' },
+		{ header: '창고명',  name: 'warehouse_nm', align: 'center', width: 200, filter: 'select' },
+		{ header: '구역명',  name: 'area_nm',      align: 'center', width: 80, filter: 'select' },
+	    { header: '재고량',  name: 'qty',          align: 'center' },
+		{ header: '단위',    name: 'item_unit',    align: 'center', width: 80, filter: 'select' }
 	  ],
 	  area_type_02: [                     // 제품
-		{ header: '번호',    name: 'prd_num',  align: 'center', width: 100 },
-	    { header: '제품명', name: 'item_nm', align: 'center', sortable: true },
-		{ header: '색깔', name: 'op_color',  align: 'right' },
-	    { header: '사이즈', name: 'op_size',  align: 'right' },
-		{ header: '굽', name: 'op_height',  align: 'right' },
-		{ header: '창고명', name: 'warehouse_nm',  align: 'right' },
-		{ header: '구역명', name: 'area_nm',  align: 'right' },
-	    { header: '재고량', name: 'qty',  align: 'right' },
-		{ header: '단위',   name: 'item_unit', align: 'center', width: 70 }
+		{ header: '번호',    name: 'prd_num',      align: 'center', width: 80 },
+	    { header: '제품명',  name: 'item_nm',      align: 'center', sortable: true, filter: 'text' },
+		{ header: '색깔',    name: 'op_color',     align: 'center', filter: 'select' },
+	    { header: '사이즈',  name: 'op_size',      align: 'center', filter: 'select' },
+		{ header: '굽',      name: 'op_height',    align: 'center', filter: 'select' },
+		{ header: '창고명',  name: 'warehouse_nm', align: 'center', width: 200, filter: 'select' },
+		{ header: '구역명',  name: 'area_nm',      align: 'center', filter: 'select' },
+	    { header: '재고량',  name: 'qty',          align: 'center', width: 80 },
+		{ header: '단위',    name: 'item_unit',    align: 'center', width: 80, filter: 'select' }
 	  ]
 	};
 	
