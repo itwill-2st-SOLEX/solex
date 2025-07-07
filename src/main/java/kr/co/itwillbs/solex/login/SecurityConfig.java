@@ -41,7 +41,9 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     String empId = authentication.getName();
                     request.getSession().setAttribute("empId", empId);
-
+                    System.out.print("로그인 성공! 권한: ");
+                    authentication.getAuthorities().forEach(auth -> System.out.print(auth.getAuthority() + " "));
+                    System.out.println();
                     response.sendRedirect("/SOLEX");
                 })
                 .permitAll()

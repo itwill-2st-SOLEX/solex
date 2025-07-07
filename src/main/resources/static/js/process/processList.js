@@ -149,6 +149,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	// ✅ 저장 버튼
 	document.querySelector('#prs-save').addEventListener('click', () => {
+		
+		// ✅ 권한 체크 API 호출
+		fetch('/SOLEX/process/checkAuth')
+		    .then(res => {
+				debugger;
+		        if (res.status === 403) {
+		            alert('저장 권한이 없습니다.');
+		            return Promise.reject('권한 없음'); // 🚨 이후 체인 차단
+		        }
+		    });
 
 		// 변경사항 추출
 		const changes = process_grid.getModifiedRows();
@@ -205,12 +215,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 			body: JSON.stringify(payload)
 		})
 			.then(res => {
-				if (!res.ok) throw new Error('저장 실패');
+				debugger;
+				if (res.status === 403) {
+			        alert('저장 권한이 없습니다.');
+			        return;
+			    }
 				return res.json();
 			})
 			.then(data => {
-				alert('저장 완료!');
-				location.reload();  // 저장 후 새로고침
+				if (data && data.success) {
+			        alert('저장 완료!');
+					location.reload();  // 저장 후 새로고침
+			    } else if (data) {
+			        alert(data.message);
+			    }
 			})
 			.catch(err => {
 				console.error(err);
