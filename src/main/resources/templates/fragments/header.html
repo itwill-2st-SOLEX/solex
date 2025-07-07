@@ -5,6 +5,8 @@
 		src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 	<!-- 	마이페이지 css입니다 -->
 	<link rel="stylesheet" th:href="@{/css/emp/emp_main.css}">
+	<link rel="stylesheet" th:href="@{/css/attendance/attendance.css}" />
+	<script th:src="@{/js/attendance/attendance_register.js}"></script>
 	<div class="costom-inner">
 		<nav
 			class="costom-nav layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
@@ -21,6 +23,10 @@
 				id="navbar-collapse">
 
 				<ul class="navbar-nav flex-row align-items-center ms-md-auto">
+					<!-- 출퇴근 버튼 -->
+					<input type="hidden" id="current-att-id">
+					<button class="time-button punch-in hidden">출근하기</button>
+			        <button class="time-button punch-out hidden">퇴근하기</button>
 					<!-- 메신저 -->
 					<li class="me-4"><a class="dropdown-item" href="#"
 						onclick="openMessengerPopup(event)"> <span

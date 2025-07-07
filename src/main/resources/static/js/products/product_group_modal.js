@@ -2,10 +2,41 @@
 let allColorOptions = [];
 let allSizeOptions = [];
 let allHeightOptions = [];
+let toastGridInstances = [];
+let allUnitOptions = []; // 제품 단위
+let allTypeOptions = [];  // 제품 유형
+
 
 
 window.addEventListener('DOMContentLoaded', () => {
-	document.getElementById('writeProductBtn').addEventListener('click', onWriteProduct);	
+	document.getElementById('writeProductBtn').addEventListener('click', onWriteProduct);
+	
+	
+	const productModalElement = document.getElementById('productModal');
+	    if (productModalElement) {
+	        productModalElement.addEventListener('shown.bs.modal', function () {
+	            console.log('제품 모달이 완전히 표시되었습니다. selectpicker를 새로고침합니다.');
+	            // 기존 selectpicker refresh는 그대로 둡니다.
+	            $('.selectpicker').selectpicker('refresh');
+
+	            // ⭐⭐ 여기에 data-bs-toggle 속성 제거 코드를 추가합니다 ⭐⭐
+	            $('.bootstrap-select .dropdown-toggle').removeAttr('data-bs-toggle');
+	            console.log('Bootstrap-select 버튼에서 data-bs-toggle 속성 제거 완료.');
+	        });
+
+	        // ⭐⭐ 새로 추가할 부분: '옵션 추가' 탭이 보여질 때 selectpicker 새로고침 ⭐⭐
+	        const allOptionsTabButton = document.getElementById('all-options-tab');
+	        if (allOptionsTabButton) {
+	            allOptionsTabButton.addEventListener('shown.bs.tab', function (event) {
+	                console.log('\'옵션 추가\' 탭이 활성화되었습니다. selectpicker를 새로고침합니다.');
+	                $('.selectpicker').selectpicker('refresh');
+	                // 탭이 변경될 때도 data-bs-toggle을 다시 제거해 주는 것이 좋습니다.
+	                $('.bootstrap-select .dropdown-toggle').removeAttr('data-bs-toggle');
+	            });
+	        }
+	    }
+	
+	
 });	
 
 
@@ -20,6 +51,7 @@ async function onWriteProduct() {
         showProductModal('new', { EMP_NM: '알 수 없음', DET_NM: '-', POS_NM: '-' });
     }
 }
+
 
 
 async function showProductModal(mode, data = null) {
@@ -37,6 +69,18 @@ async function showProductModal(mode, data = null) {
     const prdCommElement = document.getElementById('prd_comm');
     const prdRegDateElement = document.getElementById('prd_reg_date');
     const prdUpDateElement = document.getElementById('prd_up_date');
+	
+	// Bootstrap-select 초기화
+    $('#colorMultiSelect').selectpicker('deselectAll'); // 모든 선택 해제
+    $('#sizeMultiSelect').selectpicker('deselectAll');
+    $('#heightMultiSelect').selectpicker('deselectAll');
+    // 비활성화된 옵션이 있다면 다시 활성화
+    $('#colorMultiSelect').find('option').prop('disabled', false);
+    $('#sizeMultiSelect').find('option').prop('disabled', false);
+    $('#heightMultiSelect').find('option').prop('disabled', false);
+    $('#colorMultiSelect').selectpicker('refresh');
+    $('#sizeMultiSelect').selectpicker('refresh');
+    $('#heightMultiSelect').selectpicker('refresh');
 
     // 모든 요소가 null이 아닌지 먼저 확인하고 값을 비워줍니다.
     if (prdNmElement) prdNmElement.value = '';
@@ -60,19 +104,54 @@ async function showProductModal(mode, data = null) {
         saveProductBtn.textContent = '등록 완료';
         saveProductBtn.onclick = () => processProductData('register'); 
         if (generateCombinationsBtn) {
-//            generateCombinationsBtn.textContent = '옵션 등록';
-			generateCombinationsBtn.style.display='none';
+			generateCombinationsBtn.style.display='none'; // 버튼 숨김 처리
             generateCombinationsBtn.removeAttribute('disabled'); // 새 제품에 대해 활성화 상태 보장
-            // generateCombinationsBtn에 대한 클릭 이벤트는 이제 탭 변경 이벤트에 의해 처리됩니다.
-            // 이 특정 요청의 경우, 탭이 디스플레이를 트리거할 것입니다.
         }
         if (prdRegDateElement) prdRegDateElement.value = getNowForOracle(); 
         
+		// 등록 모드에서는 input 숨기고 select만 보여줌
+	    $('#prdUnitSelect').show();
+	    $('#prdUnitDisplay').hide();
+
+	    $('#prdTypeSelect').show();
+	    $('#prdTypeDisplay').hide();
+		
+		
+		// 새로운 제품 등록 시 3개 멀티 셀렉트 초기화 (선택된 옵션 없음)
+        await populateSelectPickers([]); // 빈 배열 전달 (선택된 옵션 없음)
+		
         await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit');
         await loadCommonCodesToSelect('prdTypeSelect', 'prd_type');
         
-    } else if (mode === 'edit' && data) {
+    } else if (mode === 'edit' && data) { // ⭐⭐ 이 부분 수정 ⭐⭐
         modalTitle.textContent = '제품 상세정보';
+		
+		await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_UNIT); 
+		await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_TYPE);
+		
+		
+		const unitName = allUnitOptions.find(u => u.DET_ID === data.PRD_SELECTED_UNIT)?.DET_NM || '';
+	    const typeName = allTypeOptions.find(t => t.DET_ID === data.PRD_SELECTED_TYPE)?.DET_NM || '';
+
+	    $('#prdUnitSelect').hide();
+	    $('#prdUnitDisplay').val(unitName).show();
+
+	    $('#prdTypeSelect').hide();
+	    $('#prdTypeDisplay').val(typeName).show();
+		
+		try {
+		    const existingProductOptions = await fetch(`/SOLEX/products/api/productOptions?prdId=${data.PRD_ID}`).then(res => {
+		        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+		        return res.json();
+		    });
+		    console.log('Fetched existingProductOptions for edit mode:', existingProductOptions);
+		    // window.currentProductExistingOptions에 실제 데이터 배열을 할당
+            window.currentProductExistingOptions = existingProductOptions; // 서버 응답 전체 객체 할당
+		    await populateSelectPickers(existingProductOptions); // 기존 옵션 전달
+		} catch (error) {
+		    console.error('기존 제품 옵션 로드 실패:', error);
+		    await populateSelectPickers([]); // 실패 시 빈 상태로 초기화 (옵션 목록만 보임)
+		}
 		
 		// 250626 제품 이름, 가격, 설명만 수정, 옵션은 추가만 가능, 삭제 불가.
 		const editableElements = document.getElementsByClassName('read_only');
@@ -80,10 +159,6 @@ async function showProductModal(mode, data = null) {
 		    element.setAttribute('readonly', 'readonly');
 		});
 		
-		const selectElements = document.querySelectorAll('select');
-		selectElements.forEach(select => {
-			select.setAttribute('disabled', 'disabled');
-		});
 		saveProductBtn.textContent='수정 완료';
 		saveProductBtn.onclick = () => processProductData('update'); 
 		
@@ -95,15 +170,9 @@ async function showProductModal(mode, data = null) {
         if (prdCodeElement) prdCodeElement.value = data.PRD_CODE || '';
         if (prdCommElement) prdCommElement.value = data.PRD_COMM || '';
         if (prdRegDateElement) prdRegDateElement.value = formatter(data.PRD_REG_DATE, true);
-        
-        await loadCommonCodesToSelect('prdUnitSelect', 'prd_unit', data.PRD_SELECTED_UNIT);
-        await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);
-		await loadCommonCodesToSelect('prdSizeSelect', 'opt_size', data.OPT_SIZE);
-	    await loadCommonCodesToSelect('prdHeightSelect', 'opt_height', data.OPT_HEIGHT);
-		await loadCommonCodesToSelect('prdTypeSelect', 'prd_type', data.PRD_SELECTED_TYPE);  
+       
     }
-
-    const modalEl = document.getElementById('productModal');
+	const modalEl = document.getElementById('productModal');
     const productModal = new bootstrap.Modal(modalEl);
 
 	
@@ -178,7 +247,7 @@ async function showProductModal(mode, data = null) {
             // 'new' 모드에서는 초기에 데이터가 null이므로 isAutoLoad는 false가 됩니다.
             // 'edit' 모드에서는 기존 제품 옵션을 미리 선택하기 위한 데이터가 포함될 수 있습니다.
             if (mode === 'new') {
-                await generateAndDisplayCombinations(false, []); // 새 제품의 경우, 미리 선택할 기존 데이터 없음
+//                await generateAndDisplayCombinations(false, []); // 새 제품의 경우, 미리 선택할 기존 데이터 없음
             } else if (mode === 'edit' && data) {
                 // 편집 모드인 경우, 기존 제품 옵션을 가져와 generateAndDisplayCombinations로 전달합니다.
                 let productOptions = [];
@@ -196,7 +265,7 @@ async function showProductModal(mode, data = null) {
                     alert("제품 옵션을 불러오는 중 오류가 발생했습니다.");
                     productOptions = [];
                 }
-                await generateAndDisplayCombinations(true, productOptions); // isAutoLoad를 true로 설정하여 기존 옵션 표시
+//                await generateAndDisplayCombinations(true, productOptions); // isAutoLoad를 true로 설정하여 기존 옵션 표시
             }
         });
     }
@@ -252,6 +321,7 @@ async function showProductModal(mode, data = null) {
                        {
                            header: '색상', 
                            name: 'COLORNAME',
+						   className: 'color_option',
 						   align: 'center',
 						   sortable: true ,
                            filter: { type: 'text', showApplyBtn: true, showClearBtn: true } 
@@ -300,6 +370,30 @@ async function showProductModal(mode, data = null) {
     // 마지막으로 모달을 표시합니다.
     productModal.show();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function getNowForOracle() {
     const now = new Date();
@@ -362,10 +456,8 @@ function formatter(date, includeTime = false) {
 // 범용 공통코드 셀렉트 박스 로드 함수
 async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue = null) {
     const select = document.getElementById(selectElementId);
-    console.log(`[${groupCode}] 선택된 값:`, selectedValue);
-    console.log(`[${groupCode}] groupCode??? :`, groupCode);
     if (!select) {
-        console.error(`Error: <select> 요소를 찾을 수 없습니다. ID: ${selectElementId}`);
+        console.error(`Error: <select> 요소를 찾을 수 없습니다. ID: ${sㄷlectElementId}`);
         return;
     }
 
@@ -379,15 +471,20 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
         }
 
         const responseData = await response.json();
-        console.log(`[${groupCode}] 데이터 수신:`, JSON.stringify(responseData));
-
         const commonCodes = responseData.data; // 서버 응답 구조가 {"data": [...]} 라고 가정
-		console.log('commonCodes??? ' + JSON.stringify(commonCodes));
 
         if (!Array.isArray(commonCodes)) {
             throw new Error(`[${groupCode}] 서버 응답 데이터 형식이 올바르지 않습니다. 배열이 아닙니다.`);
         }
 
+		
+		if (groupCode === 'prd_unit') {
+            allUnitOptions = commonCodes;
+        } else if (groupCode === 'prd_type') {
+            allTypeOptions = commonCodes;
+        }
+		
+		console.log('allUnitOptions : ', allUnitOptions);
         select.innerHTML = ''; // 기존 옵션 비우기
 
         const defaultOption = document.createElement('option');
@@ -401,7 +498,6 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
 
         commonCodes.forEach(codeItem => {
             const option = document.createElement('option');
-			console.log('codeItem?? ?? ' + JSON.stringify(codeItem));
 			option.value = codeItem.code || codeItem.DET_ID;        
             option.textContent = codeItem.name || codeItem.DET_NM;
 
@@ -410,6 +506,8 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
             }
             select.appendChild(option);
         });
+		
+		return commonCodes; 
 
     } catch (error) {
         console.error(`[${groupCode}] 공통코드 로드 중 오류 발생:`, error);
@@ -417,207 +515,109 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
     }
 }
 
-// 옵션 테이블 생성
-// 각 색상 그룹별 Toast UI Grid 인스턴스를 저장할 Map
-const toastGridInstances = new Map();
-async function generateAndDisplayCombinations(isAutoLoad = false, data = null) {
-    console.log(`옵션 그리드 ${isAutoLoad ? '자동 로드' : '수동 생성'} 시작`);
-    console.log('data:', data);
+// 옵션 테이블 구성 시작
+// 각 드롭다운을 초기화하고 옵션을 채워넣는 함수
+async function populateSelectPickers(existingOptions = []) {
+    console.log('[디버깅] populateSelectPickers 호출됨');
 
-    const [allColorsResponse, allSizesResponse, allHeightsResponse] = await Promise.all([
-        fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_color`),
-        fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_size`),
-        fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_height`)
-    ]);
+    // Bootstrap-select 초기화 제거 및 비우기 (한 번만!)
+    $('#colorMultiSelect').selectpicker('destroy').empty();
+    $('#sizeMultiSelect').selectpicker('destroy').empty();
+    $('#heightMultiSelect').selectpicker('destroy').empty();
 
-    if (!allColorsResponse.ok || !allSizesResponse.ok || !allHeightsResponse.ok) {
-        alert("옵션 데이터를 불러오는 데 실패했습니다.");
-        return;
+    if (allColorOptions.length === 0 || allSizeOptions.length === 0 || allHeightOptions.length === 0) {
+        try {
+            const [colorsResponse, sizesResponse, heightsResponse] = await Promise.all([
+                fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_color`),
+                fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_size`),
+                fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=opt_height`)
+            ]);
+
+            if (!colorsResponse.ok) throw new Error(`colors status: ${colorsResponse.status}`);
+            if (!sizesResponse.ok) throw new Error(`sizes status: ${sizesResponse.status}`);
+            if (!heightsResponse.ok) throw new Error(`heights status: ${heightsResponse.status}`);
+
+            const colorsData = await colorsResponse.json();
+            const sizesData = await sizesResponse.json();
+            const heightsData = await heightsResponse.json();
+
+            allColorOptions = colorsData.data;
+            allSizeOptions = sizesData.data;
+            allHeightOptions = heightsData.data;
+        } catch (e) {
+            console.error('옵션 로드 실패', e);
+            alert('옵션 데이터를 불러오는 데 실패했습니다.');
+            return;
+        }
     }
 
-    const allColors = (await allColorsResponse.json()).data;
-    const allSizes = (await allSizesResponse.json()).data;
-    const allHeights = (await allHeightsResponse.json()).data;
+    // ✅ 중복 방지: Set 사용
+    const colorSet = new Set();
+    const sizeSet = new Set();
+    const heightSet = new Set();
 
-    const optionGroupsContainer = document.getElementById('allOptionsGroupsContainer');
-    if (!optionGroupsContainer) {
-        alert("옵션 그룹 영역이 없습니다.");
-        return;
-    }
-    optionGroupsContainer.innerHTML = ''; // 탭의 기존 콘텐츠 지우기
-
-    const groupedCombinations = new Map();
-
-    allColors.forEach(color => {
-        const colorCode = color.code || color.DET_ID;
-        const colorName = color.name || color.DET_NM;
-
-        allSizes.forEach(size => {
-            const sizeCode = size.code || size.DET_ID;
-            const sizeName = size.name || size.DET_NM;
-
-            allHeights.forEach(height => {
-                const heightCode = height.code || height.DET_ID;
-                const heightName = height.name || height.DET_NM;
-
-                if (!groupedCombinations.has(colorCode)) {
-                    groupedCombinations.set(colorCode, {
-                        name: colorName,
-                        combinations: []
-                    });
-                }
-
-                let isSelected = false;
-                if (isAutoLoad && data && Array.isArray(data)) {
-                    isSelected = data.some(opt =>
-                        opt.OPT_COLOR === colorCode &&
-                        opt.OPT_SIZE === sizeCode &&
-                        opt.OPT_HEIGHT === heightCode
-                    );
-                } else if (isAutoLoad && data) { // 이 경우는 단일 제품 옵션에 해당하며, `generateAndDisplayCombinations`와는 덜 일반적입니다.
-                    isSelected = (
-                        data.OPT_COLOR === colorCode &&
-                        data.OPT_SIZE === sizeCode &&
-                        data.OPT_HEIGHT === heightCode
-                    );
-                }
-				if (!isSelected) {
-	                groupedCombinations.get(colorCode).combinations.push({
-	                    colorCode, colorName, sizeCode, sizeName, heightCode, heightName,
-	                    isSelected
-	                });
-				}
-            });
-        });
+    allColorOptions.forEach(opt => {
+        if (!colorSet.has(opt.DET_ID)) {
+            $('#colorMultiSelect').append(`<option value="${opt.DET_ID}">${opt.DET_NM}</option>`);
+            colorSet.add(opt.DET_ID);
+        }
     });
 
-    toastGridInstances.clear();
-
-    groupedCombinations.forEach((colorGroup, colorCode) => {
-        const optionGroupDiv = document.createElement('div');
-        optionGroupDiv.classList.add('option-group', 'mb-4');
-
-        const groupHeader = document.createElement('h4');
-        groupHeader.classList.add('mb-2');
-        groupHeader.textContent = `색상: ${colorGroup.name} (${colorCode})`;
-        optionGroupDiv.appendChild(groupHeader);
-
-        const gridContainer = document.createElement('div');
-        gridContainer.id = `grid-color-${colorCode}`;
-        optionGroupDiv.appendChild(gridContainer);
-        optionGroupsContainer.appendChild(optionGroupDiv);
-
-        const grid = new tui.Grid({
-            el: gridContainer,
-            data: colorGroup.combinations,
-            rowHeaders: ['checkbox'],
-            rowKey: (row) => `${row.colorCode}-${row.sizeCode}-${row.heightCode}`,
-            rowClass: (row) => {
-				// 'edit' 모드이고, 이 행이 원래 선택된 옵션인 경우 'disabled-option-row' 클래스를 추가합니다.
-		        if (isAutoLoad && row.isSelected) {
-		            return 'selected-row highlighted-row disabled-option-row';
-		        }
-		        // 다른 선택된 행 (새로 선택된 행 등)
-		        else if (row.isSelected) {
-		            return 'selected-row highlighted-row';
-		        }
-		        return '';
-            },
-            columns: [
-                { header: '색상', name: 'colorName', sortable: true, align: 'center' },
-                { header: '사이즈', name: 'sizeName', sortable: true, align: 'center', filter: { type: 'text', showApplyBtn: true, showClearBtn: true } },
-                { header: '높이', name: 'heightName', sortable: true, align: 'center', filter: { type: 'text', showApplyBtn: true, showClearBtn: true } },
-            ]
-        });
-
-        colorGroup.combinations.forEach((combo, index) => {
-            if (combo.isSelected) {
-                grid.check(index); // 체크박스도 체크
-            }
-        });
-
-        toastGridInstances.set(colorCode, grid);
-
-        // 이벤트 처리
-        grid.on('check', ev => {
-            updateOverallSelectAllCheckbox();
-        });
-        grid.on('uncheck', ev => {
-            const rowData = grid.getRow(ev.rowKey);
-            // 'edit' 모드이고, 해당 행이 원래 선택된 옵션인 경우 해제를 방지
-            if (isAutoLoad && rowData && rowData.isSelected) {
-                grid.check(ev.rowKey); // 즉시 다시 체크
-                alert('이미 등록된 옵션은 체크 해제할 수 없습니다.'); // 사용자에게 알림
-                return; // 추가적인 uncheck 이벤트 처리 중단
-            }
-            updateOverallSelectAllCheckbox();
-        });
-        grid.on('click', ev => {
-            if (ev.columnName === 'actions' && ev.target.classList.contains('delete-option-btn')) {
-                const rowData = grid.getRow(ev.rowKey);
-                // 'edit' 모드이고, 해당 행이 원래 선택된 옵션인 경우 삭제를 방지
-                if (isAutoLoad && rowData && rowData.isSelected) {
-                    alert('이미 등록된 옵션은 삭제할 수 없습니다.');
-                    return;
-                }
-                grid.removeRow(ev.rowKey);
-                updateOverallSelectAllCheckbox();
-            }
-        });
+    allSizeOptions.forEach(opt => {
+        if (!sizeSet.has(opt.DET_ID)) {
+            $('#sizeMultiSelect').append(`<option value="${opt.DET_ID}">${opt.DET_NM}</option>`);
+            sizeSet.add(opt.DET_ID);
+        }
     });
 
-    // 상단 전체 선택 체크박스
-    const overallSelectAllOptions = document.getElementById('selectAllOptions');
-    if (overallSelectAllOptions) {
-        updateOverallSelectAllCheckbox();
-        overallSelectAllOptions.onclick = (e) => {
-            const isChecked = e.target.checked;
-            toastGridInstances.forEach(grid => {
-                if (isChecked) {
-                    grid.checkAll();
-                } else {
-                    // 전체 해제 시, isAutoLoad (편집 모드)이고 isSelected 된 옵션은 해제되지 않도록 함
-                    if (isAutoLoad) {
-                        grid.getRowCount().forEach(rowIndex => {
-                            const rowData = grid.getRow(rowIndex);
-                            if (!rowData.isSelected) { // 원래 선택되지 않았던 행만 해제
-                                grid.uncheck(rowIndex);
-                            } else {
-                                grid.check(rowIndex); // 원래 선택된 행은 다시 체크 유지
-                            }
-                        });
-                    } else {
-                        grid.uncheckAll();
-                    }
-                }
-            });
-        };
-    }
+    allHeightOptions.forEach(opt => {
+        if (!heightSet.has(opt.DET_ID)) {
+            $('#heightMultiSelect').append(`<option value="${opt.DET_ID}">${opt.DET_NM}</option>`);
+            heightSet.add(opt.DET_ID);
+        }
+    });
 
-    function updateOverallSelectAllCheckbox() {
-        if (!overallSelectAllOptions) return;
-        let allChecked = true;
-        toastGridInstances.forEach(grid => {
-            // isAutoLoad (편집 모드)인 경우, 원래 선택된 옵션은 체크되어야 전체 선택으로 간주
-            const totalRows = grid.getRowCount();
-            const checkedRows = grid.getCheckedRows().length;
-            const initiallySelectedRows = grid.getData().filter(row => row.isSelected).length;
+    // 초기화
+    $('#colorMultiSelect').selectpicker();
+    $('#sizeMultiSelect').selectpicker();
+    $('#heightMultiSelect').selectpicker();
 
-            if (isAutoLoad) {
-                // 이미 선택된 옵션은 항상 체크되어 있어야 하고, 나머지 옵션 중 하나라도 체크되지 않았다면 전체 선택 아님
-                if (checkedRows < totalRows) {
-                    allChecked = false;
-                }
-            } else {
-                // 신규 등록 모드에서는 모든 행이 체크되어야 전체 선택
-                if (checkedRows !== totalRows) {
-                    allChecked = false;
-                }
-            }
-        });
-        overallSelectAllOptions.checked = allChecked;
-    }
+    console.log('selectpicker refresh 완료.');
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // 제품코드 중복확인 
@@ -664,7 +664,12 @@ async function processProductData(mode) {
     const prdComm = document.getElementById('prd_comm').value;
     const prdRegDate = document.getElementById('prd_reg_date').value; 
     // 수정일은 update 모드에서 현재 시간으로 자동 설정
-    const prdUpDate = mode === 'update' ? getNowForOracle() : null; 
+    const prdUpDate = mode === 'update' ? getNowForOracle() : null;
+	
+	const selectedColors = $('#colorMultiSelect').val() || []; // 선택된 컬러 ID 배열
+   	const selectedSizes = $('#sizeMultiSelect').val() || [];   // 선택된 사이즈 ID 배열
+   	const selectedHeights = $('#heightMultiSelect').val() || []; // 선택된 굽 ID 배열
+ 	
 
     // 2. 유효성 검사 (변경 없음)
     if (!prdNm) { alert("제품명을 입력해주세요."); return; }
@@ -675,11 +680,13 @@ async function processProductData(mode) {
 	    return;
 	}
 	// DB 중복 확인
-    const isDuplicate = await checkPrdCode(prdCode);
-    if (isDuplicate) {
-       	// 경고 메시지는 이미 checkProductCodeDuplicate 함수 안에서 띄워졌으므로 여기서는 추가 작업 없이 종료
-       	return;
-   	}
+	if (mode === 'register') {
+        const isDuplicate = await checkPrdCode(prdCode);
+        if (isDuplicate) {
+            // 경고 메시지는 이미 checkPrdCode 함수 안에서 띄워졌으므로 여기서는 추가 작업 없이 종료
+            return;
+        }
+	}
     if (!prdPrice || isNaN(prdPrice) || Number(prdPrice) <= 0) { alert("제품 가격을 올바르게 입력해주세요."); return; }
     if (!prdType) { alert("제품 유형을 선택해주세요."); return; }
     if (!prdUnit) { alert("제품 단위를 선택해주세요."); return; }
@@ -691,27 +698,61 @@ async function processProductData(mode) {
 	// 등록 모드 또는 수정 모드 모두 Toast UI Grid에서 선택된 옵션을 가져옵니다.
     // generateAndDisplayCombinations에서 이미 그리드가 생성되었고 데이터가 로드된 상태라고 가정합니다.
     if (mode === 'register' || mode === 'update') {
-		toastGridInstances.forEach(gridInstance => {
-	        const checkedRowsFromGrid = gridInstance.getCheckedRows();
-	        checkedRowsFromGrid.forEach(row => {
-	            selectedOptions.push({
-	                // 그리드 컬럼 name과 일치하는 속성명 사용
-	                opt_color: row.colorCode, 
-	                opt_size: row.sizeCode,
-	                opt_height: row.heightCode,
+		selectedColors.forEach(colorId => {
+	        selectedSizes.forEach(sizeId => {
+	            selectedHeights.forEach(heightId => {
+	                selectedOptions.push({
+	                    OPT_COLOR: colorId,
+	                    OPT_SIZE: sizeId,
+	                    OPT_HEIGHT: heightId,
+	                    OPT_YN: 'Y' // 항상 'Y'로 저장 (선택된 옵션이므로)
+	                });
 	            });
 	        });
-		});
+	    });
+		
+		console.log('selectedOptions???????? ' , selectedOptions);
 
         // 등록 모드에서는 옵션 선택이 필수
         if (mode === 'register' && selectedOptions.length === 0) {
             alert("하나 이상의 제품 옵션 조합을 선택해주세요.");
             return;
         }
-        // 수정 모드에서는 모든 기존 옵션을 유지하거나,
-        // 체크된 옵션만 업데이트하도록 로직을 조절할 수 있습니다.
-        // 현재 로직은 체크된 옵션만 서버로 보냅니다.
     }
+	
+	// ⭐⭐ 4. 수정 모드에서 옵션 중복 유효성 검사 (새로 추가) ⭐⭐
+    if (mode === 'update') {
+//        const existingOptions = window.currentProductExistingOptions || [];
+		const existingOptions = (window.currentProductExistingOptions && window.currentProductExistingOptions.data) || [];
+
+//        if (selectedOptions.length === 0) {
+//            alert("수정할 옵션 조합을 하나 이상 선택해주세요.");
+//            return;
+//        }
+
+        for (const newOption of selectedOptions) {
+            // 현재 선택된 옵션 조합이 기존 옵션들과 정확히 일치하는지 확인
+            const isDuplicate = existingOptions.some(existing => {
+                return existing.OPT_COLOR === newOption.OPT_COLOR &&
+                       existing.OPT_SIZE === newOption.OPT_SIZE &&
+                       existing.OPT_HEIGHT === newOption.OPT_HEIGHT;
+            });
+
+			
+            if (isDuplicate) {
+//                alert(`오류: 이미 존재하는 옵션 조합이 있습니다. \n\n색상: ${newOption.OPT_COLOR}\n사이즈: ${newOption.OPT_SIZE}\n굽: ${newOption.OPT_HEIGHT}\n\n이 조합은 다시 추가할 수 없습니다.`);
+				const colorName = allColorOptions.find(c => c.DET_ID === newOption.OPT_COLOR)?.DET_NM || newOption.OPT_COLOR;
+				const sizeName = allSizeOptions.find(s => s.DET_ID === newOption.OPT_SIZE)?.DET_NM || newOption.OPT_SIZE;
+				const heightName = allHeightOptions.find(h => h.DET_ID === newOption.OPT_HEIGHT)?.DET_NM || newOption.OPT_HEIGHT;
+				
+				alert(`오류: 이미 존재하는 옵션 조합이 있습니다.\n\n색상: ${colorName}\n사이즈: ${sizeName}\n굽: ${heightName}\n\n이 조합은 다시 추가할 수 없습니다.`);
+				 
+                return; // 중복 발견 시 함수 실행 중단
+            }
+        }
+        console.log("수정 모드: 선택된 옵션 조합 중복 유효성 검사 통과.");
+    }
+    // ⭐⭐ 유효성 검사 끝 ⭐⭐
     
     console.log("선택된 옵션:", selectedOptions);
     
@@ -728,7 +769,9 @@ async function processProductData(mode) {
         ...(mode === 'update' && { prd_id: prdId, prd_up_date: prdUpDate }),
         options: selectedOptions // 수집된 옵션 데이터
     };
-    console.log("전송할 제품 데이터:", productData);
+	if (mode === 'edit') {
+       productData.PRD_ID = prd_id; // 수정 모드일 때만 PRD_ID 포함
+   	}
 
     // 5. API 호출 (변경 없음)
     const url = mode === 'register' ? '/SOLEX/products/api/productRegist' : '/SOLEX/products/api/productUpdate';
@@ -763,12 +806,3 @@ async function processProductData(mode) {
         alert(`네트워크 오류 또는 서버 응답 오류가 발생했습니다: ${error.message}`);
     }
 }
-
-
-// ⭐ 중요: 초기 로드 시 이미 체크되어 있는 체크박스에 대한 색상 적용 ⭐
-// 이 부분은 generateAndDisplayCombinations 함수 끝에 추가하거나,
-// 체크박스를 생성하는 루프 내에서 isSelectedCombination이 true일 때 바로 클래스를 추가해도 됩니다.
-// 아래 코드를 generateAndDisplayCombinations 함수 가장 마지막에 추가하는 것을 권장합니다.
-document.querySelectorAll('.option-checkbox:checked').forEach(checkedCb => {
-    checkedCb.closest('tr').classList.add('selected-row');
-});
