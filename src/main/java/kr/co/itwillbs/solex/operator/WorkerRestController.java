@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -28,10 +29,7 @@ public class WorkerRestController {
 	
 	//내 부서 정보
 	@GetMapping("/workerSummary")
-	public Map<String, Object> getWorkerSummary(HttpSession session ) {
-    	
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+	public Map<String, Object> getWorkerSummary(@SessionAttribute("empId") Long empId) {
     	
     	Map empInfo = workerService.getWorkerInfo(empId);
 		
@@ -50,23 +48,16 @@ public class WorkerRestController {
 	
 	//사원 실적 등록
 	@PostMapping("/insertCount")
-	public ResponseEntity<?> insertWorkCount(@RequestBody  Map<String, Object> map, HttpSession session ) {
-    	
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+	public ResponseEntity<?> insertWorkCount(@RequestBody  Map<String, Object> map, 
+											 @SessionAttribute("empId") Long empId) {
 		
 		workerService.insertWorkCount(map);
 		return ResponseEntity.ok().build();
 	}
 	
 	@GetMapping("/workerList")
-	public Map<String, Object> getWorkerReportList(//@RequestParam(name = "page", required = false) Integer page,
-										          //@RequestParam(name = "size", required = false) Integer size,
-										          @RequestParam("wpoId") Long wpoId,
-										          HttpSession session ) {
-    	
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+	public Map<String, Object> getWorkerReportList(@RequestParam("wpoId") Long wpoId,
+										           @SessionAttribute("empId") Long empId) {
 		
 		Map<String, Object> params = new HashMap<>();
 		
@@ -84,12 +75,9 @@ public class WorkerRestController {
 	
 	@PatchMapping("/updateMemo")
 	public ResponseEntity<?> updateMemo(@RequestBody Map<String, Object> map,
-										HttpSession session ) {
-    	
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+										@SessionAttribute("empId") Long empId) {
 
-	    Long wreId   = ((Number) map.get("wreId")).longValue();
+		Long wreId   = ((Number) map.get("wreId")).longValue();
 	    String memo  = (String) map.get("newMemo");
 	    
 	    map.put("wreId", wreId);

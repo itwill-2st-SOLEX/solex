@@ -20,18 +20,47 @@
   min-height: 0;         /* flex 아이템 높이 계산용 */
 }
 
+
+
 /* 제목 */
 .panel-title {
   font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.2rem;
   white-space: nowrap;
 }
 
+.cate-legend{
+  display:flex;
+  align-items:center;
+  gap:.9rem;                /* 아이템 사이 간격 */
+  font-size:.9rem;
+  user-select:none;
+}
+
+.cate-legend .item{
+  display:flex;
+  align-items:center;
+  gap:.35rem;
+  font-weight:500;
+  color:#555;
+}
+
+.cate-legend .item span{         /* 작은 원형 표시 */
+  display:inline-block;
+  width:14px;height:14px;
+  border-radius:50%;
+}
+
+/* 각각의 색상만 따로 지정 */
+.cate-legend .company  span{background:#ff5583;}
+.cate-legend .team1     span{background:#00a9ff;}
+.cate-legend .personal span{background:#ffbb3b;}
 
 
 /* 리스트 */
 .panel-list {
+	height: 100%; 
   position: relative;
   list-style: none;
   margin: 0;
@@ -41,8 +70,25 @@
   /* font-size: . NineFive Five timesSeven;   0.95rem 까지 쓰면 Korean fix*??? ignore */
 }
 
+.panel-list .text-none.small {
+	 position: absolute;
+	 top: 40%;
+	 left: 50%;
+	 transform: translate(-50%, -50%); /* ① X·Y 축 모두 가운데 정렬 */
+
+	 
+	 text-align: center;   /* ③ 글자 가운데 */
+	 color: var(--text-muted);
+	 pointer-events: none; /* ④ 클릭 이벤트 막기(선택) */
+
+	 /* 필요하다면 글자 크기·패딩 조절 */
+	 padding: .25rem 0;
+	 font-size: .85rem;
+}
+
 .panel-list li {
-  margin-bottom: .4rem;
+  margin-top: .8rem;
+  margin-bottom: .8rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -54,15 +100,14 @@
   color: var(--brand);
 }
 
-/* 매출액 전용 */
-.price-value {
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.2;
+.tui-popup-detail-author{
+  margin-top:4px;
+  font-size:.9rem;
+  color:#444;
 }
-.price-sub {
-  font-size: .85rem;
-  color: var(--text-muted);
+.tui-popup-detail-author .tui-icon{
+  margin-right:4px;
+  vertical-align:-2px;
 }
 
 /* ─── Box 레이아웃 ─── */
@@ -75,12 +120,13 @@
   gap: var(--gap);
 }
 
-.panel.notice  { height: 200px !important; }
-.panel.approval{ height: 200px !important; }
 
 /* ─── Calendar ─── */
 .calendar { padding: 0; }
 .calendar-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
   padding: .75rem 1rem;
   border-bottom: 1px solid var(--panel-border);
 }
@@ -161,9 +207,6 @@
 	width:500px !important;
 }
 
-.toastui-calendar-detail-item.toastui-calendar-detail-item-indent{
-	display: none;
-}
 
 
 div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) {
@@ -204,7 +247,7 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
   gap: .5rem;
 
   /* 링크 영역 전부 클릭 가능하도록 padding */
-  padding: .30rem .25rem;
+  padding: .20rem .20rem;
   border-radius: 6px;
 }
 
@@ -236,15 +279,15 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 
 /* “+ 더보기” 행 */
 
-.panel.notice.flex-grow-1, .panel.approval.flex-grow-1 {
+.panel.notice, .panel.approval {
 	position: relative;
 }
-.panel.notice.flex-grow-1 > span, .panel.approval.flex-grow-1 > span {
+.panel.notice > span, .panel.approval > span {
 	position: absolute;
-	top: 10px;
+	top: 15px;
 	right: 20px;
 }
-.panel.notice.flex-grow-1 > span > a, .panel.approval.flex-grow-1 > span > a {
+.panel.notice > span > a, .panel.approval > span > a {
 	z-index: 10;
   color: var(--brand);
   font-size: .8rem;
@@ -253,13 +296,81 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 }
 
 
-.panel.notice.flex-grow-1 > span:hover, .panel.approval.flex-grow-1 > span:hover {
+.panel.notice > span:hover, .panel.approval > span:hover {
 	z-index: 10;
   background: transparent;
   cursor: pointer;
 }
 
+/* 일정 상세보기 공통 텍스트 스타일 */
+.toastui-calendar-popup-section.toastui-calendar-section-detail,
+.tui-popup-detail-author,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-category,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-priority {
 
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #444;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+div.toastui-calendar-detail-item.toastui-calendar-detail-item-indent > span.toastui-calendar-content > span > div,
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(2) > span.toastui-calendar-content,
+div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-child(3) > span.toastui-calendar-content {
+	font-size: 0.8rem;
+}
+.toastui-calendar-detail-item-indent {
+	display: flex;
+	align-items: center;
+	padding-left: 0 !important;
+	text-indent: 0 !important;
+}
+
+.toastui-calendar-icon{
+	margin-top: 5px;	
+}
+
+/* 작성자 아이콘 */
+.tui-popup-detail-author .tui-icon,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-priority .tui-icon,
+.toastui-calendar-popup-section.toastui-calendar-popup-section-category .tui-icon {
+  vertical-align: middle;
+  margin-right: 4px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* 중요도(일반/중요) 텍스트 색상 통일 */
+.toastui-calendar-popup-section.toastui-calendar-popup-section-priority span {
+  color: #555;
+  font-weight: 600;
+}
+
+/* 카테고리(회사/팀/개인) 배경색 + 글자색 */
+.toastui-calendar-popup-section.toastui-calendar-popup-section-category span {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* 카테고리별 색상 */
+.toastui-calendar-popup-section-category .company span {
+  background-color: #ff5583;
+}
+.toastui-calendar-popup-section-category .team1 span {
+  background-color: #00a9ff;
+}
+.toastui-calendar-popup-section-category .personal span {
+  background-color: #ffbb3b;
+}
+
+div.toastui-calendar-popup-section.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(4) {
+  display:none !important;
+}
 
 
 /* 모달창 css */
@@ -315,6 +426,25 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 }
 
 
+.panel.myInfo {
+	flex:0 0 22%;
+	flex-direction: row;
+}
+
+.panel.notice,
+.panel.approval{
+  /* 남은 공간을 1 : 1 로 나눠 갖는다 */
+  flex:1 1 0;          /* grow=1, shrink=1, basis=0 */
+  display:flex;
+  flex-direction:column;
+}
+
+/* notice·approval 내부 리스트는 내용이 넘치면 스크롤 */
+.panel.notice .panel-list,
+.panel.approval .panel-list{
+  flex:1 1 auto;
+  overflow-y:auto;
+}
 
 
 
@@ -322,10 +452,131 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 
 
 
-/* ─── 반응형 (≤ LG) ─── */
-@media (max-width: 992px) {
-  .box1 { flex-direction: column; height: auto; }
-  .box2 { flex-direction: column; }
-  .box2Side { width: 100% !important; flex-direction: row; }
-  .box2Side .panel { flex: 1 1 0; }
+
+/* ─── myInfo 패널 ─── */
+.panel.myInfo{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:.85rem 1.1rem;
+}
+/* 사진 */
+.panel.myInfo .photo img{
+  width:80px; height:80px;
+  border-radius:8px;
+  object-fit:cover;
+}
+
+/* 정보 + 버튼 세로 스택 */
+.panel.myInfo .emp-box{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  gap:.3rem;            /* 두 줄 간격 */
+}
+
+/* 줄① : 부서/팀/직급 */
+.dept-line{
+  margin:0;
+  font-size:1rem;
+  font-weight:600;
+  color:var(--brand);
+}
+.pos{ color:#555; font-weight:500; }
+
+/* 줄② : 이름 (사번) */
+.name-line{
+  margin:0;
+  font-size:.95rem;
+  color:#333;
+}
+.emp-id{ color:var(--text-muted); }
+
+/* 줄③ : 버튼 그룹 */
+.btn-group{
+  margin-top:.4rem;
+  display:flex;
+  gap:.5rem;
+}
+
+/* 마이페이지 : 주색 버튼 */
+.btn-mypage{
+  padding:.28rem .9rem;
+  font-size:.8rem;
+  font-weight:600;
+  color:#fff;
+  background:var(--brand);
+  border:0;
+  border-radius:5px;
+  cursor:pointer;
+  transition:opacity .2s;
+}
+.btn-mypage:hover{ opacity:.9; }
+
+/* 로그아웃 : 테두리형 경고 버튼 */
+.btn-logout{
+  padding:.28rem .9rem;
+  font-size:.8rem;
+  font-weight:600;
+  color:#e53935;
+  background:#fff;
+  border:1px solid #e53935;
+  border-radius:5px;
+  cursor:pointer;
+  transition:background .2s, color .2s;
+}
+.btn-logout:hover{
+  background:#e53935;
+  color:#fff;
+}
+
+.emp-box{
+	position: relative;
+}
+
+.emp-box .logout{
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.logout .dropdown-item{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  color:#e53935;                 /* 원하는 빨강 */
+  border:2px solid currentColor; /* 글자색 = 테두리색 */
+  padding:2px;
+  border-radius:10px;             /* 0이면 각진, 50%면 원형 */
+  font-size:1.25rem;             /* 크기 (선택) */
+}
+
+.logout .dropdown-item:hover{ background:#e53935; color:#fff; }
+
+.icon-power-red:hover{ background:#e53935; color:#fff; }
+
+
+/* ─── 태블릿 이하 (≤ 991.98 px) ─── */
+@media (max-width: 991.98px){
+	
+	.toastui-calendar-month .toastui-calendar-month-daygrid {
+		height: 80vh;
+	}
+
+
+  .box2{
+	
+    flex-direction: column;   /* 달력 위, 패널 아래 */
+    gap: var(--gap);
+  }
+  
+  .box2Side {
+	width: 100% !important;
+  }
+  
+  .panel.notice, .panel.approval {
+	min-height: 250px;
+}
+
+
 }
