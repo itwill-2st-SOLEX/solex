@@ -47,8 +47,9 @@ public class WorkOrderRestController {
 	
 	// 창고 조회
 	@GetMapping("/warehouses/{prdId}")
-	public List<Map<String, Object>> getWarehouses(@PathVariable("prdId") String prdId) {
-		return service.getWarehouses(prdId);
+	public List<Map<String, Object>> getWarehouses(@PathVariable("prdId") String prdId,
+												   @RequestParam("optId") String optId) {
+		return service.getWarehouses(prdId, optId);
 	}
 	
 	// 창고 자재 등록
@@ -56,6 +57,7 @@ public class WorkOrderRestController {
 	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo,
 								 HttpSession session) {
 		String empId = (String)session.getAttribute("empId");
+		System.out.println(prdInfo);
 		service.warehousesInsert(prdInfo, empId);
 	}
 }
