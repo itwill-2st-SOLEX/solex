@@ -24,18 +24,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateCalendarAndLabel();
     });
 
-    try {
-        const res = await fetch('/SOLEX/main/api/loginEmp');
-        loginEmp = await res.json();
+	try {
+	    const res = await fetch('/SOLEX/main/api/loginEmp', { credentials: 'include' });
+	    loginEmp = await res.json();               // ← { empNm, empNum, deptNm, posNm, photoPath }
 
-        console.log('loginEmp:', loginEmp);
-        /* loginEmp 세팅 완료 후 달력 초기화 및 표시 */
-        initCalendar();
-        updateCalendarAndLabel();
-    } catch (e) {
-        console.error('loginEmp 조회 실패', e);
-        alert('로그인 정보를 가져오지 못했습니다.');
-    }
+		console.log(loginEmp)
+	    /* ① 프로필 영역 업데이트 */
+	    document.getElementById('empDept').textContent = loginEmp.empDepNm || '';
+	    document.getElementById('empTeam' ).textContent = loginEmp.empTeamNm  || '';
+	    document.getElementById('empPos' ).textContent = loginEmp.empPosNm  || '';
+	    document.getElementById('empNm').textContent = loginEmp.empNm  || '';
+	    document.getElementById('empNum').textContent = `(${loginEmp.empNum})` || '';
+
+	    const img = document.getElementById('emp_img_preview');
+	    if (loginEmp.empImg) img.src = `/SOLEX${loginEmp.photoPath}`;
+
+	    /* ② 달력 초기화 */
+	    initCalendar();
+	    updateCalendarAndLabel();
+	  } catch (e) {
+	    console.error('loginEmp 조회 실패', e);
+	    alert('로그인 정보를 가져오지 못했습니다.');
+	  }
 });
 
 function initCalendar() {

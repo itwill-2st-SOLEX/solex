@@ -2,6 +2,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     noticeList();     // 📢 최근 공지 4건
     approvalList();   // 📝 결재 목록 4건
+	
+	
 
     // 공지사항 -----------------------------------------------------------------
     document.getElementById('noticeList').addEventListener('click', async (e) => {
@@ -24,8 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // 결재목록 -----------------------------------------------------------------
-    document.getElementById('approvalList')
-        .addEventListener('click', async (e) => {
+    document.getElementById('approvalList').addEventListener('click', async (e) => {
             const item = e.target.closest('.document-item');
             if (!item) return;
             e.preventDefault();
@@ -36,88 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
             openDetailModal(row, docTypeCode);
         });
 });
-
-
-
-
-// 즐겨찾기 토글 클릭 이벤트 (한 곳에서 통합)
-document.addEventListener('click', async e => {
-  const btn = e.target.closest('.fav-toggle');
-  if (!btn) return;
-
-  e.stopPropagation(); // 메뉴 열림 방지
-
-  // 1) 즐겨찾기 대상 li.menu-item
-  const itemLi = btn.closest('.menu-item');
-  if (!itemLi) return;
-
-  // 2) 상위 카테고리 li (최상위 메뉴 아이콘 위치)
-  const catLi   = itemLi.closest('ul')?.parentElement;
-  const iconCls =
-        catLi?.querySelector('.menu-icon')?.classList.value      // <i> 의 전체 클래스
-          ?.replace('menu-icon','')                              // 불필요한 menu‑icon 제거
-          ?.trim() || 'bx bx-star';
-
-  // 3) 메뉴 정보 추출
-  const menuId = btn.dataset.menuId;
-  const href = btn.dataset.menuHref;
-  const title = itemLi.querySelector('.text-truncate')?.textContent.trim() || '즐겨찾기';
-
-  // 4) 토글 상태 변경
-  const isOn = btn.classList.toggle('on');
-
-  if (isOn) {
-    addToFavorites({ id: menuId, href, title, icon: iconCls });
-  } else {
-    removeFromFavorites(menuId);
-  }
-
-  // 5) 서버 저장/삭제 요청 (실패해도 UI 유지)
-  try {
-    await fetch(`/api/favorites/${menuId}`, {
-      method: isOn ? 'POST' : 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: isOn ? JSON.stringify({ href }) : null
-    });
-  } catch (err) {
-    console.error('즐겨찾기 저장 실패', err);
-  }
-});
-
-function addToFavorites({ id, href, title, icon }) {
-  if (document.querySelector(`#fav-${id}`)) return; // 중복 방지
-
-  const li = document.createElement('li');
-  li.id = `fav-${id}`;
-  li.innerHTML = `
-    <a href="${href}">
-      <i class="menu-icon tf-icons ${icon}"></i>
-      <span>${title}</span>
-    </a>
-  `;
-  document.querySelector('#favoriteMenus').append(li);
-}
-
-function removeFromFavorites(id) {
-  const el = document.querySelector(`#fav-${id}`);
-  if (el) el.remove();
-}
-
-// 즐겨찾기 목록 UI 재생성 (서버에서 받아올 때 사용)
-function redrawFavorites(list) {
-  const ul = document.querySelector('.panel.favorites .panel-list');
-  ul.innerHTML = '';
-  list.slice(0, 4).forEach(m => {
-    ul.insertAdjacentHTML('beforeend', `
-      <li id="fav-${m.id}">
-        <a href="${m.href}">
-          <i class="menu-icon tf-icons ${m.iconClass}"></i>
-          <span>${m.title}</span>
-        </a>
-      </li>
-    `);
-  });
-}
 
 
 

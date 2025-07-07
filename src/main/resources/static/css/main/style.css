@@ -279,15 +279,15 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 
 /* “+ 더보기” 행 */
 
-.panel.notice.flex-grow-1, .panel.approval.flex-grow-1 {
+.panel.notice, .panel.approval {
 	position: relative;
 }
-.panel.notice.flex-grow-1 > span, .panel.approval.flex-grow-1 > span {
+.panel.notice > span, .panel.approval > span {
 	position: absolute;
 	top: 15px;
 	right: 20px;
 }
-.panel.notice.flex-grow-1 > span > a, .panel.approval.flex-grow-1 > span > a {
+.panel.notice > span > a, .panel.approval > span > a {
 	z-index: 10;
   color: var(--brand);
   font-size: .8rem;
@@ -296,7 +296,7 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 }
 
 
-.panel.notice.flex-grow-1 > span:hover, .panel.approval.flex-grow-1 > span:hover {
+.panel.notice > span:hover, .panel.approval > span:hover {
 	z-index: 10;
   background: transparent;
   cursor: pointer;
@@ -366,6 +366,10 @@ div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-chi
 }
 .toastui-calendar-popup-section-category .personal span {
   background-color: #ffbb3b;
+}
+
+div.toastui-calendar-popup-section.toastui-calendar-dropdown-section.toastui-calendar-calendar-section > ul > li:nth-child(4) {
+  display:none !important;
 }
 
 
@@ -445,10 +449,11 @@ div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-chi
 }
 
 /* 예시: 달력과 같은 컨테이너가 ‘높이:100%’ 인 경우 */
-.box2Side{
-/*    flex: 0 0 100%;*/                 /* 부모가 주는 높이 그대로 차지 */
+/* .box2Side{
+    display:flex;             
     flex-direction: column;
     gap: var(--gap);
+    height:100%;
 }
 
 .box2Side > .panel{
@@ -463,97 +468,100 @@ div.toastui-calendar-popup-section.toastui-calendar-section-detail > div:nth-chi
     flex: 1 1 auto;
     overflow-y: auto;
 }
-
-
-
-
-
-
-
-
-/* ───────────── 즐겨찾기(Favorites) 전용 스타일 ───────────── */
-
-/* 1. 패널 자체 크기 */
-
-/* 2. 2×2 카드 그리드 */
-.panel.favorites .panel-list{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);   /* 가로 2칸 */
-    gap:12px;
-    margin:0;
-    padding:0;
-    list-style:none;
+ */
+.panel.myInfo {
+	flex:0 0 22%;
+	flex-direction: row;
 }
 
-
-/* 3. 카드 1개(링크) – 아이콘 ↕ 텍스트 수직 배치 */
-.panel.favorites .panel-list li a{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    gap:6px;
-    width:100%;
-    padding:14px 10px;
-    border-radius:10px;
-    background:#f8f9fa;
-    font-size:.9rem;
-    color:#495057;
-    text-decoration:none;
-    transition:background .2s, box-shadow .2s;
-}
-.panel.favorites .panel-list li a:hover{
-    background:#eef3ff;
-    box-shadow:0 2px 6px rgba(0,0,0,.05);
+.panel.notice,
+.panel.approval{
+  /* 남은 공간을 1 : 1 로 나눠 갖는다 */
+  flex:1 1 0;          /* grow=1, shrink=1, basis=0 */
+  display:flex;
+  flex-direction:column;
 }
 
-/* 4. 아이콘 크기·색상 통일 */
-.panel.favorites .panel-list i.menu-icon{
-    font-size:1.6rem;
-    color:var(--bs-primary,#696cff);
-    line-height:1;
-}
-
-/* 5. 사이드 메뉴 안 ‘즐겨찾기 토글’ 버튼 ☆/★ */
-.menu-item{ position:relative; }           /* 기준 잡기 */
-.fav-toggle{
-    position:absolute;                     /* 메뉴 글자 왼쪽 원형 아이콘 자리 */
-    left:28px;                             /* ← 필요 시 조정 */
-    top:50%; transform:translateY(-50%);
-    background:none; border:0; cursor:pointer;
-    font-size:1.2rem; line-height:1;
-    color:rgb(159, 158, 145);                         
-}
-/* 기본은 ☆ */
-.fav-toggle::before{ content:'\2606'; font-size: 1rem; }
-
-/* on 클래스가 붙으면 ★ */
-.fav-toggle.on::before{ content:'\2605'; font-size: 1rem;} /* ★ */
-
-
-.menu .menu-sub > .menu-item > .menu-link::before {
-	background-color: #fff;
+/* notice·approval 내부 리스트는 내용이 넘치면 스크롤 */
+.panel.notice .panel-list,
+.panel.approval .panel-list{
+  flex:1 1 auto;
+  overflow-y:auto;
 }
 
 
 
 
 
-/*즐겨찾기 고정*/
-/*.panel.favorites .panel-list{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    padding:0;
-    list-style:none;
+
+
+
+.panel.myInfo{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:.85rem 1.1rem;
 }
 
-.panel.favorites .panel-list li{
-    flex:0 0 calc(33.333% - 12px);    
+/* 사진 썸네일 */
+.panel.myInfo .photo img{
+  width:80px; height:80px;
+  border-radius:8px;
+  object-fit:cover;
 }
 
-@media (max-width:991.98px){
-    .panel.favorites .panel-list li{
-        flex:0 0 calc(33% - 12px);
-    }
-}*/
+/* 텍스트 두 줄을 세로로 */
+.panel.myInfo .emp-meta{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  line-height:1.3;
+}
+
+.emp-meta .dept{
+	margin-bottom: 5px !important;
+}
+
+/* ① 부서 */
+.panel.myInfo .dept{
+  margin:0;
+  font-size:.95rem;
+  font-weight:600;
+  color:var(--brand);      /* 강조 색 */
+}
+
+/* ② 이름·직급·사번 */
+.panel.myInfo .emp-line{
+  margin:0;
+  font-size:.9rem;
+  color:#333;
+  white-space:nowrap;      /* 한 줄 유지 */
+}
+.panel.myInfo .pos,
+.panel.myInfo .emp-id{
+  margin-left:.35rem;
+  color:var(--text-muted);
+  font-weight:500;
+}
+
+/* 정보 변경 버튼 (작게) */
+.panel.myInfo .btn-edit{
+  flex:0 0 auto;
+  padding:.25rem .75rem;
+  font-size:.8rem;
+  font-weight:600;
+  color:#fff;
+  background:var(--brand);
+  border:0;
+  border-radius:5px;
+  cursor:pointer;
+  transition:background .2s;
+}
+.panel.myInfo .btn-edit:hover{ background:#1d6bf5; }
+
+/* 모바일(≤576 px) – 세로 카드 */
+@media (max-width:576px){
+  .panel.myInfo{ flex-direction:column; align-items:flex-start; }
+  .panel.myInfo .photo img{ width:68px;height:68px; }
+  .panel.myInfo .btn-edit{ align-self:stretch; text-align:center; margin-top:.6rem; }
+}

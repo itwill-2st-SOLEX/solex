@@ -5,9 +5,17 @@
   <mapper namespace="kr.co.itwillbs.solex.main.MainMapper">	
   
   	<select id="selectEmpInfo" resultType="map">
-		SELECT emp_id AS "empId", emp_dep_cd  AS "empDepCd", emp_team_cd AS "empTeamCd"
-		FROM   employee
-		WHERE  emp_id = #{empId}
+		SELECT e.emp_id AS "empId",
+			   e.emp_nm AS "empNm", 
+			   e.emp_dep_cd  AS "empDepCd", 
+			   e.emp_team_cd AS "empTeamCd",
+			   e.emp_num AS "empNum",
+			   e.emp_img AS "empImg",
+			   v.emp_dep_nm as "empDepNm",
+			   v.emp_team_nm as "empTeamNm",
+			   v.emp_pos_nm as "empPosNm"
+		FROM   employee e JOIN view_employee v ON e.emp_id=v.emp_id
+		WHERE  e.emp_id = #{empId}
 	</select>
   
   	<!-- 일정 조회하기 -->
@@ -15,8 +23,8 @@
   		SELECT  c.cal_id 			 AS "calId",
 	  		 	c.emp_id             AS "empId",
 	  		 	v.emp_nm			 AS "empNm",
-			    v.emp_dep_nm         AS "depNm",      -- 부서명
-   	 			v.emp_team_nm        AS "teamNm",     -- 팀명
+			    v.emp_dep_nm         AS "depNm",      
+   	 			v.emp_team_nm        AS "teamNm",     
     			v.emp_pos_nm         AS "posNm", 
 			    e.emp_dep_cd         AS "depCd",
 			    e.emp_team_cd        AS "teamCd",

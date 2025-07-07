@@ -41,7 +41,7 @@ public class MainRestController {
     	
     	 Map<String,Object> params =  mainService.selectEmpInfo(empId);
     	 
-    	 //params.put("empId", empId);
+    	 params.put("empId", empId);
     	 params.put("start", start);
     	 params.put("end",  end);
 	     

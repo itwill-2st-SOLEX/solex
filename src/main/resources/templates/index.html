@@ -74,47 +74,25 @@
 			
 			      <!-- 결재·즐겨찾기 세로 스택 -->
 			      <div class="box2Side d-flex flex-column gap-3" style="width:28%;">
-					<section class="panel favorites flex-fill">
-			          <h5 class="panel-title">⭐ 즐겨찾기</h5>
-			          <ul id="favoriteMenus" class="panel-list">
-					    <!-- ERP 직원 전용 -->
-						<!--<li th:if="${userType == 'ERP'}">
-						        <a href="/SOLEX/vacation/detail">
-						            <i class="menu-icon tf-icons bx bx-calendar me-1"></i>연차 현황
-						        </a>
-						    </li>
-						    <li th:if="${userType == 'ERP'}">
-						        <a href="/SOLEX/approval/drafts/new">
-						            <i class="menu-icon tf-icons bx bx-file me-1"></i>기안서 작성
-						        </a>
-						    </li>
-						    <li th:if="${userType == 'ERP'}">
-						        <a href="/SOLEX/orders/new">
-						            <i class="menu-icon tf-icons bx bx-briefcase me-1"></i>수주 등록
-						        </a>
-						    </li>
-
-						     mes즐겨찾기 
-						    <li th:if="${userType == 'MES'}">
-						        <a href="/SOLEX/vacation/detail">
-						            <i class="menu-icon tf-icons bx bx-calendar me-1"></i>연차 현황
-						        </a>
-						    </li>
-						    <li th:if="${userType == 'MES'}">
-						        <a href="/SOLEX/workOrders">
-						            <i class="menu-icon tf-icons bx bx-slider me-1"></i>작업지시 조회
-						        </a>
-						    </li>
-						    <li th:if="${userType == 'MES'}">
-						        <a href="/SOLEX/production/progress">
-						            <i class="menu-icon tf-icons bx bx-photo-album me-1"></i>생산 진행현황
-						        </a>
-						    </li>-->
-						
-					  </ul>
-			        </section>
+					<section class="panel myInfo">
+					  <!-- 사진 -->
+					  <div class="photo">
+					    <img id="emp_img_preview"
+					         src="/SOLEX/assets/img/emp/simple_person_pic.jpg"
+					         alt="사원 사진">
+					  </div>
 					
-					<section class="panel notice flex-grow-1">
+					  <!-- 텍스트 두 줄 -->
+					  <div class="emp-meta">
+					    <p class="dept"> <span id="empDept">생산관리</span> <span id="empTeam">1팀</span> <span id="empPos" class="pos">사원</span></p>          
+					    <p class="emp-line">                   
+					      <span id="empNm" class="name">나드아</span>
+					      <span id="empNum" class="emp-id">(EMP202507)</span>
+					    </p>
+					  </div>
+					</section>
+					
+					<section class="panel notice">
 				        <h5 class="panel-title">📢 최근 공지</h5>
 					  <span class="text-more mt-1">
 					      <a th:href="@{/notice}" class="small">+ 더보기</a>
@@ -123,7 +101,7 @@
 
 						</ul>
 				      </section>
-			        <section class="panel approval flex-grow-1">
+			        <section class="panel approval">
 			          <h5 class="panel-title">📝 결재 목록</h5>
 			          <span class="text-more mt-1">
 					      <a th:href="@{/approval/drafts}" class="small">+ 더보기</a>
