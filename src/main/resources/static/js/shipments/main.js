@@ -24,9 +24,10 @@ const grid = new tui.Grid({
 			       cursor: 'pointer'
 			     }
 			   }},
-    {header: "거래처", name: "CLI_NM", align: "center", sortable: true },
-    {header: "거래처 대표자", name: "CLI_CEO", align: "center", sortable: true },
-    {header: "거래처 대표자 전화번호", name: "CLI_PHONE", align: "center", sortable: true },
+    {header: "회사명", name: "CLI_NM", align: "center", sortable: true },
+    {header: "대표자 명", name: "CLI_CEO", align: "center", sortable: true },
+    {header: "대표자 전화번호", name: "CLI_PHONE", align: "center", sortable: true },
+	{header: "주문 수량", name: "ODD_CNT", align: "center", sortable: true },
     {header: "배송지", name: "ORD_ADDRESS", align: "center", width: 350, sortable: true },
     {header: "납품 요청일",name: "ORD_END_DATE",align: "center",sortable: true},
     {header: "상태", name: "DET_NM", align: "center", sortable: true },
