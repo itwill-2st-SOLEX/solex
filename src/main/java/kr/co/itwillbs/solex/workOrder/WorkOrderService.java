@@ -72,6 +72,6 @@ public class WorkOrderService {
 		
 		// --------------------- 강현----------------
 		// ✅ 7. 제품LOT 상태값 '완료(lot_status_03)'로 변경
-	    lotService.updatePrdLotStatusToComplete((Integer) prdInfo.get("oddId"));
+	    lotService.updatePrdLotStatusToComplete(prdInfo);
 	}
 }
