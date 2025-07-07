@@ -83,4 +83,10 @@
   color: #fff;
   background-color: #365acb; 
   border-color: #365acb;
-  }
+ }
+ 
+ /* #detailModal의 크기를 xl보다 약간 더 크게 조정 */
+ #detailModal .modal-dialog {
+   max-width: 1120px; /* xl 사이즈(1140px)보다 조금 더 큰 고정값으로 설정 */
+ }
+  

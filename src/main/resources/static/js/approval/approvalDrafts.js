@@ -3,17 +3,43 @@ $(function() {
 	const pageSize = 20;
 
 	const grid = new tui.Grid({
-		el: document.getElementById('grid'),
-		bodyHeight: 500,
-		scrollY: true,
-		data: [],
-		columns: [
-			{ header: '기안서 번호', name: 'doc_id', align: 'center'},
-			{ header: '기안서 종류', name: 'doc_type', sortable: 'true', align: 'center' },
-			{ header: '결재상태', name: 'doc_sts', sortable: 'true', align: 'center' },
-			{ header: '등록일', name: 'doc_reg_time', align: 'center' }
-		]
-	});
+        el: document.getElementById('grid'),
+        bodyHeight: 600,
+        scrollY: true,
+        data: [],
+        columns: [
+			{
+				header: '기안서 번호',
+				name: 'doc_id',
+				align: 'center',
+				renderer: {
+					styles: {
+						color: '#007BFF',
+						textDecoration: 'underline',
+						cursor: 'pointer'
+					}
+				}
+			},
+            { header: '기안서 종류', name: 'doc_type', sortable: true, align: 'center' },
+            { 
+                header: '결재상태', 
+                name: 'doc_sts', 
+                sortable: true, 
+                align: 'center',
+				formatter: (props) => {
+	                const status = props.value;
+	                if (status === '승인') {
+	                    return '<span class="text-primary fw-bold">승인</span>';
+	                } else if (status === '반려') {
+	                    return '<span class="text-danger fw-bold">반려</span>';
+	                } else if (status === '대기') {
+						return '<span class="fw-bold">대기</span>';
+	                }
+	            }
+            },
+            { header: '등록일', name: 'doc_reg_time', align: 'center' }
+        ]
+    });
 
 	async function loadDrafts(page) {
 		try {
@@ -269,6 +295,18 @@ $(function() {
 		form.querySelectorAll("input, textarea, select").forEach(el => {
 			el.disabled = true;
 		});
+		
+		const approveBtn = document.querySelector('#detailModal .btn-approve');
+		const rejectBtn = document.querySelector('#detailModal .btn-reject');
+
+		// If status is final (Approved/Rejected), hide action buttons
+		if (row.doc_sts === '승인' || row.doc_sts === '반려') {
+			approveBtn.style.display = 'none';
+			rejectBtn.style.display = 'none';
+		} else { // Otherwise (Pending), show them
+			approveBtn.style.display = 'inline-block';
+			rejectBtn.style.display = 'inline-block';
+		}
 
 		try {
 			const response = await fetch(`/SOLEX/approval/document/${row.doc_id}?doc_type_code=${docTypeCode}`);
@@ -294,32 +332,40 @@ $(function() {
 				});
 	
 					
-// 결재선 부분 시작		
+			// 결재선 부분 시작		
+			const approvalLineDiv = document.querySelector(".approval-line");
+			approvalLineDiv.innerHTML = ""; // Clear previous content
+
 			const nameList = (data.APL_EMP_POS_NM || "").split(",");
 			const statusList = (data.APL_STS || "").split(",");
 			const timeList = (data.APL_ACTION_TIME || "").split(",");
-			// thead 구성
-			const theadRow = document.querySelector(".approval-line thead tr");
-			theadRow.innerHTML = "";
 
-			const headLabel = document.createElement("th");
-			headLabel.innerText = " ";
-			theadRow.appendChild(headLabel);
+			nameList.forEach((pos, i) => {
+				const status = statusList[i] || "대기";
+				// Format time to include a line break if date and time are present
+				const time = (timeList[i] || "").replace(" ", "<br/>");
 
-			nameList.forEach(pos => {
-				const th = document.createElement("th");
-				th.innerText = pos;
-				theadRow.appendChild(th);
+				let statusClass = "status-pending";
+				if (status === "승인") statusClass = "status-approved";
+				else if (status === "반려") statusClass = "status-rejected";
+
+				const approverBox = document.createElement("div");
+				approverBox.className = "approver-box";
+				approverBox.innerHTML = `
+					<div class="approver-position">${pos}</div>
+					<div class="approver-status ${statusClass}">${status}</div>
+					<div class="approver-time">${time || "-"}</div>
+				`;
+				approvalLineDiv.appendChild(approverBox);
+
+				// Add arrow separator if not the last item
+				if (i < nameList.length - 1) {
+					const arrow = document.createElement('div');
+					arrow.className = 'approver-arrow';
+					arrow.innerHTML = `→`;
+					approvalLineDiv.appendChild(arrow);
+				}
 			});
-
-			// tbody 구성
-			const tbody = document.querySelector(".approval-line tbody");
-			tbody.innerHTML = "";
-			const rowEl = document.createElement("tr");
-			const bodyLabel = document.createElement("td");
-			bodyLabel.innerText = "결재";
-			rowEl.appendChild(bodyLabel);
-//			const returnReason = data.APL_RREMARK || "";
 			
 			// 반려 사유 textarea 추가
 			if (data.APL_STS && data.APL_STS.includes("반려") && data.APL_RREMARK) {
@@ -333,27 +379,10 @@ $(function() {
 						<textarea class="form-control" id="returnReason" name="return_reason" rows="3" disabled>${data.APL_RREMARK}</textarea>
 					`;
 
-					form.appendChild(returnDiv);
-					debugger;
-				
+					form.appendChild(returnDiv);				
 				}
 			}
-			for (let i = 0; i < nameList.length; i++) {
-				const td = document.createElement("td");
-				const status = statusList[i] || "대기";
-				const time = timeList[i] || "-";
-
-				let statusClass = "";
-				if (status === "승인") statusClass = "text-blue";
-				else if (status === "반려") statusClass = "text-red";
-
-				td.innerHTML = `
-				  <span class="${statusClass}"> ${status}<br>${time}</span>
-				`;
-				rowEl.appendChild(td);
-			}
-			tbody.appendChild(rowEl);
-// 결재선 부분 끝	
+			// 결재선 부분 끝	
 				
 			// 모달 오픈
 			document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());

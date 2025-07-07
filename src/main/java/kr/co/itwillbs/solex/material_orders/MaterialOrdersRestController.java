@@ -30,10 +30,8 @@ public class MaterialOrdersRestController {
 	
 	@PostMapping("/registration")
 	public void materialOrderRegist(@RequestBody Map<String, Object> matordMap, HttpSession session) {
-		System.out.println("#################################");
 		String emp_id = (String) session.getAttribute("empId");
 		System.out.println("emp_id = " + emp_id);
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		matordMap.put("emp_id", emp_id);
 		System.out.println("mat ord map = " + matordMap);
 		materialOrdersService.materialOrderRegist(matordMap);	
@@ -83,6 +81,7 @@ public class MaterialOrdersRestController {
 	@PostMapping("/materialDeny")
 	public ResponseEntity<Void> materialDeny(@RequestBody Map<String, Object> map) {
 		materialOrdersService.updateDeny(map);
+		
 	    return ResponseEntity.ok().build();
 	}
 	
