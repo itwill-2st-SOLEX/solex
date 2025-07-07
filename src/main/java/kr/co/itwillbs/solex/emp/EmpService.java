@@ -125,6 +125,9 @@ public class EmpService {
 		System.out.println("+++++++++__________________________****************");
 		System.out.println(empMap);
 		
+//		Long empNum = mapper.getEmpSabun();
+//		empMap.put("emp_num", empNum);
+		
 		mapper.insertEmp(empMap);
 	}
 
