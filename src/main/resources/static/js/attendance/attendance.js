@@ -129,14 +129,12 @@ let columnsConfig = [
     {
         header: '출근 시간',
         name: 'att_in_time',
-        width: 200,
         align: 'center',
         sortable: true
     },
     {
         header: '퇴근 시간',
         name: 'att_out_time',
-        width: 200,
         align: 'center',
         sortable: true
     },
@@ -152,8 +150,8 @@ let columnsConfig = [
             showClearBtn: true // 필터 초기화 버튼을 보여줍니다.
         }
     },
-    { header: '총 근무시간', name: 'total', width: 200, align: 'center', sortable: true, align: 'center' },
-    { header: '날짜', name: 'att_day', width: 200, align: 'center', sortable: true, align: 'center' },
+    { header: '총 근무시간', name: 'total',  align: 'left', sortable: true },
+    { header: '날짜', name: 'att_day',  align: 'center', sortable: true},
     { name: 'att_id', hidden: true }
 ];
 
@@ -224,7 +222,11 @@ const grid = new tui.Grid({
     scrollY: true,
     scrollX: false,
     data: [],
-    columns: columnsConfig // 동적으로 생성된 컬럼 설정 사용
+    columns: columnsConfig, // 동적으로 생성된 컬럼 설정 사용
+	columnOptions: {
+        resizable: true, // 모든 컬럼의 너비를 드래그로 조절 가능하게 설정
+        minWidth: 50 // (선택 사항) 최소 너비 설정
+    }
 });
 
 // JavaScript에서 초기화
