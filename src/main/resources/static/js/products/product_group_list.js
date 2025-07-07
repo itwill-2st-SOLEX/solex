@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		  { header: '선택된색상', name: 'OPT_COLOR', hidden: true },
 		  { header: '선택된굽', name: 'OPT_HEIGHT', hidden: true },
 		  { header: '선택된사이즈', name: 'OPT_SIZE', hidden: true },
-	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 130,
+	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 130, className: 'blue-text',
 			filter:
 			{
 	            type: 'text',

@@ -147,10 +147,6 @@
     /* background-color: #f5f5f5; */ /* 배경색을 연한 회색으로 변경 */
 }
 
-
-
-
-/* 그냥 해봄 */
 .dropdown-menu.show {
   z-index: 9999 !important;
   display: block !important;
@@ -158,4 +154,11 @@
 .dropdown-menu.inner {
   max-height: 200px;
   overflow-y: auto;
+}
+
+
+
+.tui-grid-cell.blue-text .tui-grid-cell-content {
+    color:  #4169E1;
+    font-weight: bold;
 }

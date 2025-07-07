@@ -27,8 +27,6 @@ import kr.co.itwillbs.solex.sales.ClientType;
 @RequestMapping("/products/api")
 public class ProductsRestController {
 	
-	long loginEmpId = 7L; // 임시 ID
-	
 	@Autowired
 	private ProductsService productsService;
 	@Autowired
