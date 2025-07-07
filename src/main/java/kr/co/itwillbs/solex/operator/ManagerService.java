@@ -61,13 +61,15 @@ public class ManagerService {
 	}
 	
 	// 작업 상태 업데이트 
-	@Transactional
+	//@Transactional
 	public void updateWpoSts(Map<String, Object> map) {
 		
 		//String wrkId = (String) map.get("wrkId");
 		String wpoStatus = (String) map.get("wpoStatus");
 		Long wpoId = Long.parseLong((String) map.get("wpoId"));
 		
+		System.out.println("wpoStatus : " +wpoStatus);
+		System.out.println("wpoId : " +wpoId);
 		switch (wpoStatus) {
 			case "wpo_sts_02":
 			// 상태 : wpo_sts_01 -> 02 
@@ -144,12 +146,13 @@ public class ManagerService {
 				
 				stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
 				
-				System.out.println("stepInfo : " + stepInfo);
+				System.out.println("nextWpoId : " + stepInfo.get("nextWpoId"));
+				System.out.println("nextWpoId : " + stepInfo);
 				
 				//다음 공정이 존재하면
-				if (stepInfo.get("NextWpoId") != null ) {
+				if (stepInfo.get("nextWpoId") != null ) {
 
-					int nextWpoId = ((Number) stepInfo.get("NextWpoId")).intValue();
+					int nextWpoId = ((Number) stepInfo.get("nextWpoId")).intValue();
 					
 					stepInfo.put("wpoNewStatus", "wpo_sts_01");		//상태값 공정대기
 					stepInfo.put("wpoStartDate", LocalDateTime.now());	//공정시작일
@@ -173,6 +176,8 @@ public class ManagerService {
 					managerMapper.insertSujuHistory(stepInfo);
 					System.out.println("끝!");
 				}
+				
+				break;
 		
 		}
 		
