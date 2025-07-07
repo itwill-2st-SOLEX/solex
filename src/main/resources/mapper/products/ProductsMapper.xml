@@ -127,9 +127,10 @@
 	    ) VALUES (
 	        #{opt_id},
 	        #{prd_id},
-	        #{opt_color},
-	        #{opt_size},
-	        #{opt_height}
+	        #{OPT_COLOR, jdbcType=VARCHAR},  
+	        #{OPT_SIZE, jdbcType=VARCHAR},   
+	        #{OPT_HEIGHT, jdbcType=VARCHAR}  
+
 	    )
   	</insert>
   	<!-- 제품에 대한 모든 옵션 값 출력 -->
@@ -181,12 +182,13 @@
 	    SELECT COUNT(*)
 	      FROM PRODUCT_OPTION
 	     WHERE prd_id = #{prd_id}
-	       AND opt_color = #{opt_color}
-	       AND opt_size = #{opt_size}
-	       AND opt_height = #{opt_height}
+	       AND opt_color = #{opt_color, jdbcType=VARCHAR}
+	       AND opt_size = #{opt_size, jdbcType=VARCHAR}
+	       AND opt_height = #{opt_height, jdbcType=VARCHAR}
 	</select>
 	
-    <select id="countProductCode" parameterType="String" resultType="int">
+	
+    <select id="existsByPrdCode" resultType="int">
        SELECT COUNT(*)
        FROM PRODUCT
        WHERE PRD_CODE = #{prdCode}

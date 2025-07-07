@@ -71,7 +71,7 @@
          JOIN view_employee ve 
            ON e.emp_id = ve.emp_id
          JOIN attendance att
-           ON e.emp_id = att.emp_id				-- 출퇴근 data
+           ON e.emp_id = att.emp_id				
          JOIN code_detail cd 
            ON cd.det_id = att.att_sts
            
@@ -79,21 +79,13 @@
 		  AND TO_CHAR(att.att_in_time, 'YYYY') = #{year}  
  		  AND TO_CHAR(att.att_in_time, 'MM') = LPAD(#{month, jdbcType=VARCHAR}, 2, '0')
 	<choose>
-		<!-- 팀장 조건 -->
-		<when test="empTeamCd != 'team_00'">
-		  AND e.emp_team_cd = #{empTeamCd} AND e.emp_dep_cd = #{empDepCd}
-		</when>
 		<!-- 부장 조건 -->
-		<when test="empDepCd != 'dep_00'">
+		<when test="empPosCd == 'pos_03'">
 		  AND e.emp_dep_cd = #{empDepCd}
 		</when>
 		<!-- 이사 조건 -->
-		<when test="empCatCd != 'cat_00'">
-		  AND e.emp_cat_cd = #{empCatCd}
-		</when>
-		<!-- 사장 조건 -->
-		<when test="empPosCd == 'pos_01'">
-		  AND e.emp_pos_cd = #{empPosCd}
+		<when test="empPosCd == 'pos_02'">
+		  AND e.emp_pos_cd != 'pos_01' 
 		</when>
 	</choose>
 		ORDER BY e.emp_dep_cd, e.emp_team_cd

@@ -14,6 +14,7 @@
     FROM suju_order ord
     LEFT JOIN client cli
     ON cli.cli_id = ord.cli_id
+	ORDER BY ord.ord_id desc
     OFFSET #{offset} ROWS
     FETCH NEXT #{limit} ROWS ONLY
 </select>
@@ -261,13 +262,17 @@
         cd3.det_nm        AS size_name,
         opt.opt_height     AS height_code,
         cd4.det_nm        AS height_name,
-        odd.odd_cnt       AS quantity
+        odd.odd_cnt       AS quantity,
+		odd.odd_id        AS odd_id,
+		cd.det_nm       AS ODD_STS,
+		opt.opt_id         AS OPT_ID
     FROM
         suju_order_detail odd
     JOIN
         product_option opt ON odd.opt_id = opt.opt_id
     JOIN
         product p ON opt.prd_id = p.prd_id
+	left JOIN code_detail cd ON odd.odd_sts = cd.det_id
 	left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
 	left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
 	left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
@@ -294,6 +299,52 @@
     WHERE
         opt.prd_id = #{prd_id}
 </select>
+
+
+	<select id="findOrdersByIds" parameterType="list" resultType="map">
+        SELECT
+            odd_id,
+            odd_sts
+        FROM
+            suju_order_detail -- 실제 테이블명으로 변경
+        WHERE
+            odd_id IN
+            <foreach collection="oddIds" item="oddId" open="(" close=")" separator=",">
+                #{oddId}
+            </foreach>
+    </select>
+
+	<delete id="deleteOrderById" parameterType="long">
+        DELETE FROM
+            suju_order_detail -- 실제 테이블명으로 변경
+        WHERE
+            odd_id = #{oddId}
+    </delete>
+
+
+
+	 <update id="updateOrderHeader" parameterType="map">
+        UPDATE suju_order -- 실제 주문 헤더 테이블명으로 변경
+        SET
+            cli_id = #{cli_id},
+            pay_type = #{pay_type},
+            ord_pay = #{ord_pay},
+            ord_end_date = #{ord_end_date},
+            ord_pay_date = #{ord_pay_date},
+            ord_pc = #{ord_pc},
+            ord_add = #{ord_add},
+            ord_da = #{ord_da},
+            emp_id = #{emp_id} -- emp_id도 변경될 수 있다면 포함
+        WHERE
+            ord_id = #{ord_id}
+    </update>
+
+	<delete id="deleteOrderDetailsByOrdId" parameterType="int">
+        DELETE FROM
+            suju_order_detail
+        WHERE
+            ord_id = #{ordId}
+    </delete>
   
   
 </mapper>

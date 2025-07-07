@@ -24,5 +24,9 @@ public interface BomsMapper {
 
 	int deleteBom(@Param("bomIds") List<Integer> bomIds);
 
+	String getPrdIdByOptId(String optId);
+
+	Map<String, Object> getBomByOptIdAndMatId(String optId, String matId);
+	
 
 }

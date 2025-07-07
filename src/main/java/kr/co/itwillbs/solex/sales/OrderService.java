@@ -2,10 +2,13 @@ package kr.co.itwillbs.solex.sales;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -130,6 +133,96 @@ public class OrderService {
 
         return finalResult;
 	}
+
+    @Transactional // 하나의 트랜잭션으로 묶어 원자성 보장
+    public Map<String, List<Long>> processBulkOrderDeletion(List<Long> oddIdsToProcess) {
+        List<Long> deletedIds = new ArrayList<>();
+        List<Long> skippedIds = new ArrayList<>();
+
+       // 1. 데이터베이스에서 모든 요청 odd_id에 대한 최신 상태를 한 번에 조회 (Map 형태로)
+        // OrderMapper 인터페이스에 List<Map<String, Object>> findOrdersByIds(List<Long> oddIds);
+        // 이런 메소드가 있다고 가정합니다. (XML 매퍼의 resultType="map"으로 조회)
+        List<Map<String, Object>> ordersData = orderMapper.findOrdersByIds(oddIdsToProcess);
+
+        // Map<oddId, OrderDataMap> 형태로 변환하여 빠른 조회를 위함
+        Map<Long, Map<String, Object>> orderMap = ordersData.stream()
+            .collect(Collectors.toMap(
+                orderData -> ((Number) orderData.get("ODD_ID")).longValue(), // DB 컬럼명이 ODD_ID라고 가정
+                Function.identity()
+            ));
+
+        for (Long oddId : oddIdsToProcess) {
+            Map<String, Object> order = orderMap.get(oddId); // Map 형태로 조회된 데이터
+
+            if (order == null) {
+                // DB에 없는 ID는 건너뛰거나 오류 처리
+                System.err.println("OddId " + oddId + " not found in DB for deletion.");
+                skippedIds.add(oddId);
+                continue;
+            }
+
+            String oddSts00 = (String) order.get("ODD_STS");
+            System.out.println(oddSts00);
+
+            if (!"odd_sts_00".equals(oddSts00)) {
+                skippedIds.add(oddId); // 삭제 불가능한 ID는 스킵 목록에 추가
+                continue; // 다음 odd_id로 넘어감
+            }
+
+
+            // 4. 모든 검증을 통과했다면 실제 삭제 처리
+            try {
+                // DTO/엔티티를 사용하지 않으므로, deleteById를 호출하거나
+                // Mybatis Mapper를 통해 직접 삭제 쿼리를 호출해야 합니다.
+                // 예: orderMapper.deleteOrderById(oddId);
+                orderMapper.deleteOrderById(oddId); // OrderMapper에 deleteOrderById(Long oddId) 메소드 있다고 가정
+                deletedIds.add(oddId);
+            } catch (Exception e) {
+                System.err.println("Error deleting oddId " + oddId + ": " + e.getMessage());
+                skippedIds.add(oddId); // 삭제 중 DB 오류 발생 시 스킵 처리
+            }
+        }
+        
+        // 결과 반환
+        Map<String, List<Long>> result = new HashMap<>();
+        result.put("deletedIds", deletedIds);
+        result.put("skippedIds", skippedIds);
+        return result;
+    }
+    
+    
+    @Transactional // 하나의 트랜잭션으로 묶어 원자성 보장
+    public int updateOrderProcess(Map<String, Object> orderPayload) {
+    	String ordIdStr = (String) orderPayload.get("ord_id");
+        int ordId = Integer.parseInt(ordIdStr); // <-- 이 부분을 수정했습니다.
+        System.out.println(ordId);
+        List<Map<String, Object>> items = (List<Map<String, Object>>) orderPayload.get("items");
+    
+        // 1. 주문 헤더 정보 업데이트 (ord_id 기준)
+        // 이 부분은 기존 주문 헤더 테이블 (예: suju_order_header)을 업데이트하는 쿼리가 필요합니다.
+        // 예: orderMapper.updateOrderHeader(orderPayload);
+        int headerUpdateResult = orderMapper.updateOrderHeader(orderPayload);
+        if (headerUpdateResult == 0) {
+            System.err.println("주문 헤더 업데이트 실패 또는 변경 없음: ord_id " + ordId);
+            // 오류 처리 또는 경고 로깅
+        }
+
+
+        // 2. 기존 수주 디테일 항목 전체 삭제 (ord_id 기준)
+        // 이전에 이 ord_id에 연결된 모든 odd_id 레코드들을 삭제합니다.
+        orderMapper.deleteOrderDetailsByOrdId(ordId); // 이 메소드를 매퍼에 추가해야 함
+
+
+         // 2. 각 item에 ord_id와 기본 상태만 추가 (opt_id 조회 로직 전체 삭제)
+        for (Map<String, Object> item : items) {
+            item.put("ord_id", ordId);
+            item.put("odd_sts", "odd_sts_00");
+        }
+        
+        // 최종적으로 업데이트된 행 수 (또는 성공 여부) 반환
+        // 여기서는 간단히 1을 반환하여 성공을 나타내거나, affected rows 총합을 반환할 수 있습니다.
+        return orderMapper.createSujuOrderDetail(items);
+    }
 
 
 }

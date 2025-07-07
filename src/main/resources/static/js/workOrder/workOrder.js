@@ -256,9 +256,10 @@ function renderProcessSteps(processList) {
 // 창고 전역변수
 let warehouses = [];
 
-function fetchWarehouses(prdId, callback) {
+function fetchWarehouses(prdId, optId, callback) {
+	debugger;
 	$.ajax({
-		url: `/SOLEX/workOrders/warehouses/${prdId}`,
+		url: `/SOLEX/workOrders/warehouses/${prdId}?optId=${optId}`,
 		method: 'GET',
 		success: function(data) {
 			warehouses = groupWarehouses(data);
@@ -276,7 +277,7 @@ function groupWarehouses(data) {
 	const grouped = {};
 
 	data.forEach(item => {
-		const whsNm = item.WHS_NM;
+		let whsNm = item.WHS_NM;
 		if (!grouped[whsNm]) {
 			grouped[whsNm] = {
 				id: item.WHS_ID,
@@ -291,7 +292,8 @@ function groupWarehouses(data) {
 			name: item.ARE_NM,
 			max: item.ARE_MAX,
 			currentCount: item.ARE_CNT,
-			id: item.ARE_ID
+			id: item.ARE_ID,
+			areDetId: item.ARE_DET_ID 
 		});
 	});
 	return Object.values(grouped);
@@ -348,13 +350,14 @@ function selectWarehouse(index) {
 // 모달 열기 함수
 function openAssignWarehouse(oddId, odd_actual_cnt) {
 	const prdId = document.getElementById('hiddenPrdId')?.value;
-
+	const optId = document.getElementById('hiddenOptId')?.value;
+	
 	document.getElementById('warehouseSearch').value = '';
 	document.getElementById('selectedWarehouseId').value = '';
 	document.getElementById('selectedOddId').value = oddId;
 
 	// odd_cnt hidden으로 저장
-	document.getElementById('hiddenAssignQty')?.remove(); // 중복 제거
+	document.getElementById('hiddenAssignQty')?.remove();
 	const qtyInput = document.createElement('input');
 	qtyInput.type = 'hidden';
 	qtyInput.id = 'hiddenAssignQty';
@@ -365,7 +368,7 @@ function openAssignWarehouse(oddId, odd_actual_cnt) {
 	document.getElementById('warehouseLocation').textContent = '-';
 	document.getElementById('warehouseZone').innerHTML = '<option value="">창고구역을 선택하세요</option>';
 
-	fetchWarehouses(prdId, () => renderWarehouseList());
+	fetchWarehouses(prdId, optId, () => renderWarehouseList());
 
 	const modal = new bootstrap.Modal(document.getElementById('AssignWarehouseModal'));
 	modal.show();
@@ -397,6 +400,7 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 	if (!selectedTeam) return alert('구역 정보가 올바르지 않습니다.');
 
 	const areaId = selectedTeam.id;
+	const areaDetId = selectedTeam.areDetId;
 
 	const maxQty = selectedTeam.max;
 	const currentQty = selectedTeam.currentCount || 0;
@@ -405,7 +409,7 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 		alert(`최대 수량(${maxQty})를 초과합니다.`);
 		return;
 	}
-
+debugger;
 	// 등록 요청
 	$.ajax({
 		url: '/SOLEX/workOrders/warehouses',
@@ -414,6 +418,7 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 		data: JSON.stringify({
 			oddId: oddId,
 			areaId: areaId, // 구역 id
+			areaDetId: areaDetId, // 규역 디테일 id
 			optId: optId, // 옵션 id
 			warehouseId: warehouseId, // 창고 id
 			areaName: team, // 구역 이름

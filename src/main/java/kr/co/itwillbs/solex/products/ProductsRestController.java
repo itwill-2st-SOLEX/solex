@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.products;
 
+import java.lang.System.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,12 +27,8 @@ import kr.co.itwillbs.solex.sales.ClientType;
 @RequestMapping("/products/api")
 public class ProductsRestController {
 	
-	long loginEmpId = 7L; // 임시 ID
-	
 	@Autowired
 	private ProductsService productsService;
-	@Autowired
-	private BomsService bomsService;
 	@Autowired
 	private ProcessService processService;
 
@@ -84,6 +82,7 @@ public class ProductsRestController {
 	// 제품 insert
 	@PostMapping("/productRegist")
 	public ResponseEntity<Map<String, String>> registerProduct(@RequestBody Map<String, Object> requestMap) {
+		System.out.println("requestMap 옵션보려고 보는 requestMap :" + requestMap);
         // 서비스 호출, Map을 그대로 넘김
         productsService.registerProduct(requestMap);
 
@@ -147,13 +146,14 @@ public class ProductsRestController {
     }
     // prd_code 겹치는지 확인
     @GetMapping("/checkPrdCode")
-    public ResponseEntity<Map<String, Boolean>> checkDuplicateCode(@RequestParam String prdCode) {
-        boolean isDuplicate = productsService.isPrdCodeDuplicate(prdCode);
-        Map<String, Boolean> response = new HashMap<>();
+	public ResponseEntity<Map<String, Object>> checkPrdCode(@RequestParam("prdCode") String prdCode) {
+		int isDuplicate = productsService.isPrdCodeDuplicate(prdCode); // 이 라인에서 에러가 날 가능성
+
+        Map<String, Object> response = new HashMap<>();
         response.put("isDuplicate", isDuplicate);
+
+        System.out.println("checkPrdCode 결과: " + isDuplicate); // 결과도 출력
         return ResponseEntity.ok(response);
-    }
-    
-	
-	
+
+	}
 }

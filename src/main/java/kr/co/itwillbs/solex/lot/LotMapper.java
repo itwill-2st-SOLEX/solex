@@ -37,7 +37,7 @@ public interface LotMapper {
     // 설비 상세조회
     Map<String, Object> selectEquipmentDetail(@Param("eqpId") Long eqpId);
     
-    // ---------------- Insert ----------------
+    // ---------------- 작업지시 등록 시 ----------------
     // 1. 제품 + 옵션 정보 조회
     Map<String, Object> selectLotInsertInfo(@Param("oddId") Long oddId);
     // 2. product_lot insert
@@ -48,7 +48,25 @@ public interface LotMapper {
     List<Map<String, Object>> selectWorkOrdersByOddId(@Param("oddId") Long oddId);
     // 5. process_lot insert
     void insertProcessLot(Map<String, Object> param);
-    // // 6. 매핑 insert
+    // 6. insert 이후 prc_lot_id 조회
+    Long selectPrcLotId(Map<String, Object> param);
+    // 7. 매핑 insert
     void insertProductProcessMapping(Map<String, Object> param);
+    // ---------------- 자재 입고 시 ----------------
+    // 1. 자재ID를 통해 자재코드 조회
+    String selectMaterialCodeById(Long mat_id);
+    // 2. 같은 날짜에 입고한적 있는지 MatLot 조회
+    Integer selectNextMaterialLotSort(Map<String, Object> map);
+    // 3. material_lot insert
+	void insertMaterialLot(Map<String, Object> map);
+	// ---------------- 최초 공정 시작 시 제품LOT 상태값 변경 ----------------
+	// 1. 최초 공정인지 확인
+	boolean isFirstProcess(Long wpoId);
+	// 2. 최상위 LOT 상태를 '진행중(lot_status_02)'으로 변경
+	void updatePrdLotStatusToInProgress(Long wpoId);
+	// ---------------- 창고 배정 시 제품LOT 상태값 변경 ----------------
+	// 1. 제품 LOT 상태를 완료(lot_status_03)로 변경
+	void updatePrdLotStatusToComplete(Integer oddId);
+
 
 }

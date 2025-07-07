@@ -36,4 +36,8 @@ public interface OrderRequestsMapper {
 	// 자재 주문 상태 변경 쿼리
 	Integer updateMaterialOrderStatus(Map<String, Object> params);
 
+
+	// 자재 확인 쿼리
+	List<String> checkMaterial(Map<String, Object> params);
+
 }

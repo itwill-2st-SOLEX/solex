@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM 요소들을 변수에 할당
     const punchInButton = document.querySelector('.punch-in');
     const punchOutButton = document.querySelector('.punch-out');
-    const punchInTimeSpan = document.getElementById('punch-in-time');
-    const punchOutTimeSpan = document.getElementById('punch-out-time');
-    const totalWorkTimeSpan = document.getElementById('total-work-time');
-    const punchStatusSpan = document.getElementById('punch-sts'); // 오타 수정: pubchStatusSpan -> punchStatusSpan
-    const resetButton = document.getElementById('reset-attendance-button');
+//    const punchInTimeSpan = document.getElementById('punch-in-time');
+//    const punchOutTimeSpan = document.getElementById('punch-out-time');
+//    const totalWorkTimeSpan = document.getElementById('total-work-time');
+//    const punchStatusSpan = document.getElementById('punch-sts'); // 오타 수정: pubchStatusSpan -> punchStatusSpan
+//    const resetButton = document.getElementById('reset-attendance-button');
     const currentAttIdInput = document.getElementById('current-att-id'); // 숨겨진 필드
 
     // 서버 API 엔드포인트 정의
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 	
 	// 전역 스코프에 함수 노출 (다른 파일에서 접근 가능하도록)
-    window.calculateFormattedWorkTime = calculateFormattedWorkTime;
+//    window.calculateFormattedWorkTime = calculateFormattedWorkTime;
 
 	
     /**
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 숨겨진 att_id 필드 설정
         if (att_id) {
-            currentAttIdInput.value = att_id;
+            currentAttIdInput.value = attendanceData.att_id;
             console.log('숨겨진 필드 ATT_ID 설정됨:', currentAttIdInput.value);
         } else {
             currentAttIdInput.value = '';
@@ -71,44 +71,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // 출근 시간 표시 및 버튼 상태 업데이트
-        if (att_in_time) {
-            const date = new Date(att_in_time);
-            punchInTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-            punchInButton.disabled = true;
-            punchInButton.style.opacity = '0.6';
-
+        if (att_in_time) { // 출근시간이 있으면
+			punchInButton.classList.add('hidden'); // 출근 버튼 숨김
+	       	punchOutButton.classList.remove('hidden'); // 퇴근 버튼 표시
             if (!att_out_time) { // 출근은 했지만 아직 퇴근을 안 했을 경우
-                punchOutButton.disabled = false;
-                punchOutButton.style.opacity = '1';
             } else { // 출근과 퇴근 모두 완료했을 경우
-                punchOutButton.disabled = true;
-                punchOutButton.style.opacity = '0.6';
+				punchOutButton.textContent = '퇴근 완료';
+				punchOutButton.disabled = true;
+				punchOutButton.style.opacity = '0.6';
             }
         } else { // 출근 기록이 없는 경우
-            punchInTimeSpan.textContent = '--:--';
-            punchInButton.disabled = false;
-            punchInButton.style.opacity = '1';
-            punchOutButton.disabled = true;
-            punchOutButton.style.opacity = '0.6';
+			punchInButton.classList.remove('hidden'); // 출근 버튼 표시
+	        punchOutButton.classList.add('hidden'); // 퇴근 버튼 숨김
         }
 
         // 퇴근 시간 표시 업데이트
-        if (att_out_time) {
-            const date = new Date(att_out_time);
-            punchOutTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-        } else {
-            punchOutTimeSpan.textContent = '--:--';
-        }
+//        if (att_out_time) {
+//            const date = new Date(att_out_time);
+//            punchOutTimeSpan.textContent = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+//        } else {
+//            punchOutTimeSpan.textContent = '--:--';
+//        }
 
         // 출퇴근 상태 표시 업데이트
-        if (det_nm) {
-            punchStatusSpan.textContent = det_nm;
-        } else {
-            punchStatusSpan.textContent = '--';
-        }
+//        if (det_nm) {
+//            punchStatusSpan.textContent = det_nm;
+//        } else {
+//            punchStatusSpan.textContent = '--';
+//        }
 
       	// 총 근무 시간 계산 및 업데이트: 분리된 함수 사용
-      	totalWorkTimeSpan.textContent = calculateFormattedWorkTime(att_in_time, att_out_time);
+//      	totalWorkTimeSpan.textContent = calculateFormattedWorkTime(att_in_time, att_out_time);
 
     }
 
@@ -126,10 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
             error: function(xhr, status, error) {
                 console.error("오늘 출퇴근 현황 불러오기 실패:", error);
                 // 에러 발생 시 UI를 기본값으로 재설정
-                punchInTimeSpan.textContent = '--:--';
-                punchOutTimeSpan.textContent = '--:--';
-                totalWorkTimeSpan.textContent = '--시간 --분';
-                punchStatusSpan.textContent = '--';
+//                punchInTimeSpan.textContent = '--:--';
+//                punchOutTimeSpan.textContent = '--:--';
+//                totalWorkTimeSpan.textContent = '--시간 --분';
+//                punchStatusSpan.textContent = '--';
                 punchInButton.disabled = false;
                 punchInButton.style.opacity = '1';
                 punchOutButton.disabled = true;
@@ -144,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. 출근 버튼 클릭 시 DB에 기록 ---
     punchInButton.addEventListener('click', () => {
+		
         $.ajax({
             url: PUNCH_IN_URL,
             method: 'POST',
@@ -152,7 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('출근 등록이 완료되었습니다!');
                 // 서버 응답으로 UI 업데이트
                 updateAttendanceUI(response);
-                // 새로운 출근이므로 퇴근 시간 및 총 근무 시간 초기화 (updateAttendanceUI에서 이미 처리됨)
+				// 페이지 새로고침
+				location.reload();
             },
             error: function(xhr, status, error) {
                 console.error("출근 등록 실패:", xhr.responseText);
@@ -163,11 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. 퇴근 버튼 클릭 시 DB에 기록 ---
     punchOutButton.addEventListener('click', () => {
-        // 출근 기록이 없으면 퇴근 불가 (서버에서도 검증 필요)
-        if (punchInTimeSpan.textContent === '--:--') {
-            alert('출근 기록이 없습니다. 먼저 출근 등록을 해주세요.');
-            return;
-        }
 
         const currentAttId = currentAttIdInput.value; // 숨겨진 필드에서 att_id 가져오기
         console.log('전송하려는 ATT_ID:', currentAttId);
@@ -183,6 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('퇴근 등록이 완료되었습니다!');
                 // 서버 응답으로 UI 업데이트
                 updateAttendanceUI(response);
+				// 페이지 새로고침
+				location.reload();
             },
             error: function(xhr, status, error) {
                 console.error("HTTP 상태:", status);

@@ -17,10 +17,17 @@ const grid = new tui.Grid({
   scrollX: false,
   data: [], // 초기 데이터는 비어있음
   columns: [
-    {header: "수주 상세 번호",name: "ODD_ID",width: 150,align: "center",sortable: true},
-    {header: "거래처", name: "CLI_NM", align: "center", sortable: true },
-    {header: "거래처 대표자", name: "CLI_CEO", align: "center", sortable: true },
-    {header: "거래처 대표자 전화번호", name: "CLI_PHONE", align: "center", sortable: true },
+    {header: "수주 상세 번호",name: "ODD_ID",width: 150,align: "center",sortable: true, renderer: {
+			     styles: {
+			       color: '#007BFF',
+			       textDecoration: 'underline',
+			       cursor: 'pointer'
+			     }
+			   }},
+    {header: "회사명", name: "CLI_NM", align: "center", sortable: true },
+    {header: "대표자 명", name: "CLI_CEO", align: "center", sortable: true },
+    {header: "대표자 전화번호", name: "CLI_PHONE", align: "center", sortable: true },
+	{header: "주문 수량", name: "ODD_CNT", align: "center", sortable: true },
     {header: "배송지", name: "ORD_ADDRESS", align: "center", width: 350, sortable: true },
     {header: "납품 요청일",name: "ORD_END_DATE",align: "center",sortable: true},
     {header: "상태", name: "DET_NM", align: "center", sortable: true },
@@ -529,15 +536,34 @@ function setupInteractiveList(containerId) {
 function deleteSelectedRows() {
   // id가 myModalTitle의 값을 파악해서 출고 등록이면 행 삭제 가능.
   // 근데 제품 삭제를 할 수 있는데 1개 이하로 떨어질 수 없음.
-  if(INNER_TUI_GRID_INSTANCE.getData().length === 1) {
-    if(document.getElementById("myModalTitle").textContent === "출고 등록") {
-      INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+  // if(INNER_TUI_GRID_INSTANCE.getData().length === 1) {
+  //   if(document.getElementById("myModalTitle").textContent === "출고 등록") {
+  //     INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+  //   } else {
+  //     alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
+  //   }    
+  // } else {
+  //   INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+  // }
+
+
+  const totalRows = INNER_TUI_GRID_INSTANCE.getData().length;
+    const checkedRows = INNER_TUI_GRID_INSTANCE.getCheckedRows(); // 체크된 행들을 가져옴
+    const checkedRowCount = checkedRows.length; // 체크된 행의 개수
+
+    const modalTitle = document.getElementById("myModalTitle").textContent;
+
+    // "출고 등록" 모달이 아니고,
+    // (현재 총 행 수 - 삭제될 행 수) 가 1 미만이 되는 경우 (즉, 0개가 되는 경우)
+    if (modalTitle !== "출고 등록" && (totalRows - checkedRowCount < 1)) {
+        alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
     } else {
-      alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
-    }    
-  } else {
-    INNER_TUI_GRID_INSTANCE.removeCheckedRows();
-  }
+        // 위의 조건을 통과했거나, "출고 등록" 모달인 경우 삭제 진행
+        INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+    }
+
+
+
 }
 
 // 콤마제거
