@@ -52,6 +52,7 @@ public class AttendanceRestController {
 		System.out.println("controller에서 emp id 가져오나? " + loginEmpId);
 		// 로그인한 사용자의 직급등 사원정보 가져오기
 		Map<String,Object> info = attendanceService.getEmployeeInfo(loginEmpId);
+		System.out.println("SADSADSA"  + info);
 		
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);// 페이징 계산
@@ -71,10 +72,14 @@ public class AttendanceRestController {
 	    Map<String, Object> combinedMap = new HashMap<>();
 	    
 	    if (resultType.equals("my")) { // 1. 내 근태 데이터 조회
+	    	System.out.println("if 안");
 	    	List<Map<String, Object>> myAttendance = attendanceService.getMyAttendanceByMonth(params); // 서비스 메서드 분리 또는 호출
 	    	combinedMap.put("myAttendance", myAttendance);
 		} else if (resultType.equals("team")) { // 2. 다른 사람/팀 근태 데이터 조회
-			List<Map<String, Object>> teamAttendance = attendanceService.getAttendanceByMonth(params); // 다른 서비스 메서드 호출
+			System.out.println("else if 안");
+			System.out.println("params" + params);
+			List<Map<String, Object>> teamAttendance = attendanceService.getAttendanceByMonth(params); // 다른 서비스 메서드 호출+
+			System.out.println("teamAttendance"+teamAttendance);
 			combinedMap.put("teamAttendance", teamAttendance);
 		}	
         

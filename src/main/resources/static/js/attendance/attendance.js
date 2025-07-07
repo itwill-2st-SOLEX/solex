@@ -150,7 +150,7 @@ let columnsConfig = [
             showClearBtn: true // 필터 초기화 버튼을 보여줍니다.
         }
     },
-    { header: '총 근무시간', name: 'total',  align: 'left', sortable: true },
+    { header: '총 근무시간', name: 'total',  align: 'center', sortable: true },
     { header: '날짜', name: 'att_day',  align: 'center', sortable: true},
     { name: 'att_id', hidden: true }
 ];
@@ -236,11 +236,6 @@ const myDatePicker = flatpickr("#my-datepicker", {
     dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
     time_24hr: true,         // 24시간 형식 사용
     locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
-});
-// 페이지가 완전히 로딩 된 후에 자동으로 목록 보여짐
-window.addEventListener('DOMContentLoaded', () => {
-	searchKeyword = document.getElementById('searchInput').value.trim();
-	document.getElementById('searchBtn').addEventListener('click', searchAttendance);
 });
 
 
