@@ -8,7 +8,7 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '재고 번호', name: 'stk_id', align: 'center' },
+			{ header: '재고 번호', name: 'stk_id', align: 'center', renderer: { styles: { color: '#007BFF', textDecoration: 'underline', cursor: 'pointer' } } },
 			{ header: '재고 구분', name: 'stk_type', sortable: 'true' , align: 'center'},
 			{ header: '품목명', name: 'stk_nm', sortable: 'true' , align: 'center'},
 			{ header: '재고량', name: 'stk_qty', align: 'center' },
