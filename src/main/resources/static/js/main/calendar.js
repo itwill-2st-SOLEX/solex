@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 	    document.getElementById('empNm').textContent = loginEmp.empNm  || '';
 	    document.getElementById('empNum').textContent = `(${loginEmp.empNum})` || '';
 
-	    const img = document.getElementById('emp_img_preview');
+/*	    const img = document.getElementById('emp_img_preview');
 	    if (loginEmp.empImg) img.src = `/SOLEX${loginEmp.photoPath}`;
-
+*/
 	    /* ② 달력 초기화 */
 	    initCalendar();
 	    updateCalendarAndLabel();
