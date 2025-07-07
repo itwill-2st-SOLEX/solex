@@ -20,6 +20,7 @@ public class ChatWebSocketController {
 	@MessageMapping("/chat.send")
 	public void sendMessage(@Payload Map<String, Object> message) {
 		String roomId = (String) message.get("roomId");
+
 		service.saveMessage(message);
 		// 여기서 직접 전송 (roomId가 포함된 경로로)
 		template.convertAndSend("/topic/chatroom/" + roomId, message);

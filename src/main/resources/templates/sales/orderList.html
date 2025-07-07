@@ -27,8 +27,7 @@
         border: 1px solid #ddd;
         border-radius: 5px;
         background-color: #fff;
-        max-height: 220px;
-        min-height: 100px; /* 최소 높이 보장 */
+        max-height: 330px;
         overflow-y: auto;
         z-index: 9999;
         box-shadow: 0 5px 10px rgba(0,0,0,0.1);
@@ -142,17 +141,17 @@
 <body>
 	<th:block layout:fragment="content">
 		<div class="container-xxl flex-grow-1 container-p-y">
-					<h5 class="card-title mb-3">수주 관리</h5>
-					<div class="d-flex justify-content-between align-items-center">
-						<div style="width : 100%;" class="d-flex align-items-center">
-							<span class="w-px-22 h-px-22"><i class="icon-base bx bx-search icon-md"></i></span>
-							<input id="searchInput" style="width: 25%;"
-								class="form-control border-0 shadow-none ps-1 ps-sm-2" type="text" placeholder="검색">
-						</div>
-						<button type="button" class="btn custom-btn-blue mb-3 float-end"
-							style="width:10%;min-width:120px;" id="openOrderModalBtn">수주 등록</button>
+				<h5 class="card-title mb-4">수주 관리</h5>
+				<div class="d-flex justify-content-between align-items-center">
+					<div style="width : 100%;" class="d-flex align-items-center">
+						<span class="w-px-22 h-px-22"><i class="icon-base bx bx-search icon-md"></i></span>
+						<input id="searchInput" style="width: 25%;"
+							class="form-control border-0 shadow-none ps-1 ps-sm-2" type="text" placeholder="검색">
 					</div>
-					<div id="grid"></div>
+					<button type="button" class="btn custom-btn-blue mb-4 float-end"
+						style="width:10%;min-width:120px;" id="openOrderModalBtn">수주 등록</button>
+				</div>
+				<div id="grid"></div>
 		</div>
 
 		<div class="modal fade" id="myModal" tabindex="-1" aria-hidden="true">
@@ -246,9 +245,7 @@
 								<div class="col">
 									<div class="d-flex align-items-center pt-2 mt-4 justify-content-around">
 										<button type="button" id="addRowBtn"
-											class="btn custom-btn-blue me-2">추가</button>
-										<button type="button" id="resetOptionFormsBtn"
-											class="btn btn-light">초기화</button>
+											class="btn custom-btn-blue me-2" style="min-width: 120px;">추가</button>
 									</div>
 								</div>
 							</div>
@@ -256,11 +253,11 @@
 								<div class="col">
 									<label class="form-label">배송지 주소 <span class="text-danger">*</span></label>
 									<div class="input-group">
-										<input type="text" id="cli_pc" name="cli_pc" class="form-control" readonly
-											placeholder="우편번호">
-										<button type="button" class="btn custom-btn-blue" id="findPostCodeBtn">우편번호
-											찾기</button>
+										<input type="text" id="cli_pc" name="cli_pc" class="form-control" readonly placeholder="우편번호">
 									</div>
+								</div>
+								<div class="col">	
+									<button type="button" style="margin-top: 1.45rem;" class="btn custom-btn-blue" id="findPostCodeBtn">우편번호 찾기</button>
 								</div>
 							</div>
 							<div class="row mb-4">
@@ -269,10 +266,9 @@
 								<div class="col"><input type="text" id="cli_da" name="cli_da" class="form-control"
 										placeholder="상세주소"></div>
 							</div>
-							<div class="mb-3 d-flex justify-content-end">
+							<div class="mb-4 d-flex justify-content-end">
 								<button type="button" class="btn btn-danger me-2" id="deleteSelectedRowsBtn">선택 항목
 									삭제</button>
-								<button type="button" class="btn btn-light" id="resetItemsBtn">주문 초기화</button>
 							</div>
 							<div id="innerGrid"></div>
 						</form>

@@ -103,9 +103,12 @@ async function fetchGridData(page = currentPage) {
     console.log(data);
 
     data.map((item) => {
+      // 자재 요청일 경우 자재요청완료?
       if(item.PRODUCTION_STATUS == '생산 가능') {
         // data-action="instruct" 추가
         item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시</button>`;
+      } else if(item.ODD_STS == 'odd_sts_01') {
+        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn">자재 요청 완료</button>`;
       } else {
         // data-action="request" 추가
         item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="request" data-ord-id="${item.ODD_ID}">자재 요청</button>`;
@@ -164,18 +167,23 @@ async function openWorkInstructionModal(selectedId) {
     // 상태에 따라 글자색을 다르게 하기 위한 클래스 변수
     const statusClass = material.STK_MATERIAL_STATUS.includes('부족') ? 'text-danger' : 'text-success';
     // 불량율 계산 10%
-    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.1); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.05); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+	
+	  const shortageCnt = finalRequiredCnt - material.STK_MATERIAL_CNT;
     // 각 자재 정보를 div로 감싸서 간격을 줍니다.
     return `
-        <div style="margin-bottom: 10px;">
-            <strong>${material.MAT_NM}</strong>
-            <div style="padding-left: 15px;">
-                - 단위당 필요 갯수 : ${material.BOM_CNT}, 
-                총 필요 갯수(+불량율 10%) : ${finalRequiredCnt}, 
-                현 재고 : ${material.STK_MATERIAL_CNT}개 
-                <strong class="${statusClass}">${material.STK_MATERIAL_STATUS}</strong>
-            </div>
+      <div style="margin-bottom: 10px;">
+        <strong>${material.MAT_NM}</strong>
+        <div style="padding-left: 15px;">
+          - 단위당 필요 갯수 : ${material.BOM_CNT}개
+          <br>
+          - 총 필요 갯수(+불량율 5%) : ${finalRequiredCnt}개
+          <br>
+          - 현 재고 : ${material.STK_MATERIAL_CNT}개
+          <br>
+          ${ shortageCnt > 0 ? `${shortageCnt}개 <strong class="text-danger">부족</strong>` : `<strong class="text-success">생산 가능</strong>` }
         </div>
+      </div>
     `;
 });
 
@@ -227,19 +235,25 @@ async function openMaterialRequestModal(selectedId) {
   const htmlLines = data.map(material => {
     // 상태에 따라 글자색을 다르게 하기 위한 클래스 변수
     const statusClass = material.STK_MATERIAL_STATUS.includes('부족') ? 'text-danger' : 'text-success';
-    // 불량율 계산 10%
-    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.1); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+    // 불량율 계산 5%
+    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.05); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+    // 부족 갯수 계산
+    const shortageCnt = finalRequiredCnt - material.STK_MATERIAL_CNT;
+
     // 각 자재 정보를 div로 감싸서 간격을 줍니다.
     return `
-        <div style="margin-bottom: 10px;">
-            <strong>${material.MAT_NM}</strong>
-            <div style="padding-left: 15px;">
-                - 단위당 필요 갯수 : ${material.BOM_CNT}, 
-                총 필요 갯수(+불량율 10%) : ${finalRequiredCnt}, 
-                현 재고 : ${material.STK_MATERIAL_CNT}개 
-                <strong class="${statusClass}">${material.STK_MATERIAL_STATUS}</strong>
-            </div>
+      <div style="margin-bottom: 10px;">
+        <strong>${material.MAT_NM}</strong>
+        <div style="padding-left: 15px;">
+          - 단위당 필요 갯수 : ${material.BOM_CNT}개
+          <br>
+          - 총 필요 갯수(+불량율 5%) : ${finalRequiredCnt}개
+          <br>
+          - 현 재고 : ${material.STK_MATERIAL_CNT}개
+          <br>
+          ${ shortageCnt > 0 ? `${shortageCnt}개 <strong class="text-danger">부족</strong>` : `<strong class="text-success">생산 가능</strong>` }
         </div>
+      </div>
     `;
 });
 
@@ -299,7 +313,7 @@ async function submitForm(selectedId) {
 
 async function submitMaterialRequestForm(selectedId) {
   try {
-    const res = await fetch(`/SOLEX/order-requests`, {
+    const res = await fetch(`/SOLEX/order-requests/material-request`, {
     method : 'POST',
     headers: {
       'Content-Type': 'application/json'

@@ -1,4 +1,4 @@
-package kr.co.itwillbs.solex.operator;
+package kr.co.itwillbs.solex.quality;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -23,20 +23,31 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
-@RequestMapping("/operator/api")
-public class ManagerRestController {
+@RequestMapping("/quality/api/inspection")
+public class InspectionRestController {
+
+    private final OrderRequestsService orderRequestsService;
+
+
 
 	@Autowired
-	public ManagerService managerService;
+	public InspectionService inspectionService;
+	
+	//로그인 구현 필요
+	Long empId = null;
 
+
+    InspectionRestController(OrderRequestsService orderRequestsService) {
+        this.orderRequestsService = orderRequestsService;
+    }
+
+	
 	//내 부서 정보
 	@GetMapping("/managerSummary")
-	public Map<String, Object> getManagerSummary(HttpSession session) {
-		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
-
-	    Map<String, Object> result = managerService.getManagerSummary(empId);
+	public Map<String, Object> getManagerSummary(HttpSession httpSession) {
+		empId = Long.parseLong(httpSession.getAttribute("empId").toString());
+	
+	    Map<String, Object> result = inspectionService.getManagerSummary(empId);
 	    System.out.println(result);
 
 	    return result;
@@ -44,13 +55,10 @@ public class ManagerRestController {
 
 	// 모든 작업 목록 가져오기
 	@GetMapping("/managerList")
-	public Map<String, Object> getManagerList(@RequestParam(name = "page", required = false) Integer page,
+	public Map<String, Object> getInspectionList(@RequestParam(name = "page", required = false) Integer page,
 								         @RequestParam(name = "size", required = false) Integer size,
-								         @RequestParam("yearMonth") String yearMonth, 
-								         HttpSession session) {
-		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+								         @RequestParam("empId") Long empId,
+								         @RequestParam("yearMonth") String yearMonth) {
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);
@@ -59,35 +67,31 @@ public class ManagerRestController {
 	    params.put("yearMonth", yearMonth);
 	    
 	    // 내 작업 전체 목록
-	    List<Map<String, Object>> managerList = managerService.getManagerList(params);
-	    //int vacationCount = managerService.getManagerCount(empId);
+	    List<Map<String, Object>> inspectionList = inspectionService.getInspectionList(params);
 
 	    Map<String, Object> result = new HashMap<>();
-	    result.put("list", managerList);
+	    result.put("list", inspectionList);
+
+		System.out.println("result : " + result);
+	    
 	    
 	    return result;
 	}
 	
 	// 작업 순서 업데이트
 	@PatchMapping("/updateStatus")
-	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map, HttpSession session) {
+	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map) {
 		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+		map.put("empId", empId);		
 		
-		map.put("empId", empId);
-		
-		managerService.updateWpoSts(map);
+		inspectionService.updateWpoSts(map);
 		
 		return ResponseEntity.ok().build();
 	}
 	
 	//불량수량 저장
 	@PostMapping("/saveBcount")
-	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map, HttpSession session) {
-		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map) {
 		System.out.println("save : " + map);
 		return ResponseEntity.ok().build();
 	
@@ -96,12 +100,9 @@ public class ManagerRestController {
 	// 각 사원별 작업내역 모달표시
     @GetMapping("/workerReport/{wpoId}")
     public Map<String, Object> apiWorkerReport(@PathVariable("wpoId") Long wpoId,
-									    		@RequestParam(name = "page", required = false) Integer page,
-										        @RequestParam(name = "size", required = false) Integer size, 
-										        HttpSession session ) {
-    	
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+					    		@RequestParam(name = "page", required = false) Integer page,
+						         @RequestParam(name = "size", required = false) Integer size
+						         ) {
     	
     	Map<String, Object> params = new HashMap<>();
     	
@@ -109,7 +110,7 @@ public class ManagerRestController {
  	    params.put("size", size);
  	    params.put("wpoId",	wpoId);
  	    
- 	    List<Map<String, Object>> workerList = managerService.selectWorkerList(params);
+ 	    List<Map<String, Object>> workerList = inspectionService.selectWorkerList(params);
  	    
  	    int wpoOcount = 0;
  	    
@@ -127,14 +128,12 @@ public class ManagerRestController {
     
     // 실적 수정
     @PatchMapping("/workerCount")
-    public ResponseEntity<?> updateWorkerCount(@RequestBody Map<String, Object> map, HttpSession session) {
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
-    	
+    public ResponseEntity<?> updateWorkerCount(@RequestBody Map<String, Object> map) {
+        
     	map.put("wreDate", LocalDateTime.now());
     	
     	System.out.println(map);
-    	int updated = managerService.updateWorkerCount(map);
+    	int updated = inspectionService.updateWorkerCount(map);
     	
     	System.out.println(updated);
         

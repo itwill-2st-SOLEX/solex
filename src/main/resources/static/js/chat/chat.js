@@ -265,7 +265,6 @@ function connectAllChatRooms() {
 								}),
 								success: function() {
 									console.log('읽음 처리 완료');
-debugger;
 									renderMessage({
 										senderName: isMine ? '나' : message.sender_nm,
 										content: message.content
@@ -315,7 +314,7 @@ function sendMessage() {
 		receiver: partnerId,
 		content: content,
 		roomId: currentRoomId,
-		type: 'CHAT',
+		type: 'CHAT'
 	};
 
 	stompClient.send('/app/chat.send', {}, JSON.stringify(message));
@@ -323,30 +322,16 @@ function sendMessage() {
 }
 
 // 메시지 렌더링
-function renderMessage(message, isMine, isRead) {
+function renderMessage(message, isMine) {
 	const chatMessages = document.getElementById('chatMessages');
 	const wrapper = document.createElement('div');
 	const msgDiv = document.createElement('div');
-	const readStatusDiv = document.createElement('div');
 
 	wrapper.className = `message-wrapper ${isMine ? 'sent' : 'received'}`;
 	msgDiv.className = `message ${isMine ? 'sent' : 'received'}`;
-	readStatusDiv.className = `read-status ${isRead === 'Y' ? '' : 'unread'}`;;
-
 	msgDiv.textContent = message.content;
-	readStatusDiv.textContent = isRead === true ? '' : '안읽음';
-	debugger;
 
-	if (isMine) {
-		// 내가 보낸 메시지는 읽음 상태가 왼쪽에 먼저
-		wrapper.appendChild(readStatusDiv);
-		wrapper.appendChild(msgDiv);
-	} else {
-		// 상대 메시지는 메시지 본문 먼저, 그 다음 읽음 상태
-		wrapper.appendChild(msgDiv);
-		wrapper.appendChild(readStatusDiv);
-	}
-
+	wrapper.appendChild(msgDiv);
 	chatMessages.appendChild(wrapper);
 	chatMessages.scrollTop = chatMessages.scrollHeight;
 }
