@@ -68,48 +68,68 @@ $(function() {
 
 	/* ───────────────── 구역 히스토리를 그리드에 표시 ───────────────── */
 	async function renderAreaHistory(areaId) {
-		// areaId가 없으면 데이터를 비우고 상세 컬럼을 숨깁니다.
-	  	if (!areaId) {
-	    	historyGrid.resetData([]);
-	    	historyGrid.hideColumn('detail1');
-	    	historyGrid.hideColumn('detail2');
-	    	historyGrid.hideColumn('detail3');
-	    	return;
-	  	}
-		
-	  	try {
-			// 서버에 areaId를 보내 SQL 쿼리를 실행하고 결과를 받아옵니다.
-			const historyData = await fetchJson(`/api/warehouse/history/${areaId}`);
+	    // areaId가 없으면 데이터를 비우고 상세 컬럼을 숨깁니다.
+	    if (!areaId) {
+	        historyGrid.resetData([]);
+	        historyGrid.hideColumn('color');
+	        historyGrid.hideColumn('size');
+	        historyGrid.hideColumn('height');
+	        return;
+	    }
 
-			// --- 동적 컬럼 표시/숨김 로직 ---
-		    // 데이터가 있고, 첫 번째 데이터의 areType을 기준으로 판단합니다.
-		    if (historyData && historyData.length > 0) {
-		      	// 서버에서 받은 JSON 키가 snake_case(are_type)일 경우를 대비하여 확인
-		      	const areaType = historyData[0].areType || historyData[0].are_type;
+	    try {
+	        // 1. 서버에서 원본 데이터를 가져옵니다.
+	        const rawHistoryData = await fetchJson(`/SOLEX/warehouse/area/${areaId}/history`);
 
-		      	if (areaType === 'area_type_01') { // 자재인 경우
-		        	historyGrid.hideColumn('detail1');
-		        	historyGrid.hideColumn('detail2');
-		        	historyGrid.hideColumn('detail3');
-		      	} else if (areaType === 'area_type_02') { // 제품인 경우
-		        	historyGrid.showColumn('detail1');
-		        	historyGrid.showColumn('detail2');
-		        	historyGrid.showColumn('detail3');
-		      	}
-	    	} else {
-	      		// 데이터가 없는 경우 상세 컬럼을 모두 숨깁니다.
-	      		historyGrid.hideColumn('detail1');
-	      		historyGrid.hideColumn('detail2');
-	      		historyGrid.hideColumn('detail3');
-		    }
-			
-			historyGrid.resetData(historyData);
+	        // 데이터가 없거나 비어있으면 그리드를 비우고 종료합니다.
+	        if (!rawHistoryData || rawHistoryData.length === 0) {
+	            historyGrid.resetData([]);
+	            historyGrid.hideColumn('color');
+	            historyGrid.hideColumn('size');
+	            historyGrid.hideColumn('height');
+	            return;
+	        }
 
-	  	} catch (err) {
-    		console.error(`구역(${areaId}) 이력 조회 실패`, err);
-	    	alert('이력 조회 중 오류가 발생했습니다.');
-	    	historyGrid.resetData([]); // 오류 발생 시 그리드 비우기
-	  	}
+	        // 2. TUI Grid가 이해할 수 있는 형식으로 데이터를 매핑합니다. (대소문자 및 Key 이름 문제 해결)
+	        const mappedData = rawHistoryData.map(row => ({
+	            actionTime: row.ACTION_TIME || row.action_time,
+	            status: row.STATUS || row.status,
+	            itemName: row.ITEM_NAME || row.item_name,
+	            quantity: row.QUANTITY || row.quantity,
+	            unit: row.UNIT || row.unit,
+	            color: row.OP_COLOR || row.op_color, // 'op_color' -> 'color'
+	            size: row.OP_SIZE || row.op_size,     // 'op_size' -> 'size'
+	            height: row.OP_HEIGHT || row.op_height, // 'op_height' -> 'height'
+	            are_type: row.ARE_TYPE || row.are_type // 로직에서 사용할 타입 정보
+	        }));
+
+	        // 3. 매핑된 데이터의 첫 번째 행을 기준으로 구역 타입을 결정합니다.
+	        const areaType = mappedData[0].are_type;
+
+	        // 4. 구역 타입에 따라 상세 컬럼을 보여주거나 숨깁니다. (로직 수정)
+	        if (areaType === 'area_type_01') { // 자재인 경우
+	            historyGrid.hideColumn('color');
+	            historyGrid.hideColumn('size');
+	            historyGrid.hideColumn('height');
+	        } else if (areaType === 'area_type_02') { // 제품인 경우
+	            historyGrid.showColumn('color');
+	            historyGrid.showColumn('size');
+	            historyGrid.showColumn('height');
+	        } else {
+	            // 예외적인 경우, 모든 상세 컬럼을 숨깁니다.
+	            historyGrid.hideColumn('color');
+	            historyGrid.hideColumn('size');
+	            historyGrid.hideColumn('height');
+	        }
+	        
+	        // 5. 매핑된 데이터를 그리드에 설정합니다.
+	        historyGrid.resetData(mappedData);
+
+	    } catch (err) {
+	        console.error(`구역(${areaId}) 이력 조회 실패`, err);
+	        alert('이력 조회 중 오류가 발생했습니다.');
+	        historyGrid.resetData([]); // 오류 발생 시 그리드 비우기
+	    }
 	}
 			
 	async function openDetailModal(row) {
@@ -150,11 +170,12 @@ $(function() {
 		    columns: [
 				{ header: '변동일시',   name: 'actionTime', align: 'center', width: 160 },
 		      	{ header: '상태',       name: 'status',     align: 'center', width: 80 },
-		      	{ header: '품명',       name: 'itemName',   align: 'left' },
-		      	{ header: '수량',       name: 'quantity',   align: 'right', width: 80 },
-		      	{ header: '상세정보 1', name: 'detail1',    align: 'center' },
-		      	{ header: '상세정보 2', name: 'detail2',    align: 'center' },
-		      	{ header: '상세정보 3', name: 'detail3',    align: 'center' }
+		      	{ header: '품명',       name: 'itemName',   align: 'center' },
+		      	{ header: '수량',       name: 'quantity',   align: 'center', width: 80 },
+				{ header: '수량',       name: 'unit',   align: 'center', width: 80 },
+		      	{ header: '상세정보 1', name: 'color',    align: 'center' },
+		      	{ header: '상세정보 2', name: 'size',    align: 'center' },
+		      	{ header: '상세정보 3', name: 'height',    align: 'center' }
 			]
 		});
 

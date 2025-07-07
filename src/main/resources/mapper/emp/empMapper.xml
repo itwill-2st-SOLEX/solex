@@ -87,6 +87,22 @@
 	    ORDER BY COD_ID, DET_ID
 	</select>
 	
+	<!--	재직중인 사원만 출력-->
+	<select id="getEmpSabun" resultType="java.lang.Long">
+		SELECT
+	    TO_CHAR(SYSDATE, 'YYYY') || LPAD((
+	        SELECT
+	            COUNT(*) + 1
+	        FROM
+	            employee
+	        WHERE
+	            -- hire_date 컬럼에서 연도만 추출하여 현재 연도와 비교합니다.
+	            TO_CHAR(emp_hire, 'YYYY') = TO_CHAR(SYSDATE, 'YYYY')
+	    ), 4, '0') AS new_employee_id
+		FROM dual;
+	</select>
+	
+	
 <!--	재직중인 사원만 출력-->
 	<select id="getEmpListFiltered" resultType="map">
         SELECT
