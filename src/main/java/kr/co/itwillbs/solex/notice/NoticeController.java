@@ -25,9 +25,6 @@ public class NoticeController {
 
 	@Autowired
 	private NoticeService noticeService;
-	
-	Long empId = 90L;
-
 
     // 공지사항 페이지로 단순 이동
     @GetMapping("")

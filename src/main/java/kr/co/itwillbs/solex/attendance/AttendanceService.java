@@ -60,20 +60,20 @@ public class AttendanceService {
 	}
 
 	@Transactional
-	public Map<String, Object> recordPunchIn(Long empId) {
+	public Map<String, Object> recordPunchIn(String loginEmpId) {
 		LocalDateTime today = LocalDateTime.now();
 		LocalDateTime punchInTime = LocalDateTime.now();
 
 		// 조회용 변수
 		LocalDate todayDate = LocalDate.now();
-		Optional<Map<String, Object>> existingRecord = attendanceMapper.findByEmpIdAndAttendanceDate(empId, todayDate);
+		Optional<Map<String, Object>> existingRecord = attendanceMapper.findByEmpIdAndAttendanceDate(loginEmpId, todayDate);
 
 		if (existingRecord.isPresent()) {
 			throw new IllegalStateException("이미 출근 기록이 존재합니다.");
 		}
 
 		Map<String, Object> attendanceData = new HashMap<>();
-		attendanceData.put("emp_id", empId);
+		attendanceData.put("emp_id", loginEmpId);
 		attendanceData.put("att_day", today);
 		attendanceData.put("att_in_time", punchInTime);
 
@@ -96,7 +96,7 @@ public class AttendanceService {
 		attendanceMapper.insertPunchIn(attendanceData); // DB에 삽입
 		
 		// 출근기록 조회
-		Map<String, Object> selectAttendanceData = attendanceMapper.findByEmpIdAndAttendanceDate(empId, todayDate)
+		Map<String, Object> selectAttendanceData = attendanceMapper.findByEmpIdAndAttendanceDate(loginEmpId, todayDate)
 				.orElseThrow(() -> new IllegalArgumentException("오늘 출근 기록이 없습니다."));
 		
 		String det_nm = (String) selectAttendanceData.get("DET_NM");
@@ -113,14 +113,14 @@ public class AttendanceService {
 	
 	// 퇴근기록
 	@Transactional
-	public Map<String, Object> recordPunchOut(Long empId, Long attId) {
+	public Map<String, Object> recordPunchOut(String loginEmpId, Long attId) {
 		LocalDateTime today = LocalDateTime.now();
 		LocalDateTime punchOutTime = LocalDateTime.now();
 
 		// 조회용 변수
 		LocalDate todayDate = LocalDate.now();
 		// 오늘 출근 기록 조회 (Map으로 반환됨)
-		Map<String, Object> attendanceData = attendanceMapper.findByEmpIdAndAttendanceDate(empId, todayDate)
+		Map<String, Object> attendanceData = attendanceMapper.findByEmpIdAndAttendanceDate(loginEmpId, todayDate)
 				.orElseThrow(() -> new IllegalArgumentException("오늘 출근 기록이 없습니다."));
 		
 		// Map에서 기존 출근 시간 가져오기
@@ -189,7 +189,7 @@ public class AttendanceService {
 		return result;
 	}
 	
-	public Optional<Map<String, Object>> getTodayAttendanceStatus(long loginEmpId) {
+	public Optional<Map<String, Object>> getTodayAttendanceStatus(String loginEmpId) {
 		LocalDateTime today = LocalDateTime.now(); // 오늘 날짜를 가져옵니다.
 
 		// 조회용 변수
@@ -197,7 +197,7 @@ public class AttendanceService {
 		return attendanceMapper.findByEmpIdAndAttendanceDate(loginEmpId, todayDate);
 	}
 
-	public Map<String, Object> getEmployeeInfo(long loginEmpId) {
+	public Map<String, Object> getEmployeeInfo(String loginEmpId) {
 		return attendanceMapper.selectEmployeeInfo(loginEmpId);
 	}
 	

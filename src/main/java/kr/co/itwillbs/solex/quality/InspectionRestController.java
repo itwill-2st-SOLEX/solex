@@ -11,6 +11,7 @@ import kr.co.itwillbs.solex.sales.OrderController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/quality/api/inspection")
+@PreAuthorize("hasAnyRole('1','2','3','4')")
 public class InspectionRestController {
 
     private final OrderRequestsService orderRequestsService;
@@ -54,7 +56,7 @@ public class InspectionRestController {
 	}
 
 	// 모든 작업 목록 가져오기
-	@GetMapping("/managerList")
+	@GetMapping("/data")
 	public Map<String, Object> getInspectionList(@RequestParam(name = "page", required = false) Integer page,
 								         @RequestParam(name = "size", required = false) Integer size,
 								         @RequestParam("empId") Long empId,
@@ -78,70 +80,72 @@ public class InspectionRestController {
 	    return result;
 	}
 	
+	@PostMapping()
+	public ResponseEntity<?> getDefectiveCountByWarehouse(@RequestBody Map<String, Object> map) {
+		
+		List<Map<String, Object>> resultList = inspectionService.getDefectiveCountByWarehouse(map);
+		System.out.println(resultList.get(0).get("STATUS"));
+		// resultList의 status가 출고 가능한지 확인
+		if (resultList.isEmpty() || resultList.get(0).get("STATUS") == null || "출고 불가능".equals(resultList.get(0).get("STATUS"))) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("출고 불가능한 상태이거나 재고를 초과할 수 없습니다.");
+		}
+		
+		return ResponseEntity.ok(resultList);
+	}
+	
+	
+	@PostMapping("/outbound")
+    public ResponseEntity<Map<String, Object>> processStockOutbound(@RequestBody Map<String, Object> requestBody) {
+        try {
+            // 요청 바디에서 oddId와 qhiBcount 추출
+            // JSON Number는 Java에서 Integer, Long, Double 등으로 파싱될 수 있으므로,
+            // 명시적으로 Long으로 변환하는 것이 안전합니다.
+            Long oddId = ((Number) requestBody.get("oddId")).longValue();
+            Long qhiBcount = ((Number) requestBody.get("qhiBcount")).longValue();
+
+            // 서비스 계층의 프로시저 실행 메소드 호출
+            Map<String, Object> result = inspectionService.executeOutboundProcedure(oddId, qhiBcount);
+
+            // 프로시저 반환 결과에서 상태 코드와 메시지 추출
+            String statusCode = (String) result.get("oStatusCode");
+            String statusMessage = (String) result.get("oStatusMessage");
+
+            // 상태 코드에 따라 적절한 HTTP 상태 코드와 응답 반환
+            if ("SUCCESS".equals(statusCode)) {
+                return new ResponseEntity<>(result, HttpStatus.OK);
+            } else if ("NOT_ENOUGH_STOCK".equals(statusCode)) {
+                return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST); // 400 Bad Request
+            } else if ("NOT_FOUND_DATA".equals(statusCode)) {
+                return new ResponseEntity<>(result, HttpStatus.NOT_FOUND); // 404 Not Found
+            } else {
+                // 기타 프로시저 내부 오류 또는 예상치 못한 상태
+                return new ResponseEntity<>(result, HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
+            }
+
+        } catch (ClassCastException | NullPointerException e) {
+            // 요청 바디의 데이터 타입이 예상과 다르거나 필수 필드가 누락된 경우
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("oStatusCode", "ERROR");
+            errorResponse.put("oStatusMessage", "요청 파라미터 형식 오류 또는 누락: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            // 그 외 예상치 못한 서버 처리 중 예외 발생
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("oStatusCode", "ERROR");
+            errorResponse.put("oStatusMessage", "서버 처리 중 예외 발생: " + e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+	
 	// 작업 순서 업데이트
 	@PatchMapping("/updateStatus")
 	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map) {
 		
-		map.put("empId", empId);		
-		
-		inspectionService.updateWpoSts(map);
+		inspectionService.updateStatus(map);
 		
 		return ResponseEntity.ok().build();
 	}
 	
-	//불량수량 저장
-	@PostMapping("/saveBcount")
-	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map) {
-		System.out.println("save : " + map);
-		return ResponseEntity.ok().build();
-	
-	}
-	
-	// 각 사원별 작업내역 모달표시
-    @GetMapping("/workerReport/{wpoId}")
-    public Map<String, Object> apiWorkerReport(@PathVariable("wpoId") Long wpoId,
-					    		@RequestParam(name = "page", required = false) Integer page,
-						         @RequestParam(name = "size", required = false) Integer size
-						         ) {
-    	
-    	Map<String, Object> params = new HashMap<>();
-    	
-    	params.put("offset", page * size);
- 	    params.put("size", size);
- 	    params.put("wpoId",	wpoId);
- 	    
- 	    List<Map<String, Object>> workerList = inspectionService.selectWorkerList(params);
- 	    
- 	    int wpoOcount = 0;
- 	    
- 	    if (!workerList.isEmpty() && workerList.get(0).get("WPO_OCOUNT") != null) {
- 	        wpoOcount = ((Number) workerList.get(0).get("WPO_OCOUNT")).intValue();
- 	    }
-
- 	    // 
- 	    Map<String, Object> result = new HashMap<>();
- 	    result.put("list",      workerList); // 실적 목록
- 	    result.put("wpoOcount", wpoOcount);  // 작업지시 수량
-
- 	    return result;
-    }
     
-    // 실적 수정
-    @PatchMapping("/workerCount")
-    public ResponseEntity<?> updateWorkerCount(@RequestBody Map<String, Object> map) {
-        
-    	map.put("wreDate", LocalDateTime.now());
-    	
-    	System.out.println(map);
-    	int updated = inspectionService.updateWorkerCount(map);
-    	
-    	System.out.println(updated);
-        
-        if (updated == 1) {
-        	
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("update fail");
-    }
 
 }

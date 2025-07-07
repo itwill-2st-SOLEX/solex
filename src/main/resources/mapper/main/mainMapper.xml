@@ -3,6 +3,102 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
   <mapper namespace="kr.co.itwillbs.solex.main.MainMapper">	
+  
+  	<select id="selectEmpInfo" resultType="map">
+		SELECT e.emp_id AS "empId",
+			   e.emp_nm AS "empNm", 
+			   e.emp_dep_cd  AS "empDepCd", 
+			   e.emp_team_cd AS "empTeamCd",
+			   e.emp_num AS "empNum",
+			   e.emp_img AS "empImg",
+			   v.emp_dep_nm as "empDepNm",
+			   v.emp_team_nm as "empTeamNm",
+			   v.emp_pos_nm as "empPosNm"
+		FROM   employee e JOIN view_employee v ON e.emp_id=v.emp_id
+		WHERE  e.emp_id = #{empId}
+	</select>
+  
+  	<!-- 일정 조회하기 -->
+  	<select id="selectEvents">
+  		SELECT  c.cal_id 			 AS "calId",
+	  		 	c.emp_id             AS "empId",
+	  		 	v.emp_nm			 AS "empNm",
+			    v.emp_dep_nm         AS "depNm",      
+   	 			v.emp_team_nm        AS "teamNm",     
+    			v.emp_pos_nm         AS "posNm", 
+			    e.emp_dep_cd         AS "depCd",
+			    e.emp_team_cd        AS "teamCd",
+			    c.cal_title          AS "calTitle",
+			    c.cal_cate           AS "calCate",
+			    c.cal_is_all_day       AS "calIsAllDay",
+			    c.cal_is_important    AS "calIsImportant",
+			    TO_CHAR(c.cal_start_date,'YYYY-MM-DD HH24:MI:SS') AS "calStartDate",
+			    TO_CHAR(c.cal_end_date  ,'YYYY-MM-DD HH24:MI:SS') AS "calEndDate"
+  		FROM    calendar c
+		JOIN      employee       e  ON e.emp_id = c.emp_id        -- 코드용
+		JOIN      view_employee  v  ON v.emp_id = c.emp_id
+		WHERE   c.cal_start_date &lt;= TO_DATE(#{end},   'YYYY-MM-DD HH24:MI:SS')
+		  AND   c.cal_end_date   &gt;= TO_DATE(#{start}, 'YYYY-MM-DD HH24:MI:SS')
+		  AND ( (c.cal_cate = 'PERSONAL' AND c.emp_id = #{empId})
+		        OR
+		        (c.cal_cate = 'TEAM'
+			         AND e.emp_dep_cd  = #{empDepCd}
+			         AND e.emp_team_cd = #{empTeamCd})
+		        OR
+		        (c.cal_cate = 'COMPANY') )
+		ORDER BY c.cal_start_date
+  	</select>
+  	
+  	<!--연차-->
+  	<select id="selectleave">
+  		SELECT
+		    d.doc_id                   AS "calId",
+		    d.emp_id                   AS "empId",
+		    v.emp_nm                    AS "empNm",
+		    v.emp_dep_nm                AS "depNm",     
+		    v.emp_team_nm               AS "teamNm",     
+		    v.emp_pos_nm                AS "posNm",
+		    e.emp_dep_cd                AS "depCd",
+		    e.emp_team_cd               AS "teamCd",
+		    ld.lea_type                  AS "calTitle",
+		    'TEAM'                    AS "calCate",    
+		    ld.lea_start_date           AS "calStartDate",
+		    ld.lea_end_date             AS "calEndDate"
+		FROM document d
+		JOIN leave_doc ld ON d.doc_id = ld.doc_id
+		JOIN view_employee v ON d.emp_id = v.emp_id      
+		JOIN employee e ON d.emp_id = e.emp_id          
+		WHERE   ld.lea_start_date &lt;= TO_DATE(#{end},   'YYYY-MM-DD HH24:MI:SS')
+		  AND   ld.lea_end_date  &gt;= TO_DATE(#{start}, 'YYYY-MM-DD HH24:MI:SS')
+		   AND doc_type = 'doc_type_01' AND doc_sts = 'doc_sts_02'
+		   AND e.emp_dep_cd = #{empDepCd} AND e.emp_team_cd = #{empTeamCd}
+  	</select>
+  
+  <!-- parameterType="map" useGeneratedKeys="true" keyProperty="calId"-->
+  	<!--일정 등록하기 -->
+  	<insert id="insertEvent"  useGeneratedKeys="true" keyProperty="calId" keyColumn="cal_id">
+	  	INSERT INTO calendar (cal_title, emp_id, cal_cate, cal_is_all_day, cal_is_important, cal_start_date, cal_end_date)
+		VALUES (#{calTitle}, #{empId}, #{calCate}, #{calIsAllDay}, #{calIsImportant},  
+				TO_DATE(#{calStartDate}, 'YYYY-MM-DD HH24:MI:SS'),
+		        TO_DATE(#{calEndDate},   'YYYY-MM-DD HH24:MI:SS'))
+  	</insert>
+  	
+  	<!--일정 변경하기-->
+  	<update id="updateEvent">
+		UPDATE calendar
+		SET cal_title = #{calTitle}, cal_cate = #{calCate}, cal_is_all_day = #{calIsAllDay},
+		    cal_is_important = #{calIsImportant}, 
+		    cal_start_date  = TO_DATE(#{calStartDate}, 'YYYY-MM-DD HH24:MI:SS'),
+		    cal_end_date = TO_DATE(#{calEndDate},   'YYYY-MM-DD HH24:MI:SS')
+		WHERE cal_id = #{calId} AND emp_id = #{empId}
+	</update>
+	
+	<!--일정 삭제하기-->
+	<delete id="deleteEvent">
+		DELETE FROM calendar
+		WHERE cal_id = #{calId} AND emp_id = #{empId}
+	</delete>
+  
 	
 	<!-- 공지사항 목록 -->
 	<select id="mainNoticeList" resultType="map">
@@ -14,7 +110,7 @@
 	</select>
 	
 	<!-- 결재 대기 목록 조회 -->
-	<select id="mainDocumentList" resultType="map">
+	<select id="mainApprovalList" resultType="map">
 		SELECT d.doc_id,
 			   c.det_id AS doc_type_code,
 		       c.det_nm AS doc_type,

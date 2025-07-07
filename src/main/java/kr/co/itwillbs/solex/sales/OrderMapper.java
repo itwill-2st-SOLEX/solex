@@ -71,4 +71,21 @@ public interface OrderMapper {
     List<Map<String, Object>> selectAllOptionsByProductId(@Param("prd_id") Object prd_id);
 
 	
+
+	// 여러 ID에 해당하는 주문 데이터를 Map 형태로 조회
+    List<Map<String, Object>> findOrdersByIds(@Param("oddIds") List<Long> oddIds);
+
+    // 특정 ID에 해당하는 주문을 삭제
+    int deleteOrderById(@Param("oddId") Long oddId); // 삭제된 행의 수를 반환
+    
+    
+    
+    // 주문 헤더 업데이트 (ord_id 기준)
+    int updateOrderHeader(Map<String, Object> orderPayload);
+
+    // 특정 ord_id에 해당하는 모든 주문 상세 삭제
+    int deleteOrderDetailsByOrdId(@Param("ordId") int ordId);
+
+    // 주문 상세 항목 하나를 삽입 (새로운 odd_id 생성)
+    int insertOrderDetail(Map<String, Object> item);
 }

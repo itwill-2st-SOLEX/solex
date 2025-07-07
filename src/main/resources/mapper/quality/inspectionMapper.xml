@@ -29,7 +29,7 @@
   	<select id="getInspectionList">
 		SELECT
 			odd.odd_id as oddId, -- 수주 상세 번호
-			prd.prd_id as prdId, -- 제품코드
+			prd.prd_code as prdId, -- 제품코드
 			prd.prd_nm as prdNm, -- 제품명
 			cd2.det_nm as prdColor, -- 컬러
 			cd3.det_nm as prdSize, -- 사이즈
@@ -262,6 +262,48 @@
 		SET wre_jcount=#{newCount}, wre_date=#{wreDate}
 		WHERE wre_id=#{wreId}
 	</update>
+	
+	
+	<select id="getDefectiveCountByWarehouse">
+	<![CDATA[
+		SELECT
+		    sod.opt_id AS 옵션코드,
+		    sod.odd_cnt AS 주문수량,
+		    SUM(ad.are_det_qty) AS 총_구역상세현재수량,
+		    CASE
+		        WHEN (sod.odd_cnt + #{qhiBcount}) <= SUM(ad.are_det_qty) THEN '출고 가능'
+		        ELSE '출고 불가능'
+		    END AS status
+		FROM
+		    suju_order_detail sod
+		JOIN
+		    area_detail ad ON sod.opt_id = ad.item_id
+		WHERE
+		    sod.odd_id = #{oddId}
+		GROUP BY
+		    sod.opt_id, sod.odd_cnt
+	]]>
+	</select>
+	
+	<select id="callFifoOutboundByOdd" statementType="CALLABLE" parameterType="map" resultType="map">
+        { CALL SP_FIFO_OUTBOUND_BY_ODD (
+            #{pOddId,         mode=IN,    jdbcType=NUMERIC},
+            #{pQhiBcount,     mode=IN,    jdbcType=NUMERIC},
+            #{oActualOutQty,  mode=OUT,   jdbcType=NUMERIC},
+            #{oStatusCode,    mode=OUT,   jdbcType=VARCHAR},
+            #{oStatusMessage, mode=OUT,   jdbcType=VARCHAR}
+        )}
+    </select>
+    
+    
+    <update id="updateStatus">
+    	UPDATE suju_order_detail
+    	set odd_mod_date = SYSDATE + 9/24, odd_sts = 'odd_sts_08'
+    	where odd_id = #{oddId}
+
+    </update>
+	
+	
 	
   </mapper>
 	

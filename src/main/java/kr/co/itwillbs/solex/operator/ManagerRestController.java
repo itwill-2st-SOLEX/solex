@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -31,10 +32,7 @@ public class ManagerRestController {
 
 	//내 부서 정보
 	@GetMapping("/managerSummary")
-	public Map<String, Object> getManagerSummary(HttpSession session) {
-		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+	public Map<String, Object> getManagerSummary(@SessionAttribute("empId") Long empId) {
 
 	    Map<String, Object> result = managerService.getManagerSummary(empId);
 	    System.out.println(result);
@@ -45,12 +43,9 @@ public class ManagerRestController {
 	// 모든 작업 목록 가져오기
 	@GetMapping("/managerList")
 	public Map<String, Object> getManagerList(@RequestParam(name = "page", required = false) Integer page,
-								         @RequestParam(name = "size", required = false) Integer size,
-								         @RequestParam("yearMonth") String yearMonth, 
-								         HttpSession session) {
-		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+											 @RequestParam(name = "size", required = false) Integer size,
+											 @RequestParam("yearMonth") String yearMonth, 
+											 @SessionAttribute("empId") Long empId) {
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);
@@ -70,11 +65,9 @@ public class ManagerRestController {
 	
 	// 작업 순서 업데이트
 	@PatchMapping("/updateStatus")
-	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map, HttpSession session) {
-		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
-		
+	public ResponseEntity<?> updateStatus(@RequestBody Map<String, Object> map,
+										  @SessionAttribute("empId") Long empId) {
+
 		map.put("empId", empId);
 		
 		managerService.updateWpoSts(map);
@@ -82,27 +75,22 @@ public class ManagerRestController {
 		return ResponseEntity.ok().build();
 	}
 	
-	//불량수량 저장
-	@PostMapping("/saveBcount")
-	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map, HttpSession session) {
-		
-		String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
-		System.out.println("save : " + map);
-		return ResponseEntity.ok().build();
-	
-	}
+//	//불량수량 저장
+//	@PostMapping("/saveBcount")
+//	public ResponseEntity<?> postBcount(@RequestBody Map<String, Object> map, 
+//										@SessionAttribute("empId") Long empId) {
+//		
+//		return ResponseEntity.ok().build();
+//	
+//	}
 	
 	// 각 사원별 작업내역 모달표시
     @GetMapping("/workerReport/{wpoId}")
     public Map<String, Object> apiWorkerReport(@PathVariable("wpoId") Long wpoId,
 									    		@RequestParam(name = "page", required = false) Integer page,
 										        @RequestParam(name = "size", required = false) Integer size, 
-										        HttpSession session ) {
-    	
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
-    	
+										        @SessionAttribute("empId") Long empId) {
+
     	Map<String, Object> params = new HashMap<>();
     	
     	params.put("offset", page * size);
@@ -127,9 +115,8 @@ public class ManagerRestController {
     
     // 실적 수정
     @PatchMapping("/workerCount")
-    public ResponseEntity<?> updateWorkerCount(@RequestBody Map<String, Object> map, HttpSession session) {
-    	String sessionId = (String) session.getAttribute("empId");
-    	Long empId = Long.parseLong(sessionId);
+    public ResponseEntity<?> updateWorkerCount(@RequestBody Map<String, Object> map, 
+    										   @SessionAttribute("empId") Long empId) {
     	
     	map.put("wreDate", LocalDateTime.now());
     	

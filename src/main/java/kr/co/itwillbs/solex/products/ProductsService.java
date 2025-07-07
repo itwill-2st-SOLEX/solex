@@ -42,25 +42,22 @@ public class ProductsService {
 		
 		// 2. 방금 삽입된 제품의 PRD_ID (자동 생성된 키) 획득
 		Long prdId  = productsMapper.selectLatestProductId();
-		System.out.println("prdId????????   : " + prdId);
      
-        
-	     // 3. 옵션 목록 추출 및 각 옵션에 제품 ID 연결
+	    // 3. 옵션 목록 추출 및 각 옵션에 제품 ID 연결
 	    // 프론트엔드에서 넘어온 'options' 키의 값은 List<Map<String, String>> 형태입니다.
 	    List<Map<String, String>> optionsList = (List<Map<String, String>>) productData.get("options");
-
 	    
 	    // 옵션 목록이 비어있지 않다면 처리
 	    if (optionsList != null && !optionsList.isEmpty()) {
 	        for (Map<String, String> optionMap : optionsList) {
-	            // 각 옵션 맵에 획득한 제품 ID를 추가합니다.
-	            // 이 'prd_id' 키는 mapper.xml의 <foreach> 내부에서 #{option.prd_id}로 사용됩니다.
+	        	System.out.println("optionMap 내용 잘 나옴?? " + optionMap);
 	        	optionMap.put("prd_id", String.valueOf(prdId));
 	        	System.out.println("DEBUG: 옵션 맵 내용 ---");
 	            System.out.println("DEBUG:   PRD_ID: " + optionMap.get("prd_id"));
-	            System.out.println("DEBUG:   OPT_COLOR: " + optionMap.get("opt_color")); // ⭐ 이 값 확인
-	            System.out.println("DEBUG:   OPT_SIZE: " + optionMap.get("opt_size"));   // ⭐ 이 값 확인
-	            System.out.println("DEBUG:   OPT_HEIGHT: " + optionMap.get("opt_height")); // ⭐ 이 값 확인
+	            System.out.println("DEBUG:   OPT_COLOR: " + optionMap.get("OPT_COLOR")); 
+	            System.out.println("DEBUG:   OPT_SIZE: " + optionMap.get("OPT_SIZE"));   
+	            System.out.println("DEBUG:   OPT_HEIGHT: " + optionMap.get("OPT_HEIGHT")); 
+	            System.out.println("DEBUG:   OPT_YN: " + optionMap.get("OPT_YN")); 
 	            System.out.println("DEBUG: ---");
 
 	            // 4. 모든 옵션 정보 다건 삽입
@@ -100,7 +97,7 @@ public class ProductsService {
 		return productsMapper.selectOptionTotalCount(prdId);
 	}
 
-	public boolean isPrdCodeDuplicate(String prdCode) {
+	public int isPrdCodeDuplicate(String prdCode) {
         return productsMapper.existsByPrdCode(prdCode); 
     }
 }
