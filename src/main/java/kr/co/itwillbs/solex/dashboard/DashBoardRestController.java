@@ -76,6 +76,7 @@ public class DashBoardRestController {
 	@GetMapping("/popular")
 	public List<Map<String, Object>> getPopluarPrds(@RequestParam("startDate") String startDate,
 													@RequestParam("endDate") String endDate) {
+		System.out.println(service.getPopluarPrds(startDate, endDate));
 		return service.getPopluarPrds(startDate, endDate);
 	}
 }
