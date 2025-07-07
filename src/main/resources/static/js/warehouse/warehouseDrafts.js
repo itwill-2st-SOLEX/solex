@@ -68,65 +68,95 @@ $(function() {
 
 	/* ───────────────── 구역 히스토리를 그리드에 표시 ───────────────── */
 	async function renderAreaHistory(areaId) {
-	  try {
-	    // 히스토리가 없으면 [] 가 넘어오도록 기본값을 줌
-	    const list = await fetchJson(`/SOLEX/warehouse/area/${areaId}/history`, []);
-
-	    // list 가 null/undefined 면 그냥 빈 배열로
-	    const safeList = Array.isArray(list) ? list : [];
+		// areaId가 없으면 데이터를 비우고 상세 컬럼을 숨깁니다.
+	  	if (!areaId) {
+	    	historyGrid.resetData([]);
+	    	historyGrid.hideColumn('detail1');
+	    	historyGrid.hideColumn('detail2');
+	    	historyGrid.hideColumn('detail3');
+	    	return;
+	  	}
 		
-	    const data = safeList.map((h) => ({
-	      actionTime : h.ACTION_TIME,
-	      inOut      : h.STATUS,
-	      qty        : h.QUANTITY
-	    }));
+	  	try {
+			// 서버에 areaId를 보내 SQL 쿼리를 실행하고 결과를 받아옵니다.
+			const historyData = await fetchJson(`/api/warehouse/history/${areaId}`);
 
-	    historyGrid.resetData(data);       // data 가 [] 여도 에러 X
-	  } catch (e) {
-	    console.error(e);
-	    historyGrid.resetData([]);         // 혹시 예외가 나도 그리드 초기화
-	  }
+			// --- 동적 컬럼 표시/숨김 로직 ---
+		    // 데이터가 있고, 첫 번째 데이터의 areType을 기준으로 판단합니다.
+		    if (historyData && historyData.length > 0) {
+		      	// 서버에서 받은 JSON 키가 snake_case(are_type)일 경우를 대비하여 확인
+		      	const areaType = historyData[0].areType || historyData[0].are_type;
+
+		      	if (areaType === 'area_type_01') { // 자재인 경우
+		        	historyGrid.hideColumn('detail1');
+		        	historyGrid.hideColumn('detail2');
+		        	historyGrid.hideColumn('detail3');
+		      	} else if (areaType === 'area_type_02') { // 제품인 경우
+		        	historyGrid.showColumn('detail1');
+		        	historyGrid.showColumn('detail2');
+		        	historyGrid.showColumn('detail3');
+		      	}
+	    	} else {
+	      		// 데이터가 없는 경우 상세 컬럼을 모두 숨깁니다.
+	      		historyGrid.hideColumn('detail1');
+	      		historyGrid.hideColumn('detail2');
+	      		historyGrid.hideColumn('detail3');
+		    }
+			
+			historyGrid.resetData(historyData);
+
+	  	} catch (err) {
+    		console.error(`구역(${areaId}) 이력 조회 실패`, err);
+	    	alert('이력 조회 중 오류가 발생했습니다.');
+	    	historyGrid.resetData([]); // 오류 발생 시 그리드 비우기
+	  	}
 	}
 			
 	async function openDetailModal(row) {
 		
-	  const $body = $("#detailModal .modal-body");
+		const $body = $("#detailModal .modal-body");
 
-	  /* 1) 모달 내부 HTML 골격 */
-	  $body.html(`
-	    <div class="row g-3 mb-3">
-	      <div class="col-md-6">
-	        <label class="form-label fw-bold">창고명</label>
-	        <input type="text" id="d-whs-nm" class="form-control" disabled>
-	      </div>
-	      <div class="col-md-6">
-	        <label class="form-label fw-bold">담당자</label>
-	        <input type="text" id="d-whs-mgr" class="form-control" disabled>
-	      </div>
-	    </div>
+	 	/* 1) 모달 내부 HTML 골격 */
+	  	$body.html(`
+		    <div class="row g-3 mb-3">
+				<div class="col-md-6">
+		        	<label class="form-label fw-bold">창고명</label>
+		        	<input type="text" id="d-whs-nm" class="form-control" disabled>
+		      	</div>
+		      	<div class="col-md-6">
+		        	<label class="form-label fw-bold">담당자</label>
+		        	<input type="text" id="d-whs-mgr" class="form-control" disabled>
+		      	</div>
+			</div>
+	
+			<div class="row g-3 mb-3">
+				<div class="col-sm-4">
+		        	<label class="form-label fw-bold">구역 선택</label>
+		        	<select id="areaSelect" class="form-select"></select>
+		      	</div>
+			</div>
+	
+		    <div id="historyGrid" class="border"></div>
+		`);
 
-	    <div class="row g-3 mb-3">
-	      <div class="col-sm-4">
-	        <label class="form-label fw-bold">구역 선택</label>
-	        <select id="areaSelect" class="form-select"></select>
-	      </div>
-	    </div>
-
-	    <div id="historyGrid" class="border"></div>
-	  `);
-
-	  historyGrid = new tui.Grid({
-	  	el: document.getElementById('historyGrid'),
-	  	bodyHeight: 300,
-	  	scrollY: true,
-		autoWidth: true,
-      	data: [],
-      	columns: [
-  	        { header: '변동일시', name: 'actionTime', align: 'center' },
-  	        { header: '구분',     name: 'inOut', sortable: 'true' , align: 'center', width:150 },
-  	        { header: '수량',     name: 'qty', align: 'center' , width:150 }
-      	]
-	  });
+		// Grid 컬럼 설정은 모든 컬럼을 포함하여 정의합니다.
+		// 나중에 데이터에 따라 동적으로 숨기거나 표시할 것입니다.
+		historyGrid = new tui.Grid({
+			el: document.getElementById('historyGrid'),
+		    bodyHeight: 300,
+		    scrollY: true,
+		    autoWidth: true,
+		    data: [],
+		    columns: [
+				{ header: '변동일시',   name: 'actionTime', align: 'center', width: 160 },
+		      	{ header: '상태',       name: 'status',     align: 'center', width: 80 },
+		      	{ header: '품명',       name: 'itemName',   align: 'left' },
+		      	{ header: '수량',       name: 'quantity',   align: 'right', width: 80 },
+		      	{ header: '상세정보 1', name: 'detail1',    align: 'center' },
+		      	{ header: '상세정보 2', name: 'detail2',    align: 'center' },
+		      	{ header: '상세정보 3', name: 'detail3',    align: 'center' }
+			]
+		});
 
 	  try {
 	    /* 3) 창고 정보 + 구역 목록 가져오기 */
@@ -138,19 +168,19 @@ $(function() {
 	    /* 4) 구역 select 채우기 */
 	    const $sel = $("#areaSelect").empty();
 	    (detail.AREAS || []).forEach(a =>
-	      $sel.append(`<option value="${a.AREA_ID}">${a.AREA_NM}</option>`));
+			$sel.append(`<option value="${a.AREA_ID}">${a.AREA_NM}</option>`));
 
 	    if (!detail.AREAS || detail.AREAS.length === 0) {
-	      $sel.append('<option disabled selected>구역 없음</option>');
-	      historyGrid.resetData([]);
+			$sel.append('<option disabled selected>구역 없음</option>');
+	      	await renderAreaHistory(null); // 구역이 없으면 null을 전달하여 그리드를 비우고 컬럼을 숨김
 	    } else {
-	      // 첫 구역 히스토리
-	      await renderAreaHistory(detail.AREAS[0].AREA_ID);
+	      	// 첫 구역 히스토리
+	      	await renderAreaHistory(detail.AREAS[0].AREA_ID);
 	    }
 
 	    /* 5) 구역 변경 이벤트 */
 	    $sel.off('change').on('change', function () {
-	      renderAreaHistory(this.value);
+	      	renderAreaHistory(this.value);
 	    });
 
 	    /* 6) 모달 오픈 */
@@ -158,15 +188,15 @@ $(function() {
 		const modal   = new bootstrap.Modal(modalEl);
 		
 		function handleShown() {
-		  historyGrid.refreshLayout();        // ← 핵심!
-		  modalEl.removeEventListener('shown.bs.modal', handleShown); // 이벤트 1회용
+		  	historyGrid.refreshLayout();        // ← 핵심!
+		  	modalEl.removeEventListener('shown.bs.modal', handleShown); // 이벤트 1회용
 		}
 		modalEl.addEventListener('shown.bs.modal', handleShown);
 
 		modal.show();   
 
 	  } catch (err) {
-	    console.error('상세 조회 실패', err);
+		console.error('상세 조회 실패', err);
 	    alert('상세 조회 중 오류가 발생했습니다.');
 	  }
 	}
