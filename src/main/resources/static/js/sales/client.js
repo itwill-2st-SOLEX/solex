@@ -61,7 +61,13 @@ const grid = new tui.Grid({
     bodyHeight: 500,
     autoWidth: true,
     columns: [
-        { header: '거래처 번호', name: 'cliId', align: 'center' },
+        { header: '거래처 번호', name: 'cliId', align: 'center',renderer: {
+			     styles: {
+			       color: '#007BFF',
+			       textDecoration: 'underline',
+			       cursor: 'pointer'
+			     }
+			   } },
         { header: '거래처 명', name: 'cliNm',align: 'center' }, // 백엔드 DTO 필드명 (camelCase)
         { header: '대표자 명', name: 'cliCeo',align: 'center' },
         { header: '사업자 등록번호', name: 'bizRegNo',align: 'center' },

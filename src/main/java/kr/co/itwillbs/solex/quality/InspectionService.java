@@ -2,6 +2,7 @@ package kr.co.itwillbs.solex.quality;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import kr.co.itwillbs.solex.orderrequest.OrderRequestsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class InspectionService {
@@ -36,143 +38,72 @@ public class InspectionService {
 		return inspectionMapper.getInspectionList(params);
 	}
 	
-	//사원이 실적 등록할 때 마다 작업수량 업데이트
-	public int updateJcount(Long wpoId) {
-		return inspectionMapper.updateJcount(wpoId);
-	}
 	
 	// 작업별 사원 생산량 리스트
 	public List<Map<String, Object>> selectWorkerList(Map map){
 		return inspectionMapper.selectWorkerList(map);
 	}
 
-	// 사원의 생산수량 변경하기
-	@Transactional
-	public int updateWorkerCount(Map map) {
-		
-		Long wpoId = ((Number) map.get("wpoId")).longValue();
+	
+	// 작업 상태 업데이트 
+	public void updateStatus(Map<String, Object> map) {
+		inspectionMapper.updateStatus(map);
+	}
 
-	    int rowCnt = inspectionMapper.updateWorkerCount(map); // ① 수정 행 수
-	    
-	    if (rowCnt == 1) {                                 // ② 성공했을 때만 합계 재계산
-	        int a = inspectionMapper.updateJcount(wpoId);
-	        System.out.println("updateJcount rows    = " + a);          // ★2
-	    }
-	    
-	    return rowCnt;
+	public List<Map<String, Object>> getDefectiveCountByWarehouse(Map<String, Object> map) {
+		List<Map<String, Object>> list = inspectionMapper.getDefectiveCountByWarehouse(map);
+		System.out.println(list);
+		
+		return list;
 		
 	}
 	
-	// 작업 상태 업데이트 
-	@Transactional
-	public void updateWpoSts(Map<String, Object> map) {
-		
-		//String wrkId = (String) map.get("wrkId");
-		String wpoStatus = (String) map.get("wpoStatus");
-		Long wpoId = Long.parseLong((String) map.get("wpoId"));
-		
-		switch (wpoStatus) {
-			case "wpo_sts_02":
-			// 상태 : wpo_sts_01 -> 02 
-				// 	>> 작업대기 -> '작업시작' 상태로 변경 
-				// 		상태코드 변경, 작업시작일 저장
-				map.put("wpoStartDate", LocalDateTime.now());
-				
-				inspectionMapper.updateWpoSts02(map);
-				break;
-				
-			case "wpo_sts_03":
-			// 상태 : wpo_sts_02 >> wpo_sts_03
-				// 		입력값 조회하여 끝났는지 확인하기 위해 select	
-				//		WorkerService에서 처리하므로 할 거 없음
-				break;
-				
-			case "wpo_sts_04":
-			// 상태 : wpo_sts_03 -> wpo_sts_04 --> 
-				//>> 공정완료 -> 품질검사중으로 변경
-				inspectionMapper.updateWpoSts04(map);
-								
-				Map quaMap = inspectionMapper.selectWpoSts04(wpoId);
-				
-				//map.put("wpoId", quaMap.get("WPO_ID"));
-				map.put("quaId", quaMap.get("QUA_ID"));
-				map.put("qhiStartDate", LocalDateTime.now());
-				map.put("qhiEmpId", map.get("empId"));
-					
-				//>> 품질 이력 테이블에 추가
-				inspectionMapper.insertWpoSts04(map);
-				
-				
-				break;
-				
-			case "wpo_sts_05":
-			// 상태 : wpo_sts_04 -> wpo_sts_05 -->
-				
-				//>> 품질이력 테이블 업데이트 하기위해 품질이력id 가져오기
-				Map qhiMap = inspectionMapper.selectWpoSts05(wpoId);
-				
-				map.put("qhiEndDate", LocalDateTime.now());
-				map.put("qhiId", qhiMap.get("QHI_ID"));
+	@Transactional // 프로시저 내에서 DML이 수행되므로 트랜잭션으로 묶는 것이 일반적입니다.
+    public Map<String, Object> executeOutboundProcedure(Long oddId, Long qhiBcount) {
+        // 프로시저에 전달할 파라미터 맵 생성
+        Map<String, Object> params = new HashMap<>();
+        // IN 파라미터 설정
+        params.put("pOddId", oddId);
+        params.put("pQhiBcount", qhiBcount);
 
-				// >>품질이력 테이블 업데이트
-				inspectionMapper.updateWpoSts05_qh(map);				
-				
-				// >> 불량개수, 상태 업데이트
-				inspectionMapper.updateWpoSts05_wp(map);
-				
+        // Mapper를 통해 프로시저 호출
+        // OUT 파라미터는 프로시저 실행 후 자동으로 이 'params' 맵에 채워집니다.
+        inspectionMapper.callFifoOutboundByOdd(params);
 
-				break;
-			
-			case "wpo_sts_09":
-			// 상태 : wpo_sts_05 -> wpo_sts_09 -->
-				map.put("wpoEndDate", LocalDateTime.now());
-				
-				System.out.println("9 : " + map);
-				//>> 현재 공정 완료처리하기
-				inspectionMapper.updateWpoSts09_curr(map);
-				
-				//>> 다음 공정 상태값 변경하기
-				
-				//>> 현재 공정 정보와 다음에 수행해야할 공정의 정보 찾아오기
-				Map stepInfo = inspectionMapper.selectStepInfo(wpoId);
-				
-				//다음 공정 정보 업데이트할 정보 전달
-				int jcount = ((Number) stepInfo.get("WPO_JCOUNT")).intValue();
-				int bcount = ((Number) stepInfo.get("BCOUNT")).intValue();
-				
-				stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
+        // 프로시저 실행 후, 'params' 맵에서 OUT 파라미터의 값을 추출
+        String statusCode = (String) params.get("oStatusCode");
+        String statusMessage = (String) params.get("oStatusMessage");
+        Number actualOutQty = (Number) params.get("oActualOutQty"); // Oracle NUMBER는 Long 또는 BigDecimal로 매핑될 수 있음
 
-				
-				//다음 공정이 존재하면
-				if (stepInfo.get("NEXT_WPO_ID") != null ) {
+        // 결과 로깅 (개발/디버깅 목적)
+        System.out.println("--- 프로시저 호출 결과 ---");
+        System.out.println("Status Code: " + statusCode);
+        System.out.println("Status Message: " + statusMessage);
+        System.out.println("Actual Out Quantity: " + actualOutQty);
+        System.out.println("-------------------------");
 
-					int nextWpoId = ((Number) stepInfo.get("NEXT_WPO_ID")).intValue();
-					
-					stepInfo.put("wpoNewStatus", "wpo_sts_01");		//상태값 공정대기
-					stepInfo.put("wpoStartDate", LocalDateTime.now());	//공정시작일
-					stepInfo.put("wpoOcount", jcount-bcount);	//이전 공정 작업개수-불량개수
-					stepInfo.put("wpoId", nextWpoId);	//다음 공정id	
 
-					inspectionMapper.updateNextStep(stepInfo);
-					
-				} else {
-					
-					//마지막 공정이면
-					//수주 테이블에 업데이트				
-					stepInfo.put("wpoId", stepInfo.get("WPO_ID"));
-					stepInfo.put("oddModDate", LocalDateTime.now());	//변경일
-					
-					//수주 디테일에 작업완료로 상태 변경, 불량개수/생산량 업데이트
-					inspectionMapper.updateSujuDetail(stepInfo);	
-					
-					//수주 히스토리에 작업 완료 처리
-					inspectionMapper.insertSujuHistory(stepInfo);
-					System.out.println("끝!");
-				}
-		
-		}
-		
-	}
+        // 프로시저 결과에 따른 비즈니스 로직 처리
+        if ("SUCCESS".equals(statusCode)) {
+            // 성공 로직: 예를 들어 추가적인 데이터 처리 또는 로그 기록
+            System.out.println("재고 출고 프로시저가 성공적으로 실행되었습니다.");
+        } else if ("NOT_ENOUGH_STOCK".equals(statusCode)) {
+            // 재고 부족 처리
+            System.out.println("재고가 부족하여 출고에 실패했습니다.");
+            // 특정 예외를 던지거나, 클라이언트에게 오류 메시지를 전달하는 등의 추가 처리가 필요합니다.
+            // throw new RuntimeException("재고 부족 오류: " + statusMessage);
+        } else if ("NOT_FOUND_DATA".equals(statusCode)) {
+            // 데이터 없음 처리
+            System.out.println("필요한 데이터를 찾을 수 없어 출고에 실패했습니다.");
+            // throw new RuntimeException("데이터 없음 오류: " + statusMessage);
+        } else {
+            // 기타 오류 처리
+            System.err.println("재고 출고 프로시저 실행 중 알 수 없는 오류 발생: " + statusMessage);
+            // throw new RuntimeException("프로시저 실행 오류: " + statusMessage);
+        }
+
+        return params; // 모든 IN/OUT 파라미터가 포함된 최종 맵 반환
+    }
 }
 
 

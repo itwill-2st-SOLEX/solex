@@ -17,7 +17,13 @@ const grid = new tui.Grid({
     scrollX: false,
     data: [], // 초기 데이터는 비어있음
     columns: [
-        { header: '수주 상세번호', name: 'ODD_ID', width: 100,align: 'center', sortable: true },
+        { header: '수주 상세번호', name: 'ODD_ID', width: 100,align: 'center', sortable: true ,renderer: {
+			     styles: {
+			       color: '#007BFF',
+			       textDecoration: 'underline',
+			       cursor: 'pointer'
+			     }
+			   }},
         { header: '제품 코드', name: 'PRD_CODE', width: 100,align: 'center', sortable: true },
         { header: '거래처', name: 'CLI_NM', align: 'center', sortable: true },
         { header: '제품명', name: 'PRD_NM', width: 200, align: 'center', sortable: true },
@@ -111,7 +117,7 @@ async function fetchGridData(page = currentPage) {
         item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn">자재 요청 완료</button>`;
       } else {
         // data-action="request" 추가
-        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="request" data-ord-id="${item.ODD_ID}">자재 요청</button>`;
+        item.PRODUCTION_STATUS = `<button class="btn btn-sm btn-danger delete-btn assign-btn" data-action="request" data-ord-id="${item.ODD_ID}">자재 요청</button>`;
       }
     });
     

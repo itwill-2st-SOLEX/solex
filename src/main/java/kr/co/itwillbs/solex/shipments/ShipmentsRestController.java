@@ -18,10 +18,12 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 
 @RestController
 @RequestMapping("/shipments")
+@PreAuthorize("hasAnyRole('1','2','3','4')")
 public class ShipmentsRestController {
 
 	@Autowired
