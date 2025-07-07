@@ -426,49 +426,6 @@ div.toastui-calendar-popup-section.toastui-calendar-dropdown-section.toastui-cal
 }
 
 
-
-/* ─── 태블릿 이하 (≤ 991.98 px) ─── */
-@media (max-width: 991.98px){
-	
-	.toastui-calendar-month .toastui-calendar-month-daygrid {
-		height: 80vh;
-	}
-
-  /* 1) 달력과 사이드 묶음 세로 배치 */
-  .box2{
-	
-    flex-direction: column;   /* 달력 위, 패널 아래 */
-    gap: var(--gap);
-  }
-  
-  .box2Side {
-	width: 100% !important;
-  }
-
-
-}
-
-/* 예시: 달력과 같은 컨테이너가 ‘높이:100%’ 인 경우 */
-/* .box2Side{
-    display:flex;             
-    flex-direction: column;
-    gap: var(--gap);
-    height:100%;
-}
-
-.box2Side > .panel{
-    flex: 0 0 calc((100% - 2 * var(--gap)) / 3);
-    max-height: calc((100% - 2 * var(--gap)) / 3);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.box2Side > .panel .panel-list{
-    flex: 1 1 auto;
-    overflow-y: auto;
-}
- */
 .panel.myInfo {
 	flex:0 0 22%;
 	flex-direction: row;
@@ -496,58 +453,55 @@ div.toastui-calendar-popup-section.toastui-calendar-dropdown-section.toastui-cal
 
 
 
+/* ─── myInfo 패널 ─── */
 .panel.myInfo{
   display:flex;
   align-items:center;
   gap:1rem;
   padding:.85rem 1.1rem;
 }
-
-/* 사진 썸네일 */
+/* 사진 */
 .panel.myInfo .photo img{
   width:80px; height:80px;
   border-radius:8px;
   object-fit:cover;
 }
 
-/* 텍스트 두 줄을 세로로 */
-.panel.myInfo .emp-meta{
+/* 정보 + 버튼 세로 스택 */
+.panel.myInfo .emp-box{
   flex:1 1 auto;
   display:flex;
   flex-direction:column;
-  line-height:1.3;
+  gap:.3rem;            /* 두 줄 간격 */
 }
 
-.emp-meta .dept{
-	margin-bottom: 5px !important;
+/* 줄① : 부서/팀/직급 */
+.dept-line{
+  margin:0;
+  font-size:1rem;
+  font-weight:600;
+  color:var(--brand);
 }
+.pos{ color:#555; font-weight:500; }
 
-/* ① 부서 */
-.panel.myInfo .dept{
+/* 줄② : 이름 (사번) */
+.name-line{
   margin:0;
   font-size:.95rem;
-  font-weight:600;
-  color:var(--brand);      /* 강조 색 */
-}
-
-/* ② 이름·직급·사번 */
-.panel.myInfo .emp-line{
-  margin:0;
-  font-size:.9rem;
   color:#333;
-  white-space:nowrap;      /* 한 줄 유지 */
 }
-.panel.myInfo .pos,
-.panel.myInfo .emp-id{
-  margin-left:.35rem;
-  color:var(--text-muted);
-  font-weight:500;
+.emp-id{ color:var(--text-muted); }
+
+/* 줄③ : 버튼 그룹 */
+.btn-group{
+  margin-top:.4rem;
+  display:flex;
+  gap:.5rem;
 }
 
-/* 정보 변경 버튼 (작게) */
-.panel.myInfo .btn-edit{
-  flex:0 0 auto;
-  padding:.25rem .75rem;
+/* 마이페이지 : 주색 버튼 */
+.btn-mypage{
+  padding:.28rem .9rem;
   font-size:.8rem;
   font-weight:600;
   color:#fff;
@@ -555,13 +509,74 @@ div.toastui-calendar-popup-section.toastui-calendar-dropdown-section.toastui-cal
   border:0;
   border-radius:5px;
   cursor:pointer;
-  transition:background .2s;
+  transition:opacity .2s;
 }
-.panel.myInfo .btn-edit:hover{ background:#1d6bf5; }
+.btn-mypage:hover{ opacity:.9; }
 
-/* 모바일(≤576 px) – 세로 카드 */
-@media (max-width:576px){
-  .panel.myInfo{ flex-direction:column; align-items:flex-start; }
-  .panel.myInfo .photo img{ width:68px;height:68px; }
-  .panel.myInfo .btn-edit{ align-self:stretch; text-align:center; margin-top:.6rem; }
+/* 로그아웃 : 테두리형 경고 버튼 */
+.btn-logout{
+  padding:.28rem .9rem;
+  font-size:.8rem;
+  font-weight:600;
+  color:#e53935;
+  background:#fff;
+  border:1px solid #e53935;
+  border-radius:5px;
+  cursor:pointer;
+  transition:background .2s, color .2s;
+}
+.btn-logout:hover{
+  background:#e53935;
+  color:#fff;
+}
+
+.emp-box{
+	position: relative;
+}
+
+.emp-box .logout{
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.logout .dropdown-item{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  color:#e53935;                 /* 원하는 빨강 */
+  border:2px solid currentColor; /* 글자색 = 테두리색 */
+  padding:2px;
+  border-radius:10px;             /* 0이면 각진, 50%면 원형 */
+  font-size:1.25rem;             /* 크기 (선택) */
+}
+
+.logout .dropdown-item:hover{ background:#e53935; color:#fff; }
+
+.icon-power-red:hover{ background:#e53935; color:#fff; }
+
+
+/* ─── 태블릿 이하 (≤ 991.98 px) ─── */
+@media (max-width: 991.98px){
+	
+	.toastui-calendar-month .toastui-calendar-month-daygrid {
+		height: 80vh;
+	}
+
+
+  .box2{
+	
+    flex-direction: column;   /* 달력 위, 패널 아래 */
+    gap: var(--gap);
+  }
+  
+  .box2Side {
+	width: 100% !important;
+  }
+  
+  .panel.notice, .panel.approval {
+	min-height: 250px;
+}
+
+
 }

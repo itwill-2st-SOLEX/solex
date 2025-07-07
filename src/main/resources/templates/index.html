@@ -82,13 +82,31 @@
 					         alt="사원 사진">
 					  </div>
 					
-					  <!-- 텍스트 두 줄 -->
-					  <div class="emp-meta">
-					    <p class="dept"> <span id="empDept">생산관리</span> <span id="empTeam">1팀</span> <span id="empPos" class="pos">사원</span></p>          
-					    <p class="emp-line">                   
-					      <span id="empNm" class="name">나드아</span>
-					      <span id="empNum" class="emp-id">(EMP202507)</span>
+					  <div class="emp-box">
+					    <p class="dept-line">
+					      <span id="empDept"></span>
+					      <span id="empTeam"></span>
+					      <span id="empPos" class="pos"></span>
 					    </p>
+					
+					    <p class="name-line">
+					      <span id="empNm" class="name"></span>
+					      <span id="empNum" class="emp-id"></span>
+					    </p>
+					
+					    <div class="btn-group">
+					      <button type="button" class="btn-mypage" onclick="openMypagePopup(event)">마이페이지</button>
+					      <!-- <button type="button" class="btn-logout">로그아웃</button> -->
+					    </div>
+					    
+					    <div class="logout"> 
+						    <a href="#" class="dropdown-item"
+								onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+									<i class="bx bx-power-off border border-2 rounded p-1 fs-4"></i>
+							</a>
+							<form id="logoutForm" action="/SOLEX/logout" method="post"
+									style="display: none;"></form>
+						</div>
 					  </div>
 					</section>
 					
@@ -118,7 +136,7 @@
 			  </div><!-- /custom-content -->
 			</div><!-- /custom-body -->
 			
-			<!-- Modal -->
+			<!-- 공지사항 모달 -->
 			<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
 			  <div class="modal-dialog modal-dialog-scrollable modal-lg">
 			    <div class="modal-content">
@@ -134,7 +152,7 @@
 			</div>
 			</div>
 			
-			<!-- 상세 모달 -->
+			<!-- 기안서 모달 -->
 			<div class="modal fade" id="detailModal" tabindex="-1"
 				aria-labelledby="detailModalLabel" aria-hidden="true">
 				<div class="modal-dialog modal-lg">
@@ -159,6 +177,25 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary"
 								data-bs-dismiss="modal">닫기</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 마이페이지 모달 -->
+			<div class="modal fade" id="mypageModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-scrollable modal-xl">
+					<div class="modal-content">
+						<div class="modal-header border-0 pb-1">
+							<h3 class="modal-title fw-semibold" id="exampleModalLabel">마이페이지</h3>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<!-- JS에서 이 부분을 채움 -->
+						<div class="modal-body pt-0">
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+							<button type="submit" class="btn btn-primary" id="mypageModifyBtn">수정</button>
 						</div>
 					</div>
 				</div>
