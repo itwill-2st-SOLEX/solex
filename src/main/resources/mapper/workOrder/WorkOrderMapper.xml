@@ -123,7 +123,7 @@
 		       , a.are_id  -- 구역 ID
 		       , a.are_nm  -- 구역명
 		       , a.are_max  -- 최대수량
-		       , ad.are_det_id
+		       , ad.are_det_id -- 구역 Detail ID
 		       , SUM(NVL(a.are_qty, 0)) AS are_cnt -- 현재수량
 		  FROM warehouse w
 		  JOIN area a 
@@ -135,16 +135,17 @@
 		 WHERE w.whs_sts = 'whs_sts_01'  -- 가동중
 		   AND a.are_type = 'area_type_02'
  		   AND p.prd_id = #{prdId} 
+ 		   AND ad.item_id = #{optId} 
 		 GROUP BY w.whs_id, w.whs_nm, w.whs_pc, w.whs_add, w.whs_da,
 			      a.are_id, a.are_nm, ad.are_det_id, a.are_max
 	</select>
 <!-- 	1. 창고 이력 insert -->
 	<insert id="warehousesInsert">
-		INSERT INTO warehouse_history (are_id,
+		INSERT INTO warehouse_history (are_det_id,
 				    				   whs_his_sts,
 				    				   whs_his_cnt,
 				    				   whs_his_date
-		) VALUES (#{areaId},    
+		) VALUES (#{areaDetId},    
 				  'whs_his_sts_01',
 				  #{assignQty},
 				  SYSDATE + (9/24)

@@ -42,21 +42,20 @@ public class WorkOrderService {
 		// 수주 히스토리 테이블 인서트
 		mapper.insertSujuHistory(oddId, empId);
 		
+		// ------------강현 ------------------------------
 		// ✅ 작업지시 등록 후 LOT 일괄 생성
 	    lotService.insertLotCascade(Long.parseLong(oddId));
 		
 	}
 
 	// 창고 조회
-	public List<Map<String, Object>> getWarehouses(String prdId) {
-		return mapper.getWarehouses(prdId);
+	public List<Map<String, Object>> getWarehouses(String prdId, String optId) {
+		return mapper.getWarehouses(prdId, optId);
 	}
 
 	// 창고 자재 등록
 	@Transactional
 	public void warehousesInsert(Map<String, Object> prdInfo, String empId) {
-		System.out.println("창고배정 클릭 시 파라미터 prdInfo : " + prdInfo + ", empId : " + empId);
-		
 		// 1. 창고 이력 insert
 		mapper.warehousesInsert(prdInfo);
 		// 2. 재고 원장 insert
@@ -69,6 +68,9 @@ public class WorkOrderService {
 		mapper.sujuDetailUpdate(prdInfo);
 		// 6. 수주 히스토리 테이블 인서트
 		mapper.sujuInserthistory(prdInfo, empId);
+		
+		
+		// --------------------- 강현----------------
 		// ✅ 7. 제품LOT 상태값 '완료(lot_status_03)'로 변경
 	    lotService.updatePrdLotStatusToComplete((Integer) prdInfo.get("oddId"));
 	}
