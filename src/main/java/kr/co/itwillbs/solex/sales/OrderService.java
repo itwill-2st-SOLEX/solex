@@ -2,10 +2,13 @@ package kr.co.itwillbs.solex.sales;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,60 +86,22 @@ public class OrderService {
 
 	
 	@Transactional
-public int createOrderProcess(Map<String, Object> orderData) {
-    // 1. 주문 테이블 INSERT (기존과 동일)
-    orderMapper.createSujuOrder(orderData);
-    Long orderId = ((BigDecimal) orderData.get("ord_id")).longValue();
+    public int createOrderProcess(Map<String, Object> orderData) {
+        // 1. 주문 테이블 INSERT (기존과 동일)
+        orderMapper.createSujuOrder(orderData);
+        Long orderId = ((BigDecimal) orderData.get("ord_id")).longValue();
 
-    List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
+        List<Map<String, Object>> items = (List<Map<String, Object>>) orderData.get("items");
 
-    // 2. 각 item에 ord_id와 기본 상태만 추가 (opt_id 조회 로직 전체 삭제)
-    for (Map<String, Object> item : items) {
-        item.put("ord_id", orderId);
-        item.put("odd_sts", "odd_sts_00");
-    }
+        // 2. 각 item에 ord_id와 기본 상태만 추가 (opt_id 조회 로직 전체 삭제)
+        for (Map<String, Object> item : items) {
+            item.put("ord_id", orderId);
+            item.put("odd_sts", "odd_sts_00");
+        }
 
-    // 3. 단순화된 items 리스트를 Mapper로 전달
-    // 이제 XML이 모든 것을 처리합니다.
-    return orderMapper.createSujuOrderDetail(items);		
-		// 수주 상세 등록
-		
-		// 이후 수주 요청 관리에서  밑에 있는 내용들이 실행됨
-		
-		// 수주 등록 승인 / 반려로 갈림.
-		
-		// 1. 승인시
-		// 기존 재고에서 제품을 줄껀지 정보를 받아야됨.
-		// 재고에서 완제품을 뺴고 충분한가?
-		// 1-1. 충분한 경우 -> 바로 출고 or 출고대기
-		// 1-2. 완제품을 주는데 부족한 경우 -> 주문온 수량을 생산하기 위해 제품에 들어가는 원재자들이 충분한가?
-		// 1-2-1. 원자재들이 생산하기전 시점에서 충분하면 -> 발주 없음(현상태 수주 등록) -> 생산대기(상태변경);
-		// 1-2-2. 원자재들이 부족한 경우 -> 발주해야됨(현상태 수주 등록) -> 주문이 들어온 수량을 확인을 하여
-		//        완제품을 생산하는데 필요한 수량을 추가적인 원자재 발주(상태 : 자재요청) -> 원자재 들어옴 ->
-		//        갯수를 카운팅 하여 자재들이 도착하면 -> 입고 검사 끝나면 -> 재고갯수 업데이트 -> 생산대기로 (상태 변경)
-		// 주문 수량 > 재고 수량
-		// int orderCount = Integer.parseInt(orderData.get("odd_cnt").toString());
-		// int stockCount = Integer.parseInt(orderData.get("stk_cn").toString());
-		// if (orderCount > stockCount) {
-		// 	orderData.put("ord_sts", "ord_sts_01"); // 상태값을 '01'로 설정 자재 요청
-			
-		// } else {
-		// 	orderData.put("ord_sts", "ord_sts_02"); // 상태값을 '02'로 설정 생산 대기
-		// }
-
-		// ★★★ 핵심: 부족한 자재에 대한 발주 요청을 추가로 INSERT ★★★
-		// List<Map<String, Object>> lackingMaterials = orderMapper.getLackingMaterials(orderData);
-		// for (Map<String, Object> material : lackingMaterials) {
-		// 	orderMapper.createPurchaseRequest(material);
-		// }
-
-		// 2. 반려시
-		//   기존 수주 테이블, 수주 상세 테이블에서 승인 반려 컬럼을 추가로 생성을 하여 YN으로 관리함,
-		//   수주 요청메뉴에서는 보이지 않음.
-		//   주문 등록 페이지에서는 반려인 상태로 보임
-	    
-		// 업데이트 수주 디테일
-	    
+        // 3. 단순화된 items 리스트를 Mapper로 전달
+        // 이제 XML이 모든 것을 처리합니다.
+        return orderMapper.createSujuOrderDetail(items);		
 	}
 
 
@@ -150,7 +115,10 @@ public int createOrderProcess(Map<String, Object> orderData) {
 
         // 2. 주문 상세 항목 목록 조회 (두 번째 DB 호출)
         List<Map<String, Object>> orderItems = orderMapper.selectOrderItemsByOrderId(ord_id);
-
+        // null 이면 예외 처리
+        if(orderInfo.get("PRODUCT_ID") == null) {
+            throw new RuntimeException("상세 주문 항목이 없습니다. ID: " + ord_id);
+        }
         // 3. 선택 가능한 전체 옵션 목록 조회 (세 번째 DB 호출)
         //    - 1번에서 조회한 상품 ID(PRODUCT_ID)를 파라미터로 사용합니다.
         //    - DB에서 대문자로 반환될 수 있으므로 대문자 키로 조회합니다.
@@ -165,6 +133,96 @@ public int createOrderProcess(Map<String, Object> orderData) {
 
         return finalResult;
 	}
+
+    @Transactional // 하나의 트랜잭션으로 묶어 원자성 보장
+    public Map<String, List<Long>> processBulkOrderDeletion(List<Long> oddIdsToProcess) {
+        List<Long> deletedIds = new ArrayList<>();
+        List<Long> skippedIds = new ArrayList<>();
+
+       // 1. 데이터베이스에서 모든 요청 odd_id에 대한 최신 상태를 한 번에 조회 (Map 형태로)
+        // OrderMapper 인터페이스에 List<Map<String, Object>> findOrdersByIds(List<Long> oddIds);
+        // 이런 메소드가 있다고 가정합니다. (XML 매퍼의 resultType="map"으로 조회)
+        List<Map<String, Object>> ordersData = orderMapper.findOrdersByIds(oddIdsToProcess);
+
+        // Map<oddId, OrderDataMap> 형태로 변환하여 빠른 조회를 위함
+        Map<Long, Map<String, Object>> orderMap = ordersData.stream()
+            .collect(Collectors.toMap(
+                orderData -> ((Number) orderData.get("ODD_ID")).longValue(), // DB 컬럼명이 ODD_ID라고 가정
+                Function.identity()
+            ));
+
+        for (Long oddId : oddIdsToProcess) {
+            Map<String, Object> order = orderMap.get(oddId); // Map 형태로 조회된 데이터
+
+            if (order == null) {
+                // DB에 없는 ID는 건너뛰거나 오류 처리
+                System.err.println("OddId " + oddId + " not found in DB for deletion.");
+                skippedIds.add(oddId);
+                continue;
+            }
+
+            String oddSts00 = (String) order.get("ODD_STS");
+            System.out.println(oddSts00);
+
+            if (!"odd_sts_00".equals(oddSts00)) {
+                skippedIds.add(oddId); // 삭제 불가능한 ID는 스킵 목록에 추가
+                continue; // 다음 odd_id로 넘어감
+            }
+
+
+            // 4. 모든 검증을 통과했다면 실제 삭제 처리
+            try {
+                // DTO/엔티티를 사용하지 않으므로, deleteById를 호출하거나
+                // Mybatis Mapper를 통해 직접 삭제 쿼리를 호출해야 합니다.
+                // 예: orderMapper.deleteOrderById(oddId);
+                orderMapper.deleteOrderById(oddId); // OrderMapper에 deleteOrderById(Long oddId) 메소드 있다고 가정
+                deletedIds.add(oddId);
+            } catch (Exception e) {
+                System.err.println("Error deleting oddId " + oddId + ": " + e.getMessage());
+                skippedIds.add(oddId); // 삭제 중 DB 오류 발생 시 스킵 처리
+            }
+        }
+        
+        // 결과 반환
+        Map<String, List<Long>> result = new HashMap<>();
+        result.put("deletedIds", deletedIds);
+        result.put("skippedIds", skippedIds);
+        return result;
+    }
+    
+    
+    @Transactional // 하나의 트랜잭션으로 묶어 원자성 보장
+    public int updateOrderProcess(Map<String, Object> orderPayload) {
+    	String ordIdStr = (String) orderPayload.get("ord_id");
+        int ordId = Integer.parseInt(ordIdStr); // <-- 이 부분을 수정했습니다.
+        System.out.println(ordId);
+        List<Map<String, Object>> items = (List<Map<String, Object>>) orderPayload.get("items");
+    
+        // 1. 주문 헤더 정보 업데이트 (ord_id 기준)
+        // 이 부분은 기존 주문 헤더 테이블 (예: suju_order_header)을 업데이트하는 쿼리가 필요합니다.
+        // 예: orderMapper.updateOrderHeader(orderPayload);
+        int headerUpdateResult = orderMapper.updateOrderHeader(orderPayload);
+        if (headerUpdateResult == 0) {
+            System.err.println("주문 헤더 업데이트 실패 또는 변경 없음: ord_id " + ordId);
+            // 오류 처리 또는 경고 로깅
+        }
+
+
+        // 2. 기존 수주 디테일 항목 전체 삭제 (ord_id 기준)
+        // 이전에 이 ord_id에 연결된 모든 odd_id 레코드들을 삭제합니다.
+        orderMapper.deleteOrderDetailsByOrdId(ordId); // 이 메소드를 매퍼에 추가해야 함
+
+
+         // 2. 각 item에 ord_id와 기본 상태만 추가 (opt_id 조회 로직 전체 삭제)
+        for (Map<String, Object> item : items) {
+            item.put("ord_id", ordId);
+            item.put("odd_sts", "odd_sts_00");
+        }
+        
+        // 최종적으로 업데이트된 행 수 (또는 성공 여부) 반환
+        // 여기서는 간단히 1을 반환하여 성공을 나타내거나, affected rows 총합을 반환할 수 있습니다.
+        return orderMapper.createSujuOrderDetail(items);
+    }
 
 
 }

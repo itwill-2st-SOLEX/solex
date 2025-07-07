@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,9 +24,11 @@ public class ApprovalRestController {
 	
 	// 결재할 기안서 리스트 
     @GetMapping("")
-    public List<Map<String, Object>> getTodoDocumentList(@RequestParam("page") int page, @RequestParam("size") int size) {
-    	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	Long loginEmpId = 2L;
+    public List<Map<String, Object>> getTodoDocumentList(@RequestParam("page") int page, @RequestParam("size") int size, HttpSession session) {
+		
+		String empId = (String) session.getAttribute("empId");
+		Long loginEmpId = Long.parseLong(empId);
+		System.out.println("empId = " + loginEmpId);
     	
     	int offset = page * size;
 		System.out.println("page:" + page + "size: " + size);
@@ -36,22 +39,26 @@ public class ApprovalRestController {
 	
 	// 결재할 기안서 상세보기 모달창
     @GetMapping("/document/{doc_id}")
-    public Map<String, Object> getTodoDocumentDetail(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
-    	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	Long loginEmpId = 2L;
+    public Map<String, Object> getTodoDocumentDetail(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode, HttpSession session) {
+		
+		String empId = (String) session.getAttribute("empId");
+		Long loginEmpId = Long.parseLong(empId);
+		System.out.println("empId = " + loginEmpId);
+		
     	return approvalService.getTodoDocumentDetail(doc_id, docTypeCode, loginEmpId);
     }
 	
 	//기안서 결재
 	@PostMapping("/document/{doc_id}")
-	public String approvalDocument(@PathVariable("doc_id") Long doc_id, @RequestBody Map<String, Object> approvalRequest) {
-		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	Long loginEmpId = 2L;
+	public void approvalDocument(@PathVariable("doc_id") Long doc_id, @RequestBody Map<String, Object> approvalRequest, HttpSession session) {
+		
+		String empId = (String) session.getAttribute("empId");
+		Long loginEmpId = Long.parseLong(empId);
+		System.out.println("empId = " + loginEmpId);
     	
     	System.out.println("---------------------***********************----------------------");
 		System.out.println(approvalRequest);
 		
 		approvalService.approvalDocument(approvalRequest, doc_id, loginEmpId);
-		return "";
 	}
 }

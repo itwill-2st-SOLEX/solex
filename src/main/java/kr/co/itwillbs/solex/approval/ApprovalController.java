@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class ApprovalController {
 	
 	// 결재할 기안서 리스트 페이지
-    @GetMapping("/todo")
+    @GetMapping("/page")
     public String getTodoDocumentList() {    	
         return "approval/approvalDrafts";
     }

@@ -72,8 +72,8 @@ $(function() {
 		    $sel.data('loaded', true);      // 플래그
 			
 		} catch (err) {
-		    	console.error('품질검사 항목 목록 로딩 실패', err);
-		    	alert('품질검사 항목 목록 로딩 실패');
+			console.error('품질검사 항목 목록 로딩 실패', err);
+			alert('품질검사 항목 목록 로딩 실패');
 		}
 	}
 	
@@ -128,10 +128,5 @@ $(function() {
     		alert('품질검사 항목 등록 실패');
   		}
 	});		
-	
-	
-	
-	
-	
 	
 });

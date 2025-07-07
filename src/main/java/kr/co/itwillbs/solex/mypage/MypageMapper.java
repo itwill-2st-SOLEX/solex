@@ -12,6 +12,8 @@ public interface MypageMapper {
 	Map<String, Object> getEmpData(String empId);
 
 	//마이페이지 수정 
-	void personalDataModify(Map<String, Object> personalModifyMap);
+	void modifyPersonalData(Map<String, Object> personalModifyMap);
+
+	String findImageNameByEmpId(String empId);
 
 }

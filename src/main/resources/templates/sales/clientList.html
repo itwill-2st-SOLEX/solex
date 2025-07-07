@@ -15,30 +15,18 @@
 <body>
 	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
 	<th:block layout:fragment="content">
-		<div class="container-xxl flex-grow-1 container-p-y" style="background-color: transparent; padding-left: 0; padding-right: 0;">
-			<div class="row">
-				<div class="col-xxl-12 mb-6">
-					<div class="card">
-						<div class="d-flex align-items-start row">
-							<div class="col-sm-12">
-								<div class="card-body">
-									<h5 class="card-title mb-3">거래처 목록</h5>
-									<div class="d-flex justify-content-between align-items-center">
-										<div style="width : 100%;" class="d-flex align-items-center">
-											<span class="w-px-22 h-px-22">
-												<i class="icon-base bx bx-search icon-md"></i>
-											</span>
-											<input id="searchInput" name="searchInput" style="width: 25%;" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none" type="text" aria-label="검색" placeholder="검색">
-										</div>
-										<button type="button" class="btn custom-btn-blue mb-3 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openClientModalBtn">거래처 등록</button>
-									</div>
-									<div id="grid" style="width: 100%; overflow-x: auto;"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-	            </div>
+		<div class="container-xxl flex-grow-1 container-p-y">
+			<h5 class="card-title mb-4">거래처 목록</h5>
+			<div class="d-flex justify-content-between align-items-center">
+				<div style="width : 100%;" class="d-flex align-items-center">
+					<span class="w-px-22 h-px-22">
+						<i class="icon-base bx bx-search icon-md"></i>
+					</span>
+					<input id="searchInput" name="searchInput" style="width: 25%;" class="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none" type="text" aria-label="검색" placeholder="검색">
+				</div>
+				<button type="button" class="btn custom-btn-blue mb-4 float-end" style="width:10%;min-width:120px;" data-bs-toggle="modal" data-bs-target="#myModal" id="openClientModalBtn">거래처 등록</button>
 			</div>
+			<div id="grid" style="width: 100%; overflow-x: auto;"></div>
         </div>
 		
 	<!-- 배경 + 스피너 컨테이너 -->

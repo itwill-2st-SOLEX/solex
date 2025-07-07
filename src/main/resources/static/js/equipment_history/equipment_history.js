@@ -12,9 +12,9 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '설비 번호', name: 'eqp_id', align: 'center' },
+			{ header: '설비 번호', name: 'eqp_id', sortable: 'true' ,align: 'center',renderer: { styles: { color: '#007BFF', textDecoration: 'underline', cursor: 'pointer' } } },
 			{ header: '설비 코드', name: 'eqp_code', sortable: 'true' , align: 'center'},
-			{ header: '설비명', name: 'eqp_name', sortable: 'true' , align: 'center'}					
+			{ header: '설비명', name: 'eqp_name', filter: 'select', align: 'center'}					
 		]
 	}); //0701 완 
 	
@@ -154,6 +154,19 @@ $(function() {
 
 	});
 	
+	// 유효성 검사 
+	function validateForm(){
+		const reason = document.getElementById('eqhReason');
+		if(!reason.value){
+			alert('수리 사유를 입력해주세요');
+			return false;
+		} else if(reason.value.length < 10){
+			alert('사유는 최소 10글자 이상 작성해주세요');
+			return false;
+		}
+		return true;
+	}
+	
 	/* ── 설비 수리이력 등록 ─────────────────────────────────── */
 	$('#submitEquipmentHistory').on('click', async function () {
 		const $modal    = $('#equipmentHistoryModal');
@@ -177,24 +190,25 @@ $(function() {
 	    	endDate   : endDate,
 			reason    : reason
 	  	};
-
-	  	try {
-	    	const res = await fetch('/SOLEX/equipmenthistory', {  // ← POST 엔드포인트
-	  			method  : 'POST',
-	      		headers : { 'Content-Type': 'application/json' },
-	      		body    : JSON.stringify(payload)
-	    	});
-	    	if (!res.ok) throw new Error(`에러러러러러러`);
-
-	    	alert('수리이력이 등록되었습니다.');
-	    	$modal.modal('hide');
-
-	    	// 목록 새로고침
-	    	currentPage = 0;
-	    	equipmentList(currentPage);
-  		} catch (err) {
-    		console.error('수리이력 등록 실패', err);
-    		alert('등록 중 오류가 발생했습니다.');
-  		}
+		if(validateForm()){
+			console.log('유효성 검사 통과!');
+		    	const res = await fetch('/SOLEX/equipmenthistory', {  // ← POST 엔드포인트
+		  			method  : 'POST',
+		      		headers : { 'Content-Type': 'application/json' },
+		      		body    : JSON.stringify(payload)
+		    	});
+				if(res.ok){
+			    	alert('수리이력이 등록되었습니다.');
+			    	$modal.modal('hide');
+		
+			    	// 목록 새로고침
+			    	currentPage = 0;
+			    	equipmentList(currentPage);
+				} else {
+		    		console.error('수리이력 등록 실패', err);
+		    		alert('등록 중 오류가 발생했습니다.');
+					
+				}
+		}
 	});
 });

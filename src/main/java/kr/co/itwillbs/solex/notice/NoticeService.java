@@ -44,7 +44,7 @@ public class NoticeService {
 	}
 
 	//글 삭제
-	public int deleteNotice(int notId) {
+	public int deleteNotice(Long notId) {
 		return noticeMapper.deleteNotice(notId);
 	}
 	

@@ -4,8 +4,29 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.itwillbs.solex.mypage.MypageMapper">
+
+	<!-- empId로 기존 이미지 파일명 조회 -->
+    <select id="findImageNameByEmpId" parameterType="String" resultType="String">
+        SELECT emp_img FROM employee WHERE emp_id = #{empId}
+    </select>
+    	
+    <!-- 사원 정보 업데이트 -->
+    <update id="modifyPersonalData" parameterType="map">
+        UPDATE employee
+        <set>
+            <if test="empNm != null">emp_nm = #{empNm},</if>
+            <if test="empPhone != null">emp_phone = #{empPhone},</if>
+            <if test="empEmail != null">emp_email = #{empEmail},</if>
+            <if test="empPc != null">emp_pc = #{empPc},</if>
+            <if test="empAdd != null">emp_add = #{empAdd},</if>
+            <if test="empDa != null">emp_da = #{empDa},</if>
+            <!-- ✅ emp_img 키가 있을 때만(사진이 변경됐을 때만) 업데이트 -->
+            <if test="emp_img != null">emp_img = #{emp_img},</if>
+        </set>
+        WHERE emp_id = #{empId}
+    </update>
 	
-<!-- 	개인정보 가져오기  -->
+	<!-- 	개인정보 가져오기  -->
 	<select id="getEmpData" resultType="map">
 		SELECT 
 			e.emp_num as "empNum",
@@ -18,6 +39,7 @@
 			e.emp_pc as "empPc",
 			e.emp_add as "empAdd",
 			e.emp_da as "empDa",
+			e.emp_img as EMP_IMG,
 			TO_CHAR(e.emp_hire,'YYYY-MM-DD') as "empHire",
 			cat.det_nm  AS empCatCd,
 	        pos.det_nm  AS empPosCd,
@@ -30,16 +52,4 @@
 		LEFT JOIN code_detail team ON team.det_id = e.emp_team_cd
 		WHERE e.emp_id = #{emp_id}
 	</select>
-	
-	<update id="personalDataModify">
-		UPDATE employee
-		SET 
-		emp_nm = #{emp_nm},
-		emp_phone = #{emp_phone},
-		emp_email = #{emp_email},
-		emp_pc = #{emp_pc},
-		emp_add = #{emp_add},
-		emp_da = #{emp_da}
-		WHERE e.emp_id = #{emp_id}
-	</update>
 </mapper>

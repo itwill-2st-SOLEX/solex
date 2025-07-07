@@ -25,6 +25,11 @@ public class WorkerService {
 		return workerMapper.getWorkerSummary(empId);
 	}
 	
+	
+	public Map<String, Object> getWorkerInfo(Long empId) {
+		return workerMapper.getWorkerInfo(empId);
+	}
+	
 	@Transactional
 	public void insertWorkCount(Map map) {
 	    System.out.println(map);

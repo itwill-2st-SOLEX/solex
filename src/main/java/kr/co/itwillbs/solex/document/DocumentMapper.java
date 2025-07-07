@@ -12,7 +12,7 @@ public interface DocumentMapper {
 	// 모달 기안서 공통코드로 불러오기
 	List<Map<String, String>> getdocTypeList();
 	// 기안서 목록 무한스크롤
-	List<Map<String, Object>> selectDraftList(@Param("offset") int offset, @Param("size") int size);
+	List<Map<String, Object>> selectDraftList(@Param("offset") int offset, @Param("size") int size, @Param("emp_id") int emp_id);
 	// 직급 공통코드 불러오기
 	List<Map<String, String>> getPosition(String group);
 	// 로그인한 사원정보 들고오기

@@ -20,7 +20,7 @@
 			<!-- Modal -->
 			<div class="modal fade" id="exampleModal" tabindex="-1"
 				aria-labelledby="exampleModalLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-scrollable modal-lg">
+				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
 							<select id="docTypeSelect"
@@ -33,10 +33,6 @@
 							</select>
 						</div>
 						<div class="modal-body">
-							<div class="approval-line">
-								<!-- 							JS에서 h2태그 채움 -->
-								<h2></h2>
-							</div>
 							<!-- 여기에 기안서 등록 form(JS) -->
 							<form id="draftForm" method="post">
 								<div id="dynamicFormArea"></div>
@@ -59,17 +55,10 @@
 						<div class="modal-header">
 							<h2 class="modal-title" id="detailModalLabel">기안서 상세조회</h2>
 						</div>
-						<div class="approval-line">
-							<table class="approval-table ms-auto">
-								<thead>
-									<tr></tr>
-									<!-- JS가 여기에 <th>를 동적으로 추가함 -->
-								</thead>
-								<tbody>
-									<tr></tr>
-									<!-- JS가 여기에 <td>를 동적으로 추가함 -->
-								</tbody>
-							</table>
+						<div class="approval-line-container">
+							<div class="approval-line">
+								<!-- JS will dynamically populate this area -->
+							</div>
 						</div>
 						<!-- 					상세조회 js에서 채움 -->
 						<div class="modal-body"></div>

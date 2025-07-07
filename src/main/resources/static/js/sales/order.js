@@ -35,7 +35,13 @@ function initializeMainPage() {
         bodyHeight: 600,
         scrollX: false,
         columns: [
-            { header: '수주 번호', name: 'ORD_ID', width: 100, align: 'center', sortable: true },
+            { header: '수주 번호', name: 'ORD_ID', width: 100, align: 'center', sortable: true ,renderer: {
+			     styles: {
+			       color: '#007BFF',
+			       textDecoration: 'underline',
+			       cursor: 'pointer'
+			     }
+			   }},
             { header: '거래처 명', name: 'CLI_NM', align: 'center', sortable: true },
             { header: '거래처 대표자', name: 'CLI_CEO', align: 'center', sortable: true },
             { header: '배송지', name: 'ORD_ADDRESS', width: 300, align: 'center', sortable: true },
@@ -91,6 +97,10 @@ async function setupModalContents() {
     const modalTitle = document.getElementById('myModalTitle');
     const submitBtn = document.getElementById('submitOrderBtn');
 
+     // 기존 이벤트 핸들러 제거를 위해 복제
+    const newSubmitBtn = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+
     createInnerGrid();
     attachModalEventListeners();
     initializeSearchableSelect('client-select-box', '/SOLEX/orders/clients', onClientSelect);
@@ -100,14 +110,19 @@ async function setupModalContents() {
         if (mode === 'detail') {
             // 상세 보기 모드일 때
             modalTitle.textContent = '수주 수정'; // 제목을 '수주 수정'으로 변경
-            submitBtn.textContent = '수정';      // 버튼 텍스트를 '수정'으로 변경
+            newSubmitBtn.textContent = '수정';      // 버튼 텍스트를 '수정'으로 변경
+            newSubmitBtn.addEventListener('click', submitUpdateForm); // 수정 이벤트 연결
 
             const orderData = JSON.parse(myModalElement.dataset.orderData);
+            console.log("모달에 로드된 주문 데이터:", orderData);
             populateModalWithData(orderData);
+
+
         } else {
             // 신규 등록 모드일 때 (원래 상태로 복원)
             modalTitle.textContent = '수주 등록'; // 제목을 '수주 등록'으로 복원
-            submitBtn.textContent = '등록';      // 버튼 텍스트를 '등록'으로 복원
+            newSubmitBtn.textContent = '등록';      // 버튼 텍스트를 '등록'으로 복원
+            newSubmitBtn.addEventListener('click', submitForm); // 등록 이벤트 연결
 
             resetOrderForm();
             initDate();
@@ -238,6 +253,7 @@ function createInnerGrid() {
             { header: '사이즈', name: 'sizeName', minWidth: 80, align: 'center' },
             { header: '굽높이', name: 'heightName', minWidth: 80, align: 'center' },
             { header: '수량', name: 'quantity', editor: 'text', minWidth: 80, align: 'right' },
+            { header: '진행 상태', name: 'oddSts', minWidth: 100, align: 'center' },
             { name: 'productCode', hidden: true }, { name: 'colorCode', hidden: true },
             { name: 'sizeCode', hidden: true }, { name: 'heightCode', hidden: true },
         ],
@@ -253,12 +269,12 @@ function attachModalEventListeners() {
             element.onclick = callback;
         }
     };
-    handler('submitOrderBtn', submitForm);
+    // handler('submitOrderBtn', submitForm);
+    // handler('updateOrderBtn', submitUpdateForm);
     handler('findPostCodeBtn', findPostCode);
     handler('addRowBtn', addRowToInnerGrid);
     handler('resetOptionFormsBtn', resetOptionForms);
-    handler('deleteSelectedRowsBtn', () => { if(INNER_TUI_GRID_INSTANCE) INNER_TUI_GRID_INSTANCE.removeRows(INNER_TUI_GRID_INSTANCE.getCheckedRowKeys()); });
-    handler('resetItemsBtn', () => { if(INNER_TUI_GRID_INSTANCE) INNER_TUI_GRID_INSTANCE.clear(); });
+    handler('deleteSelectedRowsBtn', deleteSelectedRows);
     attachNumericFormatter('odd_pay');
 
     document.getElementById('myModal').addEventListener('click', function(e){
@@ -301,6 +317,7 @@ function populateModalWithData(data) {
     resetOrderForm();
     const { orderInfo, orderItems, availableOptions } = data;
     if (!orderInfo) return;
+    document.getElementById('current_ord_id').value = orderInfo.ORD_ID || '';
     document.getElementById('pay_type').value = orderInfo.PAYMENT_TYPE || '';
     document.getElementById('odd_pay').value = formatWithComma(String(orderInfo.PAYMENT_AMOUNT || ''));
     document.getElementById('odd_end_date').value = orderInfo.DELIVERY_DATE;
@@ -321,6 +338,7 @@ function populateModalWithData(data) {
     loadAllProductOptions(availableOptions);
     if (orderItems && orderItems.length > 0) {
         const transformedItems = orderItems.map(item => ({
+            odd_id: item.ODD_ID, oddSts : item.ODD_STS,ord_id : orderInfo.ORD_ID, opt_id : item.OPT_ID,
             productName: item.PRODUCT_NAME, colorName: item.COLOR_NAME, sizeName: item.SIZE_NAME, 
             heightName: item.HEIGHT_NAME, quantity: item.QUANTITY, productCode: item.PRODUCT_CODE,
             colorCode: item.COLOR_CODE, sizeCode: item.SIZE_CODE, heightCode: item.HEIGHT_CODE
@@ -377,17 +395,34 @@ async function loadAllProductOptions(data) {
 function addRowToInnerGrid() {
     const getSelected = (id) => document.getElementById(id)?.value.split(',').filter(Boolean);
     const selected = { colors: getSelected('opt_color'), sizes: getSelected('opt_size'), heights: getSelected('opt_height') };
-    if (!selectProductCd) { alert('먼저 상품을 선택해주세요.'); return; }
-    if (selected.colors.length * selected.sizes.length * selected.heights.length === 0) { alert('색상, 사이즈, 굽높이를 각각 하나 이상 선택해주세요.'); return; }
+    if (!selectProductCd) { 
+        alert('먼저 상품을 선택해주세요.'); 
+        return; 
+    }
+    if (selected.colors.length * selected.sizes.length * selected.heights.length === 0) { 
+        alert('색상, 사이즈, 굽높이를 각각 하나 이상 선택해주세요.'); 
+        return; 
+    }
     const validCombinations = originalOptionsData.filter(opt => selected.colors.includes(opt.OPT_COLOR) && selected.sizes.includes(opt.OPT_SIZE) && selected.heights.includes(opt.OPT_HEIGHT));
-    if (validCombinations.length === 0) { alert("선택하신 옵션에 해당하는 유효한 제품 조합이 없습니다."); return; }
-    const existingRows = INNER_TUI_GRID_INSTANCE.getData(); let addedCount = 0;
+    if (validCombinations.length === 0) { 
+        alert("선택하신 옵션에 해당하는 유효한 제품 조합이 없습니다."); 
+        return; 
+    }
+    const existingRows = INNER_TUI_GRID_INSTANCE.getData(); 
+    let addedCount = 0;
+    
+    console.log(validCombinations);
+    console.log("기존 Inner Grid 데이터:", existingRows);
     validCombinations.forEach(item => {
-        const isDuplicate = existingRows.some(row => row.productCode === selectProductCd && row.colorCode === item.OPT_COLOR && row.sizeCode === item.OPT_SIZE && row.heightCode === item.OPT_HEIGHT);
+        const isDuplicate = existingRows.some(row => 
+            row.opt_id === item.OPT_ID // Inner Grid 데이터에 opt_id가 있어야 합니다.
+                                        // 추가 시 Inner Grid row에도 opt_id를 넣어줘야 함!
+        );
+        
         if (!isDuplicate) {
             INNER_TUI_GRID_INSTANCE.appendRow({
-                productName: selectProductNm, productCode: selectProductCd, colorName: item.OPT_COLOR_NM, colorCode: item.OPT_COLOR,
-                sizeName: item.OPT_SIZE_NM, sizeCode: item.OPT_SIZE, heightName: item.OPT_HEIGHT_NM, heightCode: item.OPT_HEIGHT, quantity: 1
+                productName: selectProductNm, productCode: selectProductCd, colorName: item.OPT_COLOR_NM, colorCode: item.OPT_COLOR, 
+                sizeName: item.OPT_SIZE_NM, sizeCode: item.OPT_SIZE, heightName: item.OPT_HEIGHT_NM, heightCode: item.OPT_HEIGHT, quantity: 1,opt_id: item.OPT_ID
             });
             addedCount++;
         }
@@ -457,8 +492,15 @@ function resetOrderStep(step) {
 }
 
 function initDate() {
-    const todayStr = new Date().toISOString().split('T')[0];
-    ['odd_end_date', 'odd_pay_date'].forEach(id => { const el = document.getElementById(id); if (el) el.value = todayStr; });
+  const todayStr = new Date().toISOString().split('T')[0];
+  ['odd_end_date', 'odd_pay_date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = todayStr;
+      // 선택 가능한 가장 빠른 날짜를 오늘로 설정합니다. (이전 날짜 비활성화)
+      el.min = todayStr;
+    }
+  });
 }
 
 const debounce = (fn, delay = 300) => { let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); }; };
@@ -516,6 +558,161 @@ async function submitForm() {
     };
     try {
         const response = await fetch('/SOLEX/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalPayload) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || `서버 오류`);
+        alert(result.message || '성공적으로 처리되었습니다.');
+        location.reload();
+    } catch (error) {
+        alert(`오류: ${error.message}`);
+    }
+}
+
+// 백엔드 API 호출을 담당하는 함수 (이전과 동일)
+async function callDeleteOrdersApi(oddIdsToDelete) {
+    try {
+        const response = await fetch('/SOLEX/orders', { // 실제 삭제 API 엔드포인트로 변경
+            method: 'DELETE', // 또는 POST
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(oddIdsToDelete), // 삭제할 odd_id 리스트를 배열로 전송
+        });
+
+        // 백엔드에서 반환하는 JSON 형태를 예상합니다.
+        // 예: { "status": "SUCCESS", "deletedIds": [1, 2], "skippedIds": [3], "message": "..." }
+        // 또는 오류 시: { "status": "ERROR", "message": "상태 3인 주문은 삭제 불가능" }
+        const result = await response.json(); // 서버 응답이 항상 JSON이라고 가정 (오류 시에도)
+
+        if (!response.ok) {
+            // 서버에서 4xx, 5xx 응답을 보낼 경우
+            const errorMessage = result.message || `API 호출 실패: ${response.status}`;
+            throw new Error(errorMessage);
+        }
+        return result; // 성공 시 결과 객체 반환
+    } catch (error) {
+        console.error('주문 삭제 API 호출 중 오류 발생:', error);
+        throw error; // 오류를 다시 던져 상위 호출자가 처리하도록 함
+    }
+}
+
+
+function deleteSelectedRows() {
+    const totalRows = INNER_TUI_GRID_INSTANCE.getData().length;
+    console.log("총 행 수:", totalRows); // 디버깅용
+    
+    const checkedRows = INNER_TUI_GRID_INSTANCE.getCheckedRows(); // 체크된 행들의 데이터를 가져옴
+    console.log("체크된 행 데이터:", checkedRows); // 디버깅용
+    
+    const checkedRowCount = checkedRows.length; // 체크된 행의 개수
+    console.log("체크된 행 개수:", checkedRowCount); // 디버깅용
+
+    const modalTitle = document.getElementById("myModalTitle").textContent;
+
+    // --- 1차 유효성 검사: 삭제할 행이 없는 경우 ---
+    if (checkedRowCount === 0) {
+        alert('삭제할 행을 선택해주세요.');
+        return; // 함수 실행 중단
+    }
+
+    // --- 1차 유효성 검사: 최소 행 개수 유지 체크 (프론트엔드에서 유지할지 말지 선택) ---
+    // 이 부분은 여전히 프론트에서 먼저 막을지, 백엔드에 위임할지 결정해야 합니다.
+    // 만약 백엔드에서 "최소 1개 유지" 규칙을 최종적으로 검사한다면 이 로직도 제거 가능합니다.
+    // 여기서는 일단 남겨두는 것으로 가정합니다.
+    if (modalTitle !== "출고 등록" && (totalRows - checkedRowCount < 1)) {
+        alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
+        return; // 함수 실행 중단
+    }
+
+
+    // --- 모든 1차 유효성 검사를 통과한 경우: 백엔드 API 호출 준비 ---
+    // 체크된 모든 odd_id를 백엔드로 보냅니다. 백엔드에서 검증 및 부분 삭제를 수행할 것입니다.
+    const oddIdsToProcess = checkedRows.map(row => row.odd_id);
+    console.log("삭제 요청할 odd_id 목록 (프론트엔드에서 보냄):", oddIdsToProcess);
+
+    // 사용자에게 최종 확인
+    if (!confirm(`${checkedRowCount}개의 주문을 정말로 삭제하시겠습니까?`)) {
+        return; // 사용자가 취소한 경우 함수 종료
+    }
+
+    // 백엔드 API 호출 (async/await 사용)
+    (async () => { // 비동기 함수 즉시 실행
+        try {
+            // 백엔드 호출: 모든 체크된 odd_id를 보냄
+            const apiResponse = await callDeleteOrdersApi(oddIdsToProcess);
+            
+            // 백엔드 응답 분석
+            const deletedIds = apiResponse.deletedIds || [];
+            const skippedIds = apiResponse.skippedIds || [];
+            const message = apiResponse.message || "작업이 완료되었습니다.";
+
+            if (deletedIds.length > 0 && skippedIds.length === 0) {
+                alert('선택된 주문이 모두 성공적으로 삭제되었습니다.');
+            } else if (deletedIds.length > 0 && skippedIds.length > 0) {
+                alert(`일부 주문(${skippedIds.join(', ')})은 삭제할 수 없습니다. 나머지 항목은 삭제되었습니다.`);
+            } else if (deletedIds.length === 0 && skippedIds.length > 0) {
+                alert(`선택된 모든 주문(${skippedIds.join(', ')})은 삭제할 수 없습니다.`);
+            // 백엔드가 비어있는 deletedIds와 채워진 skippedIds를 보낼 때
+            } else {
+                alert(message);
+            }
+            
+            // UI 업데이트: 가장 안전하게 그리드 전체를 새로 로드하는 방법 (권장)
+            await loadGridData(checkedRows[0].ord_id); // 그리드 데이터를 새로 불러오는 함수 호출
+
+        } catch (error) {
+            console.error('주문 삭제 실패:', error);
+            alert('주문 삭제 중 오류가 발생했습니다: ' + error.message);
+        }
+    })();
+}
+
+async function loadGridData(ord_id) {
+    console.log("그리드 데이터 다시 로드 시작..."+ ord_id);
+    const response = await fetch(`/SOLEX/orders/${ord_id}`);
+    const fullOrderData = await response.json();
+    console.log("그리드 데이터 다시 로드 완료:", fullOrderData);
+    const orderInfo = fullOrderData.orderInfo || {};
+    const orderItems = fullOrderData.orderItems || [];
+    if (orderItems && orderItems.length > 0) {
+        const transformedItems = orderItems.map(item => ({
+            odd_id: item.ODD_ID, oddSts : item.ODD_STS,ord_id : orderInfo.ORD_ID,opt_id : item.OPT_ID,
+            productName: item.PRODUCT_NAME, colorName: item.COLOR_NAME, sizeName: item.SIZE_NAME, 
+            heightName: item.HEIGHT_NAME, quantity: item.QUANTITY, productCode: item.PRODUCT_CODE,
+            colorCode: item.COLOR_CODE, sizeCode: item.SIZE_CODE, heightCode: item.HEIGHT_CODE
+        }));
+        INNER_TUI_GRID_INSTANCE.resetData(transformedItems);
+    }
+    INNER_TUI_GRID_INSTANCE.refreshLayout();
+
+}   
+
+
+async function submitUpdateForm() {
+    if (!validateFinalForm()) return;
+    const gridData = INNER_TUI_GRID_INSTANCE.getData();
+    const ordIdToUpdate = document.getElementById('current_ord_id')?.value; // 예시: 숨겨진 입력 필드에서 가져옴
+    const finalPayload = {
+        ord_id: ordIdToUpdate,
+        cli_id: document.getElementById('selected_client_id').value,
+        prd_id: document.getElementById('selected_product_id').value,
+        pay_type: document.getElementById('pay_type')?.value,
+        ord_pay: unformatWithComma(document.getElementById('odd_pay')?.value),
+        ord_end_date: document.getElementById('odd_end_date')?.value,
+        ord_pay_date: document.getElementById('odd_pay_date')?.value,
+        ord_pc: document.getElementById('cli_pc')?.value,
+        ord_add: document.getElementById('cli_add')?.value,
+        ord_da: document.getElementById('cli_da')?.value,
+        items: gridData.map(row => ({...row, quantity: unformatWithComma(row.quantity)}))
+    };
+
+    console.log("최종 제출 데이터:", finalPayload); // 디버깅용
+    try {
+        const response = await fetch('/SOLEX/orders', 
+            { 
+                method: 'PUT',
+                headers: {
+                     'Content-Type': 'application/json' 
+                }, 
+                body: JSON.stringify(finalPayload) 
+            });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || `서버 오류`);
         alert(result.message || '성공적으로 처리되었습니다.');
