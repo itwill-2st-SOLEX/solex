@@ -10,11 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import kr.co.itwillbs.solex.lot.LotService;
 @Service
 public class MaterialOrdersService {
 
 	@Autowired
 	private MaterialOrdersMapper materialOrdersMapper;
+	
+	@Autowired
+	private LotService lotService;
 	
 	//자재발주 목록
 	public List<Map<String, Object>> getMaterialOrders() {
@@ -34,7 +39,6 @@ public class MaterialOrdersService {
 
 	// 창고 select box 가져오는 코드 
 	public List<Map<String, Object>> getWarehouse(Integer matId) {
-		System.out.println(matId);
 		return materialOrdersMapper.getWarehouse(matId);
 	}
 	
@@ -46,21 +50,20 @@ public class MaterialOrdersService {
 	
 	public List<Map<String, Object>> getMaterialOrderList(int offset, int size) {
 		List<Map<String, Object>> list = materialOrdersMapper.getMaterialOrderList(offset, size);
-		System.out.println("list = " + list);
 		return list;
 	}
 	
 	// 승인버튼 누르면 insert
 	@Transactional
 	public void materialApprove(Map<String, Object> map) {
-
+		
 	    int warehistory = materialOrdersMapper.matAppWareHis(map);
 	    int areaDetail = materialOrdersMapper.matAppAreaDetail(map);
 	    int area = materialOrdersMapper.matAppArea(map);
 	    int stockLeger = materialOrdersMapper.matAppStockLeger(map);
 	    materialOrdersMapper.updateApproval(map);
-	    // 1. 파라미터 확인
-	    System.out.println("map = " + map);
+	    // 자재LOT생성
+	    lotService.createMaterialLot(map);
 
 	    // 2. DB 처리 또는 로직 실행
 	    System.out.println("materialApprove 종료!!!!!!!!!");
