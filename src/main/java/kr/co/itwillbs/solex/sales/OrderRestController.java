@@ -120,7 +120,7 @@ public class OrderRestController {
 	public ResponseEntity<Map<String, Object>> updateOrder(@RequestBody Map<String, Object> param, HttpSession session) {
 		String emp_id = (String) session.getAttribute("empId");
 		System.out.println(param.get("ord_id"));
-		
+		System.out.println("tlqkf");
 		 // 화이트리스트 방식으로 안전한 Map 생성
 	    Map<String, Object> safe = new HashMap<>();
 	    safe.put("ord_id", param.get("ord_id"));

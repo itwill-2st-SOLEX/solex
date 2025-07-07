@@ -25,6 +25,14 @@ public class WorkHistoryRestController {
 		int offset = page * size;
 		return workHistoryService.getWorkHistoryList(offset, size);
 	}
+
+
+	// 작업지시 조회
+	@GetMapping("/{oddId}")
+	public Map<String, Object> getWorkList(@PathVariable("oddId") String oddId) {
+		return workHistoryService.getWorkDetailHistoryList(oddId);
+	}
+	
 	
 	
 	
