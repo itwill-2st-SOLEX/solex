@@ -276,7 +276,7 @@ function groupWarehouses(data) {
 	const grouped = {};
 
 	data.forEach(item => {
-		const whsNm = item.WHS_NM;
+		let whsNm = item.WHS_NM;
 		if (!grouped[whsNm]) {
 			grouped[whsNm] = {
 				id: item.WHS_ID,
