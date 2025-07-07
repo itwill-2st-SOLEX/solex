@@ -25,7 +25,7 @@ const grid = new tui.Grid({
 			     }
 			   }},
         { header: '제품 코드', name: 'PRD_CODE', width: 100,align: 'center', sortable: true },
-        { header: '거래처', name: 'CLI_NM', align: 'center', sortable: true },
+        { header: '회사명', name: 'CLI_NM', align: 'center', sortable: true },
         { header: '제품명', name: 'PRD_NM', width: 200, align: 'center', sortable: true },
         { header: '컬러', name: 'OPT_COLOR', width: 80, align: 'center', sortable: true },
         { header: '사이즈', name: 'OPT_SIZE', width: 80, align: 'center', sortable: true },
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
 	// });
 
   const gridContainer = document.getElementById('grid'); // TUI Grid를 감싸는 div의 ID
-  gridContainer.addEventListener('click', function(e) {
+  gridContainer.addEventListener('click', async function(e) {
     const target = e.target;
     if (target.classList.contains('assign-btn')) {
       e.stopPropagation();
@@ -72,6 +72,12 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
       const action = target.dataset.action; // data-action 값을 가져옴
 
       console.log(`[버튼 클릭] 주문 ID: ${oddId}, 액션: ${action}`);
+      
+      const result = await checkMaterial(oddId);
+      if(!result) {
+        alert('자재가 등록되어 있지 않습니다.');
+        return;
+      }
 
       if (action === 'instruct') {
           // 작업 지시용 모달 열기
@@ -144,6 +150,34 @@ async function fetchGridData(page = currentPage) {
     // 로딩 스피너 등을 여기서 숨길 수 있습니다.
   }
 }
+
+
+// 자재가 창고에 등록이 안 되어 있으면 오류가 발생함
+async function checkMaterial(selectedId) {
+  try {
+    const res = await fetch(`/SOLEX/order-requests/check-material`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        odd_id: selectedId
+      })
+    });
+
+    if (!res.ok) {
+      const errorMessage = await res.text();
+      throw new Error(errorMessage);
+    }
+    return true; // 모든 재료가 성공적으로 확인되었을 때 true 반환
+
+  } catch (err) {
+    console.error('자재 확인 중 오류 발생:', err);
+    return false; // 오류 발생 시 false 반환
+  }
+}
+
+
 
 async function openWorkInstructionModal(selectedId) {
   const url = `/SOLEX/order-requests/${selectedId}`;

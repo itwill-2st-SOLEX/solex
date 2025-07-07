@@ -6,6 +6,7 @@
 <title>SOLEX</title>
 
 <link rel="stylesheet" th:href="@{/css/products/products.css}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
 
 </head>
 <body>
@@ -22,11 +23,11 @@
 					<div class="btn-area">
 						<button type="button" class="btn custom-btn-blue float-end" id="writeProductBtn">제품 추가</button>
 						<!-- 제품 Modal 시작-->
-						<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+						<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 						    <div class="modal-dialog modal-dialog-scrollable modal-lg"> 
 						    	<div class="modal-content">
 						            <div class="modal-header">
-						                <h5 class="modal-title" id="exampleModalLabel">제품 정보 모달</h5>
+						                <h5 class="modal-title" id="productModalLabel"></h5>
 						                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						            </div>
 						            <!-- modal-body 시작 -->
@@ -46,8 +47,10 @@
 									            </div>
 								                <div class="row mb-4">
 								                	<div class="col">
-														<label for="prd_code" class="form-label">제품 코드<span style="color:red">*</span></label>
-														<input type="text" id="prd_code" name="prd_code" class="form-control" placeholder="제품 코드" value="${data.PRD_CODE ? data.PRD_CODE : ''}">
+														<label for="prd_code" class="form-label read_only">제품 코드<span style="color:red">*</span></label>
+														<input type="text" id="prd_code" name="prd_code" class="form-control read_only" placeholder="제품 코드" 
+																value="${data.PRD_CODE ? data.PRD_CODE : ''}"
+																maxlength="4">
 									                </div>
 									                <div class="col">
 									                    <label for="prd_price" class="form-label">제품 가격<span style="color:red">*</span></label>
@@ -55,26 +58,35 @@
 									                </div>
 								                </div>
 								                <div class="row mb-4">
-										        	<div class="col">
-										            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
-														<br>
-														<select id="prdUnitSelect" class="form-select"></select>
-										            </div>
 									                <div class="col">
 									                    <label for="prd_type" class="form-label">제품 유형<span style="color:red">*</span></label>
 														<br>
 														<select id="prdTypeSelect" class="form-select"></select>
+														<input type="text" id="prdTypeDisplay" class="form-control" readonly style="display: none;"><!-- ✅ 수정용 -->
+														
+									                </div>
+									                <div class="col">
+										            	<label for="prd_unit" class="form-label">제품 단위<span style="color:red">*</span></label>
+														<br>
+														<select id="prdUnitSelect" class="form-select"></select>
+														<input type="text" id="prdUnitDisplay" class="form-control" readonly style="display: none;"><!-- ✅ 수정용 -->
+										            </div>
+										        </div>
+								                <div class="row mb-4">
+									                <div class="col" id="prd_process">
+									                    <label for="prd_process" class="form-label">공정 순서</label>
+														<br>
 									                </div>
 										        </div>
 												<div class="row mb-4">
 													<div class="col">
-														<label for="prd_comm" class="form-label">제품 설명<span style="color:red">*</span></label>
+														<label for="prd_comm" class="form-label">제품 설명</label>
 														<input type="text" id="prd_comm" name="prd_comm" class="form-control" placeholder="제품설명" value="${data.PRD_COMM ? data.PRD_COMM : ''}">
 												    </div>
 												</div>
 												<div class="row mb-4">
 										        	<div class="col">
-										            	<label for="prd_reg_date" class="form-label">제품 등록일<span style="color:red">*</span></label>
+										            	<label for="prd_reg_date" class="form-label">제품 등록일</label>
 														<br>
 														<!-- 사용자에게 보여줄 날짜 -->
 														<input type="text" id="prd_reg_date" class="form-control" placeholder="제품 등록일"
@@ -86,12 +98,7 @@
 														       id="prd_reg_date"
 														       value="${data.PRD_REG_DATE}">
 										            </div>
-									                <div class="col">
-									                    <label for="prd_up_date" class="form-label">제품 수정일<span style="color:red">*</span></label>
-														<br>
-														<input type="text" id="prd_up_date" name="prd_up_date" class="form-control" placeholder="제품 수정일" 
-															value="${data.PRD_UP_DATE ? formatter(data.PRD_UP_DATE, true) : ''}" readonly>
-									                </div>
+										            <div class="col"></div>
 										        </div>
 												<div class="row mb-4" id="optionFields" hidden> 
 										        	<div class="col">
@@ -110,15 +117,50 @@
 														<select id="prdHeightSelect" class="form-select"></select>
 									                </div>
 										        </div>
-												
-												
 												<!-- 제품등록 시에 옵션 그룹핑한 테이블 예시 -->	
 												<button type="button" class="btn btn-primary btn-sm mt-2 add-single-option-btn" data-color-code="opt_color_01" id="generateCombinationsBtn">
 													옵션 추가
 												</button>
-												<br><br>
-												<div id="optionGroupsContainer" class="mb-3" ></div>
-<!-- 												<div id="option-grid-container" style="width: 100%; min-height: 200px;"></div>  -->
+												<div id="optionGroupsContainers" class="mb-3" >
+													<ul class="nav nav-tabs mb-3" id="optionTabs" role="tablist">
+												        <li class="nav-item" role="presentation">
+												            <button class="nav-link active" id="my-options-tab" data-bs-toggle="tab" data-bs-target="#myOptionsContent" type="button" role="tab" aria-controls="myOptionsContent" aria-selected="true">내 옵션</button>
+												        </li>
+												        <li class="nav-item" role="presentation">
+												            <button class="nav-link" id="all-options-tab" data-bs-toggle="tab" data-bs-target="#allOptionsContent" type="button" role="tab" aria-controls="allOptionsContent" aria-selected="false">옵션 추가</button>
+												        </li>
+												    </ul>
+												    <div class="tab-content" id="optionTabsContent">
+												        <div class="tab-pane fade show active" id="myOptionsContent" role="tabpanel" aria-labelledby="my-options-tab">
+												            <div id="currentOptionsGridContainer"></div>
+												            <p class="text-muted mt-2"></p>
+												        </div>
+												        <div class="tab-pane fade" id="allOptionsContent" role="tabpanel" aria-labelledby="all-options-tab">
+<!-- 												        	<div class="tab-pane fade show active" id="myOptionsPanel" role="tabpanel" aria-labelledby="myOptionsTab"> -->
+														        <div class="row mb-3">
+														            <div class="col-md-4">
+<!-- 														                <label for="colorMultiSelect" class="form-label">컬러 선택</label> -->
+														                <select id="colorMultiSelect" class="selectpicker w-100" multiple data-live-search="true" data-actions-box="true" title="컬러 선택"></select>
+														            </div>
+														            <div class="col-md-4">
+<!-- 														                <label for="sizeMultiSelect" class="form-label">사이즈 선택</label> -->
+														                <select id="sizeMultiSelect" class="selectpicker w-100" multiple data-live-search="true" data-actions-box="true" title="사이즈 선택"></select>
+														            </div>
+														            <div class="col-md-4">
+<!-- 														                <label for="heightMultiSelect" class="form-label">굽 선택</label> -->
+														                <select id="heightMultiSelect" class="selectpicker w-100" multiple data-live-search="true" data-actions-box="true" title="굽 선택">
+														                </select>
+														            </div>
+														        </div>
+														
+<!-- 														        <div id="selectedCombinationsDisplay" class="mt-4 p-3 border rounded" style="min-height: 100px;"> -->
+<!-- 														            <p class="text-muted">선택된 컬러/사이즈/굽 조합에 따라 제품 옵션이 생성됩니다.</p> -->
+<!-- 														        </div> -->
+<!-- 														    </div> id=myOptionsPanel -->
+												        </div>
+												    </div>
+												
+												</div>
           
 												<!-- 옵션 그룹핑한 테이블 예시 끝 -->
 								        	</div><!-- custom-modal-content 끝 -->
@@ -136,7 +178,7 @@
 				</div>
 				
 				<!-- 그리드 영역 -->
-				<div class="grid-area">
+				<div class="grid-area" id="grid-area">
 					<div id="prod-grid"></div>
 					<div class="modal-body big-box" id="showModal"></div>
 				</div>
@@ -149,44 +191,31 @@
 				<div class="controll-area">
 					<div class="btn-area">
 						<div class="btn-area">
-						<button type="button" class="btn custom-btn-blue float-end" data-bs-toggle="modal" data-bs-target="#exampleModal" id="bom-add">
-							BOM 추가
-						</button>
-						
-						<!-- Modal -->
-						<div class="modal fade" id="exampleModal" tabindex="-1"	aria-labelledby="exampleModalLabel" aria-hidden="true">
-							<div class="modal-dialog modal-dialog-scrollable modal-lg">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title">BOM 등록</h5>
-		        						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-									</div>
-									<!-- 모달 내용 표시 -->
-									<div class="modal-body big-box" id="showProductModal"></div>
-									<!-- 모달 버튼 표시 -->
-									<div class="modal-footer">
-<!-- 										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button> -->
-<!-- 										<button type="submit" id="submitApproval"class="btn custom-btn-blue">등록</button> -->
-									</div>
-								</div>
-							</div>
-						</div>
-<!-- 						<button id="prod-delete" class="btn btn-danger delete-btn">삭제</button> -->
+							<button id="bom-add" class="btn custom-btn-blue add-btn">BOM 추가</button>
+							<button id="bom-save" class="btn btn-info save-btn">단건 BOM 저장</button>
+							<button id="bom-save-batch" class="btn btn-info add-btn">일괄 BOM 저장</button>
+							<button id="bom-delete" class="btn btn-danger delete-btn">삭제</button>
 						</div>
 					</div>
 				</div>
 				<!-- 그리드 영역 -->
-				<div class="grid-area">
-					<div id="bom-grid"></div>
+				<div class="grid-area" id="bom-area">
+					<div id="bom_grid"></div>
 				</div>
 			</div>
 		</div>
 	</th:block>
 	
 	<th:block layout:fragment="script">
-		<script th:src="@{/js/products/product_list.js}"></script>
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
+			<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+		
+		<script th:src="@{/js/products/product_group_list.js}"></script>
 		<script th:src="@{/js/products/bom_list.js}"></script>
-		<script th:src="@{/js/products/product_modal.js}"></script>
+		<script th:src="@{/js/products/bom_modify.js}"></script>
+		<script th:src="@{/js/products/product_group_modal.js}"></script>
 	</th:block>
 </body>
 </html>

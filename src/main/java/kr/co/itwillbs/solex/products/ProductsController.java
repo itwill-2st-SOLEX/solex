@@ -28,4 +28,10 @@ public class ProductsController {
 
         return "products/product_list"; 
 	}
+	
+	@GetMapping("/productGroupList")
+	public String getProductGroupList(Model model) {
+
+        return "products/productGroupList"; 
+	}
 }
