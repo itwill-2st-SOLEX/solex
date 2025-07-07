@@ -11,7 +11,7 @@
 			mat_ord_id as "matOrdId",
 			mat_id as "matId",
 			emp_id as "empId",
-			TO_CHAR(mat_qty,'FM999,999,999') as "matQty",
+			mat_qty as "matQty",
 			mat_reg_date as "matRegDate",
 			mat_eta_date as "matEtaDate",
 			mat_ata_date as "matAtaDate",
@@ -27,7 +27,7 @@
 			mat_ord_id as "matOrdId",
 			mat_id as "matId",
 			emp_id as "empId",
-			TO_CHAR(mat_qty,'FM999,999,999') as "matQty",
+			mat_qty as "matQty",
 			TO_CHAR(mat_reg_date, 'yyyy-MM-dd') as "matRegDate",
 			TO_CHAR(mat_eta_date, 'yyyy-MM-dd') as "matEtaDate",
 			TO_CHAR(mat_ata_date, 'yyyy-MM-dd') as "matAtaDate",
@@ -76,8 +76,8 @@
 <!-- 	승인 버튼 누르면 insert - 창고이력 warehouse_history -->
 	<insert id="matAppWareHis" parameterType="map">
 		INSERT INTO warehouse_history
-		(are_id, whs_his_sts, whs_his_cnt, whs_his_date) 
-		VALUES (#{are_id}, 
+		(are_det_id, whs_his_sts, whs_his_cnt, whs_his_date) 
+		VALUES (#{are_det_id}, 
 		'whs_his_sts_01', 
 		#{whs_his_cnt}, 
 		SYSDATE
