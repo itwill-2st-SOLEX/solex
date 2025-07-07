@@ -13,10 +13,6 @@ public class NoticeService {
 	@Autowired
 	private NoticeMapper noticeMapper;
 
-	public NoticeService(NoticeMapper noticeMapper) {
-        this.noticeMapper = noticeMapper;
-    }
-
 	//글 목록
 	public List<Map<String, Object>> getNoticeList(Map<String, Object> params) {
 		return noticeMapper.getNoticeList(params);

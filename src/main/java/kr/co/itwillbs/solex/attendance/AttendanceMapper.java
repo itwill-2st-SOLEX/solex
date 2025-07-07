@@ -18,7 +18,7 @@ public interface AttendanceMapper {
 	
 	// 특정 사원의 특정 날짜 출퇴근 기록 조회
     Optional<Map<String, Object>> findByEmpIdAndAttendanceDate(
-    		@Param("emp_id") Long empId, 
+    		@Param("emp_id") String loginEmpId, 
     		@Param("att_day") LocalDate attendanceDate);
 
     // 출근 기록 삽입 (새로운 출근 기록 생성)
@@ -28,7 +28,7 @@ public interface AttendanceMapper {
 
 	String selectDetNm(String attSts);
 
-	Map<String, Object> selectEmployeeInfo(long loginEmpId);
+	Map<String, Object> selectEmployeeInfo(String loginEmpId);
 
 	void updateAttendanceColumn(Map<String, Object> params);
 

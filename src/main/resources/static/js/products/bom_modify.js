@@ -140,4 +140,86 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('네트워크 오류 또는 요청 처리 중 문제가 발생했습니다.');
         }
     });
+	
+	// ⭐ 일괄 BOM 저장 버튼 로직 ⭐
+	document.getElementById('bom-save-batch').addEventListener('click', async function () {
+	    const checkedOptIds = window.getCheckedOptIds(); // 좌측에서 선택한 옵션 ID들
+
+	    if (!checkedOptIds || checkedOptIds.length < 2) {
+	        alert("일괄 저장할 제품 옵션을 2개 이상 선택해주세요.");
+	        return;
+	    }
+
+	    // 현재 그리드에서 수정된 BOM 추출
+	    const { createdRows, updatedRows } = bom_grid.getModifiedRows();
+
+	    if (createdRows.length === 0 && updatedRows.length === 0) {
+	        alert('저장할 BOM 변경 내용이 없습니다.');
+	        return;
+	    }
+
+	    // 필수 항목 검증
+	    const requiredFields = ['MAT_NM', 'BOM_CNT', 'BOM_UNIT', 'BOM_COMM'];
+		const allRows = [...createdRows, ...updatedRows];
+		
+		const invalidRows = allRows.filter(row =>
+		  requiredFields.some(field => {
+		    const value = row[field];
+		    return value === undefined || value === null || value.toString().trim() === '';
+		  })
+		);
+
+	    if (invalidRows.length > 0) {
+	        alert("필수 항목이 누락된 BOM이 있습니다.");
+	        return;
+	    }
+
+	    // ✅ createdRows 를 checkedOptIds 개수만큼 복제
+	    const batchPayload = [];
+
+	    checkedOptIds.forEach(optId => {
+	        allRows.forEach(row => {
+	            batchPayload.push({
+					BOM_ID: row.BOM_ID || null, // update의 경우에 필요
+	                OPT_ID: optId,
+	                MAT_ID: row.MAT_ID,
+	                BOM_CNT: row.BOM_CNT,
+	                BOM_UNIT: row.BOM_UNIT,
+	                BOM_COMM: row.BOM_COMM
+	            });
+	        });
+	    });
+
+		if (batchPayload.length === 0) {
+	        alert('일괄 저장 실패: 저장할 데이터가 없습니다.');
+	        return;
+	    }
+		
+	    // ✅ 저장 요청 (updateBomInfo를 재활용)
+	    try {
+	        const response = await fetch('/SOLEX/boms/api/save', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json'
+	            },
+	            body: JSON.stringify({ 
+					createdRows: [], // batchPayload 전부 update로 처리함(merge) 
+					updatedRows: batchPayload }) // update
+	        });
+
+	        const result = await response.json();
+
+	        if (result.success) {
+	            alert('일괄 저장 성공!');
+	            // 선택된 첫 번째 OPT_ID로 다시 조회
+	            window.bom_grid.clear();
+	            window.loadBomList(checkedOptIds[0]);
+	        } else {
+	            alert('일괄 저장 실패: ' + (result.message || '알 수 없는 오류'));
+	        }
+	    } catch (err) {
+	        console.error(err);
+	        alert('저장 중 오류 발생');
+	    }
+	});
 });

@@ -1,7 +1,7 @@
-@charset "UTF-8";
+	@charset "UTF-8";
 
 
- .date-navigation {
+.date-navigation {
     display: flex;
     align-items: center;
     font-size: 1.5em; /* 글자 크기 조정 */
@@ -77,12 +77,12 @@ header h1 {
 
 .time-button {
     display: block;
-    width: 90%;
-    padding: 18px;
-    margin: 15px auto;
+    width: 80%;
+    padding: 12px;
+    margin: 20px auto;
     border: none;
     border-radius: 8px;
-    font-size: 1.3em;
+    font-size: 1em;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -91,6 +91,7 @@ header h1 {
 
 .punch-in {
     background-color: #2ecc71; /* 초록색 */
+    margin-right: 5px;
 }
 
 .punch-in:hover {
@@ -100,6 +101,7 @@ header h1 {
 
 .punch-out {
     background-color: #3498db; /* 파란색 */
+    margin-right: 25px;
 }
 
 .punch-out:hover {
@@ -164,7 +166,7 @@ header h1 {
 
     .time-button {
         padding: 15px;
-        font-size: 1.2em;
+        font-size: 1em;
     }
 
     .status-section-att h2 {
@@ -174,4 +176,8 @@ header h1 {
     .status-section-att p {
         font-size: 1em;
     }
+}
+
+.hidden {
+    display: none;
 }
