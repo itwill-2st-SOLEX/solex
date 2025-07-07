@@ -8,44 +8,58 @@
 	<!-- 연차 기준일 계산, 남은 일수 계산에 사용 -->
 	<sql id="empWith">
 		WITH emp AS (
-	    SELECT e.emp_id
-	         , e.emp_nm
-	         , e.emp_hire
-	         , e.emp_pos_cd
-	         , e.emp_dep_cd
-	         , e.emp_cat_cd
-	         , e.emp_team_cd
-	         , ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12)) as w1
-	         , ADD_MONTHS(e.emp_hire, 12 * FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12) - 1) as w2
-	         , ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12) - 1) + 1) as w3
-	         , ADD_MONTHS(e.emp_hire, 12 * (FLOOR(MONTHS_BETWEEN(#{sysdate}, e.emp_hire) / 12) + 1)) as w4
-	    FROM EMPLOYEE e
-		)
+    SELECT  e.emp_id
+          , e.emp_nm
+          , e.emp_hire
+          , e.emp_pos_cd
+          , e.emp_dep_cd
+          , e.emp_cat_cd
+          , e.emp_team_cd
+          -- 오늘 기준 근속 개월 수 (정수) 
+          , FLOOR(MONTHS_BETWEEN(TRUNC(#{sysdate}), e.emp_hire))      AS months_since
+          -- 올해 기념일(입사 n주년)
+          , ADD_MONTHS(e.emp_hire,
+               12 * FLOOR(MONTHS_BETWEEN(TRUNC(#{sysdate}), e.emp_hire) / 12)) AS anniv_cur
+          -- 내년 기념일(입사 n+1주년)
+          , ADD_MONTHS(e.emp_hire,
+               12 * FLOOR(MONTHS_BETWEEN(TRUNC(#{sysdate}), e.emp_hire) / 12) + 12) AS anniv_next
+    		FROM EMPLOYEE e
 	</sql>
 	
 	<!-- 내 휴가 사용 개수 조회 -->
 	<select id="getVacationSummary" resultType="map">
 	 <include refid="empWith"/>
-		SELECT e.emp_id, e.emp_nm, e.emp_hire, v.vac_total, v.vac_used,
-		       v.vac_total - v.vac_used AS vac_remain,
-		      	CASE WHEN w1 > #{sysdate}
-	                 THEN w2
-	                 ELSE w1
-	            END AS period_start,
-	            
-	            CASE WHEN w1 > #{sysdate}
-	                 THEN w3-1
-	                 ELSE w4-1
-	            END AS period_end,
-	            
-	            CASE WHEN w1 > #{sysdate}
-	                 THEN TRUNC(w3 -#{sysdate})
-	                 ELSE TRUNC(w4 - #{sysdate})
-	            END AS days_left 
-		  FROM emp e
-		  LEFT JOIN vacation v 
-		    ON e.emp_id = v.emp_id
-		 WHERE e.emp_id = #{empId}
+		<include refid="empWith"/>
+  SELECT  e.emp_id
+        , e.emp_nm
+        , e.emp_hire
+        , v.vac_total
+        , v.vac_used
+        , v.vac_total - v.vac_used                    AS vac_remain
+
+        -- 시작일
+        , CASE
+            WHEN e.months_since &lt; 12
+                 THEN ADD_MONTHS(e.emp_hire,  e.months_since)          -- 월 단위
+            ELSE       e.anniv_cur                                      -- 연 단위
+          END                                           AS period_start
+
+        -- 종료일
+        , CASE
+            WHEN e.months_since &lt; 12
+                 THEN ADD_MONTHS(e.emp_hire,  e.months_since + 1) - 1  -- 다음 달 전날
+            ELSE       e.anniv_next - 1                                 -- 다음 주년 전날
+          END                                           AS period_end
+
+        -- 남은 일수
+        , CASE
+            WHEN e.months_since &lt; 12
+                 THEN TRUNC( ADD_MONTHS(e.emp_hire, e.months_since + 1) - TRUNC(#{sysdate}) )
+            ELSE       TRUNC( e.anniv_next - TRUNC(#{sysdate}) )
+          END                                           AS days_left
+  FROM emp e
+  LEFT JOIN vacation v  ON e.emp_id = v.emp_id
+  WHERE e.emp_id = #{empId}
 	</select>
 	
 	<!-- 내 연차 신청 개수 계산하기 (무한스크롤)-->

@@ -104,38 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-function openMessengerPopup(event) {
-			event.preventDefault();
-			const popup = window.open('/SOLEX/chats', 'MessengerWindow', 'width=500,height=700,left=100,top=100');
-			if (!popup || popup.closed) {
-				alert('팝업 차단 해제해주세요!');
-			} else {
-				popup.focus();
-			}
-		}
-	
-		function unreadCnt() {
-			$.ajax({
-				url: '/SOLEX/chats/unreadCount',
-				method: 'GET',
-				success: function(count) {
-					const badge = document.getElementById('chat-badge');
-					if (!badge) return;
-					if (count > 0) {
-						badge.textContent = count;
-						badge.classList.remove('d-none');
-					} else {
-						badge.classList.add('d-none');
-					}
-				},
-				error: function() {
-					console.error('안읽은 메시지 수 불러오기 실패');
-				}
-			});
-		}
-		document.addEventListener('DOMContentLoaded', function () {
-			unreadCnt();
-		});
+
 		
 		// "마이페이지" 메뉴 클릭 시 실행
 		async function openMypagePopup(event) {
