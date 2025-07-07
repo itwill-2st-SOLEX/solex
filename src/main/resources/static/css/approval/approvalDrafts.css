@@ -1,27 +1,97 @@
-@charset "UTF-8";
+/* 승인 버튼 (파랑) */
+.btn-approve {
+	color: #fff;
+	background-color: #5D9CEC; /* Soft Blue */
+	border-color: #5D9CEC;
+}
+.btn-approve:hover {
+	color: #fff;
+	background-color: #4A89DC;
+	border-color: #4A89DC;
+}
+
+/* 반려 버튼 (빨강) */
+.btn-reject {
+	color: #fff;
+	background-color: #ED6A5A; /* Soft Red */
+	border-color: #ED6A5A;
+}
+.btn-reject:hover {
+	color: #fff;
+	background-color: #E95744;
+	border-color: #E95744;
+}
+
+/* --- New Approval Line Styles --- */
+.approval-line-container {
+	padding: 1rem 1.5rem 0.5rem 1.5rem;
+	background-color: #f8f9fa;
+	border-bottom: 1px solid #dee2e6;
+}
+
+.approval-line {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 15px;
+	padding-bottom: 1rem;
+	flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.approver-box {
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 10px;
+	width: 110px;
+	text-align: center;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-height: 100px;
+}
+
+.approver-position {
+	font-size: 1rem;
+	font-weight: bold;
+	margin-bottom: 8px;
+	color: #333;
+}
+
+.approver-status {
+	font-size: 1rem;
+	font-weight: bold;
+	margin-bottom: 4px;
+}
+
+.approver-time {
+	font-size: 0.75rem;
+	color: #6c757d;
+}
+
+/* Status Colors */
+.approver-status.status-approved { color: #5D9CEC; } /* Soft Blue */
+.approver-status.status-rejected { color: #ED6A5A; } /* Soft Red */
+.approver-status.status-pending { color: #888; }   /* Grey for pending */
+
+.approver-arrow {
+	font-size: 2rem;
+	color: #ccc;
+	font-weight: lighter;
+}
+
+/* Original CSS from user */
 #docTypeSelect {
 	width: 180px;
 }
-.approval-table {
-	border-collapse: collapse;
-	margin-bottom: 16px;
-	margin-right: 25px;
-}
 .text-blue {
   color: #4169E1;
-  font-weight: bold; /* 선택 사항 */
+  font-weight: bold;
 }
 .text-red {
   color: red;
-  font-weight: bold; /* 선택 사항 */
-}
-.approval-table th,
-.approval-table td {
-	font-weight: bold;
-	border: 1px solid #999999;
-	text-align: center;
-	padding: 8px;
-	font-size: 14px;
+  font-weight: bold;
 }
 #dateRange,
 #dept-nm,
@@ -68,10 +138,6 @@
 #dates {
 	margin-left: 70px;
 }
-.approval-line{
-	display: flex;
-}
-
 .btn-purple {
    color: #4169E1;
    background-color: #fff;
@@ -81,6 +147,6 @@
 .btn-purple:focus,
 .btn-check:checked + .btn-purple {
   color: #fff;
-  background-color: #365acb; 
+  background-color: #365acb;
   border-color: #365acb;
-  }
+}

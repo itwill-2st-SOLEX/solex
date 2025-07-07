@@ -40,13 +40,54 @@
     </insert>
     
     <select id="getWarehouseAreaHistory" resultType="map">
-		SELECT TO_CHAR(wh.whs_his_date, 'YYYY-MM-DD HH24:MI:SS') AS action_time,
-				wh.whs_his_cnt AS quantity,
-				s.det_nm AS status
-		FROM warehouse_history wh
-		LEFT JOIN code_detail s 
-		ON wh.whs_his_sts = s.det_id
-		WHERE wh.are_id = #{areaId}
+		-- 분기 1: are_type이 'area_type_01' (자재)인 경우의 쿼리
+		SELECT
+		    TO_CHAR(wh.whs_his_date, 'YYYY-MM-DD HH24:MI:SS') AS action_time,
+		    wh.whs_his_cnt AS quantity,
+		    s.det_nm AS status,
+		    a.are_type,
+		    m.mat_nm AS item_name, -- 자재명
+		    m.mat_unit AS detail_1, -- 자재 단위
+		    NULL AS detail_2, -- 상품 옵션용 컬럼 (자리 맞춤)
+		    NULL AS detail_3  -- 상품 옵션용 컬럼 (자리 맞춤)
+		FROM
+		    warehouse_history wh
+		    -- 'area_type_01'에 해당하는 데이터만 조회하므로 INNER JOIN이 더 적합
+		    JOIN area_detail ad ON wh.are_det_id = ad.are_det_id
+		    JOIN area a ON ad.are_id = a.are_id
+		    JOIN material m ON ad.item_id = m.mat_id
+		    LEFT JOIN code_detail s ON wh.whs_his_sts = s.det_id
+		WHERE
+		    ad.are_id = #{areaId}
+		    AND a.are_type = 'area_type_01'
+		
+		UNION ALL
+		
+		-- 분기 2: are_type이 'area_type_02' (상품)인 경우의 쿼리
+		SELECT
+		    TO_CHAR(wh.whs_his_date, 'YYYY-MM-DD HH24:MI:SS') AS action_time,
+		    wh.whs_his_cnt AS quantity,
+		    s.det_nm AS status,
+		    a.are_type,
+		    p.prd_nm AS item_name, -- 상품명
+		    cd_color.det_nm AS detail_1, -- 상품 색상명
+		    cd_size.det_nm AS detail_2, -- 상품 사이즈명
+		    cd_height.det_nm AS detail_3  -- 상품 높이명
+		FROM
+		    warehouse_history wh
+		    -- 'area_type_02'에 해당하는 데이터만 조회하므로 INNER JOIN이 더 적합
+		    JOIN area_detail ad ON wh.are_det_id = ad.are_det_id
+		    JOIN area a ON ad.are_id = a.are_id
+		    JOIN product_option po ON ad.item_id = po.opt_id
+		    JOIN product p ON po.prd_id = p.prd_id
+		    LEFT JOIN code_detail s ON wh.whs_his_sts = s.det_id
+		    -- 각 옵션(색상, 사이즈, 높이)에 해당하는 코드명을 가져오기 위해 code_detail 테이블을 추가로 조인
+		    LEFT JOIN code_detail cd_color ON po.opt_color = cd_color.det_id
+		    LEFT JOIN code_detail cd_size ON po.opt_size = cd_size.det_id
+		    LEFT JOIN code_detail cd_height ON po.OPT_HEIGHT = cd_height.det_id
+		WHERE
+		    ad.are_id = #{areaId}
+		    AND a.are_type = 'area_type_02'
 	</select>
 	
 	<select id="selectStockList" resultType="map">

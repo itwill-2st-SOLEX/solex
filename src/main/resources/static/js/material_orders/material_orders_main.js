@@ -1,380 +1,349 @@
 $(function() {
-	// 현재 페이지 
-	let currentPage = 0;
-	
-	// 무한스크롤 보일 행 수
-	const pageSize = 30;
-	
-	// tui 그리드 가져오기
-	const grid = new tui.Grid({
-		
-		//그리드 들고와서 el에 넣고
-		el: document.getElementById('grid'),
-		
-		//데이터 빈 배열로 만들고
-		data : [],
-		//높이는 600, 높이는 500(바디하이트), 자동넓이 트루, 컬럼들 채우기
-		height : 600,
-		bodyHeight : 500,
-		autoWidth : true,
-		columns: [
-			//헤더, 네임, 얼라인(센터)
-			{header: '발주ID', name : 'matOrdId', align: 'center', width: 89},
-			{header: '자재ID', name : 'matId', align: 'center', width: 99},
-			{header: '요청자ID', name : 'empId', align: 'center', width: 99},
-			{header: '발주설명', name : 'matComm', align: 'center', width: 600},
-			{header: '발주수량', name : 'matQty', align: 'center', width: 99},
-			{header: '발주 요청일', name : 'matRegDate', align: 'center', width: 118},
-			{header: '승인/반려', name : 'mat_ok', align: 'center', width: 230, 
-				formatter: ({ value, rowKey }) =>	{
-//				   // 값이 '반려'(또는 '승인')라면 그대로 출력
-				    if (value === '승인' || value === '반려') return value;
+    // 현재 페이지
+    let currentPage = 0;
+    // 무한스크롤 시 한 번에 불러올 데이터 행 수
+    const pageSize = 30;
 
-				   // 아직 미처리 → 버튼 렌더링
-				   return `
-				     <button class="btn btn-secondary" name="approval" data-row-key="${rowKey}">승인</button>
-				     <button class="btn btn-secondary" name="deny"     data-row-key="${rowKey}">반려</button> `;
-				 }
-			 }
-		]
-	
-	}); //tui 그리드 가져오기 끝 
-	
-	// 자재id 목록 받아오는 함수 - select box
-	async function fetchAndPopulateMaterial(selectElement) {
-		const response =  await fetch(`/SOLEX/material_orders/getMatId`); // 자재목록을 가져올 api 엔드포인트에 요청
-		
-		const materials = await response.json(); //응답본문을 json객체로 변환
-		
-		materials.forEach(mat => { // 가져온 자재목록을 순회하며 dropdown에 추가
-			const option = document.createElement('option');
-			option.value = mat.MAT_ID;
-			option.textContent = mat.MAT_NM;
-			selectElement.appendChild(option); 
-		});
-	}
+    // 모달 엘리먼트와 인스턴스를 초기에 한 번만 생성하여 재사용합니다.
+    const modalEl = document.getElementById('exampleModal');
+    const approvalModal = new bootstrap.Modal(modalEl);
 
-	// 저장 될 창고 가져오는 함수 - select box
-	async function fetchAndPopulateWarehouse(selectElement, matId){
-		selectElement.innerHTML = '<option value="">-- 창고 선택 --</option>';
-		console.log('matId' , matId);
-		const url = matId ? `/SOLEX/material_orders/getWarehouse?matId=${matId}`: '/SOLEX/material_orders/getWarehouse';
-		
-		const response = await fetch(url); 
-		const warehouseList = await response.json(); // 리스트 받아오기
-		
-		warehouseList.forEach(whs => {
-			const option = document.createElement('option');
-			option.value = whs.WHS_ID;
-			option.textContent = whs.WHS_NM;
-			selectElement.appendChild(option);
-		});
-	}			
-	
-	// 저장 될 구역 가져오는 함수 - select box
-	async function fetchAndPopulateArea(selectElement, whsId, matId){
-		selectElement.disabled = false;
-		
-		selectElement.innerHTML = '<option value="">-- 구역 선택--</option>';
-		
-		if(!whsId){
-			selectElement.disabled = true;
-			return;
-		}
-		
-		const response = await fetch(`/SOLEX/material_orders/getArea?whsId=${whsId}&matId=${matId}`);
-		const area = await response.json(); // 리스트 받아오기
-		
-		area.forEach(a => {
-			const option = document.createElement('option');
-			option.value = a.ARE_ID;
-			option.textContent = a.ARE_NM;
-			selectElement.appendChild(option);
-		});
-	}			
-	
-	//자재 발주 목록 조회
-	async function loadMatList(page) {
-		const response = await fetch(`/SOLEX/material_orders/materialList?page=${page}&size=${pageSize}`);
-		const rawData = await response.json();
-		const data = rawData.map(row => ({
-			matOrdId: row.matOrdId,
-			matId: row.matId,
-			empId: row.empId,
-			matComm: row.matComm,
-			matQty: row.matQty,
-			matRegDate: row.matRegDate,
-			matEtaDate: row.matEtaDate,
-			matAtaDate: row.matAtaDate,
-			matlmddate: row.matlmddate
-		}));
-		
-		//현재 페이지가 첫 페이진지(전자) 아닌지(후자) 판단 후 그리드에 데이터를 새로넣을지 : 붙일지 정하는 코드 
-		page === 0 ? grid.resetData(data) : grid.appendRows(data);
-		
-		//페이지를 하나 불러왔으니 다음에 불러올때는 ++로 함 
-		currentPage++;
-		
-		//데이터 길이보다 페이지 사이즈가 크면 스크롤 끝 
-		if(data.length < pageSize) grid.off("scrollEnd");
-	}
+    // TUI 그리드 설정
+    const grid = new tui.Grid({
+        el: document.getElementById('grid'),
+        data: [],
+        height: 600,
+        bodyHeight: 500,
+        columns: [
+            { header: '발주ID', name: 'matOrdId', align: 'center', width: 89, sortable: true },
+            { header: '자재ID', name: 'matId', align: 'center', width: 99, sortable: true },
+            { header: '요청자ID', name: 'empId', align: 'center', width: 99, sortable: true },
+            { header: '발주설명', name: 'matComm', align: 'center', width: 600 },
+            { header: '발주수량', name: 'matQty', align: 'center', width: 99},
+            { header: '발주 요청일', name: 'matRegDate', align: 'center', width: 118, sortable: true },
+            {
+                header: '승인/반려',
+                name: 'mat_ord_sts',
+				sortable: true,
+                align: 'center',
+                width: 230,
+				sortable: true,
+                formatter: ({ value, rowKey }) => {
+                    if (value === 'mat_ord_sts_01') {
+                        return '<span class="text-primary fw-bold">승인</span>';
+                    }
+                    if (value === 'mat_ord_sts_02') {
+                        return '<span class="text-danger fw-bold">반려</span>';
+                    }
+                    // 승인/반려되지 않은 항목에 대해서만 버튼을 표시합니다.
+                    return `
+                        <button class="btn btn-sm btn-outline-primary me-1" name="approval" data-row-key="${rowKey}">승인</button>
+                        <button class="btn btn-sm btn-outline-secondary" name="deny" data-row-key="${rowKey}">반려</button>`;
+                }
+            }
+        ],
+        // 그리드 너비가 변경될 때 컬럼 너비를 자동으로 조절합니다.
+        columnOptions: {
+            resizable: true
+        }
+    });
 
-	loadMatList(currentPage); //최조 1페이지 로딩
-	grid.on('scrollEnd', () =>  loadDrafts(currentPage)); // 스크롤 끝나면 다음 페이지 로딩
-	
-	
-	// 발주등록 버튼
-	document.getElementById('RegisterModalBtn').addEventListener('click', () => openModal('register'));
+    /**
+     * 서버로부터 자재 발주 목록을 비동기적으로 불러와 그리드에 추가합니다.
+     * @param {number} page - 불러올 페이지 번호.
+     */
+    async function loadMatList(page) {
+        try {
+            const response = await fetch(`/SOLEX/material_orders/materialList?page=${page}&size=${pageSize}`);
+            if (!response.ok) {
+                throw new Error(`서버 응답 오류: ${response.statusText}`);
+            }
+            
+            const rawData = await response.json();
+            
+            // 서버 데이터를 그리드 형식에 맞게 변환합니다.
+            const data = rawData.map(row => ({
+                matOrdId: row.matOrdId,
+                matId: row.matId,
+                empId: row.empId,
+                matComm: row.matComm,
+                matQty: row.matQty,
+                matRegDate: row.matRegDate,
+                matEtaDate: row.matEtaDate,
+                matAtaDate: row.matAtaDate,
+                matlmddate: row.matlmddate,
+                mat_ord_sts: row.matOrdSts 
+            }));
 
-	
-	// 승인버튼 누르면 모달창뜨게
-	grid.on('click', async ev => {
-		  // ev.targetType === 'cell' 일 때만 처리
-		  if (ev.columnName !== 'mat_ok') return;
-		
-		  // 클릭된 실제 DOM 버튼
-		  const btn = ev.nativeEvent.target.closest('button');
-		  if (!btn) return;
-		
-		  // 행 rowKey 얻기
-		  const rowKey = ev.rowKey;    
-		  const rowData = grid.getRow(rowKey);
-		  
-		  if (btn.name === 'approval') {
-		    openModal('approval', rowKey); //승인 모달 열림
-			return; 
-		  }
-		  if (btn.name === 'deny') {
-			try {
-		      const res = await fetch('/SOLEX/material_orders/materialDeny', {
-		        method : 'POST',
-		        headers: { 'Content-Type': 'application/json' },
-		        body   : JSON.stringify({ mat_ord_id: rowData.matOrdId })  // 필요한 키만 전송
-		      });
+            // 첫 페이지는 새로고침, 이후 페이지는 기존 데이터에 추가합니다.
+            page === 0 ? grid.resetData(data) : grid.appendRows(data);
+            
+            // 마지막 페이지에 도달하면 스크롤 이벤트 리스너를 제거합니다.
+            if (data.length < pageSize) {
+                grid.off("scrollEnd");
+            } else {
+                currentPage++;
+            }
+        } catch(e) {
+            console.error("자재 발주 목록 조회 실패:", e);
+            alert("데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+        }
+    }
 
-			  if (!res.ok) {
-				  const msg = await res.text();
-				  alert('반려 실패: ' + msg);
-				  return;
-			  }
-			  
-			  // 2) 성공하면 UI 갱신
-			  alert('반려되었습니다.');
-			  grid.setValue(rowKey, 'mat_ok', '반려');   // 버튼 → '반려' 텍스트
-		    } catch (err) {
-		        console.error('[반려 요청 오류]', err);
-		        alert('서버 통신 중 오류가 발생했습니다.');
-		    }			
-		  }
-	});
+    // 최초 데이터 로딩 및 스크롤 이벤트 핸들러 등록
+    loadMatList(currentPage);
+    grid.on('scrollEnd', () => loadMatList(currentPage));
 
-	// 모달 오픈
-	async function openModal(mode, rowKey = null) {
-		
-		const modalEl   = document.getElementById('exampleModal');
-		const modal     = new bootstrap.Modal(modalEl);
-		const modalBody = modalEl.querySelector('.modal-body');
-		const modalTit  = document.getElementById('exampleModalLabel');
-		
-		// 모달 열릴때마다 기존 내용 제거
-		modalBody.innerHTML = '';
-			
-		if (mode === 'register') {
-			modalTit.textContent = '자재 발주 등록';
-			
-			// 폼 생성
-		  	const form = document.createElement('form');
-		  	form.id = 'materialOrderForm';
-			
-			//요청자 id 들고오기 위해 
-			const empId = /*[[${session.empId}]]*/ "";
-			
-		  	// 안에 내용 틀 js 형식으로 가져오기 
-	  		form.innerHTML = `
-	  			<div class="modal-body big-box">
-	  				<div class="row mb-3">
-	  					<div class="col">
-	  						<label>자재ID</label>
-	  						<div><select id="matId" class="form-control d-inline-block" name= "mat_id" required>
-	  						<option value="">-- 자재를 선택하세요 --</option></select></div>
-	  					</div>	
-						<div class="col">
-	  						<label>발주 수량</label>
-	  						<div><input type="number" class="form-control d-inline-block" name= "mat_qty" required></div>
-	  					</div>
-	  				</div>
-	  				<div class="row mb-3">
-	  					<div class="col">
-	  						<label>발주 요청일</label>
-	  						<div><input type="date" class="form-control" name= "mat_reg_date" required></div>
-	  					</div>
-	  					<div class="col">
-							<label>발주 요청자</label>
-							<div><input type="text" class="form-control" id="empIdView" readonly disabled></div>
-	  					</div>
-	  				</div>
-	  				<div class="row mb-3">
-	  					<div class="col">
-	  						<label>발주 설명</label>
-	  						<div><input type="text" class="form-control d-inline-block" name= "mat_comm" required></div>
-	  					</div>
-	  				</div>
-					<br>
-	  				<div class="modal-footer">
-	  					<button type="submit" class="btn custom-btn-blue btn-success" id="registerBtn">등록</button>
-	  					<button type="reset" class="btn btn-secondary" id="resetBtn">초기화</button>
-	  					<button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-	  				</div>
-	  			</div>
-	  		`;
-			  				
-			const matIdSelect = form.querySelector('#matId');
+    /**
+     * fetch API를 사용하여 JSON 데이터를 안전하게 요청하고 파싱합니다.
+     * @param {string} url - 요청할 URL.
+     * @param {object} options - fetch에 전달할 옵션 객체.
+     * @param {*} defaultValue - 응답이 비었을 경우 반환할 기본값.
+     * @returns {Promise<any>} 파싱된 JSON 데이터 또는 기본값.
+     */
+    async function fetchJson(url, options = {}, defaultValue = null) {
+        try {
+            const res = await fetch(url, options);
+            if (res.status === 204) return defaultValue; // No Content
+            const text = await res.text();
+            if (!res.ok) {
+                // 서버에서 보낸 텍스트 에러 메시지를 활용합니다.
+                throw new Error(text || `${res.status} ${res.statusText}`);
+            }
+            return text ? JSON.parse(text) : defaultValue;
+        } catch (error) {
+            console.error(`Fetch 오류 [${url}]:`, error);
+            // 에러를 다시 던져서 호출한 쪽에서 처리할 수 있도록 합니다.
+            throw error;
+        }
+    }
 
-	  		await fetchAndPopulateMaterial(matIdSelect);
-	  		modalBody.appendChild(form); // 최종 폼 삽입
-		  		
-	  	//실제 등록
-		if(registerBtn){
-			registerBtn.addEventListener('click', async function(event) {
-				event.preventDefault(); // type="submit"이므로 기본 제출 방지
-									
-				const formData = new FormData(form);
-				const payload = {
-					mat_id : formData.get('mat_id'),
-					emp_id : formData.get('emp_id'),
-					mat_qty : formData.get('mat_qty'),
-					mat_reg_date : formData.get('mat_reg_date'),
-					mat_eta_date : formData.get('mat_eta_date'),
-					mat_lmd_date : formData.get('mat_lmd_date'),
-					mat_comm : formData.get('mat_comm')
-				};
-		  				
-				console.log('서버로 보낼 데이터 = ', payload);
-		  				
-				try {
-					const response = await fetch(`/SOLEX/material_orders/registration`, {
-						method : 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body:JSON.stringify(payload)
-					});
-					
-					if(response.ok){
-						alert('발주 등록 성공');
-						window.location.reload();
-					} else {
-						alert('발주 등록 실패');
-					}
-				} catch(error) {
-					console.log('전송중 오류발생 = ', error);
-					alert('서버 전송 실패');
-				}
-			});		
-		}
-			} else if (mode === 'approval') { //자재가 저장 될 수 있는 창고 목록 보여주기 
-			    modalTit.textContent = '발주 승인';
+    /**
+     * 서버에서 자재 목록을 가져와 Select Box를 채웁니다. (발주 등록 모달용)
+     */
+    async function fetchAndPopulateMaterial() {
+        const $sel = $('#matId');
+        // 이미 데이터가 로드되었다면 다시 요청하지 않습니다.
+        if ($sel.data('loaded')) return;
+        try {
+            const materials = await fetchJson(`/SOLEX/material_orders/getMatId`, {}, []);
+            materials.forEach(mat => {
+                $('<option>', {
+                    value: mat.MAT_ID,
+                    text: mat.MAT_NM
+                }).appendTo($sel);
+            });
+            $sel.data('loaded', true);
+        } catch (e) {
+            alert('자재 목록을 불러오는 데 실패했습니다.');
+        }
+    }
 
-			    const rowData = grid.getRow(Number(rowKey));   // 행 전체 데이터
-				console.log("rowData", rowData);
-				
-				//폼 생성
-				const form = document.createElement('form');
-				form.id = 'applyForm';
-				
-			    form.innerHTML = `
-				  <div class="row mb-3">
-  					<div class="col">
-  						<label>자재ID</label>
-  						<div><input type="number" class="form-control d-inline-block" id="matId" name= "mat_id" value ="${rowData.matId}" readonly></div>
-  					</div>	
-					<div class="col">
-  						<label>수량</label>
-  						<div><input type="number" class="form-control d-inline-block" id= "matQty" name= "mat_qty" value ="${rowData.matQty}" readonly></div>
-  					</div>
-  				</div>
-				  <div class="row mb-3">
-					  <div class="col">
-					  	<label>저장될 창고</label>
-						<div>
-							<select id="whsId" class="form-control d-inline-block" name="whs_id" required>
-							<option value="">-- 창고를 선택하세요 --</option></select>
-						</div>
-					  </div>
-					  <div class="col">
-					  	<label>구역</label>
-						<div>
-							<select id="areId" class="form-control d-inline-block" name="are_id" disabled required>
-							<option value="">-- 구역을 선택하세요 --</option></select>
-						</div>
-					  </div>
-  				  </div>
-				  
-			      <div class="text-end">
-			        <button id="approveBtn" class="btn btn-primary">승인</button>
-			        <button id="cancelBtn"  class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-			      </div>
-			    `;
-				// select_box 채우기
-				const whsIdSelect = form.querySelector('#whsId');
-				await fetchAndPopulateWarehouse(whsIdSelect, rowData.matId);
-				
-				const areaIdSelect = form.querySelector('#areId');
-				await fetchAndPopulateArea(areaIdSelect, null, null);
-				
-				// (D) 창고 선택 변화 감지 → 구역 다시 로드
-				whsIdSelect.addEventListener('change', () => {
-				  const whsId = whsIdSelect.value;
-				  fetchAndPopulateArea(areaIdSelect, whsIdSelect.value, rowData.matId);
-				});
-				
-				
-				modalBody.appendChild(form); // 최종 폼 삽입
-				
-				
-			    // 승인 버튼
-			    modalBody.querySelector('#approveBtn').onclick = async () => {
-					const matIdValue = document.getElementById('matId').value; //자재아이디 - ok
-					const areIdValue   = document.getElementById('areId').value;   // 구역아이디 - ok
-					const whsHisCntVal = document.getElementById('matQty').value; // 수량 - ok
-					const whsIdValue = document.getElementById('whsId').value; // 창고 id - ok
-					
-					console.log('areIdValue = ', areIdValue , 'whsHisCntVal = ', whsHisCntVal, 'matIdValue = ', matIdValue );
-					
-				    const res = await fetch('/SOLEX/material_orders/materialApprove', {
-				        method : 'POST',
-				        headers: {'Content-Type':'application/json'},
-				        body   : JSON.stringify({
-							 mat_ord_id: rowData.matOrdId,
-							 mat_id: matIdValue,
-							 are_id: areIdValue,
-							 whs_his_cnt: whsHisCntVal,
-							 whs_id: whsIdValue
-						  })
-				     });
-				  
-			      if (res.ok) {
-			        alert('승인 완료');
-			        modal.hide();
+    /**
+     * 선택된 자재에 따라 저장 가능한 창고 목록을 가져와 Select Box를 채웁니다.
+     * @param {HTMLSelectElement} selectElement - 창고 목록을 채울 select 엘리먼트.
+     * @param {string} matId - 필터링할 자재 ID.
+     */
+    async function fetchAndPopulateWarehouse(selectElement, matId) {
+        selectElement.innerHTML = '<option value="">-- 창고 선택 --</option>';
+        const url = `/SOLEX/material_orders/getWarehouse?matId=${matId}`;
+        try {
+            const warehouses = await fetchJson(url, {}, []);
+            warehouses.forEach(whs => {
+                const option = new Option(whs.WHS_NM, whs.WHS_ID);
+                selectElement.add(option);
+            });
+        } catch (e) {
+            alert('창고 목록을 불러오는 데 실패했습니다.');
+        }
+    }
 
-					//승인 완료 시 버튼 두개가 없어지면서 승인됨으로 변경
-					grid.setValue(rowKey, 'mat_ok', '승인');
-					
-					grid.refreshCell(rowKey, 'mat_ok');
-					
-			      } else{
-					console.log('error = ' , await res.text());
-					alert('승인 실패');
-				  } 
-				    };
-				  }
-			  modal.show();
-										
-									
-	}// 모달 내부 끝
-	
+    /**
+     * 선택된 창고와 자재에 따라 저장 가능한 구역 목록을 가져와 Select Box를 채웁니다.
+     * @param {HTMLSelectElement} selectElement - 구역 목록을 채울 select 엘리먼트.
+     * @param {string} whsId - 필터링할 창고 ID.
+     * @param {string} matId - 필터링할 자재 ID.
+     */
+    async function fetchAndPopulateArea(selectElement, whsId, matId) {
+        selectElement.innerHTML = '<option value="">-- 구역 선택 --</option>';
+        selectElement.disabled = !whsId;
+        if (!whsId) return;
 
-	
+        const url = `/SOLEX/material_orders/getArea?whsId=${whsId}&matId=${matId}`;
+        try {
+            const areas = await fetchJson(url, {}, []);
+            areas.forEach(a => {
+                const option = new Option(a.ARE_NM, a.ARE_ID);
+                selectElement.add(option);
+            });
+        } catch (e) {
+            alert('구역 목록을 불러오는 데 실패했습니다.');
+        }
+    }
 
-	
-}); //domContentLoaded
+    // 발주 등록 모달이 열릴 때 자재 목록을 불러옵니다.
+    $('#exampleModal').on('show.bs.modal', fetchAndPopulateMaterial);
+    
+    // [리팩토링] 발주 등록 폼 유효성 검사 함수
+    function validateRegistrationForm() {
+        const matId = $('#matId').val();
+        const matQty = $.trim($('#matQty').val());
+        const matRegDate = $.trim($('#matRegDate').val());
+
+        if (!matId) {
+            alert('자재를 선택해주세요.');
+            return false;
+        }
+        if (!matQty || Number(matQty) <= 0) {
+            alert('발주 수량은 0보다 큰 숫자로 입력해주세요.');
+            return false;
+        }
+        if (!matRegDate) {
+            alert('발주 요청일을 선택해주세요.');
+            return false;
+        }
+        return true;
+    }
+
+    // 자재발주등록 모달 내 '등록' 버튼 클릭 이벤트
+    $('#registerBtn').on('click', async function () {
+        // [추가] 유효성 검사
+        if (!validateRegistrationForm()) {
+            return;
+        }
+
+        const payload = {
+            matId: $('#matId').val(),
+            matQty: $.trim($('#matQty').val()),
+            matRegDate: $.trim($('#matRegDate').val()),
+            matComm: $.trim($('#matComm').val())
+        };
+
+        try {
+            await fetchJson(`/SOLEX/material_orders/registration`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            alert('발주가 성공적으로 등록되었습니다.');
+            window.location.reload();
+        } catch (error) {
+            alert('발주 등록에 실패했습니다: ' + error.message);
+        }
+    });
+
+    // 그리드 내 '승인' 또는 '반려' 버튼 클릭 이벤트 위임
+    grid.on('click', async ev => {
+        const btn = ev.nativeEvent.target.closest('button');
+        if (!btn || !['approval', 'deny'].includes(btn.name)) return;
+
+        openModal(btn.name, ev.rowKey);
+    });
+
+    /**
+     * 다양한 모드('approval', 'deny')에 따라 모달을 열고 해당 기능을 처리합니다.
+     * @param {'approval' | 'deny'} mode - 모달의 작동 모드.
+     * @param {number} rowKey - 그리드에서 선택된 행의 키.
+     */
+    async function openModal(mode, rowKey) {
+        const modalBody = modalEl.querySelector('.modal-body');
+        const modalTitle = document.getElementById('exampleModalLabel');
+        const rowData = grid.getRow(rowKey);
+        
+        modalBody.innerHTML = ''; // 모달 내용 초기화
+
+        if (mode === 'approval') {
+            modalTitle.textContent = '발주 승인';
+            
+            const form = document.createElement('form');
+            form.id = 'applyForm';
+            form.innerHTML = `
+                <div class="row mb-3">
+                    <div class="col"><label class="form-label">발주ID</label><input type="text" class="form-control" value="${rowData.matOrdId}" readonly></div>
+                    <div class="col"><label class="form-label">자재ID</label><input type="text" class="form-control" id="matId" name="mat_id" value="${rowData.matId}" readonly></div>
+                </div>
+                <div class="mb-3"><label class="form-label">수량</label><input type="number" class="form-control" id="matQty" name="mat_qty" value="${rowData.matQty}" readonly></div>
+                <div class="row mb-3">
+                    <div class="col"><label class="form-label">저장될 창고</label><select id="whsId" class="form-select" name="whs_id" required><option value="">-- 창고 선택 --</option></select></div>
+                    <div class="col"><label class="form-label">구역</label><select id="areId" class="form-select" name="are_id" disabled required><option value="">-- 구역 선택 --</option></select></div>
+                </div>
+                <div class="text-end mt-4">
+                    <button type="submit" id="approveBtn" class="btn btn-primary">승인</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                </div>`;
+            modalBody.appendChild(form);
+
+            const whsIdSelect = form.querySelector('#whsId');
+            const areaIdSelect = form.querySelector('#areId');
+
+            await fetchAndPopulateWarehouse(whsIdSelect, rowData.matId);
+
+            whsIdSelect.addEventListener('change', () => {
+                fetchAndPopulateArea(areaIdSelect, whsIdSelect.value, rowData.matId);
+            });
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const approveButton = event.currentTarget.querySelector('#approveBtn');
+                approveButton.disabled = true;
+
+                const whsIdValue = whsIdSelect.value;
+                const areIdValue = areaIdSelect.value;
+
+                if (!whsIdValue || !areIdValue) {
+                    alert("창고와 구역을 모두 선택해주세요.");
+                    approveButton.disabled = false;
+                    return;
+                }
+
+                const payload = {
+                    mat_ord_id: rowData.matOrdId,
+                    mat_id: rowData.matId,
+                    are_id: areIdValue,
+                    whs_his_cnt: rowData.matQty,
+                    whs_id: whsIdValue
+                };
+
+                try {
+                    await fetchJson('/SOLEX/material_orders/materialApprove', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    alert('승인 처리되었습니다.');
+                    approvalModal.hide();
+                    grid.setValue(rowKey, 'mat_ord_sts', 'mat_ord_sts_01');
+                } catch (error) {
+                    alert('승인 처리 실패: ' + error.message);
+                    approveButton.disabled = false;
+                }
+            });
+        } else if (mode === 'deny') {
+            modalTitle.textContent = '발주 반려 확인';
+            modalBody.innerHTML = `
+                <p>발주 ID <strong>[${rowData.matOrdId}]</strong> 건을 정말로 반려하시겠습니까?</p>
+                <div class="text-end mt-4">
+                    <button type="button" id="confirmDenyBtn" class="btn btn-danger">반려 확인</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                </div>`;
+            
+            modalBody.querySelector('#confirmDenyBtn').onclick = async (event) => {
+                event.currentTarget.disabled = true;
+                try {
+                    await fetchJson('/SOLEX/material_orders/materialDeny', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mat_ord_id: rowData.matOrdId })
+                    });
+                    alert('반려 처리되었습니다.');
+                    approvalModal.hide();
+                    grid.setValue(rowKey, 'mat_ord_sts', 'mat_ord_sts_02');
+                } catch (error) {
+                    alert('반려 처리 실패: ' + error.message);
+                    event.currentTarget.disabled = false;
+                }
+            };
+        }
+        approvalModal.show();
+    }
+});

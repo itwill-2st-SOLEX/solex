@@ -106,5 +106,10 @@ public class ClientService {
 		return clientMapper.getSearchClients(keyword);
 	}
 
+    // 거래처 사용여부
+    public List<Map<String, String>> getClientIsActive() {
+        return clientMapper.getClientIsActive();
+    }
+
 
 }

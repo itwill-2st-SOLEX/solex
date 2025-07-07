@@ -61,7 +61,29 @@ public class OrderRequestsService {
             throw new RuntimeException("주문 상태 변경에 실패했습니다.");
         }
 
-	}   
+	} 
+
+    public void orderMaterialRequest(Map<String, Object> params) throws Exception {
+        
+
+         // 자재 주문  
+        Integer materialOrderStatus = orderRequestsMapper.insertMaterialOrder(params);
+        System.out.println(materialOrderStatus);
+        
+        
+        // null 체크 추가
+        if (materialOrderStatus == null || materialOrderStatus <= 0) {
+            throw new RuntimeException("자재 주문에 실패했습니다.");
+        }
+        
+        
+        // 주문 상태 변경
+        Integer result2 = orderRequestsMapper.updateMaterialOrderStatus(params);
+        // null 체크 추가
+        if (result2 == null || result2 <= 0) {
+            throw new RuntimeException("주문 상태 변경에 실패했습니다.");
+        }
+    }
 
 }
 
