@@ -261,11 +261,11 @@ async function renderDonutChart(startDate, endDate) {
 			return;
 		}
 
-		let values = data.map(item => item.ORDER_COUNT);
+		let values = data.map(item => item.ORDER_QUANTITY);
 		let total = values.reduce((sum, val) => sum + val, 0);
 
 		let labels = data.map(item => {
-			const percentage = ((item.ORDER_COUNT / total) * 100).toFixed(1);
+			const percentage = ((item.ORDER_QUANTITY / total) * 100).toFixed(1);
 			return `${item.PRD_NM} (${item.PRD_CODE}) - ${percentage}%`;
 		});
 

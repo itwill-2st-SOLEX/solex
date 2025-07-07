@@ -45,7 +45,6 @@ public class MainRestController {
     	 params.put("start", start);
     	 params.put("end",  end);
 	     
-    	 System.out.println("ppp : " + mainService.selectEvents(params));
         return mainService.selectEvents(params);
     }
     
@@ -60,7 +59,6 @@ public class MainRestController {
     	 params.put("start", start);
     	 params.put("end",  end);
 	     
-    	 System.out.println("연차 : " + mainService.selectleave(params));
         return mainService.selectleave(params);
     }
 //
@@ -84,10 +82,9 @@ public class MainRestController {
     	map.put("calId", id);
     	map.put("empId", empId);
     	
-    	System.out.println(map);
         mainService.updateEvent(map);
     }
-//
+    
 //  일정 삭제
     @DeleteMapping("/calendar/{id}")
     public void delete(@PathVariable("id") long id,
@@ -100,14 +97,6 @@ public class MainRestController {
     	
     	mainService.deleteEvent(map);
     }
-	
-	
-	
-	
-	
-	
-	
-	
 	// 공지사항 목록
 	@GetMapping("/noticeList")
 	public List<Map<String, Object>> getMainNotice() {
