@@ -245,13 +245,19 @@ $(function() {
      * @param {'approval' | 'deny'} mode - 모달의 작동 모드.
      * @param {number} rowKey - 그리드에서 선택된 행의 키.
      */
+	
+	
+
+	
     async function openModal(mode, rowKey) {
         const modalBody = modalEl.querySelector('.modal-body');
         const modalTitle = document.getElementById('exampleModalLabel');
         const rowData = grid.getRow(rowKey);
         
         modalBody.innerHTML = ''; // 모달 내용 초기화
-
+		
+		
+		// 뭐냐하면 쉼표 제거하는 코드
         if (mode === 'approval') {
             modalTitle.textContent = '발주 승인';
             

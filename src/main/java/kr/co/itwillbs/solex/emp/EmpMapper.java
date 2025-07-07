@@ -35,6 +35,8 @@ public interface EmpMapper {
 
 	Long findManagerId(Map<String, String> managerEmp);
 
+	Long getEmpSabun();
+
 
 
 }
