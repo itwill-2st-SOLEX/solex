@@ -127,13 +127,7 @@ public class EmpService {
 		
 		mapper.insertEmp(empMap);
 	}
-	
-	
-	// 인사등록 사진 저장을 위한 
-//	public void save(Map<String, Object> empMap) {
-//		// TODO Auto-generated method stub
-//		mapper.insertEmp(empMap);
-//	}
+
 
 	//인사목록 (재직중)
 	 public List<Map<String, Object>> getEmpList(String searchType, String searchKeyword, String includeEmpSts) {

@@ -59,7 +59,11 @@ public class MaterialOrdersService {
 	    int area = materialOrdersMapper.matAppArea(map);
 	    int stockLeger = materialOrdersMapper.matAppStockLeger(map);
 	    materialOrdersMapper.updateApproval(map);
+	    // 1. 파라미터 확인
+	    System.out.println("map = " + map);
 
+	    // 2. DB 처리 또는 로직 실행
+	    System.out.println("materialApprove 종료!!!!!!!!!");
 	    if (warehistory != 1 || areaDetail != 1 || area != 1 || stockLeger != 1) {
 	        throw new IllegalStateException("승인 처리 실패: warehistory=" + warehistory + ", areaDetail=" + areaDetail + ", area=" + area  + ", stockLeger=" + stockLeger );
 	    }

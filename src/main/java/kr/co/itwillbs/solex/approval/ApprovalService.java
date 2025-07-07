@@ -21,7 +21,10 @@ public class ApprovalService {
 	
 	// 결재 해야될 기안서 리스트
 	public List<Map<String, Object>> getTodoDocumentList(int offset, int size, long loginEmpId) {
-        return approvalMapper.selectTodoDocumentList(offset, size, loginEmpId);
+		List<Map<String, Object>> lm = approvalMapper.selectTodoDocumentList(offset, size, loginEmpId);
+		System.out.println("------------- lm -------------");
+		System.out.println(lm);
+		return lm;
     }
 	
 	// 결재 해야하는 기안서 상세보기
