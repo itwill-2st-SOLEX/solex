@@ -44,13 +44,14 @@
            									placeholder="예: 2100123" required>
 								</div>
 							</div>
-							<div class="col">
-								<label for="whsManager" class="form-label">주소등록</label><br>
-								  <input type="text" id="sample6_postcode" name="whs_pc" class="form-control d-inline-block w-25" placeholder="우편번호" required>
-								  <input type="button" onclick="sample6_execDaumPostcode()" value="우편번호 찾기"><br>
-								  <input type="text" id="sample6_address" name="whs_add" class="form-control" placeholder="주소" required>
-								  <input type="text" id="sample6_detailAddress" name="whs_da" class="form-control mt-1" placeholder="상세주소" required>
-								  <input type="text" id="sample6_extraAddress" class="form-control mt-1" placeholder="참고항목">
+							<div class="mb-3">
+								<label class="form-label">주소</label>
+								<div class="input-group mb-2">
+									<input type="text" id="sample6_postcode" name="whs_pc" class="form-control" placeholder="우편번호" required readonly>
+									<button class="btn btn-outline-primary" type="button" onclick="sample6_execDaumPostcode()">우편번호 찾기</button>
+								</div>
+								<input type="text" id="sample6_address" name="whs_add" class="form-control mb-2" placeholder="주소" required readonly>
+								<input type="text" id="sample6_detailAddress" name="whs_da" class="form-control" placeholder="상세주소를 입력해주세요" required>
 							</div>
 								
 							<hr>

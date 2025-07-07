@@ -44,24 +44,51 @@
 	<select id="selectProcessNodes" resultType="map">
 		SELECT
 		    'prc_' || pl.prc_lot_id AS id,
-		    prc.prc_nm || ' / ' || prc.prc_code AS text,
+		    prc.prc_nm || ' / ' || prc.prc_code || ' (' || cd.det_nm || ')' AS text, -- ✅ 상태 이름 표시
 		    0 AS children
 		FROM process_lot pl
-		JOIN prdLot_processLot_mapping map ON pl.prc_lot_id = map.prc_lot_id
-		JOIN process prc ON pl.prc_id = prc.prc_id
+		JOIN prdLot_processLot_mapping map 
+		    ON pl.prc_lot_id = map.prc_lot_id
+		JOIN process prc 
+		    ON pl.prc_id = prc.prc_id
+		JOIN product_lot pl2
+		    ON pl.prd_lot_id = pl2.prd_lot_id
+		JOIN suju_order_detail sod
+		    ON pl2.odd_id = sod.odd_id
+		JOIN work_order wo
+		    ON sod.odd_id = wo.odd_id
+		JOIN (
+		    SELECT wp1.wrk_id, wo1.prc_id, wp1.wpo_status
+		    FROM work_process wp1
+		    JOIN work_order wo1
+		        ON wp1.wrk_id = wo1.wrk_id -- ✅ prc_id를 work_order에서 가져옴
+		    JOIN (
+		        SELECT wp2.wrk_id, MAX(wpo_id) AS max_wpo_id
+		        FROM work_process wp2
+		        GROUP BY wp2.wrk_id
+		    ) latest
+		        ON wp1.wrk_id = latest.wrk_id
+		       AND wp1.wpo_id = latest.max_wpo_id
+		) wp
+		    ON wp.wrk_id = wo.wrk_id
+		   AND wp.prc_id = pl.prc_id -- ✅ process_lot과 동일 공정 매칭
+		JOIN code_detail cd
+		    ON wp.wpo_status = cd.det_id -- ✅ 상태 이름 가져오기
 		WHERE map.prd_lot_id = #{prdLotId}
 	</select>
 	
 	<!-- 자재리스트 -->
 	<select id="selectMaterialNodes" resultType="map">
 		SELECT 
-			'mat_' || ml.mat_lot_id AS id,
-			m.mat_nm || ' (' || m.mat_cd || ')' AS text,
-			0 AS children
-		FROM prdLot_matLot_mapping pmm
-		JOIN material_lot ml ON pmm.mat_lot_id = ml.mat_lot_id
+		    'mat_' || ml.mat_lot_id AS id,
+		    m.mat_nm || ' (' || m.mat_cd || ')' AS text,
+		    0 AS children
+		FROM product_lot pl
+		JOIN suju_order_detail sod ON pl.odd_id = sod.odd_id
+		JOIN sujuOrdDetail_matLot_mapping som ON sod.odd_id = som.odd_id
+		JOIN material_lot ml ON som.matlot_id = ml.mat_lot_id
 		JOIN material m ON ml.mat_id = m.mat_id
-		WHERE pmm.prd_lot_id = #{prdLotId}
+		WHERE pl.prd_lot_id = #{prdLotId}
 	</select>
 	
 	<!-- 설비리스트 -->
@@ -79,6 +106,7 @@
 	<!-- 최상위 LOT 상세조회 -->
 	<select id="selectProductLotDetail" parameterType="long" resultType="map">
 	    SELECT
+	    	DISTINCT
 	        pl.prd_lot_code AS "lotCode",
 	        e.emp_nm AS "orderName",
 	        e.emp_num AS "orderNum",
@@ -90,6 +118,7 @@
 	        cd4.det_nm AS "status",
 	        cd5.det_nm AS "productType",
 	        cd6.det_nm AS "height",
+	        sod.odd_cnt AS "orderCount",
 	        pl.prd_lot_start_date AS "startDate",
 	        pl.prd_lot_end_date AS "endDate"
 	    FROM product_lot pl
@@ -109,40 +138,51 @@
 
 	<!-- 공정 상세조회 -->
     <select id="selectProcessLotDetail" parameterType="long" resultType="map">
-	    SELECT * FROM (
-	        SELECT
-	            pl.prc_lot_id,
-	            prc.prc_nm AS "processName",
-	            prc.prc_code AS "processCode",
-	            pl.erp_nm AS "operatorName",
-	            pl.erp_num AS "operatorNum",
-	            pl.prc_lot_start_date AS "processStartDate",
-	            pl.prc_lot_end_date AS "processEndDate",
-	            wp.wpo_jcount AS "successCount",
-	            NVL(qh.qhi_bcount, 0) AS "failCount",
-	            e.eqp_name AS "usedEquipmentName",
-	            e.eqp_code AS "usedEquipmentCode"
-	        FROM process_lot pl
-	        JOIN product_lot pl2 ON pl.prd_lot_id = pl2.prd_lot_id
-	        JOIN suju_order_detail sod ON pl2.odd_id = sod.odd_id
-	        JOIN work_order wo ON sod.odd_id = wo.odd_id
-	        JOIN process prc ON pl.prc_id = prc.prc_id
-	        JOIN equipment e ON pl.eqp_id = e.eqp_id
-	        LEFT JOIN work_process wp 
-	            ON wp.wrk_id = wo.wrk_id
-	           AND wp.wpo_id = (
-	               SELECT MIN(wpo_sub.wpo_id)
-	               FROM work_process wpo_sub
-	               WHERE wpo_sub.wrk_id = wo.wrk_id
-	           )
-	        LEFT JOIN (
-	            SELECT qhi.qhi_target_id, SUM(qhi.qhi_bcount) AS qhi_bcount
-	            FROM quality_history qhi
-	            GROUP BY qhi.qhi_target_id
-	        ) qh ON wp.wpo_id = qh.qhi_target_id
-	        WHERE pl.prc_lot_id = #{prcLotId}
-	    )
-	    WHERE ROWNUM = 1
+	    SELECT
+		    pl.prc_lot_id,
+		    dep_cd.det_nm AS "departmentName",     	-- 담당부서명
+		    team_cd.det_nm AS "teamName",          	-- 담당팀명
+		    pl.erp_nm AS "operatorName",           	-- 공정장 이름
+		    pl.erp_num AS "operatorNum",			-- 공정장 사번
+		    wp.wpo_start_date AS "processStartDate",-- 공정시작일
+		    wp.wpo_end_date AS "processEndDate",    -- 공정종료일
+		    wp.wpo_jcount AS "successCount",        -- 공정별 생산수량
+		    NVL(qh.qhi_bcount, 0) AS "failCount",   -- 공정별 불량수량
+		    e.eqp_name AS "usedEquipmentName",      -- 사용설비명
+		    e.eqp_code AS "usedEquipmentCode",      -- 사용설비코드
+		    cd.det_nm AS "processStatus"            -- 공정진행상태
+		FROM process_lot pl
+		JOIN product_lot pl2
+		    ON pl.prd_lot_id = pl2.prd_lot_id
+		JOIN suju_order_detail sod
+		    ON pl2.odd_id = sod.odd_id
+		JOIN work_order wo
+		    ON sod.odd_id = wo.odd_id
+		JOIN work_process wp
+		    ON wp.wrk_id = wo.wrk_id
+		   AND wpo_step = (
+		       SELECT MAX(wp1.wpo_step)
+		       FROM work_process wp1
+		       JOIN work_order wo1 ON wp1.wrk_id = wo1.wrk_id
+		       WHERE wp1.wrk_id = wo1.wrk_id
+		         AND prc_id = pl.prc_id
+		   )
+		LEFT JOIN quality_history qh
+		    ON wp.wpo_id = qh.qhi_target_id
+		JOIN process prc
+		    ON pl.prc_id = prc.prc_id
+		JOIN equipment e
+		    ON pl.eqp_id = e.eqp_id
+		JOIN code_detail cd
+		    ON wp.wpo_status = cd.det_id
+		-- ✅ 공정장 → employee → 부서명/팀명
+		LEFT JOIN employee emp
+		    ON pl.erp_num = emp.emp_num
+		LEFT JOIN code_detail dep_cd
+		    ON emp.emp_dep_cd = dep_cd.det_id
+		LEFT JOIN code_detail team_cd
+		    ON emp.emp_team_cd = team_cd.det_id
+		WHERE pl.prc_lot_id = #{prcLotId}
 	</select>
 
 	<!-- 자재 상세조회 -->
@@ -151,13 +191,14 @@
             ml.mat_lot_code AS "materialLot",
             m.mat_nm AS "materialName",
             m.mat_cd AS "materialCode",
-            ml.mat_sort AS "materialCount",
+            smm.used_qty AS "materialCount",
             ml.mat_date AS "materialDate",
 			c.cli_nm AS "materialPartner",
 			c.CLI_MGR_NAME AS "materialManager",
 			c.CLI_MGR_PHONE AS "materialPhone"
         FROM material_lot ml
         JOIN material m ON ml.mat_id = m.mat_id
+        JOIN sujuorddetail_matlot_mapping smm ON ml.mat_lot_id = smm.matlot_id
         JOIN client c ON m.cli_id = c.cli_id
         WHERE ml.mat_lot_id = #{matLotId}
     </select>
@@ -180,15 +221,34 @@
         WHERE e.eqp_id = #{eqpId}
     </select>
     
-    <!-- SAVE -->
-    <!-- ✅ 제품 LOT 생성에 필요한 정보 조회 -->
+    <!-- 작업지시 등록 시 -->
+    <!-- ✅ 1. 제품 + 옵션 정보 조회 -->
     <select id="selectLotInsertInfo" parameterType="long" resultType="map">
         SELECT
             #{oddId} AS "odd_id",
-            'LOT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || p.prd_code || '-' || cd1.det_nm || '-' || cd2.det_nm || '-' || LPAD(ROWNUM, 3, '0') AS "prd_lot_code",
+            'LOT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || p.prd_code || '-' || cd1.det_nm || '-' || cd2.det_nm || '-' ||
+            LPAD(NVL((
+	            SELECT COUNT(*)
+	            FROM product_lot pl
+	            JOIN suju_order_detail sod2 ON pl.odd_id = sod2.odd_id
+	            JOIN product_option po2 ON sod2.opt_id = po2.opt_id
+	            WHERE TO_CHAR(pl.prd_lot_start_date, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+	              AND po2.prd_id = po.prd_id
+	              AND po2.opt_size = po.opt_size
+	              AND po2.opt_color = po.opt_color
+	        ), 0) + 1, 3, '0') AS "prd_lot_code",
+            LPAD(NVL((
+	            SELECT COUNT(*)
+	            FROM product_lot pl
+	            JOIN suju_order_detail sod2 ON pl.odd_id = sod2.odd_id
+	            JOIN product_option po2 ON sod2.opt_id = po2.opt_id
+	            WHERE TO_CHAR(pl.prd_lot_start_date, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+	              AND po2.prd_id = po.prd_id
+	              AND po2.opt_size = po.opt_size
+	              AND po2.opt_color = po.opt_color
+	        ), 0) + 1, 3, '0') AS "prd_lot_sort",
             SYSDATE AS "prd_lot_start_date",
-            'lot_status_02' AS "prd_lot_status",
-            1 AS "prd_lot_sort"
+            'lot_status_01' AS "prd_lot_status"
         FROM suju_order_detail sod
         JOIN product_option po ON sod.opt_id = po.opt_id
         JOIN product p ON po.prd_id = p.prd_id
@@ -198,7 +258,7 @@
         AND ROWNUM = 1
     </select>
 
-    <!-- ✅ product_lot insert -->
+    <!-- ✅ 2. product_lot insert -->
     <insert id="insertProductLot" parameterType="map" useGeneratedKeys="true" keyProperty="prdLotId">
         INSERT INTO product_lot (
             prd_lot_code,
@@ -215,7 +275,7 @@
         )
     </insert>
     
-    <!-- ✅ product_lot select -->
+    <!-- ✅ 3. insert 이후 prd_lot_id 조회 -->
     <select id="selectPrdLotId" parameterType="map">
     	SELECT	prd_lot_id as "prd_lot_id"
     	from	product_lot
@@ -223,16 +283,18 @@
     	and		prd_lot_sort = #{prd_lot_sort}
     </select>
 
-    <!-- ✅ odd_id로 work_order 조회 -->
+    <!-- ✅ 4. 작업지시 리스트 조회 -->
     <select id="selectWorkOrdersByOddId" parameterType="long" resultType="map">
         SELECT	wo.wrk_id as "wrk_id",
         		wo.prc_id as "prc_id",
-        		wo.wrk_ord_empId AS "wrk_ord_empId"
+        		wo.wrk_ord_empId AS "wrk_ord_empId",
+        		wpo.wpo_team AS "wpo_team"
         FROM work_order wo
+        JOIN work_process wpo ON wo.wrk_id = wpo.wrk_id
         WHERE wo.odd_id = #{oddId}
     </select>
 
-    <!-- ✅ process_lot insert -->
+    <!-- ✅ 5. process_lot insert -->
     <insert id="insertProcessLot" parameterType="map" useGeneratedKeys="true" keyProperty="prcLotId">
         INSERT INTO process_lot (
             prd_lot_id,
@@ -246,16 +308,46 @@
         ) VALUES (
             #{prdLotId},
             #{prc_id},
-            (SELECT emp_nm FROM employee WHERE emp_id = #{wrk_ord_empId}),
-            (SELECT emp_num FROM employee WHERE emp_id = #{wrk_ord_empId}),
+	        (SELECT emp.emp_nm	-- ✅ 공정장의 이름
+	         FROM work_order wo
+	         JOIN process prc ON wo.prc_id = prc.prc_id
+	         JOIN employee emp
+	              ON emp.emp_dep_cd = prc.det_id
+	             AND emp.emp_team_cd = #{wpo_team}
+	             AND emp.emp_pos_cd = 'pos_04'
+	         WHERE wo.wrk_id = #{wrk_id}
+	           AND ROWNUM = 1),
+	        (SELECT emp.emp_num	-- ✅ 공정장의 사번
+	         FROM work_order wo
+	         JOIN process prc ON wo.prc_id = prc.prc_id
+	         JOIN employee emp
+	              ON emp.emp_dep_cd = prc.det_id
+	             AND emp.emp_team_cd = #{wpo_team}
+	             AND emp.emp_pos_cd = 'pos_04'
+	         WHERE wo.wrk_id = #{wrk_id}
+	           AND ROWNUM = 1),
             NULL,
             NULL,
-            NULL,
-            NULL
+            (SELECT wpo_status FROM work_process wp WHERE wp.wrk_id = #{wrk_id} AND ROWNUM = 1),	-- work_process.wpo_status (공정진행상태)
+	        (SELECT  eqp.eqp_id		-- 사용설비ID
+			FROM    equipment eqp
+			JOIN    process prc ON eqp.prc_id = #{prc_id}
+			JOIN    employee emp ON emp.emp_team_cd = eqp.emp_team
+			WHERE   prc.det_id = emp.emp_dep_cd
+			AND		prc.prc_id = #{prc_id}
+			AND     emp_pos_cd = 'pos_04')
         )
     </insert>
+    
+    <!-- ✅ 6. insert 이후 prc_lot_id 조회 -->
+    <select id="selectPrcLotId" parameterType="map" resultType="long">
+        SELECT prc_lot_id
+        FROM process_lot
+        WHERE prd_lot_id = #{prdLotId} AND prc_id = #{prc_id}
+        ORDER BY prc_lot_id DESC FETCH FIRST 1 ROWS ONLY
+    </select>
 
-    <!-- ✅ prdLot_processLot_mapping insert -->
+    <!-- ✅ 7. prdLot_processLot_mapping insert -->
     <insert id="insertProductProcessMapping" parameterType="map">
         INSERT INTO prdLot_processLot_mapping (
             prd_lot_id,
@@ -265,5 +357,79 @@
             #{prcLotId}
         )
     </insert>
+    
+    <!-- 자재 입고 시 -->
+    <!-- 1. 자재ID를 통해 자재코드 조회 -->
+    <select id="selectMaterialCodeById" parameterType="long" resultType="string">
+	    SELECT mat_cd
+	    FROM material
+	    WHERE mat_id = #{mat_id}
+	</select>
+	
+    <!-- 2. 같은 날짜에 입고한적 있는지 MatLot 조회 -->
+    <select id="selectNextMaterialLotSort" parameterType="map" resultType="int">
+	    SELECT
+	        NVL(MAX(SUBSTR(mat_lot_code, -3)), 0)
+	    FROM material_lot
+	    WHERE mat_id = #{mat_id}
+	      AND TO_CHAR(mat_date, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+	      AND mat_lot_code LIKE '%' || #{mat_code} || '%'
+	</select>
+    
+    <!-- 3. material_lot insert -->
+    <insert id="insertMaterialLot" parameterType="map">
+	    INSERT INTO material_lot (
+	        mat_lot_code,
+	        mat_id,
+	        mat_date,
+	        mat_sort,
+	        are_id,
+	        mat_cnt
+	    ) VALUES (
+	        #{mat_lot_code},
+	        #{mat_id},
+	        sysdate,
+	        #{mat_sort},
+	        #{are_id},
+	        #{whs_his_cnt}
+	    )
+	</insert>
+	
+	<!-- 최초 공정 시작 시 제품LOT 상태값 변경 -->
+	<!-- 1. 최초 공정인지 확인 -->
+	<select id="isFirstProcess" parameterType="long" resultType="boolean">
+	    SELECT CASE
+		           WHEN wp.wpo_step = 1
+		           THEN 1
+		           ELSE 0
+		       END AS is_first_process
+		FROM work_process wp
+		WHERE wp.wpo_id = #{wpoId}
+	</select>
+	
+	<!-- 2. 최상위 LOT 상태를 '진행중(lot_status_02)'으로 변경 -->
+	<update id="updatePrdLotStatusToInProgress" parameterType="long">
+	    UPDATE product_lot
+	    SET prd_lot_status = 'lot_status_02'
+	    WHERE prd_lot_id = (
+	        SELECT pl.prd_lot_id
+	        FROM product_lot pl
+	        JOIN suju_order_detail sod
+	          ON pl.odd_id = sod.odd_id
+	        JOIN work_order wo
+	          ON sod.odd_id = wo.odd_id
+	        JOIN work_process wp
+	          ON wp.wrk_id = wo.wrk_id
+	        WHERE wp.wpo_id = #{wpoId}
+	    )
+	</update>
+	
+	<!-- 창고 배정 시 제품LOT 상태값 변경 -->
+	<!-- 1. 제품 LOT 상태를 완료(lot_status_03)로 변경 -->
+	<update id="updatePrdLotStatusToComplete" parameterType="int">
+	    UPDATE product_lot
+	    SET prd_lot_status = 'lot_status_03' -- ✅ 완료 상태로 변경
+	    WHERE odd_id = #{oddId}
+	</update>
     
 </mapper>

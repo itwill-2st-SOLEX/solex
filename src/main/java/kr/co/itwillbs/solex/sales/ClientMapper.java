@@ -20,4 +20,7 @@ public interface ClientMapper {
 
 	List<Map<String, Object>> getSearchClients(Map<String, Object> keyword);
 
+	// 거래처 사용여부
+	List<Map<String, String>> getClientIsActive();
+
 }

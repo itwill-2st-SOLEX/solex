@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 
 @RestController
 @RequestMapping("/equipment")
+@PreAuthorize("hasAnyRole('1','2','3','4')")
 public class EquipmentRestController {
 
 	@Autowired

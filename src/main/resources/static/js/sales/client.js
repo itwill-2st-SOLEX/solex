@@ -36,6 +36,20 @@ const getClientTypeDisplayName = (type) => {
     }
 };
 
+
+
+// { header: '상세', name: 'detail',
+//     formatter: ({ value }) => { // value는 `processedData`에서 `client.cliId`로 설정됩니다.
+//         return `<button class="btn btn-link p-0 open-detail" style="width: 100%;" tabindex="-1" title="detail" onclick="openDetailModal('${value}')">
+//                   <span>⋮</span>
+//                 </button>`;
+//     }
+// }
+
+
+
+
+
 // =================================================================================================
 // TUI Grid 인스턴스 생성
 // =================================================================================================
@@ -47,21 +61,22 @@ const grid = new tui.Grid({
     bodyHeight: 500,
     autoWidth: true,
     columns: [
-        { header: '거래처 명', name: 'cliNm' }, // 백엔드 DTO 필드명 (camelCase)
-        { header: '대표자 명', name: 'cliCeo' },
-        { header: '사업자 등록번호', name: 'bizRegNo' },
-        { header: '거래처 유형', name: 'cliType', width: 80 },
-        { header: '연락처', name: 'cliPhone' },
-        { header: '담당자 명', name: 'cliMgrName' },
-        { header: '담당자 연락처', name: 'cliMgrPhone' },
-        { header: '주소', name: 'cliAddres', width: 400 },
-        { header: '상세', name: 'detail',
-            formatter: ({ value }) => { // value는 `processedData`에서 `client.cliId`로 설정됩니다.
-                return `<button class="btn btn-link p-0 open-detail" style="width: 100%;" tabindex="-1" title="detail" onclick="openDetailModal('${value}')">
-                          <span>⋮</span>
-                        </button>`;
-            }
-        }
+        { header: '거래처 번호', name: 'cliId', align: 'center',renderer: {
+			     styles: {
+			       color: '#007BFF',
+			       textDecoration: 'underline',
+			       cursor: 'pointer'
+			     }
+			   } },
+        { header: '거래처 명', name: 'cliNm',align: 'center' }, // 백엔드 DTO 필드명 (camelCase)
+        { header: '대표자 명', name: 'cliCeo',align: 'center' },
+        { header: '사업자 등록번호', name: 'bizRegNo',align: 'center' },
+        { header: '거래처 유형', name: 'cliType', width: 80,align: 'center' },
+        { header: '연락처', name: 'cliPhone',align: 'center' },
+        { header: '담당자 명', name: 'cliMgrName',align: 'center' },
+        { header: '담당자 연락처', name: 'cliMgrPhone',align: 'center' },
+        { header: '거래처 사용여부', name: 'cliIsActive', width: 120,align: 'center' },
+        { header: '주소', name: 'cliAddres', width: 400,align: 'center' }
     ]
 });
 
@@ -85,7 +100,8 @@ const getFormElements = () => {
         cliDaInput: document.getElementById('cli_da'),
         noBizCheckbox: document.getElementById('no_biz_checkbox'),
         noBizText: document.getElementById('no_biz_text'),
-        getBizRegNoInfoBtn: document.getElementById('getBizRegNoInfo')
+        getBizRegNoInfoBtn: document.getElementById('getBizRegNoInfo'),
+        clientIsActiveSelect: document.getElementById('clientIsActiveSelect')
     };
 };
 
@@ -96,7 +112,6 @@ const getFormElements = () => {
 // 모달 HTML 템플릿을 동적으로 생성하는 함수
 // data 객체의 속성명을 백엔드 DTO(camelCase)에 맞춰 수정
 function generateModalHtml(mode, data = {}, clientId = null) {
-    console.log("모달 데이터:", data);
     const isUpdateMode = mode === 'update';
     const modalTitleText = isUpdateMode ? '거래처 수정' : '거래처 등록';
     const submitButtonText = isUpdateMode ? '수정' : '등록';
@@ -115,6 +130,8 @@ function generateModalHtml(mode, data = {}, clientId = null) {
     const cli_add = data.CLI_ADD || '';
     const cli_da = data.CLI_DA || '';
     const cli_id = data.CLI_ID || '';
+    const cli_is_active = data.CLI_IS_ACTIVE || '';
+    
 
 	// '사업자 등록번호 미보유' 상태 결정
     const isNoBizRegNo = biz_reg_no_value === '-';
@@ -145,7 +162,7 @@ function generateModalHtml(mode, data = {}, clientId = null) {
 	            <label for="biz_reg_no" class="form-label">사업자 등록번호 <span style="color:red">*</span></label>
 	            <div class="d-flex align-items-center">
 	                <input type="text" maxlength="10" id="biz_reg_no" name="biz_reg_no" class="form-control" placeholder="사업자 등록번호 (숫자만)" style="width: 48.4%;" value="${actual_biz_reg_no_for_input}" ${biz_reg_input_disabled}>
-	                <button type="button" class="btn btn-primary ms-2" id="getBizRegNoInfo" ${biz_reg_input_disabled}>사업자 등록번호 조회</button>
+	                <button type="button" class="btn btn-primary ms-7" id="getBizRegNoInfo" ${biz_reg_input_disabled}>사업자 등록번호 조회</button>
 	            </div>
 	            <div class="form-check mt-2">
 	                <input type="checkbox" class="form-check-input" id="no_biz_checkbox" name="no_biz_checkbox" ${no_biz_checkbox_checked}>
@@ -155,12 +172,18 @@ function generateModalHtml(mode, data = {}, clientId = null) {
 	                </div>
 	            </div>
 	        </div>
-            <div class="mb-4">
-                <div>
+            <div class="mb-4 row">
+                <div class="col">
                     <label for="clientTypeSelect" class="form-label">거래처 유형 <span style="color:red">*</span></label>
                     <br>
                     <select id="clientTypeSelect" class="form-select">
                         </select>
+                </div>
+
+                <div class="col">
+                    <label for="clientIsActiveSelect" class="form-label">거래 여부 <span style="color:red">*</span></label>
+                    <br>
+                    <select id="clientIsActiveSelect" class="form-select"></select>
                 </div>
             </div>
             <div class="mb-4">
@@ -184,7 +207,7 @@ function generateModalHtml(mode, data = {}, clientId = null) {
                 <div class="form-label">주소 <span style="color:red">*</span></div>
                 <div class="d-flex align-items-center mb-2">
                     <input type="text" id="cli_pc" name="cli_pc" class="form-control" style="width: 48.4%;" readonly="readonly" placeholder="우편번호" value="${cli_pc}">
-                    <button type="button" class="btn btn-primary ms-2" onclick="findPostCode()">우편번호 찾기</button>
+                    <button type="button" class="btn btn-primary ms-7" onclick="findPostCode()">우편번호 찾기</button>
                 </div>
                 <div class="d-flex align-items-center mb-2">
                     <input type="text" id="cli_add" name="cli_add" class="form-control" readonly="readonly" placeholder="기본주소" value="${cli_add}">
@@ -207,6 +230,7 @@ function openCreateClientModal() {
     currentClientId = null; // 등록 모드 설정
     isBizRegNoVerified = false; // 사업자등록번호 검증 상태 초기화
     loadClientTypes(); // 거래처 유형 로드
+    loadClientIsActive(); // 거래처 사용여부 로드
     attachDynamicEventListeners(); // 동적 이벤트 리스너 재연결
     bootstrapModalInstance.show(); // 모달 표시
 }
@@ -246,6 +270,7 @@ window.openDetailModal = async (clientId) => { // TUI Grid formatter에서 호�
         isBizRegNoVerified = false; // 수정 모드 진입 시 검증 상태 초기화
 
         loadClientTypes(data.CLI_TYPE);
+        loadClientIsActive(data.CLI_IS_ACTIVE,data.CLI_IS_ACTIVE_NM);
         attachDynamicEventListeners();
 
         bootstrapModalInstance.show();
@@ -292,7 +317,7 @@ function attachDynamicEventListeners() {
 // 폼 유효성 검사 함수
 function isValidForm() {
     const { cliNmInput, cliCeoInput, bizRegNoInput, noBizCheckbox, clientTypeSelect,
-            cliPhoneInput, cliMgrNameInput, cliMgrPhoneInput, cliPcInput, cliDaInput } = getFormElements();
+            cliPhoneInput, cliMgrNameInput, cliMgrPhoneInput, cliPcInput, cliDaInput, clientIsActiveSelect } = getFormElements();
 
     if (!cliNmInput || cliNmInput.value.trim() === '') {
         alert("거래처명을 입력해주세요.");
@@ -375,6 +400,13 @@ function isValidForm() {
         return false;
     }
 
+
+    if (!clientIsActiveSelect || clientIsActiveSelect.value === '') {
+        alert("거래 여부를 선택해주세요.");
+        if(clientIsActiveSelect) clientIsActiveSelect.focus();
+        return false;
+    }
+
     return true;
 }
 
@@ -395,7 +427,8 @@ async function submitClientForm() {
             cliPcInput,
             cliAddInput,
             cliDaInput,
-            noBizCheckbox } = getFormElements();
+            noBizCheckbox,
+            clientIsActiveSelect } = getFormElements();
 
     let finalBizRegNo = '';
     if (noBizCheckbox && noBizCheckbox.checked) {
@@ -418,6 +451,8 @@ async function submitClientForm() {
         cli_pc: cliPcInput.value.trim(),
         cli_add: cliAddInput.value.trim(),
         cli_da: cliDaInput.value.trim(),
+        cli_id: currentClientId,
+        cli_is_active: clientIsActiveSelect ? clientIsActiveSelect.value : ''
     };
 
 
@@ -501,11 +536,14 @@ async function scrollMoreClient(isInitialLoad = false) {
         }
 
         const result = await response.json(); // 서버 응답 (Map<String, Object> 형태)
+
+        console.log(result);
 		
 
         if (result.status === "OK" && result.data) {
             // TUI Grid에 맞게 데이터 가공 (예: 주소 조합, 타입 한글 변환)
             const processedData = result.data.map(client => ({
+                cliId: client.CLI_ID,
                 cliNm: client.CLI_NM,
                 cliCeo: client.CLI_CEO,
                 bizRegNo: client.BIZ_REG_NO || "-",
@@ -514,7 +552,8 @@ async function scrollMoreClient(isInitialLoad = false) {
                 cliMgrName: client.CLI_MGR_NAME,
                 cliMgrPhone: client.CLI_MGR_PHONE,
                 cliAddres: (client.CLI_ADD || "") + " " + (client.CLI_DA || ""),
-                detail: client.CLI_ID // 상세 버튼을 위해 cliId 전달
+                detail: client.CLI_ID, // 상세 버튼을 위해 cliId 전달
+                cliIsActive: client.CLI_IS_ACTIVE_NM // 거래처 사용여부
             }));
 
             if (isInitialLoad) {
@@ -552,6 +591,10 @@ async function scrollMoreClient(isInitialLoad = false) {
         grid.off('scrollEnd'); // 오류 발생 시 스크롤 이벤트 해제
     }
 }
+
+
+
+
 
 
 // =================================================================================================
@@ -698,9 +741,7 @@ function findPostCode() {
 // 거래처 유형 드롭다운 로드
 async function loadClientTypes(selectedValue = null) {
     const select = document.getElementById('clientTypeSelect');
-    console.log("선택된 유형값:", selectedValue); // 디버깅용
     if (!select) {
-        console.error("거래처 유형 선택 요소를 찾을 수 없습니다.");
         return; // 요소가 없으면 종료
     }
 
@@ -735,6 +776,60 @@ async function loadClientTypes(selectedValue = null) {
         alert("거래처 유형을 불러오는 데 실패했습니다.");
     }
 }
+
+async function loadClientIsActive(selectedValue = null, selectedText = null) {
+    const select = document.getElementById('clientIsActiveSelect');
+    if (!select) {
+        return; // 요소가 없으면 종료
+    }
+
+    try {
+        const response = await fetch('/SOLEX/clients/client-is-active');
+        if (!response.ok) {
+            throw new Error('거래처 사용여부를 불러오지 못했습니다.');
+        }
+        const clientIsActive = await response.json();
+        console.log("clientIsActive", clientIsActive);
+
+        select.innerHTML = ''; // 기존 옵션 비우기
+
+        // 3. '선택하세요' 기본 옵션을 생성하고 추가합니다.
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '선택하세요';
+        defaultOption.disabled = true; // 직접 선택할 수 없도록 비활성화
+        select.appendChild(defaultOption);
+
+        // 4. 서버에서 받아온 데이터로 옵션들을 생성하고 추가합니다.
+        clientIsActive.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.DET_ID;
+            option.textContent = type.DET_NM;
+            select.appendChild(option);
+        });
+
+        // 5. selectedValue가 있으면 해당 값을 가진 옵션을 선택된 상태로 만듭니다.
+        //    - selectedValue가 없거나(신규 등록), 일치하는 옵션이 없으면 '선택하세요'가 선택된 상태로 유지됩니다.
+        if (selectedValue) {
+            select.value = selectedValue;
+        } else {
+            select.selectedIndex = 0; // '선택하세요'를 명시적으로 선택
+        }
+
+
+
+
+
+    } catch (error) {
+        console.error("거래처 사용여부 로드 중 오류 발생:", error);
+        alert("거래처 유형을 불러오는 데 실패했습니다.");
+    }
+}
+
+
+
+
+
 // 함수가 짧은 시간 내에 여러 번 호출되는 것을 방지합니다.
 const debounce = (func, delay) => {
     let timeoutId;
@@ -753,6 +848,10 @@ const debounce = (func, delay) => {
 // DOMContentLoaded 이벤트 리스너: 문서 로드 후 초기화
 // =================================================================================================
 document.addEventListener('DOMContentLoaded', () => {
+
+
+
+
     // 모달 관련 요소 초기화
     myModalEl = document.getElementById('myModal');
     modalContentContainer = document.getElementById('modalContentContainer');
@@ -771,38 +870,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 	// --- TUI Grid 스크롤 이벤트에 연결 ---
-	   // 이전에 논의했던 DOM 기반 스크롤 감지 로직을 TUI Grid의 scrollEnd 이벤트 내부에 적용
-	   grid.on('scrollEnd', (ev) => {
-	       const gridContainerElement = grid.el;
+    // 이전에 논의했던 DOM 기반 스크롤 감지 로직을 TUI Grid의 scrollEnd 이벤트 내부에 적용
+    grid.on('scrollEnd', (ev) => {
+        const gridContainerElement = grid.el;
 
-	       if (!gridContainerElement) {
-	           console.error("TUI Grid 컨테이너 요소를 찾을 수 없습니다. grid.el이 유효한지 확인해주세요.");
-	           return;
-	       }
+        if (!gridContainerElement) {
+            console.error("TUI Grid 컨테이너 요소를 찾을 수 없습니다. grid.el이 유효한지 확인해주세요.");
+            return;
+        }
 
-	       // 실제 스크롤이 발생하는 TUI Grid 내부의 body area 요소를 찾습니다.
-	       const gridBodyArea = gridContainerElement.querySelector('.tui-grid-body-area');
+        // 실제 스크롤이 발생하는 TUI Grid 내부의 body area 요소를 찾습니다.
+        const gridBodyArea = gridContainerElement.querySelector('.tui-grid-body-area');
 
-	       if (!gridBodyArea) {
-	           console.error("TUI Grid body area 요소를 찾을 수 없습니다. HTML 구조 또는 클래스명을 확인해주세요.");
-	           return;
-	       }
+        if (!gridBodyArea) {
+            console.error("TUI Grid body area 요소를 찾을 수 없습니다. HTML 구조 또는 클래스명을 확인해주세요.");
+            return;
+        }
 
-	       // DOM 요소의 속성으로 스크롤 정보 가져오기
-	       const currentScrollTop = gridBodyArea.scrollTop;
-	       const scrollHeight = gridBodyArea.scrollHeight;
-	       const clientHeight = gridBodyArea.clientHeight;
+        // DOM 요소의 속성으로 스크롤 정보 가져오기
+        const currentScrollTop = gridBodyArea.scrollTop;
+        const scrollHeight = gridBodyArea.scrollHeight;
+        const clientHeight = gridBodyArea.clientHeight;
 
 
-	       // 스크롤이 수직으로 끝까지 도달했는지 확인 (오차 범위 10px)
-	       const SCROLL_THRESHOLD = 10;
-	       const isVerticalScrollEnd = (currentScrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD);
+        // 스크롤이 수직으로 끝까지 도달했는지 확인 (오차 범위 10px)
+        const SCROLL_THRESHOLD = 10;
+        const isVerticalScrollEnd = (currentScrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD);
 
-	       if (isVerticalScrollEnd) {
-	           scrollMoreClient(false); // 추가 로드 (다음 페이지)
-	       } else {
-	       }
-	   });
+        if (isVerticalScrollEnd) {
+            scrollMoreClient(false); // 추가 로드 (다음 페이지)
+        } else {
+        }
+    });
+
+    grid.on('click', (ev) => {
+        if (ev.columnName === 'cliId') {
+            const rowData = grid.getRow(ev.rowKey);
+            openDetailModal(rowData.cliId);
+        }
+    });
+
+
+
+
 
     // --- 검색 입력 필드 및 검색 버튼 이벤트 ---
     const searchInput = document.getElementById('searchInput'); // 검색 입력 필드 ID

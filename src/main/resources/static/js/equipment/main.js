@@ -24,7 +24,13 @@ const grid = new tui.Grid({
     scrollY: true,
     scrollX: false,
     columns: [
-        { header: '설비 코드', name: 'EQP_CODE', width: 150, align: 'center', sortable: true },
+        { header: '설비 코드', name: 'EQP_CODE', width: 150, align: 'center', sortable: true ,renderer: {
+			     styles: {
+			       color: '#007BFF',
+			       textDecoration: 'underline',
+			       cursor: 'pointer'
+			     }
+			   }},
         { header: '제조사', name: 'CLI_NM', align: 'center', sortable: true },
         { header: '공정 명', name: 'PRC_NM', width: 150, align: 'center', sortable: true },
         { header: '설비 명', name: 'EQP_NAME', align: 'center', sortable: true },
@@ -74,7 +80,7 @@ function setupEventListeners() {
 
     // 그리드 행 클릭 -> 상세 모달 열기
     grid.on('click', (ev) => {
-        if (ev.rowKey !== undefined && ev.columnName === 'EQP_NAME') {
+        if (ev.rowKey !== undefined && ev.columnName === 'EQP_CODE') {
             const rowData = grid.getRow(ev.rowKey);
             openDetailModal(rowData);
         }

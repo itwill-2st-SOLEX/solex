@@ -15,41 +15,80 @@
      </insert>
   		
 	<select id="selectTodoDocumentList" resultType="map">
-  		WITH me AS (
-    		SELECT emp_cat_cd, emp_dep_cd, emp_team_cd, emp_pos_cd
-    		FROM   employee emp
-    		WHERE  emp_id = #{loginEmpId}
-  		)
-  		SELECT al.doc_id, 
-  				al.apl_id,
-  				c.det_id AS doc_type_code,
-  				c.det_nm AS doc_type,
-  				s.det_nm AS apl_sts,
-  				al.apl_step_no, 
-  				TO_CHAR(d.doc_reg_time, 'YYYY-MM-DD HH24:MI:SS') AS doc_reg_time
-  		FROM   approval_line al
-  		JOIN   document d ON d.doc_id = al.doc_id
-  		LEFT JOIN code_detail c
-		    ON d.doc_type = c.det_id
-		LEFT JOIN code_detail s 
-		    ON al.apl_sts  = s.det_id
-  		CROSS  JOIN me m
-  		WHERE  al.apl_sts    = 'apl_sts_01'
-    	AND  al.emp_id IS NULL
-    	AND  al.apl_emp_pos  = m.emp_pos_cd    	
-    	AND  al.apl_emp_cat = m.emp_cat_cd
-    	AND  al.apl_emp_dep = m.emp_dep_cd
-    	AND  al.apl_emp_team = m.emp_team_cd
-    	AND  NOT EXISTS (
-          	SELECT 1
-          	FROM   approval_line apl
-          	WHERE  apl.doc_id  = al.doc_id
-            AND  apl.apl_step_no &gt; al.apl_step_no
-            AND  apl.apl_sts != 'apl_sts_02'
-        )
-  		ORDER  BY d.doc_reg_time DESC
-  		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
-   </select>
+	    -- WITH절을 사용하여 로그인한 사용자의 정보를 미리 정의합니다.
+	    WITH me AS (
+	        SELECT emp_id, emp_cat_cd, emp_dep_cd, emp_team_cd, emp_pos_cd
+	        FROM   employee emp
+	        WHERE  emp_id = #{loginEmpId}
+	    )
+	    -- 최종 결과를 SELECT하고, 시간 포맷을 변경합니다.
+	    SELECT
+	        doc_id,
+	        apl_id,
+	        doc_type_code,
+	        doc_type,
+	        apl_sts,
+	        apl_step_no,
+	        TO_CHAR(doc_reg_time, 'YYYY-MM-DD HH24:MI:SS') AS doc_reg_time
+	    FROM (
+	        -- --------------------------------------------------------------------
+	        -- [첫 번째 쿼리: 내가 '결재할' 문서 (상태: 대기)]
+	        -- 기존 쿼리 로직을 거의 그대로 사용합니다.
+	        -- --------------------------------------------------------------------
+	        SELECT
+	            al.doc_id,
+	            al.apl_id,
+	            c.det_id AS doc_type_code,
+	            c.det_nm AS doc_type,
+	            s.det_nm AS apl_sts,
+	            al.apl_step_no,
+	            d.doc_reg_time
+	        FROM approval_line al
+	        JOIN document d ON d.doc_id = al.doc_id
+	        LEFT JOIN code_detail c ON d.doc_type = c.det_id
+	        LEFT JOIN code_detail s ON al.apl_sts  = s.det_id
+	        CROSS JOIN me m
+	        WHERE al.apl_sts = 'apl_sts_01' -- '대기' 상태 코드
+	          AND al.emp_id IS NULL -- 아직 특정 결재자가 지정되지 않음 (부서/직책 결재)
+	          AND al.apl_emp_pos  = m.emp_pos_cd
+	          AND al.apl_emp_cat = m.emp_cat_cd
+	          AND al.apl_emp_dep = m.emp_dep_cd
+	          AND al.apl_emp_team = m.emp_team_cd
+	          AND NOT EXISTS ( -- 내 결재 순서가 맞는지 확인
+	              SELECT 1
+	              FROM   approval_line apl
+	              WHERE  apl.doc_id  = al.doc_id
+	                AND  apl.apl_step_no > al.apl_step_no
+	                AND  apl.apl_sts != 'apl_sts_02'
+	          )
+	
+	        UNION ALL -- 두 개의 SELECT 결과를 중복 제거 없이 모두 합칩니다.
+	
+	        -- --------------------------------------------------------------------
+	        -- [두 번째 쿼리: 내가 '처리한' 문서 (상태: 승인, 반려 등)]
+	        -- 내가 이미 결재한 내역을 조회하는 로직입니다.
+	        -- --------------------------------------------------------------------
+	        SELECT
+	            al.doc_id,
+	            al.apl_id,
+	            c.det_id AS doc_type_code,
+	            c.det_nm AS doc_type,
+	            s.det_nm AS apl_sts,
+	            al.apl_step_no,
+	            d.doc_reg_time
+	        FROM approval_line al
+	        JOIN document d ON d.doc_id = al.doc_id
+	        LEFT JOIN code_detail c ON d.doc_type = c.det_id
+	        LEFT JOIN code_detail s ON al.apl_sts  = s.det_id
+	        CROSS JOIN me m
+	        WHERE al.emp_id = m.emp_id -- 결재자 ID가 내 ID와 일치하는 결재 라인
+	          -- AND al.apl_sts != 'apl_sts_01' -- 필요시 '승인', '반려' 코드만 명시할 수도 있습니다.
+	                                         -- 예: AND al.apl_sts IN ('apl_sts_03', 'apl_sts_04')
+	    ) combined_results
+	    -- 합쳐진 전체 결과에 대해 정렬 및 페이징을 적용합니다.
+	    ORDER BY doc_reg_time DESC
+	    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
    
 	<update id="updateApprovalLine" parameterType="map">
 	    UPDATE approval_line
