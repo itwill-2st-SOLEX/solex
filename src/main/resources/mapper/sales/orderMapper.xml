@@ -14,6 +14,7 @@
     FROM suju_order ord
     LEFT JOIN client cli
     ON cli.cli_id = ord.cli_id
+	ORDER BY ord.ord_id desc
     OFFSET #{offset} ROWS
     FETCH NEXT #{limit} ROWS ONLY
 </select>

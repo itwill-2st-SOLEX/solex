@@ -85,4 +85,21 @@ public class OrderRequestsRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류가 발생했습니다.");
         }
     }
+
+
+    // 자재 확인
+    @PostMapping("/check-material") 
+    public ResponseEntity<String> checkOrderMaterial(@RequestBody Map<String, Object> params) throws Exception {        
+        try {
+            orderRequestsService.checkMaterial(params);
+            // 모든 자재가 등록되어 있으면 성공 메시지 반환
+            return new ResponseEntity<>("모든 자재가 성공적으로 확인되었습니다.", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            // 재고가 등록되지 않은 경우 예외 메시지와 함께 400 Bad Request 반환
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            // 그 외 예상치 못한 예외 처리
+            return new ResponseEntity<>("알 수 없는 오류가 발생했습니다: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

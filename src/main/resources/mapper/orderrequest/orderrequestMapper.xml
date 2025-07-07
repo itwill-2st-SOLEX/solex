@@ -97,7 +97,7 @@
 	</select>
 
 
-
+	
 	<!-- 승인 로직 -->
 	<!-- 재고 조회 -->
 	<select id="checkStock" parameterType="Map" resultType="String">
@@ -197,6 +197,31 @@
      where odd_id = #{odd_id}
 	</update>
 
+
+	<!-- 선택한 자재가 창고에서 조회되는지 -->
+	<select id="checkMaterial" parameterType="Map" resultType="String">
+	SELECT
+		CASE
+			WHEN T2.item_id IS NOT NULL THEN '등록됨'
+			ELSE '등록안됨'
+		END AS registration_status
+	FROM
+		(SELECT
+			mat.mat_id
+		FROM
+			suju_order_detail odd
+		LEFT JOIN
+			product_option opt ON opt.opt_id = odd.opt_id
+		LEFT JOIN
+			bom bom ON bom.opt_id = opt.opt_id
+		LEFT JOIN
+			material mat ON mat.mat_id = bom.mat_id
+		WHERE
+			odd.odd_id = #{odd_id}
+		) T1
+	LEFT JOIN
+		area T2 ON T1.mat_id = T2.item_id AND T2.are_type = 'area_type_01'
+	</select>
 
   
 </mapper>

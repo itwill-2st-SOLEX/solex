@@ -11,6 +11,7 @@
 		cli.cli_phone as CLI_PHONE, -- 거래처 대표자 전화번호
 		ord.ord_add || ' ' || ord.ord_da as ORD_ADDRESS, -- 주소		
 		odd.odd_sts as ODD_STS,
+		odd.odd_cnt as ODD_CNT,
 		cd.det_nm as DET_NM,
 		TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ORD_MOD_DATE, -- 수정일
 		TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ORD_END_DATE -- 납품 예정일
