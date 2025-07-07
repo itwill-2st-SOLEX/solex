@@ -11,12 +11,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import kr.co.itwillbs.solex.area.AreaMapper;
 import kr.co.itwillbs.solex.lot.LotService;
 @Service
 public class MaterialOrdersService {
 
 	@Autowired
 	private MaterialOrdersMapper materialOrdersMapper;
+	
+	@Autowired
+	private AreaMapper areaMapper;
 	
 	@Autowired
 	private LotService lotService;
@@ -57,13 +61,32 @@ public class MaterialOrdersService {
 	@Transactional
 	public void materialApprove(Map<String, Object> map) {
 		
-	    int warehistory = materialOrdersMapper.matAppWareHis(map);
+		String areId = (String) map.get("are_id");
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " + areId );
+
+		Long areDetId = areaMapper.getDetIdByAreaId(areId);
+		map.put("are_det_id", areDetId);
+		
+		
+		
+		int warehistory = materialOrdersMapper.matAppWareHis(map);
+
 	    int areaDetail = materialOrdersMapper.matAppAreaDetail(map);
+
 	    int area = materialOrdersMapper.matAppArea(map);
+
 	    int stockLeger = materialOrdersMapper.matAppStockLeger(map);
+		System.out.println("1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+
 	    materialOrdersMapper.updateApproval(map);
+		System.out.println("2!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+
 	    // 자재LOT생성
 	    lotService.createMaterialLot(map);
+	    System.out.println("3!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
+		
+		
+	    
 
 	    // 2. DB 처리 또는 로직 실행
 	    System.out.println("materialApprove 종료!!!!!!!!!");

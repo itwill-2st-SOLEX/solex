@@ -179,7 +179,7 @@ public class LotService {
     // ---------------- 자재 입고 시 ----------------
     public void createMaterialLot(Map<String, Object> map) {
     	// 1. 자재ID를 통해 자재코드 조회
-    	Long mat_id = Long.parseLong((String) map.get("mat_id"));
+    	Long mat_id = Long.valueOf(String.valueOf(map.get("mat_id")));
     	String matCode = lotMapper.selectMaterialCodeById(mat_id);
     	
     	map.put("mat_code", matCode);
