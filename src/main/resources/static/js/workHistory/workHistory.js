@@ -123,6 +123,9 @@ async function dataFormat(data) {
 		console.log(item);
         const step = document.createElement('div');
         step.classList.add('timeline-step');
+		
+		const startDate = formatter(item.WPO_START_DATE, true);
+		const endDate = formatter(item.WPO_END_DATE, true);
         
         let backgroundColor = '#ccc'; // 기본 회색 (대기 상태)
         let borderColor = '#ccc';
@@ -160,9 +163,40 @@ async function dataFormat(data) {
                 ${index + 1}
             </div>
             <div class="timeline-content">
-                <div class="step-title">${item.PRC_NM}공정 ${item.WPO_TEAM_NM} ${item.WPO_START_DATE} ~ ${item.WPO_END_DATE}</div>
+                <div class="step-title">${item.PRC_NM}공정${item.WPO_TEAM_NM} <br><span id="workHistory_stEdDate">시작시간 : ${startDate} <br>종료시간 : ${endDate}</span></div>
             </div>
         `;
         container.appendChild(step);
     });
+}
+function formatter(date, includeTime = false) {
+    let d = new Date(date);
+
+    if (isNaN(d.getTime())) {
+        console.warn("formatter: 유효하지 않은 날짜 값:", date);
+        return ''; 
+    }
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    let result = `${year}-${month}-${day}`; 
+
+    if (includeTime) {
+        const timeParts = new Intl.DateTimeFormat('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true 
+        }).formatToParts(d);
+
+        const getPart = type => timeParts.find(p => p.type === type)?.value;
+
+        const dayPeriod = getPart('dayPeriod');
+        const hour = getPart('hour');
+        const minute = getPart('minute');
+        result += ` ${dayPeriod} ${hour}:${minute}`;
+    }
+
+    return result;
 }

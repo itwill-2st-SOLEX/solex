@@ -64,10 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 숨겨진 att_id 필드 설정
         if (att_id) {
             currentAttIdInput.value = attendanceData.att_id;
-            console.log('숨겨진 필드 ATT_ID 설정됨:', currentAttIdInput.value);
         } else {
             currentAttIdInput.value = '';
-            console.log('ATT_ID가 없어 숨겨진 필드가 비어있음.');
         }
 
         // 출근 시간 표시 및 버튼 상태 업데이트
@@ -112,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'GET',
             dataType: 'json',
             success: function(response) {
-                console.log('오늘 출퇴근 현황 응답:', JSON.stringify(response));
                 // 받아온 데이터를 UI 업데이트 함수에 전달
                 updateAttendanceUI(response);
             },
@@ -160,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
     punchOutButton.addEventListener('click', () => {
 
         const currentAttId = currentAttIdInput.value; // 숨겨진 필드에서 att_id 가져오기
-        console.log('전송하려는 ATT_ID:', currentAttId);
 
         $.ajax({
             url: PUNCH_OUT_URL,

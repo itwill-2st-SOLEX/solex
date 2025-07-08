@@ -39,11 +39,9 @@ public class BomsRestController {
 	    @RequestParam(name = "perPage") int perPage
 	) {
 	    int offset = (page - 1) * perPage;
-	    System.out.println("offset ?? " + offset);
 	    List<Map<String, Object>> rows = bomsService.getBomList(opt_id, offset, perPage);
 	    
 	    
-	    System.out.println("getBomList?? " + rows);
 	    if (rows == null) rows = new ArrayList<>();
 
 	    int totalCount = bomsService.getTotalBomCount(opt_id);
@@ -56,7 +54,6 @@ public class BomsRestController {
 	
 	@PostMapping("/save")
 	public Map<String, Object> saveBomInfo(@RequestBody Map<String, List<Map<String, Object>>> map) {
-		System.out.println("save 함수의 데이터 : " + map);
 		List<Map<String, Object>> insertList = map.get("createdRows");
 	    List<Map<String, Object>> updateList = map.get("updatedRows");
 	    
@@ -81,7 +78,6 @@ public class BomsRestController {
     @PostMapping("/batchSave")
     public ResponseEntity<Map<String, Object>> batchSaveBom(@RequestBody Map<String, Object> payload) {
         Map<String, Object> response = new HashMap<>();
-        System.out.println("response : " + response);
         return null;
 //        try {
 //            // 1. 요청 페이로드에서 데이터 추출
@@ -135,7 +131,6 @@ public class BomsRestController {
 	// ⭐ BOM 삭제 API 엔드포인트 ⭐
     @DeleteMapping("/deleteBom")
     public ResponseEntity<Map<String, Object>> deleteBom(@RequestBody List<Integer> bomIds) {
-    	System.out.println("BOM ID 콘트롤러에 제대로 들어옴? " + bomIds);
         Map<String, Object> response = new HashMap<>();
         try {
             int deletedCount = bomsService.deleteBom(bomIds);
