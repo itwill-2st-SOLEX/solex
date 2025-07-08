@@ -13,4 +13,10 @@ public interface WorkHistoryMapper {
 			@Param("offset") int offset, 
 			@Param("size") int size);
 	
+	List<Map<String, Object>> selectWorkDetailHistoryList(
+			@Param("oddId") String oddId);
+
+
+	List<Map<String, Object>> selectWorkDetailHistoryTeamList(
+			@Param("oddId") String oddId);
 }

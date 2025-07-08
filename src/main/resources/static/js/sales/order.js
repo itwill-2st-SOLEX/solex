@@ -116,6 +116,8 @@ async function setupModalContents() {
 
             const orderData = JSON.parse(myModalElement.dataset.orderData);
             console.log("모달에 로드된 주문 데이터:", orderData);
+            enableForm(true);
+            
             populateModalWithData(orderData);
 
 
@@ -124,11 +126,12 @@ async function setupModalContents() {
             modalTitle.textContent = '수주 등록'; // 제목을 '수주 등록'으로 복원
             newSubmitBtn.textContent = '등록';      // 버튼 텍스트를 '등록'으로 복원
             newSubmitBtn.addEventListener('click', submitForm); // 등록 이벤트 연결
-
+            enableForm(true);
+            
             resetOrderForm();
             initDate();
         }
-
+    
         if (INNER_TUI_GRID_INSTANCE) INNER_TUI_GRID_INSTANCE.refreshLayout();
     }, 150);
 }
@@ -314,7 +317,7 @@ async function onProductSelect(selected) {
     lastLoadedProductCd = selectProductCd;
 }
 
-function populateModalWithData(data) {
+async function populateModalWithData(data) {
     resetOrderForm();
     const { orderInfo, orderItems, availableOptions } = data;
     if (!orderInfo) return;
@@ -346,26 +349,30 @@ function populateModalWithData(data) {
         }));
         INNER_TUI_GRID_INSTANCE.resetData(transformedItems);
     }
+
+    // orderItems의 ODD_STS가 "수주 등록"이면 수정 변경모드로
+    console.log(orderItems);
+
+    if (orderItems && orderItems.length > 0) {
+    // 모든 orderItems의 ODD_STS가 "수주 등록"일 때만 true가 됩니다.
+    // 하나라도 "수주 등록"이 아니면 false가 됩니다.
+    const allArePendingItems = orderItems.every(item => item.ODD_STS === "수주 등록");
     
-    // orderItems의 ODD_STS가 하나라도 수주등록이 아니라면 거래처명, 상품명, 수량, 배송지, 납품요청일, 상태, 상태변경일을 disabled
-    if(orderItems.some(item => item.ODD_STS !== '수주 등록')) {
-        enableForm(false);
-    } else {
-        enableForm(true);
-    }
-
-
+    console.log(allArePendingItems); // 이 부분이 이제 '모두 수주 등록'일 때만 true를 출력합니다.
+    enableForm(allArePendingItems);
+}
+    
 
 }
 
-function enableForm(isEnabled) {
+async function enableForm(isEnabled) {
     document.getElementById('client-search-input').disabled = !isEnabled;
     document.getElementById('product-search-input').disabled = !isEnabled;
     document.getElementById('odd_end_date').disabled = !isEnabled;
     document.getElementById('odd_pay_date').disabled = !isEnabled;
-    document.getElementById('opt_color').disabled = !isEnabled;
-    document.getElementById('opt_size').disabled = !isEnabled;
-    document.getElementById('opt_height').disabled = !isEnabled;
+    document.getElementById('display_opt_color').disabled = !isEnabled;
+    document.getElementById('display_opt_size').disabled = !isEnabled;
+    document.getElementById('display_opt_height').disabled = !isEnabled;
 
     document.getElementById('cli_pc').disabled = !isEnabled;
     document.getElementById('cli_add').disabled = !isEnabled;
@@ -391,6 +398,7 @@ function resetAndFetchGridData() { currentPage = 0; hasMoreData = true; if (TUI_
 
 async function loadAllProductOptions(data) {
     let optionsData;
+    console.log(data);
     if (typeof data === 'string' || typeof data === 'number') {
         if (!data) { resetOrderStep('color'); return; }
         try { optionsData = await (await fetch(`/SOLEX/orders/product/${data}`)).json(); }
@@ -458,33 +466,65 @@ function addRowToInnerGrid() {
     resetOptionForms();
 }
 
-function resetOptionForms() { ['color', 'size', 'height'].forEach(type => { const wrapper = document.getElementById(`${type}CustomSelectWrapper`); if (wrapper) { wrapper.querySelector('.select-box input').value = ''; wrapper.querySelector('.options-container').innerHTML = ''; document.getElementById(`opt_${type}`).value = ''; }}); }
+function resetOptionForms() {
+    ['color', 'size', 'height'].forEach(type => {
+        const wrapper = document.getElementById(`${type}CustomSelectWrapper`);
+        if (wrapper) {
+            // 화면에 보이는 input의 값을 초기화
+            wrapper.querySelector('.select-box input').value = '';
+            // 옵션 컨테이너 비우기
+            wrapper.querySelector('.options-container').innerHTML = '';
+            // 숨겨진 input의 값을 초기화
+            document.getElementById(`opt_${type}`).value = '';
+        }
+    });
+}
 
+// initializeCustomSelect 함수 수정 (주요 변경 없음, HTML ID 변경에 따른 영향이 적음)
 function initializeCustomSelect(wrapperId, isMultiSelect) {
-    const wrapper = document.getElementById(wrapperId); if (!wrapper) return;
+    const wrapper = document.getElementById(wrapperId);
+    if (!wrapper) return;
+
     const optionsContainer = wrapper.querySelector('.options-container');
+    // 화면에 보이는 input 필드
     const input = wrapper.querySelector('.select-box input');
+    // 숨겨진 input 필드 (ID는 opt_color, opt_size, opt_height 그대로 사용)
     const hiddenInput = document.getElementById(`opt_${wrapperId.replace('CustomSelectWrapper', '')}`);
+
     const selectedValues = new Set(hiddenInput.value.split(',').filter(Boolean));
+
     optionsContainer.querySelectorAll('.option').forEach(option => {
         option.onclick = (e) => {
-            e.stopPropagation(); const value = option.getAttribute('data-value');
+            e.stopPropagation();
+            const value = option.getAttribute('data-value');
             if (isMultiSelect) {
                 option.classList.toggle('selected');
-                if (selectedValues.has(value)) selectedValues.delete(value); else selectedValues.add(value);
+                if (selectedValues.has(value)) selectedValues.delete(value);
+                else selectedValues.add(value);
             }
             updateDisplayValue(input, hiddenInput, selectedValues, optionsContainer);
         };
-        if(selectedValues.has(option.dataset.value)) option.classList.add('selected');
+        // 초기 로딩 시 hiddenInput에 값이 있다면 해당 옵션을 'selected'로 표시
+        if(selectedValues.has(option.dataset.value)) {
+            option.classList.add('selected');
+        }
     });
+    // 초기 로딩 시 화면에 보이는 input에 올바른 displayText를 설정
     updateDisplayValue(input, hiddenInput, selectedValues, optionsContainer);
 }
 
+// updateDisplayValue 함수 (이전과 동일하게 유지하며, 콘솔 로그는 정확히 작동)
 function updateDisplayValue(input, hiddenInput, selectedValues, optionsContainer) {
     const labels = Array.from(selectedValues).map(val => (optionsContainer.querySelector(`.option[data-value="${val}"]`)?.textContent || '')).filter(Boolean);
-    let displayText = '';
-    if (labels.length === 1) displayText = labels[0]; else if (labels.length > 1) displayText = `${labels[0]} 외 ${labels.length - 1}개`;
+    // 이 줄을 추가해야 합니다!
+    let displayText = ''; 
+    if (labels.length === 1) displayText = labels[0];
+    else if (labels.length > 1) displayText = `${labels[0]} 외 ${labels.length - 1}개`;
+
+    // 여기가 핵심: 화면에 보이는 input에 displayText 할당
     input.value = displayText;
+
+    // 숨겨진 input에는 실제 데이터 값 할당
     if (hiddenInput) hiddenInput.value = Array.from(selectedValues).join(',');
 }
 
@@ -555,8 +595,58 @@ function findPostCode() { new daum.Postcode({ oncomplete: function(data) {
 }}).open(); }
 
 function validateFinalForm() {
-    if (!document.getElementById('selected_client_id').value) { alert('거래처를 선택해주세요.'); return false; }
-    if (INNER_TUI_GRID_INSTANCE.getData().length === 0) { alert('등록할 수주 항목이 없습니다.'); return false; }
+    if (!document.getElementById('selected_client_id').value){ 
+        alert('거래처를 선택해주세요.'); 
+        return false; 
+    }
+
+    if (INNER_TUI_GRID_INSTANCE.getData().length === 0) {
+        alert('등록할 수주 항목이 없습니다.'); 
+        return false; 
+    }
+
+    if (!document.getElementById('pay_type').value){ 
+        alert('결재방법을 선택해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('odd_pay').value){ 
+        alert('결재액을 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('odd_end_date').value){ 
+        alert('납품일을 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('odd_pay_date').value){ 
+        alert('결재일을 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('cli_pc').value){ 
+        alert('거래처 주소를 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('cli_add').value){ 
+        alert('거래처 주소를 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('cli_da').value){ 
+        alert('거래처 주소를 입력해주세요.'); 
+        return false; 
+    }
+    
+    // 추가된 상품이 있는지
+    if (INNER_TUI_GRID_INSTANCE.getData().length === 0) {
+        alert('등록할 수주 항목이 없습니다.'); 
+        return false; 
+    }
+    
+    // 추가된 상품의 수량이 올바른지
     for (const row of INNER_TUI_GRID_INSTANCE.getData()) {
         const quantity = parseInt(unformatWithComma(String(row.quantity)), 10);
         if (isNaN(quantity) || quantity < 1) {
@@ -639,10 +729,6 @@ function deleteSelectedRows() {
         return; // 함수 실행 중단
     }
 
-    // --- 1차 유효성 검사: 최소 행 개수 유지 체크 (프론트엔드에서 유지할지 말지 선택) ---
-    // 이 부분은 여전히 프론트에서 먼저 막을지, 백엔드에 위임할지 결정해야 합니다.
-    // 만약 백엔드에서 "최소 1개 유지" 규칙을 최종적으로 검사한다면 이 로직도 제거 가능합니다.
-    // 여기서는 일단 남겨두는 것으로 가정합니다.
     if (modalTitle !== "출고 등록" && (totalRows - checkedRowCount < 1)) {
         alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
         return; // 함수 실행 중단

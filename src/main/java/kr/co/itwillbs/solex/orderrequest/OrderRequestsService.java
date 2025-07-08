@@ -77,8 +77,10 @@ public class OrderRequestsService {
         }
         
         
+        System.out.println("params: " + params);
         // 주문 상태 변경
         Integer result2 = orderRequestsMapper.updateMaterialOrderStatus(params);
+        System.out.println("result2: " + result2);
         // null 체크 추가
         if (result2 == null || result2 <= 0) {
             throw new RuntimeException("주문 상태 변경에 실패했습니다.");
