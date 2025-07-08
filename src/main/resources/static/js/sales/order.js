@@ -595,8 +595,58 @@ function findPostCode() { new daum.Postcode({ oncomplete: function(data) {
 }}).open(); }
 
 function validateFinalForm() {
-    if (!document.getElementById('selected_client_id').value) { alert('거래처를 선택해주세요.'); return false; }
-    if (INNER_TUI_GRID_INSTANCE.getData().length === 0) { alert('등록할 수주 항목이 없습니다.'); return false; }
+    if (!document.getElementById('selected_client_id').value){ 
+        alert('거래처를 선택해주세요.'); 
+        return false; 
+    }
+
+    if (INNER_TUI_GRID_INSTANCE.getData().length === 0) {
+        alert('등록할 수주 항목이 없습니다.'); 
+        return false; 
+    }
+
+    if (!document.getElementById('pay_type').value){ 
+        alert('결재방법을 선택해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('odd_pay').value){ 
+        alert('결재액을 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('odd_end_date').value){ 
+        alert('납품일을 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('odd_pay_date').value){ 
+        alert('결재일을 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('cli_pc').value){ 
+        alert('거래처 주소를 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('cli_add').value){ 
+        alert('거래처 주소를 입력해주세요.'); 
+        return false; 
+    }
+    
+    if (!document.getElementById('cli_da').value){ 
+        alert('거래처 주소를 입력해주세요.'); 
+        return false; 
+    }
+    
+    // 추가된 상품이 있는지
+    if (INNER_TUI_GRID_INSTANCE.getData().length === 0) {
+        alert('등록할 수주 항목이 없습니다.'); 
+        return false; 
+    }
+    
+    // 추가된 상품의 수량이 올바른지
     for (const row of INNER_TUI_GRID_INSTANCE.getData()) {
         const quantity = parseInt(unformatWithComma(String(row.quantity)), 10);
         if (isNaN(quantity) || quantity < 1) {
