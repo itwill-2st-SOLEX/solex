@@ -32,7 +32,7 @@ const grid = new tui.Grid({
         { header: '굽', name: 'OPT_HEIGHT', width: 80, align: 'center', sortable: true },
         { header: '주문 수량', name: 'ODD_CNT', align: 'center', sortable: true },
         { header: '진행 현황', name: 'DET_NM', align: 'center', sortable: true },
-        { header: '원자재 재고 여부', name: 'PRODUCTION_STATUS', align: 'center', sortable: true },
+        { header: '원자재 재고 여부', name: 'PRODUCTION_STATUS', align: 'center', width: 200, sortable: true },
         { header: '납품 요청일', name: 'ORD_END_DATE', align: 'center', sortable: true }
     ],
 });
@@ -70,12 +70,10 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
       
       const oddId = target.dataset.ordId;
       const action = target.dataset.action; // data-action 값을 가져옴
-
-      console.log(`[버튼 클릭] 주문 ID: ${oddId}, 액션: ${action}`);
       
       const result = await checkMaterial(oddId);
       if(!result) {
-        alert('자재가 등록되어 있지 않습니다.');
+        alert('제품에 대한 BOM이 등록되어 있지 않습니다.');
         return;
       }
 
@@ -85,6 +83,9 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
       } else if (action === 'request') {
           // 자재 요청용 모달 열기
           openMaterialRequestModal(oddId);
+      } else if (action === 'materialRequest') {
+          // 자재 요청 완료
+          openMaterialRequestCompleteModal(oddId);
       }
     }
   });
@@ -112,15 +113,20 @@ async function fetchGridData(page = currentPage) {
     
     // 3. 응답 데이터를 JSON으로 파싱
     const data = await response.json();
-    console.log(data);
+    
+    
 
     data.map((item) => {
       // 자재 요청일 경우 자재요청완료?
       if(item.PRODUCTION_STATUS == '생산 가능') {
         // data-action="instruct" 추가
-        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시</button>`;
+        if(item.ODD_STS == 'odd_sts_01') {
+          item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시(자재 요청 완료)</button>`;
+        } else {
+          item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시</button>`;
+        }
       } else if(item.ODD_STS == 'odd_sts_01') {
-        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn">자재 요청 완료</button>`;
+        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="materialRequest" data-ord-id="${item.ODD_ID}">자재 요청 완료</button>`;
       } else {
         // data-action="request" 추가
         item.PRODUCTION_STATUS = `<button class="btn btn-sm btn-danger delete-btn assign-btn" data-action="request" data-ord-id="${item.ODD_ID}">자재 요청</button>`;
@@ -169,6 +175,7 @@ async function checkMaterial(selectedId) {
       const errorMessage = await res.text();
       throw new Error(errorMessage);
     }
+
     return true; // 모든 재료가 성공적으로 확인되었을 때 true 반환
 
   } catch (err) {
@@ -190,7 +197,6 @@ async function openWorkInstructionModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
   const commonInfo = data[0];
   // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
   document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
@@ -259,7 +265,6 @@ async function openMaterialRequestModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
   const commonInfo = data[0];
   // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
   document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
@@ -313,6 +318,68 @@ async function openMaterialRequestModal(selectedId) {
     submitMaterialRequestForm(selectedId);
   });
 
+
+
+
+  const modal = document.getElementById('myModal');
+  const modalInstance = new bootstrap.Modal(modal);
+  modalInstance.show();
+
+}
+
+
+async function openMaterialRequestCompleteModal(selectedId) {
+  const url = `/SOLEX/order-requests/${selectedId}`;
+  const response = await fetch(url);
+
+  // 2. 응답 상태 확인
+  if (!response.ok) { // HTTP 상태 코드가 200-299 범위가 아니면 오류
+    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+  }
+  // 3. 응답 데이터를 JSON으로 파싱
+  const data = await response.json();
+
+  const commonInfo = data[0];
+  // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
+  document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
+  document.getElementById('PRD_NM').value = commonInfo.PRD_NM;
+  document.getElementById('OPT_COLOR').value = commonInfo.OPT_COLOR;
+  document.getElementById('OPT_SIZE').value = commonInfo.OPT_SIZE;
+  document.getElementById('STK_CNT').value = commonInfo.STK_CNT;
+  document.getElementById('OPT_HEIGHT').value = commonInfo.OPT_HEIGHT;
+  document.getElementById('ODD_CNT').value = commonInfo.ODD_CNT;
+  document.getElementById('ORD_END_DATE').value = commonInfo.ORD_END_DATE;
+  
+  const textArea = document.getElementById('MATERIAL_CNT');
+  const htmlLines = data.map(material => {
+    // 상태에 따라 글자색을 다르게 하기 위한 클래스 변수
+    const statusClass = material.STK_MATERIAL_STATUS.includes('부족') ? 'text-danger' : 'text-success';
+    // 불량율 계산 5%
+    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.05); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+    // 부족 갯수 계산
+    const shortageCnt = finalRequiredCnt - material.STK_MATERIAL_CNT;
+
+    // 각 자재 정보를 div로 감싸서 간격을 줍니다.
+    return `
+      <div style="margin-bottom: 10px;">
+        <strong>${material.MAT_NM}</strong>
+        <div style="padding-left: 15px;">
+          - 단위당 필요 갯수 : ${material.BOM_CNT}개
+          <br>
+          - 총 필요 갯수(+불량율 5%) : ${finalRequiredCnt}개
+          <br>
+          - 현 재고 : ${material.STK_MATERIAL_CNT}개
+          <br>
+          ${ shortageCnt > 0 ? `${shortageCnt}개 <strong class="text-danger">부족</strong>` : `<strong class="text-success">생산 가능</strong>` }
+        </div>
+      </div>
+    `;
+});
+
+  textArea.innerHTML = htmlLines.join('\n');
+
+  // TODO: 자재 요청 완료 모달
+  // 승인 반려 버튼 안보이게
 
 
 

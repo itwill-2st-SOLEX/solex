@@ -165,7 +165,6 @@ function openCreateEquipmentModal() {
  */
 async function openDetailModal(rowData) {
     resetModalForm(); // 폼을 깨끗하게 초기화
-    console.log(rowData);
     try {
         const response = await fetch(`/SOLEX/equipment/${rowData.EQP_CODE}`);
         if (!response.ok) throw new Error('상세 데이터 로딩 실패');
@@ -174,7 +173,6 @@ async function openDetailModal(rowData) {
 
         originalEquipmentData = equipmentData;
 		
-		    console.log(equipmentData);
         
         // 상세 데이터로 폼을 채웁니다.
         populateModalForm(equipmentData);
@@ -512,7 +510,6 @@ function getCurrentFormData() {
       prc_id: Number(document.getElementById('PRC_NM').value),
       team_id: document.getElementById('TEAM_NAME').value,
   };
-  console.log(data);
   return data;
 }
 
@@ -533,7 +530,6 @@ async function updateEquipment(eqpCode) {
       originalEquipmentData.CLI_ID !== currentData.cli_id ||
       originalEquipmentData.PRC_ID !== currentData.prc_id ||
       originalEquipmentData.TEAM_ID !== currentData.team_id;
-  console.log(currentData);
   if (!isChanged) {
       alert('변경된 내용이 없습니다.');
       return;

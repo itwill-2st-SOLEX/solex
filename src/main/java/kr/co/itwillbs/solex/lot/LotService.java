@@ -1,6 +1,5 @@
 package kr.co.itwillbs.solex.lot;
 
-import java.security.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -197,8 +196,6 @@ public class LotService {
         map.put("mat_lot_code", matLotCode);
         map.put("mat_sort", sort);
         
-        System.out.println("map : " + map);
-
         // 3. material_lot insert
         lotMapper.insertMaterialLot(map);
     }

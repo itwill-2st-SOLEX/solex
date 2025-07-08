@@ -29,7 +29,6 @@ public class ChatService {
 
 	// ChatWebSocketController 디비에 메세지 저장
 	public void saveMessage(Map<String, Object> message) {
-		System.out.println(message);
 		mapper.saveMessage(message);
 	}
 

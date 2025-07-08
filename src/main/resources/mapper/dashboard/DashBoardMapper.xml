@@ -59,12 +59,12 @@
 				(SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		   		   FROM suju_order_detail
 		   		  WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 1)
-		   			-- AND odd_isapproval = 'y'
+		   			AND odd_isapproval = 'y'
 		   		) yester,
 		  		(SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		   		   FROM suju_order_detail
 		   		  WHERE TRUNC(odd_mod_date) = TRUNC(SYSDATE - 2)
-		   			-- AND odd_isapproval = 'y'
+		   		    AND odd_isapproval = 'y'
 		   		) before
 	</select>
 	
@@ -72,8 +72,8 @@
 	<select id="getMonthCnt" resultType="int">
 		SELECT SUM(odd_actual_cnt) AS monthCnt
 		  FROM suju_order_detail
-		-- WHERE odd_isapproval = 'y'
-	       WHERE TRUNC(odd_mod_date) BETWEEN TRUNC(SYSDATE, 'MM') AND TRUNC(SYSDATE)
+		 WHERE odd_isapproval = 'y'
+	       AND TRUNC(odd_mod_date) BETWEEN TRUNC(SYSDATE, 'MM') AND TRUNC(SYSDATE)
 	</select>
 	
 <!-- 	당월 누적 생산률 -->
@@ -87,11 +87,13 @@
 		    (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		       FROM suju_order_detail
 		      WHERE odd_mod_date &gt;= TRUNC(SYSDATE, 'MM')
+		        AND odd_isapproval = 'y'
 		    ) curr,
 		    (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		       FROM suju_order_detail
 		      WHERE odd_mod_date &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
 		        AND odd_mod_date &lt; TRUNC(SYSDATE, 'MM')
+		        AND odd_isapproval = 'y'
 		    ) prev
 	</select>
 	
@@ -101,7 +103,8 @@
 		        (SUM(odd_bcount) / SUM(odd_actual_cnt)) * 100, 1
 			   ) AS defect_rate
 		  FROM suju_order_detail
-		 WHERE TO_CHAR(odd_mod_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+		 WHERE odd_isapproval = 'y'
+		   AND TO_CHAR(odd_mod_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
 	</select>
 	
 <!-- 	상품별 전일 생산량 -->
@@ -109,6 +112,7 @@
 		SELECT SUM(odd_actual_cnt) AS yesterCnt
 		  FROM vw_suju_summary
 		 WHERE TRUNC(TO_DATE(odd_mod_date, 'YYYY-MM-DD')) = TRUNC(SYSDATE - 1)
+		   AND odd_isapproval = 'y'
 		   AND prd_code = #{prdCode}
 	</select>
 	
@@ -124,12 +128,14 @@
 		        SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		          FROM vw_suju_summary
 		         WHERE TRUNC(TO_DATE(odd_mod_date, 'YYYY-MM-DD')) = TRUNC(SYSDATE - 1)
+		           AND odd_isapproval = 'y'
 		           AND prd_code = #{prdCode}
 		    ) yester,
 		    (
 		        SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		          FROM vw_suju_summary
 		         WHERE TRUNC(TO_DATE(odd_mod_date, 'YYYY-MM-DD')) = TRUNC(SYSDATE - 2)
+		           AND odd_isapproval = 'y'
 		           AND prd_code = #{prdCode}
 		    ) before
 	</select>
@@ -140,6 +146,7 @@
 		  FROM vw_suju_summary
 		 WHERE TO_DATE(odd_mod_date, 'YYYY-MM-DD') 
 		       BETWEEN TRUNC(SYSDATE, 'MM') AND TRUNC(SYSDATE)
+		   AND odd_isapproval = 'y'
 	       AND prd_code = #{prdCode}
 	</select>
 	
@@ -154,12 +161,14 @@
 		  (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		     FROM vw_suju_summary
 		    WHERE TO_DATE(odd_mod_date, 'YYYY-MM-DD') &gt; TRUNC(SYSDATE, 'MM')
+		      AND odd_isapproval = 'y'
 		      AND prd_code = #{prdCode}
 		  ) curr,
 		  (SELECT NVL(SUM(odd_actual_cnt), 0) AS qty
 		     FROM vw_suju_summary
 		    WHERE TO_DATE(odd_mod_date, 'YYYY-MM-DD') &gt;= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
 		      AND TO_DATE(odd_mod_date, 'YYYY-MM-DD') &lt; TRUNC(SYSDATE, 'MM')
+		      AND odd_isapproval = 'y'
 		      AND prd_code = #{prdCode}
 		  ) prev
 	</select>
@@ -171,6 +180,7 @@
 		       ) AS defectRate
 		  FROM vw_suju_summary
 		 WHERE TO_CHAR(TO_DATE(odd_mod_date, 'YYYY-MM-DD'), 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+		   AND odd_isapproval = 'y'
 		   AND prd_code = #{prdCode}
 	</select>
 	
@@ -187,6 +197,7 @@
 				'출고 완료'
 		 )
 		  AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+		  AND odd_isapproval = 'y'
 		  <if test="prdCode != null and prdCode != ''">
 		    AND PRD_CODE = #{prdCode}
 		  </if>
@@ -207,6 +218,7 @@
 				'출고 완료'
 		 )
 		   AND TO_DATE(ODD_MOD_DATE, 'YYYY-MM-DD') >= TRUNC(SYSDATE) - 6
+		   AND odd_isapproval = 'y'
 		  <if test="prdCode != null and prdCode != ''">
 		    AND PRD_CODE = #{prdCode}
 		  </if>
@@ -217,15 +229,16 @@
 <!-- 	 인기 품목 도넛 차트  -->
 	<select id="getPopluarPrds" resultType="map">
 		SELECT prd_code,
-			   prd_nm,
-			   COUNT(DISTINCT odd_id) AS order_count
+		       prd_nm,
+		       SUM(odd_cnt) AS order_quantity
 		  FROM vw_suju_summary
 		 WHERE TO_DATE(ord_reg_date, 'YYYY-MM-DD HH24:MI:SS')
-	   BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
-		   AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+		       BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+		           AND TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1 - (1/86400)
+		   AND odd_isapproval = 'y'
 		 GROUP BY prd_code, prd_nm
-		 ORDER BY order_count DESC
-		  FETCH FIRST 5 ROWS ONLY
+		 ORDER BY order_quantity DESC
+		 FETCH FIRST 5 ROWS ONLY
 	</select>
 
 </mapper>	
