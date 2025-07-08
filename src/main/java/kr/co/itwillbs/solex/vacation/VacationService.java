@@ -1,6 +1,7 @@
 package kr.co.itwillbs.solex.vacation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,9 @@ public class VacationService {
 		Map map = new HashMap<>();
 		
 		map.put("empId", empId);
-		map.put("sysdate", java.sql.Date.valueOf(LocalDate.now()));
+		map.put("sysdate", LocalDateTime.now());
+		
+		System.out.println(map);
 		return vacationMapper.getVacationSummary(map);
 	}
 	

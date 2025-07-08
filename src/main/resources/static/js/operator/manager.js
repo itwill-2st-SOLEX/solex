@@ -71,6 +71,7 @@ const grid = new tui.Grid({
 			// 작업률 표시
             formatter: ({ value }) => {
                 const rate = parseFloat(value) || 0;
+				console.log("rrrrrrrr " + rate)
                 return `
                     <div class="progress" style="height: 20px; position: relative;">
                         <div class="progress-bar progress-bar-striped bg-success" 
@@ -324,7 +325,7 @@ async function managerList(page) {
 
         const gridData = list.map(n => {
             let btn = '';
-            const bcount = n.QHI_BCOUNT //|| 0;
+            const bcount = n.QHI_BCOUNT || 0;
 			
 			// 불량 개수 제외하고 진행률 계산
             const wpoProRate = n.ODD_CNT > 0

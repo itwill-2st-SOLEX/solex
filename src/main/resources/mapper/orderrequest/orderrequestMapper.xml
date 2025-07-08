@@ -153,7 +153,7 @@
         EMP_ID,
         MAT_REG_DATE,
         MAT_QTY,
-        MAT_ORD_STS,
+        
 		MAT_COMM,
 		MAT_LMD_DATE
     )
@@ -165,7 +165,7 @@
         SELECT SUM(ar.are_qty) FROM area ar
         WHERE ar.item_id = b.mat_id AND ar.are_type = 'area_type_01'
     	), 0), -- ★ 불량률 5% 적용 (올림) - 현재 재고를 뺌
-        'mat_ord_sts_01',                                         -- 발주 상태 (초기값)
+        
 		'주문상세번호(' || #{odd_id} || ') 처리 중, 자재 재고 부족으로 자동 생성된 발주입니다.',
 		SYSDATE + 9/24
     FROM
@@ -195,6 +195,8 @@
            	odd_mod_date = sysdate + 9/24,
            	odd_isapproval = 'y'
      where odd_id = #{odd_id}
+
+	 
 	</update>
 
 
