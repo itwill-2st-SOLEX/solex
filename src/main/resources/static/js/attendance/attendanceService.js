@@ -19,7 +19,6 @@ export function getTodayAttendanceStatus() {
             method: 'GET',
             dataType: 'json',
             success: function(response) {
-                console.log('오늘 출퇴근 현황 응답:', response);
                 resolve(response); // 성공하면 응답 데이터를 넘겨줍니다.
             },
             error: function(xhr, status, error) {
@@ -70,7 +69,6 @@ export function punchOut(attId) {
             return;
         }
 
-        console.log('전송하려는 ATT_ID:', attId);
 
         $.ajax({
             url: API_ENDPOINTS.PUNCH_OUT,
@@ -79,7 +77,6 @@ export function punchOut(attId) {
             data: JSON.stringify({ att_id: attId }), // att_id를 JSON 형태로 묶어 보냄
             success: function(response) {
                 alert('퇴근 등록이 완료되었습니다!');
-                console.log('퇴근 응답:', response);
                 resolve(response);
             },
             error: function(xhr, status, error) {

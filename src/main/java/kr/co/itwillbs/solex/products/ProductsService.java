@@ -20,10 +20,8 @@ public class ProductsService {
 		return productsMapper.selectProductsLists();
 	}
 
-	public List<Map<String, Object>> getPagedProductList(@Param("offset") int offset,
-														@Param("perPage") int perPage, 
-														@Param("prd_yn") String prdYn) {
-		return productsMapper.selectPagedProductList(offset, perPage, prdYn);
+	public List<Map<String, Object>> getPagedProductList(@Param("prd_yn") String prdYn) {
+		return productsMapper.selectPagedProductList(prdYn);
 	}
 
 	public int getTotalProductCount(String prdYn) {
@@ -50,21 +48,12 @@ public class ProductsService {
 	    // 옵션 목록이 비어있지 않다면 처리
 	    if (optionsList != null && !optionsList.isEmpty()) {
 	        for (Map<String, String> optionMap : optionsList) {
-	        	System.out.println("optionMap 내용 잘 나옴?? " + optionMap);
 	        	optionMap.put("prd_id", String.valueOf(prdId));
-	        	System.out.println("DEBUG: 옵션 맵 내용 ---");
-	            System.out.println("DEBUG:   PRD_ID: " + optionMap.get("prd_id"));
-	            System.out.println("DEBUG:   OPT_COLOR: " + optionMap.get("OPT_COLOR")); 
-	            System.out.println("DEBUG:   OPT_SIZE: " + optionMap.get("OPT_SIZE"));   
-	            System.out.println("DEBUG:   OPT_HEIGHT: " + optionMap.get("OPT_HEIGHT")); 
-	            System.out.println("DEBUG:   OPT_YN: " + optionMap.get("OPT_YN")); 
-	            System.out.println("DEBUG: ---");
 
 	            // 4. 모든 옵션 정보 다건 삽입
 	            productsMapper.insertProductOption(optionMap);
 	        }
 	    }
-	    System.out.println("서비스: 제품 등록 및 옵션 저장 완료. 최종 제품 ID: " + prdId);
 	}
 
 	public List<Map<String, Object>> getProductOptions(String prdId) {

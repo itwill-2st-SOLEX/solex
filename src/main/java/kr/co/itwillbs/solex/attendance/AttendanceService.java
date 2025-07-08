@@ -171,12 +171,9 @@ public class AttendanceService {
 		
 		
 		
-		System.out.println("attendanceData???????? " + attendanceData);
 		// 업데이트 후 상태를 바로 보여주기 위해서 가지고오는 데이터 
 //		String det_nm = (String) attendanceData.get("DET_NM");
 		String det_nm = attendanceMapper.selectDetNm(attSts); // att_sts를 넣어야 결과를 가지고 오도록 
-//		selectAllCodeDetails
-		System.out.println("퇵근 det_nm ??? " + det_nm);
 
 		// 조회후 바로 화면단에 보여주기 위하
 		Map<String, Object> result = new HashMap<>();
@@ -215,7 +212,6 @@ public class AttendanceService {
         } else {
             throw new IllegalArgumentException("ATT_ID 형식이 올바르지 않습니다.");
         }
-    	System.out.println("서비스 updateData (초기): " + updateData);
 
         String columnName = null;
         Object newValue = null;
@@ -262,13 +258,10 @@ public class AttendanceService {
         // 5. 컬럼별 업데이트 로직 처리
         if ("att_out_time".equals(normalizedColumnName) && newValue instanceof String) {
             String newAttOutTimeString = (String) newValue;
-            System.out.println("Service: 받은 새로운 att_out_time 문자열 = " + newAttOutTimeString);
             
             try {
                 parsedNewValue = LocalDateTime.parse(newAttOutTimeString, formatter);
-                System.out.println("Service: 파싱된 새로운 att_out_time LocalDateTime = " + parsedNewValue);
             } catch (DateTimeParseException e) {
-                System.err.println("Service: 새 퇴근 시간 LocalDateTime 파싱 실패: " + e.getMessage());
                 throw new IllegalArgumentException("새 퇴근 시간 형식 오류입니다: " + newAttOutTimeString, e);
             }
 
@@ -276,7 +269,6 @@ public class AttendanceService {
             if (currentAttInTime != null) {
                 Duration duration = Duration.between(currentAttInTime, parsedNewValue);
                 long totalMinutes = duration.toMinutes();
-                System.out.println("Service: 총 근무 시간 (Duration) = " + duration);
                 
                 int breakTimeMinutes = 60; // 1시간 휴게
                 if (totalMinutes > (4 * 60)) { // 4시간 이상 근무 시 휴게 시간 적용
@@ -296,18 +288,14 @@ public class AttendanceService {
                 }
             } else {
                 attSts = "att_sts_01"; // 출근 시간 정보가 없어 계산 불가
-                System.err.println("Service: 기존 출근 시간이 없어 att_out_time 수정 시 att_sts 계산 불가.");
             }
 
         } else if ("att_in_time".equals(normalizedColumnName) && newValue instanceof String) {
             String newAttInTimeString = (String) newValue;
-            System.out.println("Service: 받은 새로운 att_in_time 문자열 = " + newAttInTimeString);
 
             try {
                 parsedNewValue = LocalDateTime.parse(newAttInTimeString, formatter);
-                System.out.println("Service: 파싱된 새로운 att_in_time LocalDateTime = " + parsedNewValue);
             } catch (DateTimeParseException e) {
-                System.err.println("Service: 새 출근 시간 LocalDateTime 파싱 실패: " + e.getMessage());
                 throw new IllegalArgumentException("새 출근 시간 형식 오류입니다: " + newAttInTimeString, e);
             }
 
@@ -345,8 +333,6 @@ public class AttendanceService {
         }
         // 다른 컬럼이 있다면 여기에 else if로 추가 로직 구현
 
-        System.out.println("Service: 최종 바뀐 상태값 (attSts) = " + attSts);
-        System.out.println("Service: 최종 파싱된 값 (parsedNewValue) = " + parsedNewValue);
 
         // 6. Mapper에 전달할 최종 Map 준비 및 호출
         Map<String, Object> params = new HashMap<>();
@@ -395,7 +381,6 @@ public class AttendanceService {
                 }
                 return LocalDateTime.parse((String) dbTimeObj, formatter);
             } catch (DateTimeParseException e) {
-                System.err.println("DB 조회 시간 문자열 파싱 오류: " + dbTimeObj + " - " + e.getMessage());
                 return null;
             }
         }

@@ -15,7 +15,6 @@ export async function fetchCombinedProductAndBomData(page, pageSize) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`HTTP 오류: ${response.status} - ${response.statusText}`, errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 		
@@ -24,7 +23,6 @@ export async function fetchCombinedProductAndBomData(page, pageSize) {
 				
         return data; 
     } catch (error) {
-        console.error('Combined API fetch error:', error);
         throw error;
     }
 }
@@ -42,7 +40,6 @@ export function initializeList(addButtonId, writeHandler, loadListFunction, init
         if (addButton) {
             addButton.addEventListener('click', writeHandler);
         } else {
-            console.warn(`버튼 ID '${addButtonId}'를 찾을 수 없습니다. 이벤트 리스너를 추가할 수 없습니다.`);
         }
         loadListFunction(initialPage);
     });
