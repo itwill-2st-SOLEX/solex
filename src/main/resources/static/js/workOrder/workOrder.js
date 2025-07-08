@@ -257,7 +257,6 @@ function renderProcessSteps(processList) {
 let warehouses = [];
 
 function fetchWarehouses(prdId, optId, callback) {
-	debugger;
 	$.ajax({
 		url: `/SOLEX/workOrders/warehouses/${prdId}?optId=${optId}`,
 		method: 'GET',
@@ -409,7 +408,6 @@ document.getElementById('submitWarehouseAssign').addEventListener('click', () =>
 		alert(`최대 수량(${maxQty})를 초과합니다.`);
 		return;
 	}
-debugger;
 	// 등록 요청
 	$.ajax({
 		url: '/SOLEX/workOrders/warehouses',

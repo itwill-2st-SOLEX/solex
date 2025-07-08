@@ -89,7 +89,7 @@ async function updateSummaryCards(prdCode, prdNm) {
 		if (!response.ok) throw new Error('서버 응답 실패');
 
 		const data = await response.json();
-debugger;
+		
 		// 텍스트 라벨 동적 변경
 		document.getElementById('yesterdayLabel').textContent = `${prdNm} 전일 생산량`;
 		document.getElementById('monthLabel').textContent = `${prdNm} 당월 누적 생산`;
@@ -105,8 +105,8 @@ debugger;
 			data.monthRate === null ? '–' : `${data.monthRate > 0 ? '+' : ''}${data.monthRate}%`;
 
 		document.getElementById('defectRate').textContent = (data.defectCnt ?? 0) + '%';
-		debugger;
-	} catch (err) {
+
+		} catch (err) {
 		console.error('📊 요약 카드(상품별) 로딩 실패:', err);
 	}
 }
@@ -172,7 +172,6 @@ async function recentFinishedList() {
 
 		data.forEach(item => {
 			const li = document.createElement('li');
-			debugger;
 			li.className = 'prd-card';
 			li.innerHTML = `
 		    <strong>${item.PRD_NM}, ${item.PRD_COLOR} ${item.PRD_SIZE} ${item.PRD_HEIGHT}cm</strong>

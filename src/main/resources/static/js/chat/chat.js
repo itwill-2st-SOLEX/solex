@@ -287,7 +287,6 @@ function connectAllChatRooms() {
 								senderName: isMine ? '나' : message.sender_nm,
 								content: message.content
 							}, isMine, message.isRead);
-							debugger;
 							showChatBadge();
 							unreadCnt();
 							fetchChatList();
@@ -330,7 +329,6 @@ function renderMessage(message, isMine) {
 	wrapper.className = `message-wrapper ${isMine ? 'sent' : 'received'}`;
 	msgDiv.className = `message ${isMine ? 'sent' : 'received'}`;
 	msgDiv.textContent = message.content;
-	debugger;
 	wrapper.appendChild(msgDiv);
 	chatMessages.appendChild(wrapper);
 	chatMessages.scrollTop = chatMessages.scrollHeight;
