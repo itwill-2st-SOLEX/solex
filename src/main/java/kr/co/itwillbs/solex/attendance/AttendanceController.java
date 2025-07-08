@@ -43,7 +43,7 @@ public class AttendanceController {
 	
     // 부하직원의 근태현황 조회
     @GetMapping("/attendance_list")
-    @PreAuthorize("hasAnyRole('1','2','3')")
+    @PreAuthorize("hasAnyRole('1','2','3','4')")
 	public String getAttendenceList(Model model) {
     	// 현재 연도와 월
         YearMonth currentYearMonth = YearMonth.now();

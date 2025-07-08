@@ -15,20 +15,17 @@ window.addEventListener('DOMContentLoaded', () => {
 	const productModalElement = document.getElementById('productModal');
 	    if (productModalElement) {
 	        productModalElement.addEventListener('shown.bs.modal', function () {
-	            console.log('제품 모달이 완전히 표시되었습니다. selectpicker를 새로고침합니다.');
 	            // 기존 selectpicker refresh는 그대로 둡니다.
 	            $('.selectpicker').selectpicker('refresh');
 
 	            // ⭐⭐ 여기에 data-bs-toggle 속성 제거 코드를 추가합니다 ⭐⭐
 	            $('.bootstrap-select .dropdown-toggle').removeAttr('data-bs-toggle');
-	            console.log('Bootstrap-select 버튼에서 data-bs-toggle 속성 제거 완료.');
 	        });
 
 	        // ⭐⭐ 새로 추가할 부분: '옵션 추가' 탭이 보여질 때 selectpicker 새로고침 ⭐⭐
 	        const allOptionsTabButton = document.getElementById('all-options-tab');
 	        if (allOptionsTabButton) {
 	            allOptionsTabButton.addEventListener('shown.bs.tab', function (event) {
-	                console.log('\'옵션 추가\' 탭이 활성화되었습니다. selectpicker를 새로고침합니다.');
 	                $('.selectpicker').selectpicker('refresh');
 	                // 탭이 변경될 때도 data-bs-toggle을 다시 제거해 주는 것이 좋습니다.
 	                $('.bootstrap-select .dropdown-toggle').removeAttr('data-bs-toggle');
@@ -144,12 +141,10 @@ async function showProductModal(mode, data = null) {
 		        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 		        return res.json();
 		    });
-		    console.log('Fetched existingProductOptions for edit mode:', existingProductOptions);
 		    // window.currentProductExistingOptions에 실제 데이터 배열을 할당
             window.currentProductExistingOptions = existingProductOptions; // 서버 응답 전체 객체 할당
 		    await populateSelectPickers(existingProductOptions); // 기존 옵션 전달
 		} catch (error) {
-		    console.error('기존 제품 옵션 로드 실패:', error);
 		    await populateSelectPickers([]); // 실패 시 빈 상태로 초기화 (옵션 목록만 보임)
 		}
 		
@@ -191,7 +186,6 @@ async function showProductModal(mode, data = null) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const processData = await response.json();
-            console.log('서버에서 받은 공정 데이터:', processData);
 
             if (processData && processData.length > 0) {
                 let htmlContent = '<span><strong>생산 공정 순서</strong></span>';
@@ -211,7 +205,6 @@ async function showProductModal(mode, data = null) {
             }
 
         } catch (error) {
-            console.error('공정 정보를 가져오는데 실패했습니다:', error);
             prdProcessDiv.innerHTML = '<p style="color: red;">공정 정보를 불러오는 중 오류가 발생했습니다.</p>';
         }
     };
@@ -228,7 +221,6 @@ async function showProductModal(mode, data = null) {
 	
     // 해당 select 요소에 'change' 이벤트를 강제로 한번 더 발생시켜야 할 수도 있습니다.
     if (prdTypeSelectElement.value) {
-		console.log("초기 공정 순서 로드 시도 (prdTypeSelectElement.value 있음):", prdTypeSelectElement.value);
 		processTypeChange();
     } else {
         // 선택된 값이 없으면 초기화 메시지 표시
@@ -242,7 +234,6 @@ async function showProductModal(mode, data = null) {
     if (allOptionsTabBtn) {
         // 탭 콘텐츠가 표시된 후에 실행되도록 Bootstrap의 `shown.bs.tab` 이벤트를 사용합니다.
         allOptionsTabBtn.addEventListener('shown.bs.tab', async () => {
-            console.log("모든 옵션 추가 탭이 활성화되었습니다.");
             // 탭이 표시될 때 generateAndDisplayCombinations를 호출합니다.
             // 'new' 모드에서는 초기에 데이터가 null이므로 isAutoLoad는 false가 됩니다.
             // 'edit' 모드에서는 기존 제품 옵션을 미리 선택하기 위한 데이터가 포함될 수 있습니다.
@@ -288,9 +279,6 @@ async function showProductModal(mode, data = null) {
                 }
 				
 				// 2. 총 옵션 개수 불러오기 (새로운 fetch 요청 추가)
-				console.log('result ? ' + JSON.stringify(result)); // result.opt_count
-				console.log('result.opt_count ? ' + JSON.stringify(result.opt_count)); // result.opt_count
-
                 // ⭐ generateCombinationsBtn을 숨기고, '내 옵션' 탭에 건수 표시 ⭐
                 const myOptionsTab = document.getElementById('my-options-tab');
                 if (myOptionsTab) {
@@ -307,7 +295,6 @@ async function showProductModal(mode, data = null) {
                 alert("제품 옵션을 불러오는 중 오류가 발생했습니다.");
                 productOptions = []; // 오류 발생 시에도 빈 배열로 진행
             }
-            console.log('productOptions for grid:', productOptions);
 			// --- TUI Grid 로직 시작 (myOptionsContent용) ---
            	const currentOptionsGridContainer = document.getElementById('currentOptionsGridContainer');
             if (currentOptionsGridContainer) {
@@ -370,30 +357,6 @@ async function showProductModal(mode, data = null) {
     // 마지막으로 모달을 표시합니다.
     productModal.show();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function getNowForOracle() {
     const now = new Date();
@@ -464,7 +427,6 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
     try {
         // groupCode를 쿼리 파라미터로 전달하여 해당 그룹의 공통코드를 요청
         const response = await fetch(`/SOLEX/products/api/prdUnitTypes?groupCode=${groupCode}`);
-        console.log(`[${groupCode}] URL 호출 결과:`, response.status);
 
         if (!response.ok) {
             throw new Error(`[${groupCode}] 공통코드를 불러오지 못했습니다. 상태: ${response.status}`);
@@ -484,7 +446,6 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
             allTypeOptions = commonCodes;
         }
 		
-		console.log('allUnitOptions : ', allUnitOptions);
         select.innerHTML = ''; // 기존 옵션 비우기
 
         const defaultOption = document.createElement('option');
@@ -518,7 +479,6 @@ async function loadCommonCodesToSelect(selectElementId, groupCode, selectedValue
 // 옵션 테이블 구성 시작
 // 각 드롭다운을 초기화하고 옵션을 채워넣는 함수
 async function populateSelectPickers(existingOptions = []) {
-    console.log('[디버깅] populateSelectPickers 호출됨');
 
     // Bootstrap-select 초기화 제거 및 비우기 (한 번만!)
     $('#colorMultiSelect').selectpicker('destroy').empty();
@@ -581,41 +541,7 @@ async function populateSelectPickers(existingOptions = []) {
     $('#colorMultiSelect').selectpicker();
     $('#sizeMultiSelect').selectpicker();
     $('#heightMultiSelect').selectpicker();
-
-    console.log('selectpicker refresh 완료.');
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -632,7 +558,6 @@ async function checkPrdCode(code) {
         }
         const data = await response.json(); // 서버에서 JSON 응답을 기대
 
-		console.log('prd code data???' + JSON.stringify(data))
 		
         // 서버 응답 형태에 따라 변경될 수 있음.
         if (data.isDuplicate) { // 또는 data.exists 등 서버 응답에 따라
@@ -650,7 +575,6 @@ async function checkPrdCode(code) {
 
 // ⭐ 통합된 제품 등록/수정 처리 함수
 async function processProductData(mode) { 
-    console.log(`제품 ${mode === 'register' ? '등록' : '수정'} 시작`);
 
     // 1. 제품 기본 정보 수집 (변경 없음)
     const prdIdHiddenInput = document.getElementById('prd_id_hidden');
@@ -690,7 +614,6 @@ async function processProductData(mode) {
     if (!prdPrice || isNaN(prdPrice) || Number(prdPrice) <= 0) { alert("제품 가격을 올바르게 입력해주세요."); return; }
     if (!prdType) { alert("제품 유형을 선택해주세요."); return; }
     if (!prdUnit) { alert("제품 단위를 선택해주세요."); return; }
-    console.log("기본 필드 유효성 검사 통과.");
 
     // ⭐ 3. 선택된 옵션 조합 수집
     const selectedOptions = [];
@@ -711,7 +634,6 @@ async function processProductData(mode) {
 	        });
 	    });
 		
-		console.log('selectedOptions???????? ' , selectedOptions);
 
         // 등록 모드에서는 옵션 선택이 필수
         if (mode === 'register' && selectedOptions.length === 0) {
@@ -750,12 +672,8 @@ async function processProductData(mode) {
                 return; // 중복 발견 시 함수 실행 중단
             }
         }
-        console.log("수정 모드: 선택된 옵션 조합 중복 유효성 검사 통과.");
     }
     // ⭐⭐ 유효성 검사 끝 ⭐⭐
-    
-    console.log("선택된 옵션:", selectedOptions);
-    
     // 4. 서버로 전송할 데이터 객체 구성
     const productData = {
         prd_nm: prdNm,

@@ -49,10 +49,8 @@ public class AttendanceRestController {
 			) {
 		String loginEmpId = (String)session.getAttribute("empId");
 		
-		System.out.println("controller에서 emp id 가져오나? " + loginEmpId);
 		// 로그인한 사용자의 직급등 사원정보 가져오기
 		Map<String,Object> info = attendanceService.getEmployeeInfo(loginEmpId);
-		System.out.println("SADSADSA"  + info);
 		
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);// 페이징 계산
@@ -72,14 +70,10 @@ public class AttendanceRestController {
 	    Map<String, Object> combinedMap = new HashMap<>();
 	    
 	    if (resultType.equals("my")) { // 1. 내 근태 데이터 조회
-	    	System.out.println("if 안");
 	    	List<Map<String, Object>> myAttendance = attendanceService.getMyAttendanceByMonth(params); // 서비스 메서드 분리 또는 호출
 	    	combinedMap.put("myAttendance", myAttendance);
 		} else if (resultType.equals("team")) { // 2. 다른 사람/팀 근태 데이터 조회
-			System.out.println("else if 안");
-			System.out.println("params" + params);
 			List<Map<String, Object>> teamAttendance = attendanceService.getAttendanceByMonth(params); // 다른 서비스 메서드 호출+
-			System.out.println("teamAttendance"+teamAttendance);
 			combinedMap.put("teamAttendance", teamAttendance);
 		}	
         
@@ -117,7 +111,6 @@ public class AttendanceRestController {
 
     	
         Optional<Map<String, Object>> attendanceRecord = attendanceService.getTodayAttendanceStatus(loginEmpId);
-        System.out.println("today attendanceRecord ???" + attendanceRecord);
         Map<String, Object> response = new HashMap<>();
 
         if (attendanceRecord.isPresent()) { // 조회 결과가 존재한다면 (Optional 안에 Map이 있다면)
@@ -129,7 +122,6 @@ public class AttendanceRestController {
             response.put("det_nm", record.get("DET_NM") != null ? record.get("DET_NM") : null);
             response.put("att_id", record.get("ATT_ID"));
             
-            System.out.println("today response : " + response);
         } else { // 조회 결과가 없다면 (Optional이 비어있다면)
             // 출근/퇴근 기록이 없음을 나타내기 위해 모든 값을 null로 설정
             response.put("att_in_time", null);
@@ -144,7 +136,6 @@ public class AttendanceRestController {
 	// 기록 초기화 API (선택 사항)
     @DeleteMapping("/today") // HTTP DELETE 요청이 /attendance/api/today 경로로 오면 이 메서드 실행
     public ResponseEntity<Map<String, Object>> resetTodayAttendance() {
-    	System.out.println("/api/today - delete");
         // 1. 현재 로그인한 사용자 정보 가져오기
         // 2. DB에서 오늘 출퇴근 기록 삭제 (예: service.deleteTodayAttendance(userId))
         // 3. 성공 응답 반환
@@ -184,7 +175,6 @@ public class AttendanceRestController {
 //            Map<String, Object> result = attendanceService.recordPunchOut(loginEmpId);
             Map<String, Object> result = attendanceService.recordPunchOut(loginEmpId, attId);
             result.put("status", "success");
-            System.out.println("result : " + result);
             
             return ResponseEntity.ok(result);
         } catch (IllegalStateException | IllegalArgumentException e) {
