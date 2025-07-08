@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 	                sortable: true,
 	                editor: {
 	                    type: 'select',
-	                    options: {
-	                        listItems: materialList // 서버에서 가져온 데이터 사용
-	                    }
+						options: {
+						            editor: MaterialSelectEditor
+				        }
 	                }
 	            },
 				{ header: '소모량', name: 'BOM_CNT', sortable: 'true',align : 'right' , width: 70, editor: 'text' },
