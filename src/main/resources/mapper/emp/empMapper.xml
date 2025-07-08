@@ -8,12 +8,11 @@
 <!-- 인사등록 -->
   <insert id="insertEmp" parameterType="map">
     INSERT INTO employee (
-        emp_id, emp_num, emp_hire, emp_nm, emp_gd,
+        emp_num, emp_hire, emp_nm, emp_gd,
         emp_birth, emp_pw, emp_phone, emp_email, emp_add,
         emp_da, emp_sts_cd, emp_pc, emp_cat_cd, emp_pos_cd,
         emp_dep_cd, emp_team_cd,emp_img, meg_num
     ) VALUES (
-        emp_seq.NEXTVAL,
         emp_seq.NEXTVAL,
         #{emp_hire, jdbcType=DATE},     
         #{emp_nm, jdbcType=VARCHAR},

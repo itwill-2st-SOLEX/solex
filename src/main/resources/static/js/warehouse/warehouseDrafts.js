@@ -8,7 +8,7 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '창고 번호', name: 'whs_id', align: 'center' , width:90},
+			{ header: '창고 번호', name: 'whs_id', width:90, align: 'center', renderer: { styles: { color: '#007BFF', textDecoration: 'underline', cursor: 'pointer' } } },
 			{ header: '창고명', name: 'whs_nm', sortable: 'true' , align: 'center'  },
 			{ header: '주소', name: 'whs_full_adr', sortable: 'true' , align: 'center', width:390 },
 			{ header: '구역 수', name: 'are_cnt', align: 'center' , width:90},
@@ -172,10 +172,10 @@ $(function() {
 		      	{ header: '상태',       name: 'status',     align: 'center', width: 80 },
 		      	{ header: '품명',       name: 'itemName',   align: 'center' },
 		      	{ header: '수량',       name: 'quantity',   align: 'center', width: 80 },
-				{ header: '수량',       name: 'unit',   align: 'center', width: 80 },
-		      	{ header: '상세정보 1', name: 'color',    align: 'center' },
-		      	{ header: '상세정보 2', name: 'size',    align: 'center' },
-		      	{ header: '상세정보 3', name: 'height',    align: 'center' }
+				{ header: '단위',       name: 'unit',   align: 'center', width: 80 },
+		      	{ header: '색상', name: 'color',    align: 'center' },
+		      	{ header: '사이즈', name: 'size',    align: 'center' },
+		      	{ header: '굽', name: 'height',    align: 'center' }
 			]
 		});
 

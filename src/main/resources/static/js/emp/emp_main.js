@@ -265,8 +265,8 @@ $(function() {
         if (selectedCatCd) {
             // 직급이 사장/이사인 경우 (종류 선택과 무관하게 부서는 공통)
             if (selectedPosCd === 'pos_01' || selectedPosCd === 'pos_02') {
-                 addCommonOption($empDepCd, '부서');
-                 addCommonOption($empTeamCd, '팀');
+                 addCommonOption($empDepCd, '부서', 'dep');
+                 addCommonOption($empTeamCd, '팀', 'team');
             }
             // 직급이 부장/팀장/사원인 경우 (선택된 종류에 따라 부서가 달라짐)
             else if (selectedPosCd === 'pos_03' || selectedPosCd === 'pos_04' || selectedPosCd === 'pos_05') {
@@ -288,7 +288,7 @@ $(function() {
         if (selectedDepCd) {
             // 직급이 사장/이사/부장인 경우 (부서 선택과 무관하게 팀은 공통)
             if (selectedPosCd === 'pos_01' || selectedPosCd === 'pos_02' || selectedPosCd === 'pos_03') {
-                addCommonOption($empTeamCd, '팀');
+                addCommonOption($empTeamCd, '팀', 'team');
             } 
             // 직급이 팀장, 사원인 경우 (선택된 부서에 따라 팀이 달라짐)
             else if (selectedPosCd === 'pos_04' || selectedPosCd === 'pos_05') {
