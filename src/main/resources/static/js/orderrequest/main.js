@@ -1,7 +1,7 @@
 // order.js
 
 let currentPage = 0;
-const pageSize = 20;
+const pageSize = 100;
 const gridHeight = 600;
 let isLoading = false; // 데이터 로딩 중인지 여부 (중복 요청 방지)
 let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 스크롤 종료 조건)
@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
 	fetchGridData(currentPage); // 초기 페이지와 (비어있는) 검색어 전달
 	
 	// 무한 스크롤 이벤트 리스너 추가
-	grid.on('scrollEnd', async ({ horz, vert }) => {
-    if (vert.isReachedBottom) { // 스크롤이 그리드 바닥에 도달했을 때
-      if (hasMoreData && !isLoading) { // 더 불러올 데이터가 있고, 현재 로딩 중이 아닐 때
-        currentPage++; // 다음 페이지 번호로 업데이트
-        await fetchGridData(currentPage); // 다음 페이지 데이터 로드
-      }
-    }
-	});
+	// grid.on('scrollEnd', async ({ horz, vert }) => {
+  //   if (vert.isReachedBottom) { // 스크롤이 그리드 바닥에 도달했을 때
+  //     if (hasMoreData && !isLoading) { // 더 불러올 데이터가 있고, 현재 로딩 중이 아닐 때
+  //       currentPage++; // 다음 페이지 번호로 업데이트
+  //       await fetchGridData(currentPage); // 다음 페이지 데이터 로드
+  //     }
+  //   }
+	// });
   
 	// grid.on('click', (ev) => {
   //   // 컬럼 id를 선택을 하여 모달을 띄운다.

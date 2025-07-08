@@ -38,16 +38,6 @@ const getClientTypeDisplayName = (type) => {
 
 
 
-// { header: '상세', name: 'detail',
-//     formatter: ({ value }) => { // value는 `processedData`에서 `client.cliId`로 설정됩니다.
-//         return `<button class="btn btn-link p-0 open-detail" style="width: 100%;" tabindex="-1" title="detail" onclick="openDetailModal('${value}')">
-//                   <span>⋮</span>
-//                 </button>`;
-//     }
-// }
-
-
-
 
 
 // =================================================================================================
@@ -276,6 +266,14 @@ window.openDetailModal = async (clientId) => { // TUI Grid formatter에서 호�
         alert('거래처 정보를 불러오는 데 실패했습니다.');
     }
 };
+// 모달을 초기화하고 표시하는 함수
+function formatPhoneNumber(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 11); // 숫자만, 최대 11자리 제한
+
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
 
 
 // 동적으로 생성된 요소에 이벤트 리스너를 다시 연결하는 함수
@@ -293,19 +291,37 @@ function attachDynamicEventListeners() {
         };
     }
 
+    // 입력 중엔 숫자만 유지
+  const sanitizeInput = (el) => {
+    const digits = el.value.replace(/\D/g, '').slice(0, 11);
+    el.value = digits;
+  };
+   // 입력 중엔 숫자만 보이고
+  // 포커스 잃을 때만 하이픈 붙이기
+  const attachPhoneEvents = (inputEl) => {
+    if (!inputEl) return;
 
-    if (cliPhoneInput) {
-        cliPhoneInput.oninput = function() {
-            formatCliPhone(this);
-        };
-    }
-    if (cliMgrPhoneInput) {
-        cliMgrPhoneInput.oninput = function() {
-            formatCliPhone(this);
-        };
-    }
+    inputEl.addEventListener('input', function () {
+      sanitizeInput(this);
+    });
+
+    inputEl.addEventListener('blur', function () {
+      this.value = formatPhoneNumber(this.value);
+    });
+
+    inputEl.addEventListener('focus', function () {
+      // 하이픈 제거하고 숫자만 보여주기
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
+    });
+  };
+
+  
+  attachPhoneEvents(cliPhoneInput);
+  attachPhoneEvents(cliMgrPhoneInput);
+
+
+    
 }
-
 // =================================================================================================
 // 데이터 검증 및 전송 함수
 // =================================================================================================
@@ -665,71 +681,9 @@ function toggleBizRegNoRelatedUI(isChecked) {
         noBizText.style.display = 'none';
     }
 }
-function formatCliPhone(inputElem) {
-    // 1. 기존 커서 위치 저장
-    const originalSelectionStart = inputElem.selectionStart;
-    const originalSelectionEnd = inputElem.selectionEnd;
 
-    // 2. 현재 입력된 값에서 숫자만 추출
-    let num = inputElem.value.replace(/[^0-9]/g, '');
 
-    // 3. 포맷팅 전 하이픈 개수 계산 (커서 위치 보존용)
-    const oldHyphenCount = (inputElem.value.match(/-/g) || []).length;
 
-    let formattedNum = '';
-
-    // 4. 추출된 숫자를 기준으로 포맷팅 로직 수행
-    if (num.substring(0, 2) === '02') { // 서울 지역번호 (02)
-        if (num.length < 3) {
-            formattedNum = num;
-        } else if (num.length < 6) {
-            formattedNum = num.replace(/(\d{2})(\d{1,3})/, '$1-$2');
-        } else if (num.length < 10) {
-            formattedNum = num.replace(/(\d{2})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
-        } else {
-            formattedNum = num.replace(/(\d{2})(\d{4})(\d{4}).*/, '$1-$2-$3');
-        }
-    } else if (/^01[016789]/.test(num)) { // 휴대폰 번호 (01x)
-        if (num.length < 4) {
-            formattedNum = num;
-        } else if (num.length < 7) {
-            formattedNum = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
-        } else if (num.length < 11) {
-            formattedNum = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
-        } else {
-            formattedNum = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
-        }
-    } else { // 일반 유선 전화 (0xx)
-        if (num.length < 4) {
-            formattedNum = num;
-        } else if (num.length < 7) {
-            formattedNum = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
-        } else if (num.length < 11) {
-            formattedNum = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
-        } else {
-            formattedNum = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
-        }
-    }
-
-    // 5. input value 업데이트
-    inputElem.value = formattedNum;
-
-    // 6. 새로운 하이픈 개수 계산
-    const newHyphenCount = (formattedNum.match(/-/g) || []).length;
-
-    // 7. 커서 위치 조정
-    let newSelectionStart = originalSelectionStart + (newHyphenCount - oldHyphenCount);
-    // 커서가 0보다 작아지지 않도록 방지 (맨 앞에서 지울 때)
-    if (newSelectionStart < 0) {
-        newSelectionStart = 0;
-    }
-    // 커서가 현재 값 길이보다 길어지지 않도록 방지
-    if (newSelectionStart > formattedNum.length) {
-        newSelectionStart = formattedNum.length;
-    }
-
-    inputElem.setSelectionRange(newSelectionStart, newSelectionStart);
-}
 
 // HTML 예시:
 // <input type="text" id="phoneInput" oninput="formatCliPhone(this)">
@@ -870,8 +824,6 @@ const debounce = (func, delay) => {
 // DOMContentLoaded 이벤트 리스너: 문서 로드 후 초기화
 // =================================================================================================
 document.addEventListener('DOMContentLoaded', () => {
-
-
 
 
     // 모달 관련 요소 초기화
