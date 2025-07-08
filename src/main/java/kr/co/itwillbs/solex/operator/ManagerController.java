@@ -21,10 +21,7 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/operator")
 public class ManagerController {
 
-	Long empId = 26L;
-
-
-    // 작업목록 페이지로 단순 이동
+	// 작업목록 페이지로 단순 이동
     @GetMapping("/manager")
     public String getManagerPage() {
         return "operator/manager";

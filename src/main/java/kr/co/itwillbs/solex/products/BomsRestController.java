@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/boms/api")
 public class BomsRestController {
 	
-	long loginEmpId = 7L; // 임시 ID
-	
 	@Autowired
 	private BomsService bomsService;
 	
