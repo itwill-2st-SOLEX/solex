@@ -665,43 +665,74 @@ function toggleBizRegNoRelatedUI(isChecked) {
         noBizText.style.display = 'none';
     }
 }
-
-// 전화번호 하이픈 포맷팅 함수
 function formatCliPhone(inputElem) {
+    // 1. 기존 커서 위치 저장
+    const originalSelectionStart = inputElem.selectionStart;
+    const originalSelectionEnd = inputElem.selectionEnd;
+
+    // 2. 현재 입력된 값에서 숫자만 추출
     let num = inputElem.value.replace(/[^0-9]/g, '');
 
-    if (num.substring(0, 2) === '02') {
+    // 3. 포맷팅 전 하이픈 개수 계산 (커서 위치 보존용)
+    const oldHyphenCount = (inputElem.value.match(/-/g) || []).length;
+
+    let formattedNum = '';
+
+    // 4. 추출된 숫자를 기준으로 포맷팅 로직 수행
+    if (num.substring(0, 2) === '02') { // 서울 지역번호 (02)
         if (num.length < 3) {
-            inputElem.value = num;
+            formattedNum = num;
         } else if (num.length < 6) {
-            inputElem.value = num.replace(/(\d{2})(\d{1,3})/, '$1-$2');
+            formattedNum = num.replace(/(\d{2})(\d{1,3})/, '$1-$2');
         } else if (num.length < 10) {
-            inputElem.value = num.replace(/(\d{2})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
+            formattedNum = num.replace(/(\d{2})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
         } else {
-            inputElem.value = num.replace(/(\d{2})(\d{4})(\d{4}).*/, '$1-$2-$3');
+            formattedNum = num.replace(/(\d{2})(\d{4})(\d{4}).*/, '$1-$2-$3');
         }
-    } else if (/^01[016789]/.test(num) || num.length >= 3) {
+    } else if (/^01[016789]/.test(num)) { // 휴대폰 번호 (01x)
         if (num.length < 4) {
-            inputElem.value = num;
+            formattedNum = num;
         } else if (num.length < 7) {
-            inputElem.value = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
+            formattedNum = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
         } else if (num.length < 11) {
-            inputElem.value = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
+            formattedNum = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
         } else {
-            inputElem.value = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
+            formattedNum = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
         }
-    } else {
+    } else { // 일반 유선 전화 (0xx)
         if (num.length < 4) {
-            inputElem.value = num;
+            formattedNum = num;
         } else if (num.length < 7) {
-            inputElem.value = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
+            formattedNum = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
         } else if (num.length < 11) {
-            inputElem.value = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
+            formattedNum = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
         } else {
-            inputElem.value = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
+            formattedNum = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
         }
     }
+
+    // 5. input value 업데이트
+    inputElem.value = formattedNum;
+
+    // 6. 새로운 하이픈 개수 계산
+    const newHyphenCount = (formattedNum.match(/-/g) || []).length;
+
+    // 7. 커서 위치 조정
+    let newSelectionStart = originalSelectionStart + (newHyphenCount - oldHyphenCount);
+    // 커서가 0보다 작아지지 않도록 방지 (맨 앞에서 지울 때)
+    if (newSelectionStart < 0) {
+        newSelectionStart = 0;
+    }
+    // 커서가 현재 값 길이보다 길어지지 않도록 방지
+    if (newSelectionStart > formattedNum.length) {
+        newSelectionStart = formattedNum.length;
+    }
+
+    inputElem.setSelectionRange(newSelectionStart, newSelectionStart);
 }
+
+// HTML 예시:
+// <input type="text" id="phoneInput" oninput="formatCliPhone(this)">
 
 // 우편번호 찾기 (Daum Postcode API)
 function findPostCode() {

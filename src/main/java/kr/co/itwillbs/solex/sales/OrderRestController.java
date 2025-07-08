@@ -65,8 +65,6 @@ public class OrderRestController {
 	public List<Map<String, Object>> getSearchProductList(@RequestParam(name = "searchKeyword", required = false) String searchKeyword , HttpSession session
     ) throws Exception {
         
-        // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
-        String emp_id = (String) session.getAttribute("empId");	
 
         List<Map<String, Object>> list = orderService.getSearchProductList(searchKeyword);
         return list;
