@@ -115,7 +115,6 @@ async function setupModalContents() {
             newSubmitBtn.addEventListener('click', submitUpdateForm); // 수정 이벤트 연결
 
             const orderData = JSON.parse(myModalElement.dataset.orderData);
-            console.log("모달에 로드된 주문 데이터:", orderData);
             enableForm(true);
             
             populateModalWithData(orderData);
@@ -223,7 +222,6 @@ function initializeSearchableSelect(wrapperId, apiUrl, onSelectCallback) {
 
 
 document.addEventListener('click', (e) => {
-    console.log("클릭됨");
     // 1. 검색 가능한 셀렉트 박스(거래처/제품) 닫기
     // 클릭한 위치가 .custom-search-select 내부가 아닐 때만 실행
     if (!e.target.closest('.custom-search-select')) {
@@ -351,14 +349,12 @@ async function populateModalWithData(data) {
     }
 
     // orderItems의 ODD_STS가 "수주 등록"이면 수정 변경모드로
-    console.log(orderItems);
 
     if (orderItems && orderItems.length > 0) {
     // 모든 orderItems의 ODD_STS가 "수주 등록"일 때만 true가 됩니다.
     // 하나라도 "수주 등록"이 아니면 false가 됩니다.
     const allArePendingItems = orderItems.every(item => item.ODD_STS === "수주 등록");
     
-    console.log(allArePendingItems); // 이 부분이 이제 '모두 수주 등록'일 때만 true를 출력합니다.
     enableForm(allArePendingItems);
 }
     
@@ -398,7 +394,6 @@ function resetAndFetchGridData() { currentPage = 0; hasMoreData = true; if (TUI_
 
 async function loadAllProductOptions(data) {
     let optionsData;
-    console.log(data);
     if (typeof data === 'string' || typeof data === 'number') {
         if (!data) { resetOrderStep('color'); return; }
         try { optionsData = await (await fetch(`/SOLEX/orders/product/${data}`)).json(); }
@@ -446,8 +441,6 @@ function addRowToInnerGrid() {
     const existingRows = INNER_TUI_GRID_INSTANCE.getData(); 
     let addedCount = 0;
     
-    console.log(validCombinations);
-    console.log("기존 Inner Grid 데이터:", existingRows);
     validCombinations.forEach(item => {
         const isDuplicate = existingRows.some(row => 
             row.opt_id === item.OPT_ID // Inner Grid 데이터에 opt_id가 있어야 합니다.
@@ -713,13 +706,10 @@ async function callDeleteOrdersApi(oddIdsToDelete) {
 
 function deleteSelectedRows() {
     const totalRows = INNER_TUI_GRID_INSTANCE.getData().length;
-    console.log("총 행 수:", totalRows); // 디버깅용
     
     const checkedRows = INNER_TUI_GRID_INSTANCE.getCheckedRows(); // 체크된 행들의 데이터를 가져옴
-    console.log("체크된 행 데이터:", checkedRows); // 디버깅용
     
     const checkedRowCount = checkedRows.length; // 체크된 행의 개수
-    console.log("체크된 행 개수:", checkedRowCount); // 디버깅용
 
     const modalTitle = document.getElementById("myModalTitle").textContent;
 
@@ -738,7 +728,6 @@ function deleteSelectedRows() {
     // --- 모든 1차 유효성 검사를 통과한 경우: 백엔드 API 호출 준비 ---
     // 체크된 모든 odd_id를 백엔드로 보냅니다. 백엔드에서 검증 및 부분 삭제를 수행할 것입니다.
     const oddIdsToProcess = checkedRows.map(row => row.odd_id);
-    console.log("삭제 요청할 odd_id 목록 (프론트엔드에서 보냄):", oddIdsToProcess);
 
     // 사용자에게 최종 확인
     if (!confirm(`${checkedRowCount}개의 주문을 정말로 삭제하시겠습니까?`)) {
@@ -814,7 +803,6 @@ async function submitUpdateForm() {
         items: gridData.map(row => ({...row, quantity: unformatWithComma(row.quantity)}))
     };
 
-    console.log("최종 제출 데이터:", finalPayload); // 디버깅용
     try {
         const response = await fetch('/SOLEX/orders', 
             { 

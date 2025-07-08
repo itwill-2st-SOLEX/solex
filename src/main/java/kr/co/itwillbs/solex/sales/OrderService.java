@@ -38,7 +38,6 @@ public class OrderService {
             } else if (dateObj instanceof String) { 
                 try {
                 } catch (Exception e) {
-                    System.err.println("날짜 문자열 파싱 오류: " + dateObj);
                 }
             }
         }
@@ -156,13 +155,11 @@ public class OrderService {
 
             if (order == null) {
                 // DB에 없는 ID는 건너뛰거나 오류 처리
-                System.err.println("OddId " + oddId + " not found in DB for deletion.");
                 skippedIds.add(oddId);
                 continue;
             }
 
             String oddSts00 = (String) order.get("ODD_STS");
-            System.out.println(oddSts00);
 
             if (!"odd_sts_00".equals(oddSts00)) {
                 skippedIds.add(oddId); // 삭제 불가능한 ID는 스킵 목록에 추가
@@ -178,7 +175,6 @@ public class OrderService {
                 orderMapper.deleteOrderById(oddId); // OrderMapper에 deleteOrderById(Long oddId) 메소드 있다고 가정
                 deletedIds.add(oddId);
             } catch (Exception e) {
-                System.err.println("Error deleting oddId " + oddId + ": " + e.getMessage());
                 skippedIds.add(oddId); // 삭제 중 DB 오류 발생 시 스킵 처리
             }
         }
@@ -195,17 +191,13 @@ public class OrderService {
     public int updateOrderProcess(Map<String, Object> orderPayload) {
     	String ordIdStr = (String) orderPayload.get("ord_id");
         int ordId = Integer.parseInt(ordIdStr); // <-- 이 부분을 수정했습니다.
-        System.out.println(ordId);
         List<Map<String, Object>> items = (List<Map<String, Object>>) orderPayload.get("items");
-        System.out.println(items);
     
         // 1. 주문 헤더 정보 업데이트 (ord_id 기준)
         // 이 부분은 기존 주문 헤더 테이블 (예: suju_order_header)을 업데이트하는 쿼리가 필요합니다.
         // 예: orderMapper.updateOrderHeader(orderPayload);
         int headerUpdateResult = orderMapper.updateOrderHeader(orderPayload);
         if (headerUpdateResult == 0) {
-            System.err.println("주문 헤더 업데이트 실패 또는 변경 없음: ord_id " + ordId);
-            // 오류 처리 또는 경고 로깅
         }
 
 
