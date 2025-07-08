@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // '선택하세요' 옵션 추가
         materialList.unshift({ text: '선택하세요', value: '', id: '', unit: '', comm: '' });
 		
-        console.log("DEBUG: materialList 로드 완료:", materialList); // Debug: materialList 확인
 		
 		// 그리드 생성
 		window.bom_grid = new tui.Grid({
@@ -83,7 +82,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		    const pastedText = clipboardData.getData('text');
 
 		    if (!pastedText) {
-		        console.warn('클립보드에 텍스트 데이터가 없습니다.');
 		        return;
 		    }
 
@@ -115,7 +113,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		    if (newRowsDataToAppend.length > 0) {
 		        // 기존 appendRows 사용. 이 시점에는 createdRows에 안 잡힐 수 있음.
 		        window.bom_grid.appendRows(newRowsDataToAppend);
-		        console.log('엑셀 데이터가 그리드에 시각적으로 추가되었습니다. (appendRows 사용)');
 
 		        // ⭐ 핵심: appendRows 후, 새로 추가된 각 행의 데이터를 setRow로 다시 설정하여
 		        // TUI Grid가 이를 변경으로 인식하고 createdRows에 포함시키도록 유도
@@ -131,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		            }
 		        });
 		        
-		        console.log("새로 식별된 RowKeys (__pastedFromExcel 기준):", addedRowKeys);
 
 		        addedRowKeys.forEach(rowKey => {
 		            const rowData = window.bom_grid.getRow(rowKey);
@@ -143,15 +139,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 		                    // doContentsChange: true // 이 옵션은 v3.x에서 주로 사용, v4+에서는 생략 가능
 		                    // noDataUpdateEvent: false // 기본값은 false, 즉 이벤트 발생
 		                }); 
-		                console.log(`RowKey ${rowKey}의 데이터를 setRow로 다시 설정하여 변경 트리거`);
 		            }
 		        });
 		        
 		        // ⭐ 확인: 강제 설정 후 createdRows가 제대로 채워지는지 다시 확인
 		        const { createdRows, updatedRows, deletedRows } = window.bom_grid.getModifiedRows();
-		        console.log("붙여넣기 후 (setRow 강제 설정 포함) createdRows:", createdRows);
-		        console.log("붙여넣기 후 (setRow 강제 설정 포함) updatedRows:", updatedRows);
-		        console.log("붙여넣기 후 (setRow 강제 설정 포함) deletedRows:", deletedRows);
 		    }
 		});
 		
@@ -162,9 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	    window.bom_grid.on('afterChange', (ev) => {
 	        ev.changes.forEach(({ rowKey, columnName, value }) => {
 	            if (columnName === 'MAT_NM') {
-					console.log('MAT_NM 컬럼 변경 감지!'); // MAT_NM 변경 시 이 로그가 찍히는지 확인
 	                const selectedMaterial = materialList.find(item => String(item.value) === String(value));
-					console.log('Selected Material:', selectedMaterial); // 찾은 데이터 확인
 	                if (selectedMaterial) {
 						// ⭐ MAT_NM 컬럼에는 다시 '이름'을 표시 (사용자에게 보이는 값)
 						window.bom_grid.setValue(rowKey, 'MAT_NM', selectedMaterial.text, false);
@@ -172,7 +162,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 						window.bom_grid.setValue(rowKey, 'MAT_ID', selectedMaterial.id, false);
 						// BOM_UNIT 자동 채우기
 	                    window.bom_grid.setValue(rowKey, 'BOM_UNIT', selectedMaterial.unit, false);
-						console.log('DEBUG: Unit and Comm set.');
 	                } else {
 						// 선택 해제되거나 찾을 수 없을 경우 초기화
 						window.bom_grid.setValue(rowKey, 'MAT_ID', '', false);
@@ -192,7 +181,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		};
 		
     } catch (error) {
-        console.error('원자재 목록을 가져오는데 실패했습니다:', error);
         // 에러 처리: 기본값 설정 또는 사용자에게 알림
     }
 });

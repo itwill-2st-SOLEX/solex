@@ -11,9 +11,7 @@ public interface ProductsMapper {
 
 	List<Map<String, Object>> selectProductsLists();
 
-	List<Map<String, Object>> selectPagedProductList(@Param("offset") int offset,
-													@Param("perPage") int perPage, 
-													@Param("prdYn") String prdYn);
+	List<Map<String, Object>> selectPagedProductList(@Param("prdYn") String prdYn);
 	int selectTotalProductCount(String prdYn);
 	
 	// 셀렉트 박스 정보 가져오기

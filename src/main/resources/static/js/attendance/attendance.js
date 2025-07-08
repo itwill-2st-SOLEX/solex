@@ -264,13 +264,10 @@ function updateMonthYearDisplay() {
     
     if (currentPath.includes('/my_attendance_list')) {
         requestType = 'my';
-        console.log("현재 페이지는 '내 근태 현황' 페이지입니다.");
     } else if (currentPath.includes('/attendance_list')) {
         requestType = 'team';
-        console.log("현재 페이지는 '팀 근태 현황' 페이지입니다.");
     } else {
         requestType = 'default';
-        console.log("알 수 없는 근태 페이지입니다. 기본값을 사용합니다.");
     }
 
     attendanceLists(displayYear, displayMonth, requestType, '', currentPage); 
@@ -291,10 +288,8 @@ async function attendanceLists(year, month, requestType, keyword = '', page) {
 		const totalCount = data.totalCount;
 		
 		if (requestType === 'my' && data.myAttendance && Array.isArray(data.myAttendance)) {
-			console.log('my');
 			displayMyAttendance(data.myAttendance);
 		} else if (requestType === 'team' && data.teamAttendance && Array.isArray(data.teamAttendance)) {
-			console.log('team');
 			displayTeamAttendance(data.teamAttendance);
 		} else {
 			console.warn("요청 타입에 맞는 데이터가 없거나, 정의되지 않은 요청 타입입니다.");
@@ -328,7 +323,6 @@ function displayMyAttendance(data) {
         grid.setRows([]); // 빈 배열을 설정하여 기존 데이터를 모두 지우고 emptyMessage를 표시
         return; 
     }
-	console.log('내 출퇴근근황의 data' + JSON.stringify(data));
 	
 	gridData = data.map((at, idx) => ({
 		emp_nm: at.EMP_NM,
@@ -342,7 +336,6 @@ function displayMyAttendance(data) {
 		att_id: at.ATT_ID
 		
 	}));
-	console.log('내 출퇴근근황의 gridData' + JSON.stringify(gridData));
 	
 	grid.appendRows(gridData);
 }
@@ -367,7 +360,6 @@ function displayTeamAttendance(data) {
 		att_id: at.ATT_ID
 		
 	}));
-	console.log('부하직원 출퇴근근황의 gridData' + JSON.stringify(gridData));
 	grid.appendRows(gridData);
 }
 
@@ -428,21 +420,16 @@ grid.on('afterChange', ev => {
 
             // 변경이 실제로 발생했는지 확인 (값은 같지만 타입이 다를 수 있으므로)
             if (newValue === prevValue) {
-                console.log(`값 변경 없음: RowKey=${rowKey}, Column=${columnName}`);
                 return; // 변경된 값이 이전 값과 동일하면 아무것도 하지 않음
             }
 
             // 해당 rowKey의 전체 데이터 조회
             const rowData = grid.getRow(rowKey);
-			console.log('rowData?? ' + JSON.stringify(rowData));
 			
             if (!rowData || !rowData.att_id) {
                 console.error(`행 데이터 또는 att_id를 찾을 수 없습니다. RowKey: ${rowKey}`);
                 return;
             }
-
-            console.log(`Grid 데이터 변경 감지: RowKey=${rowKey}, Column=${columnName}, NewValue=${newValue}, PrevValue=${prevValue}`);
-            console.log('업데이트할 전체 Row 데이터 (예시):', rowData);
 
             // TODO: 여기서 AJAX 요청을 통해 백엔드로 데이터를 업데이트
             // 백엔드로 보낼 데이터 구성: att_id와 변경된 컬럼 값만 전송함.
@@ -450,7 +437,6 @@ grid.on('afterChange', ev => {
                 ATT_ID: rowData.att_id, // 고유 식별자
                 [columnName]: newValue   // 변경된 컬럼의 이름과 새로운 값
             };
-			console.log('updateData? ' + JSON.stringify(updateData));
             // 만약 'det_nm' 컬럼이 특정 ID로 매핑되어야 한다면 추가 로직 필요
             // 예: if (columnName === 'det_nm') { updateData.DET_ID = getDetIdByDetNm(newValue); }
 
@@ -460,7 +446,6 @@ grid.on('afterChange', ev => {
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify(updateData),
                 success: function(response) {
-					console.log('response ?? ' + response);
 //                    if (response.status === 'success') {
 //                        console.log('서버 업데이트 성공:', response);
 //                        // 사용자에게 성공 메시지 표시 (옵션)

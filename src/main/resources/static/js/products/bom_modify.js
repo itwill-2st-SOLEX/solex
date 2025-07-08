@@ -42,8 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	    const invalidRows = [...createdRows, ...updatedRows].filter(row =>
 	        requiredFields.some(field => row[field] === '')
 	    );
-		console.log('invalidRows');
-		console.log(invalidRows);
 		
 	    if (invalidRows.length > 0) {
 	        alert("필수 항목이 입력되지 않은 행이 있습니다.");
@@ -84,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		})
 		.catch(err => {
-	        console.error(err);
 	        alert('저장 중 오류 발생');
 	    });;
 	});
@@ -105,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. 선택된 BOM_ID 리스트 추출
         const bomIdsToDelete = checkedRows.map(row => row.BOM_ID);
-        console.log('삭제할 BOM_ID 리스트:', bomIdsToDelete);
 
         try {
             // 3. 서버로 삭제 요청 전송 (DELETE 메서드)
@@ -136,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('서버 오류: BOM 삭제에 실패했습니다.');
             }
         } catch (error) {
-            console.error('BOM 삭제 중 오류 발생:', error);
             alert('네트워크 오류 또는 요청 처리 중 문제가 발생했습니다.');
         }
     });
@@ -218,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	            alert('일괄 저장 실패: ' + (result.message || '알 수 없는 오류'));
 	        }
 	    } catch (err) {
-	        console.error(err);
 	        alert('저장 중 오류 발생');
 	    }
 	});
