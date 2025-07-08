@@ -12,7 +12,7 @@ $(function() {
 		scrollY: true,
 		data: [],
 		columns: [
-			{ header: '설비 번호', name: 'eqp_id', sortable: 'true' ,align: 'center',renderer: { styles: { color: '#007BFF', textDecoration: 'underline', cursor: 'pointer' } } },
+			{ header: '설비 번호', name: 'eqp_id', sortable: 'true' ,align: 'center', renderer: { styles: { color: '#007BFF', textDecoration: 'underline', cursor: 'pointer' } } },
 			{ header: '설비 코드', name: 'eqp_code', sortable: 'true' , align: 'center'},
 			{ header: '설비명', name: 'eqp_name', filter: 'select', align: 'center'}					
 		]

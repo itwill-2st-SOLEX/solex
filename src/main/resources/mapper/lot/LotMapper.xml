@@ -301,8 +301,6 @@
             prc_id,
             erp_nm,
             erp_num,
-            prc_lot_start_date,
-            prc_lot_end_date,
             prc_lot_status,
             eqp_id
         ) VALUES (
@@ -326,8 +324,6 @@
 	             AND emp.emp_pos_cd = 'pos_04'
 	         WHERE wo.wrk_id = #{wrk_id}
 	           AND ROWNUM = 1),
-            NULL,
-            NULL,
             (SELECT wpo_status FROM work_process wp WHERE wp.wrk_id = #{wrk_id} AND ROWNUM = 1),	-- work_process.wpo_status (공정진행상태)
 	        (SELECT  eqp.eqp_id		-- 사용설비ID
 			FROM    equipment eqp

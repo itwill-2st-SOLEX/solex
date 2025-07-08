@@ -96,6 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const docTypeCode = item.dataset.type;
 
             openDetailModal(row, docTypeCode);
+			
+			
         });
 		
 	
@@ -104,38 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-function openMessengerPopup(event) {
-			event.preventDefault();
-			const popup = window.open('/SOLEX/chats', 'MessengerWindow', 'width=500,height=700,left=100,top=100');
-			if (!popup || popup.closed) {
-				alert('팝업 차단 해제해주세요!');
-			} else {
-				popup.focus();
-			}
-		}
-	
-		function unreadCnt() {
-			$.ajax({
-				url: '/SOLEX/chats/unreadCount',
-				method: 'GET',
-				success: function(count) {
-					const badge = document.getElementById('chat-badge');
-					if (!badge) return;
-					if (count > 0) {
-						badge.textContent = count;
-						badge.classList.remove('d-none');
-					} else {
-						badge.classList.add('d-none');
-					}
-				},
-				error: function() {
-					console.error('안읽은 메시지 수 불러오기 실패');
-				}
-			});
-		}
-		document.addEventListener('DOMContentLoaded', function () {
-			unreadCnt();
-		});
+
 		
 		// "마이페이지" 메뉴 클릭 시 실행
 		async function openMypagePopup(event) {
@@ -606,6 +577,7 @@ async function approvalList() {
   		`
 	};
 	
+	// 상세조회 모달
 	async function openDetailModal(row, docTypeCode) {
 		document.querySelector("#detailModal .modal-body").innerHTML = formTemplates[docTypeCode];
 		// 항상 비활성화
@@ -625,32 +597,43 @@ async function approvalList() {
 				const el = form.querySelector(`[name="${key.toLowerCase()}"]`);
 				if (el) el.value = value;
 			}
+			
+			// 결재선 부분 시작		
+			const approvalLineDiv = document.querySelector("#detailModal .approval-line");
+			approvalLineDiv.innerHTML = ""; // Clear previous content
+
 			const nameList = (data.APL_EMP_POS_NM || "").split(",");
 			const statusList = (data.APL_STS || "").split(",");
 			const timeList = (data.APL_ACTION_TIME || "").split(",");
-			// thead 구성
-			const theadRow = document.querySelector(".approval-line thead tr");
-			theadRow.innerHTML = "";
 
-			const headLabel = document.createElement("th");
-			headLabel.innerText = " ";
-			theadRow.appendChild(headLabel);
+			nameList.forEach((pos, i) => {
+				const status = statusList[i] || "대기";
+				// Format time to include a line break if date and time are present
+				const time = (timeList[i] || "").replace(" ", "<br/>");
 
-			nameList.forEach(pos => {
-				const th = document.createElement("th");
-				th.innerText = pos;
-				theadRow.appendChild(th);
+				let statusClass = "status-pending";
+				if (status === "승인") statusClass = "status-approved";
+				else if (status === "반려") statusClass = "status-rejected";
+
+				const approverBox = document.createElement("div");
+				approverBox.className = "approver-box";
+				approverBox.innerHTML = `
+					<div class="approver-position">${pos}</div>
+					<div class="approver-status ${statusClass}">${status}</div>
+					<div class="approver-time">${time || "-"}</div>
+				`;
+				approvalLineDiv.appendChild(approverBox);
+
+				// Add arrow separator if not the last item
+				if (i < nameList.length - 1) {
+					const arrow = document.createElement('div');
+					arrow.className = 'approver-arrow';
+					arrow.innerHTML = `→`;
+					approvalLineDiv.appendChild(arrow);
+				}
 			});
+						
 
-			// tbody 구성
-			const tbody = document.querySelector(".approval-line tbody");
-			tbody.innerHTML = "";
-			const rowEl = document.createElement("tr");
-			const bodyLabel = document.createElement("td");
-			bodyLabel.innerText = "결재";
-			rowEl.appendChild(bodyLabel);
-//			const returnReason = data.APL_RREMARK || "";
-			
 			// 반려 사유 textarea 추가
 			if (data.APL_STS && data.APL_STS.includes("반려") && data.APL_RREMARK) {
 				const form = document.querySelector("#detailModal .modal-body");
@@ -666,24 +649,8 @@ async function approvalList() {
 					form.appendChild(returnDiv);
 				}
 			}
-			for (let i = 0; i < nameList.length; i++) {
-				const td = document.createElement("td");
-				const status = statusList[i] || "대기";
-				const time = timeList[i] || "-";
-
-				let statusClass = "";
-				if (status === "승인") statusClass = "text-blue";
-				else if (status === "반려") statusClass = "text-red";
-
-				td.innerHTML = `
-				  <span class="${statusClass}"> ${status}<br>${time}</span>
-				`;
-				rowEl.appendChild(td);
-			}
-
-
-			tbody.appendChild(rowEl);
-
+			// 결재선 부분 끝
+			
 			// 모달 오픈
 			document.querySelectorAll('.modal-backdrop').forEach(bd => bd.remove());
 			const modal = new bootstrap.Modal(document.getElementById('detailModal'));

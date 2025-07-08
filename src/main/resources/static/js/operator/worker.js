@@ -99,11 +99,21 @@ function workerReport() {
 		
 		let completeQty = parseInt(completeQtyInput.value);
 		let wreMemo = wreMemoInput.value;
+		let oCount= Number(document.getElementById("wpoOcount").innerText)
+		let jCount= Number(document.getElementById("wpoJcount").innerText) || 0;
+		
+		const maxInputQty = oCount - jCount;
 		
         if (isNaN(completeQty) || completeQty <= 0) {
             alert('작업 수량을 정확히 입력해주세요.');
             return;
         }
+		
+		if (oCount < (completeQty+jCount)) {
+            alert('입력 가능한 작업 수량을 초과하였습니다. \n (입력 가능 수량 : ' + maxInputQty + ')');
+			completeQtyInput.value = maxInputQty; 
+            return;
+		}
 
         if (!empId || !currentWpoId) {
             alert('작업 정보가 없습니다.');

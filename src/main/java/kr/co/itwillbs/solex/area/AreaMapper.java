@@ -19,4 +19,6 @@ public interface AreaMapper {
 
 	List<Map<String, Object>> getStockDetail(@Param("itemId") int itemId, @Param("type") String type);
 
+	Long getDetIdByAreaId(String areId);
+
 }

@@ -18,11 +18,45 @@
 			   , prd_height
 			   , ord_end_date
 		  FROM vw_suju_summary -- 뷰테이블
-		 WHERE odd_sts in (SELECT det_nm FROM code_detail WHERE det_id between 'odd_sts_06' and 'odd_sts_09')
+		 WHERE odd_sts in (SELECT det_nm FROM code_detail WHERE det_id in ('odd_sts_06', 'odd_sts_07', 'odd_sts_08', 'odd_sts_09'))
 		 
 		 
 		 ORDER BY odd_id DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+
+
+	<select id="selectWorkDetailHistoryList" resultType="map">
+		SELECT odd.odd_id
+			   , prd.prd_code
+			   , prd.prd_nm
+			   , odd.odd_cnt
+			   , cd.det_nm as OPT_COLOR
+			   , cd2.det_nm as OPT_SIZE
+			   , cd3.det_nm as OPT_HEIGHT
+			   , sh.odd_sts as ODD_STS
+			   , cd4.det_nm as ODD_STS_NM
+			   , sh.his_date as HIS_DATE
+		FROM suju_order_detail odd
+		left join suju_history sh on odd.odd_id = sh.odd_id
+		left join product_option opt on odd.opt_id = opt.opt_id
+		left join product prd on opt.prd_id = prd.prd_id
+		left join code_detail cd on opt.opt_color = cd.det_id
+		left join code_detail cd2 on opt.opt_size = cd2.det_id
+		left join code_detail cd3 on opt.opt_height = cd3.det_id
+		left join code_detail cd4 on sh.odd_sts = cd4.det_id
+		WHERE odd.odd_id = #{oddId}
+		ORDER BY sh.his_date ASC, sh.his_id ASC
+	</select>
+
+	<select id="selectWorkDetailHistoryTeamList" resultType="map">
+		SELECT work.prc_id, work_process.wpo_team,  work_process.wpo_start_date, work_process.wpo_end_date, cd.det_nm as WPO_TEAM_NM,
+				prc.prc_nm as PRC_NM
+		FROM work_order work
+		JOIN work_process work_process on work_process.wrk_id = work.wrk_id
+		LEFT JOIN code_detail cd on work_process.wpo_team = cd.det_id
+		LEFT JOIN process prc on work.prc_id = prc.prc_id
+		WHERE work.odd_id = #{oddId}
 	</select>
 	
 </mapper>
