@@ -15,6 +15,21 @@ let requestType = '';
 // 페이지 로드 시 초기 표시
 updateMonthYearDisplay(); 
 
+
+// 페이지 로드가 완료된 후에 flatpickr를 초기화하도록 변경
+document.addEventListener('DOMContentLoaded', function() {
+    const myDatePickerElement = document.getElementById('my-datepicker');
+    if (myDatePickerElement) { // my-datepicker 요소가 존재할 때만 flatpickr 초기화
+        const myDatePicker = flatpickr(myDatePickerElement, {
+            enableTime: true,        // 시간 선택 활성화
+            dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
+            time_24hr: true,         // 24시간 형식 사용
+            locale: "ko"             // 한국어 로케일 적용
+        });
+    } else {
+        console.warn("Element with ID 'my-datepicker' not found. Flatpickr will not be initialized for it.");
+    }
+});
 // FlatpickrDateEditor.js (혹은 <script> 태그 안에 정의)
 class FlatpickrDateEditor {
     constructor(props) {
@@ -230,13 +245,13 @@ const grid = new tui.Grid({
 });
 
 // JavaScript에서 초기화
-const myDatePicker = flatpickr("#my-datepicker", {
-    // 옵션 객체
-    enableTime: true,        // 시간 선택 활성화
-    dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
-    time_24hr: true,         // 24시간 형식 사용
-    locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
-});
+//const myDatePicker = flatpickr("#my-datepicker", {
+//    // 옵션 객체
+//    enableTime: true,        // 시간 선택 활성화
+//    dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
+//    time_24hr: true,         // 24시간 형식 사용
+//    locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
+//});
 
 
 //무한 스크롤 이벤트
