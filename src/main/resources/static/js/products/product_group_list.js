@@ -79,8 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 	        }
 		  },
-	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true,
-            filter: 'select'
+	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true, filter: 'select'
           },
 	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true,
             filter: {
