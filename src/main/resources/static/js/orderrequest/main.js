@@ -70,12 +70,10 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
       
       const oddId = target.dataset.ordId;
       const action = target.dataset.action; // data-action 값을 가져옴
-
-      console.log(`[버튼 클릭] 주문 ID: ${oddId}, 액션: ${action}`);
       
       const result = await checkMaterial(oddId);
       if(!result) {
-        alert('제품에 대한 자재가 등록되어 있지 않습니다.');
+        alert('제품에 대한 BOM이 등록되어 있지 않습니다.');
         return;
       }
 
@@ -199,7 +197,6 @@ async function openWorkInstructionModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
   const commonInfo = data[0];
   // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
   document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
@@ -268,7 +265,6 @@ async function openMaterialRequestModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
   const commonInfo = data[0];
   // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
   document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
@@ -343,7 +339,6 @@ async function openMaterialRequestCompleteModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
   const commonInfo = data[0];
   // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
   document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
@@ -424,7 +419,6 @@ async function submitForm(selectedId) {
 
 
 async function submitMaterialRequestForm(selectedId) {
-  console.log(selectedId);
   try {
     const res = await fetch(`/SOLEX/order-requests/material-request`, {
     method : 'POST',

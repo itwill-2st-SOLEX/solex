@@ -46,8 +46,6 @@ public class OrderRequestsService {
         // 2. 파라미터로 넘겨줬던 Map에서 'result_code' 키로 결과를 꺼내 확인
         String resultCode = (String) params.get("result_code");
 
-        System.out.println("result_code: " + resultCode);
-
         // null 체크 추가
         // 3. 프로시저가 'SUCCESS'를 반환하지 않았다면 실패로 간주하고 예외 발생
         if (!"SUCCESS".equals(resultCode)) {
@@ -68,7 +66,7 @@ public class OrderRequestsService {
 
         // 자재 주문  
         Integer materialOrderStatus = orderRequestsMapper.insertMaterialOrder(params);
-        System.out.println(materialOrderStatus);
+        
         
         
         // null 체크 추가
@@ -77,10 +75,8 @@ public class OrderRequestsService {
         }
         
         
-        System.out.println("params: " + params);
         // 주문 상태 변경
         Integer result2 = orderRequestsMapper.updateMaterialOrderStatus(params);
-        System.out.println("result2: " + result2);
         // null 체크 추가
         if (result2 == null || result2 <= 0) {
             throw new RuntimeException("주문 상태 변경에 실패했습니다.");
