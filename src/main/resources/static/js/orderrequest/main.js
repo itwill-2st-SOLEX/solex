@@ -247,6 +247,10 @@ async function openWorkInstructionModal(selectedId) {
     submitForm(selectedId);
   });
 
+  document.getElementById('submitBtn').style.display = 'block';
+  document.getElementById('rejectBtn').style.display = 'block';
+  
+
 
   const modal = document.getElementById('myModal');
   const modalInstance = new bootstrap.Modal(modal);
@@ -303,6 +307,8 @@ async function openMaterialRequestModal(selectedId) {
 });
 
   textArea.innerHTML = htmlLines.join('\n');
+  document.getElementById('submitBtn').style.display = 'block';
+  document.getElementById('rejectBtn').style.display = 'block';
 
 
   // 자재 요청
@@ -380,6 +386,8 @@ async function openMaterialRequestCompleteModal(selectedId) {
 
   // TODO: 자재 요청 완료 모달
   // 승인 반려 버튼 안보이게
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('rejectBtn').style.display = 'none';
 
 
 

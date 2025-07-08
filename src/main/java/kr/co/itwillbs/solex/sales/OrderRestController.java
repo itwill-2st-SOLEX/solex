@@ -25,7 +25,7 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/orders")
-@PreAuthorize("hasAnyRole('1','2','3','4')")
+
 public class OrderRestController {
 
 	@Autowired
@@ -116,6 +116,7 @@ public class OrderRestController {
 		}
 	}
 
+	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	@PutMapping
 	public ResponseEntity<Map<String, Object>> updateOrder(@RequestBody Map<String, Object> param, HttpSession session) {
 		String emp_id = (String) session.getAttribute("empId");
@@ -156,6 +157,7 @@ public class OrderRestController {
 		return orderData;
 	}
 
+	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	@DeleteMapping
 	public ResponseEntity<Map<String, Object>> deleteOrders(@RequestBody List<Long> oddIds) {
 		Map<String, Object> responseMap = new HashMap<>();
