@@ -8,13 +8,11 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 public class ProcessRestController {
@@ -64,19 +62,9 @@ public class ProcessRestController {
         return result;
 	}
 	
-	// ✅ 저장 권한 체크 API
-    @GetMapping("/process/checkAuth")
-    @PreAuthorize("hasAnyRole('1','2','3','4')")
-    public ResponseEntity<?> checkSaveAuth() {
-        // 권한 있으면 200 OK 반환
-        return ResponseEntity.ok().build();
-    }
-	
 	// 공정정보 신규 등록 및 수정
 	@PostMapping("/process/save")
-	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	public Map<String, Object> saveProcess(@RequestBody Map<String, List<Map<String, Object>>> map) {
-		System.out.println();
 	    List<Map<String, Object>> insertList = map.get("createdRows");
 	    List<Map<String, Object>> updateList = map.get("updatedRows");
 	    
@@ -171,7 +159,6 @@ public class ProcessRestController {
 	
 	// 공정순서 삭제
 	@PostMapping("/typeProcess/delete")
-	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	public ResponseEntity<?> deleteTypeProcesses(@RequestBody List<Map<String, Object>> deleteList) {
         try {
         	processService.deleteTypeProcesses(deleteList);
