@@ -37,7 +37,6 @@ public class EquipmentRestController {
         @RequestParam(name = "pageSize", defaultValue = "20") int pageSize
     ) throws Exception {
         List<Map<String, Object>> list = equipmentService.getPagedGridDataAsMap(page, pageSize);
-        System.out.println(list);
         return list; 
     }
 	
@@ -49,8 +48,6 @@ public class EquipmentRestController {
 	
 	@PostMapping
 	public ResponseEntity<String> createEquipment(@RequestBody Map<String, Object> params) throws Exception {	
-
-        System.out.println(params);
 
     try {
           // 서비스 메소드 호출 (리턴값이 없으므로 변수에 담지 않음)
