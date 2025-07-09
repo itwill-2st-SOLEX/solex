@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
       
       const result = await checkMaterial(oddId);
       if(!result) {
-        alert('제품이 창고에 등록되어 있지 않습니다.');
+        alert('자재가 창고에 등록되어 있지 않습니다.');
         return;
       }
 
