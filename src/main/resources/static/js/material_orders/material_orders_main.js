@@ -246,7 +246,6 @@ $(function() {
      * @param {number} rowKey - 그리드에서 선택된 행의 키.
      */
 	
-	
 
 	
     async function openModal(mode, rowKey) {
@@ -274,7 +273,7 @@ $(function() {
                     <div class="col"><label class="form-label">구역</label><select id="areId" class="form-select" name="are_id" disabled required><option value="">-- 구역 선택 --</option></select></div>
                 </div>
                 <div class="text-end mt-4">
-                    <button type="submit" id="approveBtn" class="btn btn-primary">승인</button>
+                    <button type="submit" id="approveBtn" class="btn custom-btn-blue">승인</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 </div>`;
             modalBody.appendChild(form);

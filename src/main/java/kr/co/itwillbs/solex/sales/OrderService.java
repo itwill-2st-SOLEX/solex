@@ -197,7 +197,7 @@ public class OrderService {
         // 이 부분은 기존 주문 헤더 테이블 (예: suju_order_header)을 업데이트하는 쿼리가 필요합니다.
         // 예: orderMapper.updateOrderHeader(orderPayload);
         int headerUpdateResult = orderMapper.updateOrderHeader(orderPayload);
-        if (headerUpdateResult == 0) {
+        	if (headerUpdateResult == 0) {
         }
 
 

@@ -55,41 +55,16 @@
   <select id="getSelectTop5PopularClients" resultType="Map">
     SELECT
     	cli_nm, cli_id
-    FROM (
-        SELECT
-            cli.cli_nm,cli.cli_id,
-            COUNT(suju.cli_id) AS order_count
-        FROM client cli 
-        JOIN suju_order suju    
-        ON cli.cli_id = suju.cli_id
-        WHERE cli.cli_type = 'client_cat_02'   
-        GROUP BY
-            cli.cli_nm,cli.cli_id
-        ORDER BY order_count DESC
-    )
-    WHERE ROWNUM <![CDATA[ <= ]]> 5
+    FROM client
+	WHERE cli_type = 'client_cat_02'
+    and ROWNUM <![CDATA[ <= ]]> 10
    </select>
    
    <select id="getSelectTop5PopularProducts" resultType="Map">
     SELECT
     	prd_nm, prd_id
-    FROM (
-        SELECT
-	        p.prd_nm,
-	        p.prd_id,
-	        SUM(odd.odd_cnt) AS total_sales
-	    FROM
-	        product p 
-	    JOIN
-	        product_option opt ON p.prd_id = opt.prd_id 
-	    JOIN
-	        suju_order_detail odd ON opt.opt_id = odd.opt_id 
-	    GROUP BY
-	        p.prd_nm, p.prd_id
-	    ORDER BY
-	        total_sales DESC
-    	)
-    WHERE ROWNUM <![CDATA[ <= ]]> 5
+    FROM product
+    WHERE ROWNUM <![CDATA[ <= ]]> 10
    </select>
    
    
