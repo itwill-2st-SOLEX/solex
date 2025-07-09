@@ -53,7 +53,7 @@ public class AttendanceRestController {
 		Map<String,Object> info = attendanceService.getEmployeeInfo(loginEmpId);
 		
 	    Map<String, Object> params = new HashMap<>();
-	    params.put("offset", page * size);// 페이징 계산
+	    params.put("offset", (page - 1) * size);
 	    params.put("year", year);
 	    params.put("month", month);
 	    params.put("keyword", keyword);
@@ -70,10 +70,16 @@ public class AttendanceRestController {
 	    Map<String, Object> combinedMap = new HashMap<>();
 	    
 	    if (resultType.equals("my")) { // 1. 내 근태 데이터 조회
+	    	System.out.println("myAttendance ::: " + params);
 	    	List<Map<String, Object>> myAttendance = attendanceService.getMyAttendanceByMonth(params); // 서비스 메서드 분리 또는 호출
+	    	System.out.println("myAttendance ::: " + myAttendance);
+	    	
 	    	combinedMap.put("myAttendance", myAttendance);
 		} else if (resultType.equals("team")) { // 2. 다른 사람/팀 근태 데이터 조회
 			List<Map<String, Object>> teamAttendance = attendanceService.getAttendanceByMonth(params); // 다른 서비스 메서드 호출+
+			System.out.println("teamAttendance ::: " + teamAttendance);
+			
+			
 			combinedMap.put("teamAttendance", teamAttendance);
 		}	
         
