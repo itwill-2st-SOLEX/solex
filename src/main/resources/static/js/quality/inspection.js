@@ -41,7 +41,6 @@ const gridColumns = [
         // editable 속성을 함수로 정의하여 동적으로 편집 가능 여부를 결정합니다.
         // currentInspectionRowKey와 현재 행의 rowKey가 일치할 때만 true를 반환합니다.
         editable: (value, row) => {
-            console.log('Editable check for row:', row.rowKey, 'Result:', row.rowKey === currentInspectionRowKey);
             return row.rowKey === currentInspectionRowKey;
         },
         editor: customTextEditor // customTextEditor를 에디터로 지정
@@ -195,7 +194,6 @@ async function Approve (oddId,numericValue) {
 }
 
 async function callStockOutApi(oddId, qhiBcount) {
-	console.log("실행됨?");
     try {
         const stockOutResponse = await fetch('/SOLEX/quality/api/inspection/outbound', {
             method: 'POST', // 재고 차감은 주로 POST/PATCH/PUT
@@ -321,7 +319,6 @@ document.getElementById('grid').addEventListener('click', async e => {
             } else {
                 // Approve 실패 시, 사용자에게 메시지를 보여주고 행을 삭제하지 않음
                 // (Appove 함수 내에서 이미 showCustomAlert가 호출됨)
-                console.log('불량 수량 업데이트 실패. 행을 삭제하지 않습니다.');
                 // 여기서 필요하다면 버튼 상태를 다시 활성화하거나 다른 UI 조작을 할 수 있습니다.
             }
 
@@ -391,7 +388,6 @@ async function managerSummary() {
     try {
         const res = await fetch(`/SOLEX/quality/api/inspection/managerSummary`);
         const data = await res.json();
-        console.log(data);
 
         empId = data.EMP_ID;
 
@@ -413,7 +409,6 @@ async function List(page) {
         const url = `/SOLEX/quality/api/inspection/data?page=${page}&size=${pageSize}&empId=${empId}&yearMonth=${ym}`;
         const res = await fetch(url);
         const data = await res.json();
-        console.log(data);
 
         const list = data.list;
         
@@ -453,7 +448,6 @@ async function List(page) {
 }
 
 async function updateStatus(oddId, status, eventOrValue) { // 이름 변경: bcount -> eventOrValue
-    console.log('updateStatus 호출됨', oddId, status, eventOrValue);
 
     const rowKey = grid.getData().findIndex(row => row.oddId == oddId);
     if (rowKey === -1) {
