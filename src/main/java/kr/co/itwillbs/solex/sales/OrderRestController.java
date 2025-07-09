@@ -25,7 +25,7 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/orders")
-@PreAuthorize("hasAnyRole('1','2','3','4')")
+
 public class OrderRestController {
 
 	@Autowired
@@ -65,8 +65,6 @@ public class OrderRestController {
 	public List<Map<String, Object>> getSearchProductList(@RequestParam(name = "searchKeyword", required = false) String searchKeyword , HttpSession session
     ) throws Exception {
         
-        // 회원정보를 받아와서 emp_id값을 넣어줘야 됨 로그인 기능이 다 되면
-        String emp_id = (String) session.getAttribute("empId");	
 
         List<Map<String, Object>> list = orderService.getSearchProductList(searchKeyword);
         return list;
@@ -116,6 +114,7 @@ public class OrderRestController {
 		}
 	}
 
+	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	@PutMapping
 	public ResponseEntity<Map<String, Object>> updateOrder(@RequestBody Map<String, Object> param, HttpSession session) {
 		String emp_id = (String) session.getAttribute("empId");
@@ -156,6 +155,7 @@ public class OrderRestController {
 		return orderData;
 	}
 
+	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	@DeleteMapping
 	public ResponseEntity<Map<String, Object>> deleteOrders(@RequestBody List<Long> oddIds) {
 		Map<String, Object> responseMap = new HashMap<>();
