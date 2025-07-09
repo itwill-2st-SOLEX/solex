@@ -2,6 +2,8 @@ package kr.co.itwillbs.solex.emp;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,12 +123,16 @@ public class EmpService {
 		empMap.put("emp_pwd", encodedPassword);
 		empMap.put("meg_num", managerId);
 		empMap.put("emp_img", storedFileName); // 생성된 파일 이름을 emp_img 키로 추가
+
+		String hireDateStr = (String) empMap.get("emp_hire"); // "2025-07-01"
+		LocalDate hireDate = LocalDate.parse(hireDateStr, DateTimeFormatter.ISO_LOCAL_DATE); // 문자열을 LocalDate 객체로 파싱
+		// 사번 구하기
+		long empNum = mapper.findSabun(hireDate);
+		empMap.put("emp_num", empNum);
+		
 		
 		System.out.println("+++++++++__________________________****************");
 		System.out.println(empMap);
-		
-//		Long empNum = mapper.getEmpSabun();
-//		empMap.put("emp_num", empNum);
 		
 		mapper.insertEmp(empMap);
 	}
