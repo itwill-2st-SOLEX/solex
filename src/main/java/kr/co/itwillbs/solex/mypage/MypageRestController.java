@@ -35,10 +35,7 @@ public class MypageRestController {
 	//로그인 된 회원의 정보 가져오기
 	@GetMapping("/empData")
 	public Map<String, Object> getEmpData(HttpSession session) {
-		
 		String empId = (String) session.getAttribute("empId");
-		System.out.println("empId = " + empId);
-		
 		return mypageService.getEmpData(empId);
 		
 	}
@@ -49,12 +46,7 @@ public class MypageRestController {
             @RequestPart("emp") Map<String, Object> empMap,
             @RequestPart(value = "emp_img", required = false) MultipartFile file, // ✅ 'required = false'로 설정
             HttpSession session) throws IOException {
-
         String empId = (String) session.getAttribute("empId");
-        
-        System.out.println("------------------------------------------   마이페이지 수정시 컨트롤러에 들어오는 Map ------------------------------------------");
-		System.out.println("personalModifyMap = " + empMap);
-		
 		mypageService.modifyPersonalData(empId, empMap, file);
     }
 	

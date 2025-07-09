@@ -27,6 +27,14 @@ public class EmpRestController {
 
 	@Autowired
 	private EmpService empService;
+	
+	// 무한스크롤
+	@GetMapping("")
+    public List<Map<String, Object>> getempList(@RequestParam("page") int page, @RequestParam("size") int size) {
+		int offset = page * size;
+        return empService.getempList(offset, size);
+    }
+		
 
 	// 인사등록
 	@PostMapping("")
@@ -41,13 +49,6 @@ public class EmpRestController {
 	
 	}
 
-	// 무한스크롤
-	@GetMapping("/empList")
-    public List<Map<String, Object>> getempList(@RequestParam("page") int page, @RequestParam("size") int size) {
-		int offset = page * size;
-        return empService.getempList(offset, size);
-    }
-
 	 // ajax를 통해 json으로 공통 코드 목록을 리턴
     @GetMapping("/codelistJson")
     public Map<String, Object> getCommonCodeListJson() {
@@ -57,7 +58,6 @@ public class EmpRestController {
         System.out.println("Codelist JSON Response: " + response);
         return response;
     }
-
 
 	// AJAX 를 통해 목록 조회 요청 결과를 JSON 으로 리턴하기 위한 요청 매핑
     @GetMapping("/listJson")
