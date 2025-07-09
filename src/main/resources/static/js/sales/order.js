@@ -719,10 +719,22 @@ function deleteSelectedRows() {
         return; // 함수 실행 중단
     }
 
-    if (modalTitle !== "출고 등록" && (totalRows - checkedRowCount < 1)) {
+    // 수주 등록이 아니면
+    if (modalTitle !== "수주 등록" && (totalRows - checkedRowCount < 1)) {
         alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
         return; // 함수 실행 중단
     }
+
+
+    // 수주 등록이면 백엔드로 가면 안됨 그냥 그 행만 지우고
+    if (modalTitle === "수주 등록") {
+        for (const row of checkedRows) {
+            INNER_TUI_GRID_INSTANCE.removeRow(row.rowKey);
+        }
+        INNER_TUI_GRID_INSTANCE.uncheckAll(); // 모든 체크박스 해제
+        return;
+    }
+
 
 
     // --- 모든 1차 유효성 검사를 통과한 경우: 백엔드 API 호출 준비 ---
@@ -788,6 +800,17 @@ async function loadGridData(ord_id) {
 async function submitUpdateForm() {
     if (!validateFinalForm()) return;
     const gridData = INNER_TUI_GRID_INSTANCE.getData();
+    // 그리드 데이터중에서 sts가 하나라도 00이 아니면
+    const hasNonZeroSts = gridData.some(row => row.oddSts !== '수주 등록');
+    console.log(hasNonZeroSts);
+    if (hasNonZeroSts) {
+        alert('작업 상태가 변경이 되어 수정할 수 없습니다.');
+        return;
+    }
+
+
+
+
     const ordIdToUpdate = document.getElementById('current_ord_id')?.value; // 예시: 숨겨진 입력 필드에서 가져옴
     const finalPayload = {
         ord_id: ordIdToUpdate,
