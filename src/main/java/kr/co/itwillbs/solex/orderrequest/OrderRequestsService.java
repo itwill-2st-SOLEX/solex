@@ -95,7 +95,23 @@ public class OrderRequestsService {
         
     }
 
+    @Transactional(rollbackFor = Exception.class) 
+    public void rejectOrder(Map<String, Object> params) throws Exception {
+        // 주문상세id랑 주문id랑 조인해서 주문상세가 1건이면 주문상세를 삭제하고 주문을 삭제
+        List<Map<String, Object>> result1 = orderRequestsMapper.checkOrderDetail(params);
+        int count = Integer.parseInt(result1.get(0).get("COUNT").toString());
+        params.put("ord_id", result1.get(0).get("ORD_ID"));
 
+        Integer result = orderRequestsMapper.rejectOrderDetailDelete(params);
+        // 1건이면 주문도 삭제
+        if(count == 1) {
+            Integer result2 = orderRequestsMapper.rejectOrderDelete(params);   
+        }
+        // 예외 발생
+        if (result == null || result <= 0) {
+            throw new RuntimeException("주문상세 삭제에 실패했습니다.");
+        }
+    }
 }
 
 
