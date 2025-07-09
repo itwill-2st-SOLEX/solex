@@ -160,13 +160,7 @@
 		    ON sod.odd_id = wo.odd_id
 		JOIN work_process wp
 		    ON wp.wrk_id = wo.wrk_id
-		   AND wpo_step = (
-		       SELECT MAX(wp1.wpo_step)
-		       FROM work_process wp1
-		       JOIN work_order wo1 ON wp1.wrk_id = wo1.wrk_id
-		       WHERE wp1.wrk_id = wo1.wrk_id
-		         AND prc_id = pl.prc_id
-		   )
+		   AND wo.prc_id = pl.prc_id
 		LEFT JOIN quality_history qh
 		    ON wp.wpo_id = qh.qhi_target_id
 		JOIN process prc
