@@ -31,9 +31,7 @@ public class MaterialOrdersRestController {
 	@PostMapping("/registration")
 	public void materialOrderRegist(@RequestBody Map<String, Object> matordMap, HttpSession session) {
 		String emp_id = (String) session.getAttribute("empId");
-		System.out.println("emp_id = " + emp_id);
 		matordMap.put("emp_id", emp_id);
-		System.out.println("mat ord map = " + matordMap);
 		materialOrdersService.materialOrderRegist(matordMap);	
 	}
 	
@@ -46,18 +44,13 @@ public class MaterialOrdersRestController {
 	//select box 창고목록 가져오는 코드
 	@GetMapping("/getWarehouse")
 	public List<Map<String, Object>> getWarehouse(@RequestParam("matId") String matId) {
-		System.out.println(matId);
-		
 		int num = Integer.parseInt(matId);
-		
 		return materialOrdersService.getWarehouse(num);
 	}
 	
 	//select box 구역목록 가져오는 코드
 	@GetMapping("/getArea")
 	public List<Map<String, Object>> getArea(@RequestParam("whsId") String whsId, @RequestParam("matId") String matId) {
-		System.out.println(whsId);
-		
 		int num1 = Integer.parseInt(whsId);
 		int num2 = Integer.parseInt(matId);
 		return materialOrdersService.getArea(num1, num2);

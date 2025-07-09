@@ -45,8 +45,8 @@ public class OrgChartService {
         // 🔹 4. CEO 노드 구성
         Map<String, Object> root = new HashMap<>();
         root.put("text", Map.of(
-            "name", "CEO",
-            "title", ceo != null ? ceo.get("EMP_NM") : "미정"
+            "title", "CEO",
+            "name", ceo != null ? ceo.get("EMP_NM") : "미정"
         ));
         root.put("HTMLclass", "ceo");
 
@@ -60,8 +60,8 @@ public class OrgChartService {
 
             Map<String, Object> dirNode = new HashMap<>();
             dirNode.put("text", Map.of(
-                "name", empCat, // 소속
-                "title", dirEmp.get("EMP_NM")  // 이름
+                "title", empCat, // 소속
+                "name", dirEmp.get("EMP_NM")  // 이름
             ));
             
             // 🔹 이사 역할에 따른 클래스 지정
@@ -82,8 +82,8 @@ public class OrgChartService {
                     
                     Map<String, Object> depNode = new HashMap<>();
                     depNode.put("text", Map.of(
-                        "name", dep.get("EMP_DEP"),
-                        "title", dep.get("EMP_NM")
+                        "title", dep.get("EMP_DEP"),
+                        "name", dep.get("EMP_NM")
                     ));
                     
                  	// 🔹 부서장 역할에 따른 클래스 지정

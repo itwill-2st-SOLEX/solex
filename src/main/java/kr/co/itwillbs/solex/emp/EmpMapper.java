@@ -17,7 +17,8 @@ public interface EmpMapper {
 
 	//인사수정을 위한 json 생성
     List<Map<String, Object>> findAllItems();
-
+    
+    // ajax를 통해 json으로 공통 코드 목록을 리턴
     List<Map<String, Object>> getAllCodeDetails();
 
     List<Map<String, Object>> getStsCodes(); // 재직 상태 코드만

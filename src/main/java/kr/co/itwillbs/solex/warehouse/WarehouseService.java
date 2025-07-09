@@ -55,7 +55,8 @@ public class WarehouseService {
         result.put("AREAS", areas);
         return result;
 	}
-
+	
+	//창고 등록
 	@Transactional
 	public void registerWarehouse(Map<String, Object> warehouseRequest) {
 		long empNum   = Long.parseLong((String) warehouseRequest.get("whs_mgr"));       

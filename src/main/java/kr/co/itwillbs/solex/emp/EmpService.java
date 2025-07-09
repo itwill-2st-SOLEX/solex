@@ -144,7 +144,7 @@ public class EmpService {
 	        return empList;
 	    }
 
-
+	 // ajax를 통해 json으로 공통 코드 목록을 리턴
 	  public List<Map<String, Object>> getAllCommonCodesForJson() {
 
 	        List<Map<String, Object>> allCodes = mapper.getAllCodeDetails();
