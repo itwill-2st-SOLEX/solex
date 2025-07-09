@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,26 +28,23 @@ public class EmpRestController {
 
 	@Autowired
 	private EmpService empService;
-
-	// 인사등록
-	@PostMapping("")
-	public void registerEmployee(
-			@RequestPart("emp") Map<String, Object> empMap, 
-			@RequestPart("emp_img") MultipartFile file) throws IOException {
-		
-		System.out.println("------------------------------------------   인사등록시 컨트롤러에 들어오는 Map ------------------------------------------");
-		System.out.println(empMap);
-		
-		empService.registerEmployee(empMap, file);
 	
-	}
-
 	// 무한스크롤
-	@GetMapping("/empList")
+	@GetMapping("")
     public List<Map<String, Object>> getempList(@RequestParam("page") int page, @RequestParam("size") int size) {
 		int offset = page * size;
         return empService.getempList(offset, size);
     }
+		
+
+	// 인사등록
+	@PostMapping("")
+//	@PreAuthorize("hasAnyRole('1','2','3','4','5')")
+	public void registerEmployee(
+			@RequestPart("emp") Map<String, Object> empMap, 
+			@RequestPart("emp_img") MultipartFile file) throws IOException {
+		empService.registerEmployee(empMap, file);
+	}
 
 	 // ajax를 통해 json으로 공통 코드 목록을 리턴
     @GetMapping("/codelistJson")
@@ -57,7 +55,6 @@ public class EmpRestController {
         System.out.println("Codelist JSON Response: " + response);
         return response;
     }
-
 
 	// AJAX 를 통해 목록 조회 요청 결과를 JSON 으로 리턴하기 위한 요청 매핑
     @GetMapping("/listJson")
@@ -92,6 +89,7 @@ public class EmpRestController {
     }
     
     // 수정 모달(업데이트)
+    @PreAuthorize("hasAnyRole('1','2','3','4','5')")
  	@PutMapping("/modify")
  	public void modify_post(@RequestBody HashMap<String, Object> empModifyMap) {
  		System.out.println("Received empData: " + empModifyMap);

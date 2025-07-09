@@ -15,6 +15,21 @@ let requestType = '';
 // 페이지 로드 시 초기 표시
 updateMonthYearDisplay(); 
 
+
+// 페이지 로드가 완료된 후에 flatpickr를 초기화하도록 변경
+document.addEventListener('DOMContentLoaded', function() {
+    const myDatePickerElement = document.getElementById('my-datepicker');
+    if (myDatePickerElement) { // my-datepicker 요소가 존재할 때만 flatpickr 초기화
+        const myDatePicker = flatpickr(myDatePickerElement, {
+            enableTime: true,        // 시간 선택 활성화
+            dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
+            time_24hr: true,         // 24시간 형식 사용
+            locale: "ko"             // 한국어 로케일 적용
+        });
+    } else {
+        console.warn("Element with ID 'my-datepicker' not found. Flatpickr will not be initialized for it.");
+    }
+});
 // FlatpickrDateEditor.js (혹은 <script> 태그 안에 정의)
 class FlatpickrDateEditor {
     constructor(props) {
@@ -230,23 +245,44 @@ const grid = new tui.Grid({
 });
 
 // JavaScript에서 초기화
-const myDatePicker = flatpickr("#my-datepicker", {
-    // 옵션 객체
-    enableTime: true,        // 시간 선택 활성화
-    dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
-    time_24hr: true,         // 24시간 형식 사용
-    locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
-});
+//const myDatePicker = flatpickr("#my-datepicker", {
+//    // 옵션 객체
+//    enableTime: true,        // 시간 선택 활성화
+//    dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
+//    time_24hr: true,         // 24시간 형식 사용
+//    locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
+//});
 
 
 //무한 스크롤 이벤트
 function bindScrollEvent() {
 	// 검색으로 화면 목록이 변경되었을 경우를 대비해서 스크롤 초기화
-    grid.off('scrollEnd');
+//    grid.off('scrollEnd');
 	
-	//무한스크롤시 검색어 유지를 위해 재전달
-    grid.on('scrollEnd', () => {
-        const keyword = document.getElementById('searchInput').value.trim();
+//	//무한스크롤시 검색어 유지를 위해 재전달
+//    grid.on('scrollEnd', () => {
+//        const keyword = document.getElementById('searchInput').value.trim();
+//    });
+	grid.on('scrollEnd', async () => {
+        // 현재 스크롤 위치가 마지막 페이지에 도달했는지 확인 (필요에 따라 추가 로직)
+        // 예를 들어, grid.getPagination().getLastPage() 와 비교하거나
+        // 서버에서 받아온 총 데이터 개수와 현재 로드된 데이터 개수를 비교하여 더 이상 로드할 데이터가 없는지 확인
+        const currentDataLength = grid.getRowCount();
+        // totalCount는 attendanceLists에서 받아와야 합니다. 여기서는 임시로 사용하거나 전역 변수로 관리해야 합니다.
+        // 현재 코드에서는 totalCount가 attendanceLists에서만 처리되고 있습니다.
+        // 따라서, scrollEnd에서는 totalCount에 접근할 수 없으므로, attendanceLists가 반환하는 데이터의 길이를 이용해야 합니다.
+        // 또는 attendanceLists가 totalCount를 전역 변수에 저장하도록 수정합니다.
+
+        // 더 이상 로드할 데이터가 없으면 return
+        if (currentDataLength >= totalDataCountFromLastLoad) { // totalDataCountFromLastLoad는 마지막 API 호출 시 서버에서 전달받은 총 데이터 개수
+             console.log("더 이상 로드할 데이터가 없습니다.");
+             grid.off('scrollEnd'); // 더 이상 스크롤 이벤트를 듣지 않음
+             return;
+        }
+
+        const keyword = '';
+        // 다음 페이지 데이터 로드
+        await attendanceLists(currentDate.getFullYear(), currentDate.getMonth() + 1, requestType, keyword, currentPage);
     });
 }
 
@@ -273,6 +309,9 @@ function updateMonthYearDisplay() {
     attendanceLists(displayYear, displayMonth, requestType, '', currentPage); 
 }
 
+// 마지막으로 로드된 총 데이터 개수를 저장할 변수
+let totalDataCountFromLastLoad = 0;
+
 
 async function attendanceLists(year, month, requestType, keyword = '', page) {
 	try {
@@ -286,6 +325,8 @@ async function attendanceLists(year, month, requestType, keyword = '', page) {
 	
 		const attendanceArray = Array.isArray(data.teamAttendance) ? data.teamAttendance : [];
 		const totalCount = data.totalCount;
+		
+		totalDataCountFromLastLoad = totalCount; // 총 데이터 개수 업데이트
 		
 		if (requestType === 'my' && data.myAttendance && Array.isArray(data.myAttendance)) {
 			displayMyAttendance(data.myAttendance);
@@ -394,7 +435,7 @@ nextMonthBtn.addEventListener('click', goToNextMonth);
 // 검색기능
 function searchAttendance() {
 	grid.resetData([]); 
-	const keyword = document.getElementById('searchInput').value.trim();
+	const keyword = '';
 	currentPage = 0;
 		
 	bindScrollEvent();		//무한스크롤 초기화 후 실행

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface MaterialMapper {
 	
@@ -14,7 +15,7 @@ public interface MaterialMapper {
 	List<Map<String, Object>> getMaterial();
 	
 	//자재 무한스크롤
-	List<Map<String, Object>> getMaterialList(int offset, int size);
+	List<Map<String, Object>> getMaterialList(@Param("offset") int offset, @Param ("size") int size);
 
 	//자재등록 공통코드 가져오기
 	

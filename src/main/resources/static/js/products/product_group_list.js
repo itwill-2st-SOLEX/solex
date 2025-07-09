@@ -79,8 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 	        }
 		  },
-	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true,
-            filter: 'select'
+	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true, filter: 'select'
           },
 	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true,
             filter: {
@@ -245,15 +244,15 @@ document.addEventListener('DOMContentLoaded', function() {
 	// ⭐ 중요한 변경: 페이지 로드 시 데이터를 초기화하고 다시 불러오도록 함
     // 이렇게 하면 필터링 시에도 1페이지 데이터가 처음부터 로드됩니다.
     // 기존의 `resetData`와 `scrollTo`는 필요 없거나 문제가 될 수 있으므로 제거했습니다.
-	if (window.prod_grid) {
+//	if (window.prod_grid) {
 	  // window.prod_grid.resetData([]); // 이 코드는 불필요하거나 문제 발생 가능성이 있어 제거
-	  window.prod_grid.readData(1); // 페이지 로드 시 첫 페이지 데이터 로드
+//	  window.prod_grid.readData(1); // 페이지 로드 시 첫 페이지 데이터 로드
 	  // 스크롤 관련 코드는 필터링 문제와는 관련 없으므로 제거 (필요시 다시 추가)
 	  // setTimeout(() => {
 	  //   const rowCount = window.prod_grid.getRowCount();
 	  //   window.prod_grid.scrollTo(rowCount - 1);
 	  // }, 300);
-	}
+//	}
 
 });
 

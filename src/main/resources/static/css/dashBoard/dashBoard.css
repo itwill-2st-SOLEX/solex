@@ -175,6 +175,7 @@ input[type="date"] {
   width: 100%;
 }
 
+
 /* 반응형 줄맞춤 테이블+도넛 */
 .chart-row-wrap {
   display: flex;

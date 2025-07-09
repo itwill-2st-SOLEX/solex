@@ -437,7 +437,7 @@ function fillEmployeeInfo() {
 		type: 'GET',
 		dataType: 'json',
 		success: function(data) {
-			$('#docEmp_id').val(data.EMP_ID).prop('disabled', true);
+			$('#docEmp_id').val(data.EMP_NUM).prop('disabled', true);
 			$('#docEmp_nm').val(data.EMP_NM).prop('disabled', true);
 			$('#docdept_nm').val(data.EMP_DEP_NM).prop('disabled', true);
 			$('#docdept_team').val(data.EMP_TEAM_NM).prop('disabled', true);
