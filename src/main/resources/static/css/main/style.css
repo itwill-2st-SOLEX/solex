@@ -284,7 +284,7 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 }
 .panel.notice > span, .panel.approval > span {
 	position: absolute;
-	top: 15px;
+	bottom: 25px;
 	right: 20px;
 }
 .panel.notice > span > a, .panel.approval > span > a {

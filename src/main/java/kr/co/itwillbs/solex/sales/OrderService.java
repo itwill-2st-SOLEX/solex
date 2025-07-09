@@ -192,12 +192,14 @@ public class OrderService {
     	String ordIdStr = (String) orderPayload.get("ord_id");
         int ordId = Integer.parseInt(ordIdStr); // <-- 이 부분을 수정했습니다.
         List<Map<String, Object>> items = (List<Map<String, Object>>) orderPayload.get("items");
+
+        
     
         // 1. 주문 헤더 정보 업데이트 (ord_id 기준)
         // 이 부분은 기존 주문 헤더 테이블 (예: suju_order_header)을 업데이트하는 쿼리가 필요합니다.
         // 예: orderMapper.updateOrderHeader(orderPayload);
         int headerUpdateResult = orderMapper.updateOrderHeader(orderPayload);
-        if (headerUpdateResult == 0) {
+        	if (headerUpdateResult == 0) {
         }
 
 

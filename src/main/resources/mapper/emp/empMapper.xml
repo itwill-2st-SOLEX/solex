@@ -8,31 +8,44 @@
 <!-- 인사등록 -->
   <insert id="insertEmp" parameterType="map">
     INSERT INTO employee (
-        emp_num, emp_hire, emp_nm, emp_gd,
+        emp_num,
+        emp_hire, emp_nm, emp_gd,
         emp_birth, emp_pw, emp_phone, emp_email, emp_add,
         emp_da, emp_sts_cd, emp_pc, emp_cat_cd, emp_pos_cd,
-        emp_dep_cd, emp_team_cd,emp_img, meg_num
+        emp_dep_cd, emp_team_cd, emp_img, meg_num
     ) VALUES (
-        emp_seq.NEXTVAL,
-        #{emp_hire, jdbcType=DATE},     
+    	#{emp_num, jdbcType=VARCHAR},	
+        #{emp_hire, jdbcType=DATE},
         #{emp_nm, jdbcType=VARCHAR},
         #{emp_gd, jdbcType=VARCHAR},
-        #{emp_birth, jdbcType=DATE},    
+        #{emp_birth, jdbcType=DATE},
         #{emp_pwd, jdbcType=VARCHAR},
+        
         #{emp_phone, jdbcType=VARCHAR},
         #{emp_email, jdbcType=VARCHAR},
         #{emp_add, jdbcType=VARCHAR},
         #{emp_da, jdbcType=VARCHAR},
         'emp_sts_01',
-        #{emp_pc, jdbcType=NUMERIC},    
+        
+        #{emp_pc, jdbcType=NUMERIC},
         #{empCatCd, jdbcType=VARCHAR},
         #{empPosCd, jdbcType=VARCHAR},
         #{empDepCd, jdbcType=VARCHAR},
         #{empTeamCd, jdbcType=VARCHAR},
+        
         #{emp_img, jdbcType=VARCHAR},
         #{meg_num, jdbcType=NUMERIC}
     )
 </insert>
+
+	<select id="findSabun" resultType="long">
+		SELECT
+        	TO_CHAR(#{emp_hire, jdbcType=DATE}, 'YYYY') || LPAD(COUNT(*) + 1, 4, '0')
+     	FROM
+        	employee
+     	WHERE
+        	TO_CHAR(emp_hire, 'YYYY') = TO_CHAR(#{emp_hire, jdbcType=DATE}, 'YYYY')
+	</select>
 
 	<select id="findManagerId" resultType="long">
 		SELECT emp_id FROM   EMPLOYEE
@@ -43,12 +56,13 @@
         FETCH FIRST 1 ROWS ONLY
 	</select>
 	
+<!-- 	인사수정 -->
 	<select id="findAllItems" resultMap="empResultMap">
 		SELECT emp_num, emp_nm, emp_phone, emp_hire
 		FROM employee
 		ORDER BY emp_num asc
 	</select>
-	
+<!-- 	 ajax를 통해 json으로 공통 코드 목록을 리턴 -->
 	<select id="findAllCodeDetails" resultMap="codeDetailMap">
 		SELECT emp_cat_cd, emp_pos_cd, emp_dep_cd, emp_team_cd, emp_sts_cd
 		FROM employee
@@ -184,6 +198,7 @@
         ON e.emp_sts_cd = sts.det_id
         AND sts.cod_id = 'sts'
         ORDER BY emp_num asc
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
     
     <select id="getAllcodes" resultType="map">
