@@ -1,6 +1,6 @@
 $(function() {
 	let currentPage = 0;
-	const pageSize = 30;
+	const pageSize = 20;
 
 	const grid = new tui.Grid({
 	    el: document.getElementById('grid'),
@@ -11,12 +11,12 @@ $(function() {
 	    columns: [
 			{ header: '자재ID', name: 'matId', align : 'center', sortable: true, width:90},
 			{ header: '거래처ID', name: 'cliId', align : 'center', sortable: true, width:90},
-	        { header: '자재코드', name: 'matCd', align : 'center', sortable: true},
-	        { header: '자재명', name: 'matNm', align : 'center', filter: 'select'},
+	        { header: '자재코드', name: 'matCd', align : 'center', sortable: true , width:90},
+	        { header: '자재명', name: 'matNm', align : 'center', filter: 'select', width:280},
 	        { header: '단위', name: 'matUnit', align : 'center', filter: 'select' , width:85},
 	        { header: '가격', name: 'mat_price', align : 'center', filter: 'select', width:90, editor: 'text' },
-	        { header: '설명', name: 'mat_comm', align : 'center', width:300, editor: 'text'},
-	        { header: '등록일', name: 'matRegDate', align : 'center', sortable: true},
+	        { header: '설명', name: 'mat_comm', align : 'center', width:400, editor: 'text'},
+	        { header: '등록일', name: 'matRegDate', align : 'center', sortable: true , width:120},
 	        { header: '사용여부', name: 'mat_is_active', align : 'center' , sortable: true, width:75,
 				editor: {
 				    type: 'select',
