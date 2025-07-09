@@ -13,6 +13,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,6 +30,7 @@ public class MaterialOrdersRestController {
 	private MaterialOrdersService materialOrdersService;
 	
 	@PostMapping("/registration")
+	@PreAuthorize("hasAnyRole('1','2','3','4')")
 	public void materialOrderRegist(@RequestBody Map<String, Object> matordMap, HttpSession session) {
 		String emp_id = (String) session.getAttribute("empId");
 		matordMap.put("emp_id", emp_id);
