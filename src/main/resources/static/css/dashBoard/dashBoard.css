@@ -7,6 +7,11 @@
   flex-direction: column;
   width: 965px;
 }
+#yesterdayLabel,
+#monthLabel,
+#defectLabel {
+  white-space: pre-line;
+}
 
 input[type="date"] {
 	height: 32px;

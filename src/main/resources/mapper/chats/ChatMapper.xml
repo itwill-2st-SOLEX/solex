@@ -35,8 +35,8 @@
 		          AND (m2.leave_status IS NULL OR m2.leave_status != 2)
 	    	  ) AS unread_count
 		  FROM messenger m
-		  JOIN employee send ON m.sender_id = send.emp_num
-		  JOIN employee re ON m.receiver_id = re.emp_num
+		  JOIN employee send ON m.sender_id = send.emp_id
+		  JOIN employee re ON m.receiver_id = re.emp_id
 		 WHERE m.MSG_ID IN (
 		    SELECT MAX(MSG_ID)
 		    FROM messenger
@@ -61,9 +61,9 @@
 		       , m.is_read
 		  FROM messenger m
           JOIN employee sender
-            ON m.sender_id = sender.emp_num
+            ON m.sender_id = sender.emp_id
           JOIN employee receiver
-            ON m.receiver_id = receiver.emp_num 
+            ON m.receiver_id = receiver.emp_id 
 		 WHERE (
 				(sender_id = #{empId} AND receiver_id = #{partnerId})
 		    	OR (sender_id = #{partnerId} AND receiver_id = #{empId})
