@@ -58,19 +58,8 @@ $(function() {
 		type = $(this).data('type');
 		updateLineChart(type);
 		
-		console.log(type)
-	});
+		});
 	
-	
-/*	$('.chart-refresh').on('click', function() {
-		type = $(this).data('type');
-		if (type="monthly") {
-			updateLineChart('monthly');
-		} else if (type="weekly") {
-			updateLineChart('weekly');
-		}
-	});
-*/
 });
 
 // 3개 요약카드
@@ -106,9 +95,9 @@ async function updateSummaryCards(prdCode, prdNm) {
 		const data = await response.json();
 
 		// 텍스트 라벨 동적 변경
-		document.getElementById('yesterdayLabel').textContent = `${prdNm} 전일 생산량`;
-		document.getElementById('monthLabel').textContent = `${prdNm} 당월 누적 생산`;
-		document.getElementById('defectLabel').textContent = `${prdNm} 당월 불량률`;
+		document.getElementById('yesterdayLabel').textContent = `${prdNm}\n 전일 생산량`;
+		document.getElementById('monthLabel').textContent = `${prdNm}\n 당월 누적 생산`;
+		document.getElementById('defectLabel').textContent = `${prdNm}\n 당월 불량률`;
 
 		// 값 세팅
 		document.getElementById('yesterdayCount').textContent = (data.yesterCnt ?? 0).toLocaleString();

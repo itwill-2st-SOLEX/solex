@@ -23,4 +23,34 @@ $(function() {
         document.getElementById("empNo").value = savedEmpNum;
         document.getElementById("saveEmpNum").checked = true;
     }
+	
+	  // 역할별 자동 로그인 버튼 처리
+	  document.querySelectorAll(".admin-login-buttons .right-btn").forEach((btn) => {
+	    btn.addEventListener("click", function () {
+	      const role = this.dataset.role;
+	      let empNo = "", empPw = "";
+
+	      switch (role) {
+	        case "employee":
+	          empNo = "20240122";
+	          empPw = "930705";
+	          break;
+	        case "manager":
+	          empNo = "20240070";
+	          empPw = "000429";
+	          break;
+	        case "admin":
+	          empNo = "20140001";
+	          empPw = "850401";
+	          break;
+	      }
+	      // 자동 입력
+	      document.getElementById("empNo").value = empNo;
+	      document.getElementById("empPw").value = empPw;
+	      document.getElementById("saveEmpNum").checked = false;
+
+	      // 로그인 버튼 강제 클릭
+	      document.getElementById("loginBtn").click();
+	    });
+	  });
 });
