@@ -40,6 +40,8 @@
 		FROM material m 
 		left join code_detail cd 
 		on m.mat_unit = cd.det_id
+		ORDER BY mat_id DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
 	
 <!-- 	등록에서 공통코드(자재단위) 가져오기 -->

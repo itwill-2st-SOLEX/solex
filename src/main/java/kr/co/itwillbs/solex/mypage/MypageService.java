@@ -26,13 +26,10 @@ public class MypageService {
 	
 	// 로그인 된 정보의 마이페이지 가져오기 
 	public Map<String, Object> getEmpData(String empId) {
-		
 		Map<String, Object> empData = mypageMapper.getEmpData(empId);
-		System.out.println("empData = " + empData);
 		
 		Object empImgObject = empData.get("EMP_IMG"); // DB 컬럼명이 EMP_IMG라고 가정
         String imageName = (String) empImgObject;
-		System.out.println("imageName = " + imageName);
         empData.put("empProfileImg", imageName);
    
 		return empData;

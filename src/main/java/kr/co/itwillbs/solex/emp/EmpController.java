@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import lombok.extern.log4j.Log4j2;
 
 
-@Log4j2
 @Controller
 @RequestMapping("/emp")
 public class EmpController {
@@ -21,18 +20,8 @@ public class EmpController {
 	@Autowired
 	private EmpService empService;
 
-	@GetMapping("")
-	public String main(Model model, @RequestParam(value="includeEmpSts", required = false) String includeEmpSts,
-			@RequestParam(name = "searchType", defaultValue = "") String searchType,
-			@RequestParam(name = "searchKeyword", defaultValue = "") String searchKeyword){
-
-
-		List<Map<String, Object>> empList = empService.getEmpList(searchType, searchKeyword, includeEmpSts);
-
-		model.addAttribute("empList", empList);
-		model.addAttribute("includeEmpSts", includeEmpSts); // 체크박스 유지용
-		model.addAttribute("searchType", searchType);
-		model.addAttribute("searchKeyword", searchKeyword);
+	@GetMapping("/page")
+	public String main(){
 
 		return "emp/emp_main";
 	}

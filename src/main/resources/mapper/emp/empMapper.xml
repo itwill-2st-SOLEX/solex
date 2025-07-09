@@ -43,12 +43,13 @@
         FETCH FIRST 1 ROWS ONLY
 	</select>
 	
+<!-- 	인사수정 -->
 	<select id="findAllItems" resultMap="empResultMap">
 		SELECT emp_num, emp_nm, emp_phone, emp_hire
 		FROM employee
 		ORDER BY emp_num asc
 	</select>
-	
+<!-- 	 ajax를 통해 json으로 공통 코드 목록을 리턴 -->
 	<select id="findAllCodeDetails" resultMap="codeDetailMap">
 		SELECT emp_cat_cd, emp_pos_cd, emp_dep_cd, emp_team_cd, emp_sts_cd
 		FROM employee
@@ -184,6 +185,7 @@
         ON e.emp_sts_cd = sts.det_id
         AND sts.cod_id = 'sts'
         ORDER BY emp_num asc
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
     
     <select id="getAllcodes" resultType="map">
