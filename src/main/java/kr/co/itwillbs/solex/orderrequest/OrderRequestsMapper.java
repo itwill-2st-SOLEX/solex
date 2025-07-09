@@ -40,4 +40,15 @@ public interface OrderRequestsMapper {
 	// 자재 확인 쿼리
 	List<String> checkMaterial(Map<String, Object> params);
 
+	
+
+	// 주문상세id랑 주문id랑 조인해서 주문상세가 1건이면 주문상세를 삭제하고 주문을 삭제
+	List<Map<String, Object>> checkOrderDetail(Map<String, Object> params);
+
+	// 주문상세 삭제 쿼리
+	Integer rejectOrderDetailDelete(Map<String, Object> params);
+
+	// 주문 삭제 쿼리
+	Integer rejectOrderDelete(Map<String, Object> params);
+
 }
