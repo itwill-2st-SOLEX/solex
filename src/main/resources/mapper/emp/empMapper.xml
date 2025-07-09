@@ -7,31 +7,35 @@
 
 <!-- 인사등록 -->
   <insert id="insertEmp" parameterType="map">
-    INSERT INTO employee (
-        emp_num, emp_hire, emp_nm, emp_gd,
-        emp_birth, emp_pw, emp_phone, emp_email, emp_add,
-        emp_da, emp_sts_cd, emp_pc, emp_cat_cd, emp_pos_cd,
-        emp_dep_cd, emp_team_cd,emp_img, meg_num
-    ) VALUES (
-        emp_seq.NEXTVAL,
-        #{emp_hire, jdbcType=DATE},     
-        #{emp_nm, jdbcType=VARCHAR},
-        #{emp_gd, jdbcType=VARCHAR},
-        #{emp_birth, jdbcType=DATE},    
-        #{emp_pwd, jdbcType=VARCHAR},
-        #{emp_phone, jdbcType=VARCHAR},
-        #{emp_email, jdbcType=VARCHAR},
-        #{emp_add, jdbcType=VARCHAR},
-        #{emp_da, jdbcType=VARCHAR},
-        'emp_sts_01',
-        #{emp_pc, jdbcType=NUMERIC},    
-        #{empCatCd, jdbcType=VARCHAR},
-        #{empPosCd, jdbcType=VARCHAR},
-        #{empDepCd, jdbcType=VARCHAR},
-        #{empTeamCd, jdbcType=VARCHAR},
-        #{emp_img, jdbcType=VARCHAR},
-        #{meg_num, jdbcType=NUMERIC}
-    )
+   INSERT INTO employee (
+    emp_num, emp_hire, emp_nm, emp_gd,
+    emp_birth, emp_pw, emp_phone, emp_email, emp_add,
+    emp_da, emp_sts_cd, emp_pc, emp_cat_cd, emp_pos_cd,
+    emp_dep_cd, emp_team_cd, emp_img, meg_num
+)
+SELECT
+    TO_CHAR(#{emp_hire, jdbcType=DATE}, 'YYYY') || LPAD(COUNT(*) + 1, 4, '0'),
+    #{emp_hire, jdbcType=DATE},
+    #{emp_nm, jdbcType=VARCHAR},
+    #{emp_gd, jdbcType=VARCHAR},
+    #{emp_birth, jdbcType=DATE},
+    #{emp_pwd, jdbcType=VARCHAR},
+    #{emp_phone, jdbcType=VARCHAR},
+    #{emp_email, jdbcType=VARCHAR},
+    #{emp_add, jdbcType=VARCHAR},
+    #{emp_da, jdbcType=VARCHAR},
+    'emp_sts_01', -- This is a fixed value
+    #{emp_pc, jdbcType=NUMERIC},
+    #{empCatCd, jdbcType=VARCHAR},
+    #{empPosCd, jdbcType=VARCHAR},
+    #{empDepCd, jdbcType=VARCHAR},
+    #{empTeamCd, jdbcType=VARCHAR},
+    #{emp_img, jdbcType=VARCHAR},
+    #{meg_num, jdbcType=NUMERIC}
+FROM
+    employee
+WHERE
+    TO_CHAR(emp_hire, 'YYYY') = TO_CHAR(#{emp_hire, jdbcType=DATE}, 'YYYY')
 </insert>
 
 	<select id="findManagerId" resultType="long">
