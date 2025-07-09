@@ -8,6 +8,7 @@ let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 �
 let selectProductCd = "";
 let selectProductNm = "";
 let INNER_TUI_GRID_INSTANCE;
+let currentOddSts = null;
 
 // 2. ToastUI Grid 생성 (변경 없음)
 const grid = new tui.Grid({
@@ -146,9 +147,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       if (action === "approve") {
         // 작업 지시용 모달 열기
+        
         openApproveModal(oddId);
       } else if (action === "Inspection") {
         // 창고에서 거래처로 배송
+        
         openInspectionModal(oddId);
       } 
     }
@@ -159,12 +162,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // 'shown.bs.modal' 이벤트는 모달이 완전히 화면에 나타난 후에 발생합니다.
   myModalEl.addEventListener('shown.bs.modal', () => {
+    
     // 이 시점에서 그리드에게 레이아웃을 다시 계산하고 그리라고 명령합니다.
     if (INNER_TUI_GRID_INSTANCE) {
       INNER_TUI_GRID_INSTANCE.refreshLayout();
     }
   });
 });
+
 
 // 초기 grid 테이블에 들어갈 list
 async function fetchGridData(page = currentPage) {
@@ -191,16 +196,10 @@ async function fetchGridData(page = currentPage) {
 
     data.forEach(item => {
       if(item.ODD_STS === 'odd_sts_05') {
-        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="approve" data-odd-id="${item.ODD_ID}">승인 / 반려</button>`;
+        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="approve" data-odd-id="${item.ODD_ID}" data-odd-sts="${item.ODD_STS}">승인 / 반려</button>`;
       } else if(item.ODD_STS === 'odd_sts_06') {
-        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="Inspection" data-odd-id="${item.ODD_ID}">창고 대기</button>`;
-      } else if(item.DET_NM === 'odd_sts_07') {
-        item.DET_NM = '수주 삭제';
-      } else if(item.DET_NM === 'odd_sts_08') {
-        item.DET_NM = '수주 완료';
-      } else if(item.DET_NM === 'odd_sts_09') {
-        item.DET_NM = '수주 취소';
-      }
+        item.DET_NM = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="Inspection" data-odd-id="${item.ODD_ID}" data-odd-sts="${item.ODD_STS}">창고 대기</button>`;
+      } 
     });
 
     // 4. 그리드 데이터 업데이트
@@ -534,33 +533,21 @@ function setupInteractiveList(containerId) {
 }
 
 function deleteSelectedRows() {
-  // id가 myModalTitle의 값을 파악해서 출고 등록이면 행 삭제 가능.
-  // 근데 제품 삭제를 할 수 있는데 1개 이하로 떨어질 수 없음.
-  // if(INNER_TUI_GRID_INSTANCE.getData().length === 1) {
-  //   if(document.getElementById("myModalTitle").textContent === "출고 등록") {
-  //     INNER_TUI_GRID_INSTANCE.removeCheckedRows();
-  //   } else {
-  //     alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
-  //   }    
-  // } else {
-  //   INNER_TUI_GRID_INSTANCE.removeCheckedRows();
-  // }
-
-
+ 
   const totalRows = INNER_TUI_GRID_INSTANCE.getData().length;
-    const checkedRows = INNER_TUI_GRID_INSTANCE.getCheckedRows(); // 체크된 행들을 가져옴
-    const checkedRowCount = checkedRows.length; // 체크된 행의 개수
+  const checkedRows = INNER_TUI_GRID_INSTANCE.getCheckedRows(); // 체크된 행들을 가져옴
+  const checkedRowCount = checkedRows.length; // 체크된 행의 개수
 
-    const modalTitle = document.getElementById("myModalTitle").textContent;
+  const modalTitle = document.getElementById("myModalTitle").textContent;
 
-    // "출고 등록" 모달이 아니고,
-    // (현재 총 행 수 - 삭제될 행 수) 가 1 미만이 되는 경우 (즉, 0개가 되는 경우)
-    if (modalTitle !== "출고 등록" && (totalRows - checkedRowCount < 1)) {
-        alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
-    } else {
-        // 위의 조건을 통과했거나, "출고 등록" 모달인 경우 삭제 진행
-        INNER_TUI_GRID_INSTANCE.removeCheckedRows();
-    }
+  // "출고 등록" 모달이 아니고,
+  // (현재 총 행 수 - 삭제될 행 수) 가 1 미만이 되는 경우 (즉, 0개가 되는 경우)
+  if (modalTitle !== "출고 등록" && (totalRows - checkedRowCount < 1)) {
+      alert('주문 건수가 1개 이하로 떨어질 수 없습니다.');
+  } else {
+      // 위의 조건을 통과했거나, "출고 등록" 모달인 경우 삭제 진행
+      INNER_TUI_GRID_INSTANCE.removeCheckedRows();
+  }
 
 
 
@@ -754,6 +741,8 @@ async function openApproveModal(oddId) {
   document.getElementById("myModalTitle").textContent = '출고 승인';
   
   detailForm(oddId);
+  
+ 
 
   const modal = document.getElementById("myModal");
   const modalInstance = new bootstrap.Modal(modal);
@@ -765,6 +754,7 @@ async function openInspectionModal(oddId) {
   document.getElementById("myModalTitle").textContent = '출고 검사 요청';
   
   detailForm(oddId);
+
 
   const modal = document.getElementById("myModal");
   const modalInstance = new bootstrap.Modal(modal);

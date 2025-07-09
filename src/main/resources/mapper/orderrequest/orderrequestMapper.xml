@@ -153,7 +153,7 @@
         EMP_ID,
         MAT_REG_DATE,
         MAT_QTY,
-        MAT_ORD_STS,
+        
 		MAT_COMM,
 		MAT_LMD_DATE
     )
@@ -165,7 +165,9 @@
         SELECT SUM(ar.are_qty) FROM area ar
         WHERE ar.item_id = b.mat_id AND ar.are_type = 'area_type_01'
     	), 0), -- ★ 불량률 5% 적용 (올림) - 현재 재고를 뺌
-        'mat_ord_sts_01',                                         -- 발주 상태 (초기값)
+        
+
+		
 		'주문상세번호(' || #{odd_id} || ') 처리 중, 자재 재고 부족으로 자동 생성된 발주입니다.',
 		SYSDATE + 9/24
     FROM
@@ -195,6 +197,8 @@
            	odd_mod_date = sysdate + 9/24,
            	odd_isapproval = 'y'
      where odd_id = #{odd_id}
+
+	 
 	</update>
 
 
@@ -222,6 +226,29 @@
 	LEFT JOIN
 		area T2 ON T1.mat_id = T2.item_id AND T2.are_type = 'area_type_01'
 	</select>
+
+
+	<!-- 주문상세id랑 주문id랑 조인해서 주문상세가 1건이면 주문상세를 삭제하고 주문을 삭제 -->
+	<select id="checkOrderDetail" parameterType="Map" resultType="Map">
+    SELECT COUNT(sod2.ord_id) as count, sod2.ord_id as ord_id
+	FROM suju_order_detail sod1
+	JOIN suju_order_detail sod2 ON sod1.ord_id = sod2.ord_id
+	WHERE sod1.odd_id = #{odd_id}
+	group by sod2.ord_id
+	</select>
+
+	
+	<!-- 주문상세 삭제 쿼리 -->
+	<delete id="rejectOrderDetailDelete" parameterType="Map">
+	delete from suju_order_detail
+	 where odd_id = #{odd_id}
+	</delete>
+
+	<!-- 주문 삭제 쿼리 -->
+	<delete id="rejectOrderDelete" parameterType="Map">
+	delete from suju_order
+	 where ord_id = #{ord_id}
+	</delete>
 
   
 </mapper>

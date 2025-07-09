@@ -63,6 +63,7 @@
 		FROM warehouse w LEFT OUTER JOIN area a
 		ON w.whs_id = a.whs_id
 		WHERE a.item_id = #{matId}
+		AND a.are_max >= a.are_qty
 		GROUP BY w.whs_id, w.whs_nm
 	</select>
 	

@@ -54,6 +54,7 @@
 <!-- 	로그인한 사원 정보 들고오기 -->
 		<select id="getEmpInfo" resultType="map">
 			SELECT e.emp_id,
+					e.emp_num,
 				   e.emp_nm,
 			       pos.det_nm AS emp_pos_nm,
 			       dep.det_nm AS emp_dep_nm,

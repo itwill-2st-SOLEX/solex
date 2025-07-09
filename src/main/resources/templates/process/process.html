@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
 	layout:decorate="~{layouts/layout}">
 <head>
 <title>SOLEX</title>
@@ -26,9 +27,9 @@
 				<div id="process-tab" class="tab-content">
 					<div class="process-area">
 						<div class="btn-area">
-							<button id="prs-add" class="btn custom-btn-blue add-btn">추가</button>
-							<button id="prs-save" class="btn btn-info save-btn">저장</button>
-							<button id="prs-delete" class="btn btn-danger delete-btn">삭제</button>
+							<button id="prs-add" sec:authorize="hasAnyRole('1', '2', '3', '4')" class="btn custom-btn-blue add-btn">추가</button>
+							<button id="prs-save" sec:authorize="hasAnyRole('1', '2', '3', '4')" class="btn btn-info save-btn">저장</button>
+							<button id="prs-delete" sec:authorize="hasAnyRole('1', '2', '3', '4')" class="btn btn-danger delete-btn">삭제</button>
 						</div>
 						<div class="grid-area">
 							<div id="process-grid"></div>
@@ -50,9 +51,9 @@
 						<div class="title-area">
 							<span class="sub-title">공정순서</span>
 							<div class="btn-area">
-								<button id="tp-add" class="btn custom-btn-blue add-btn">추가</button>
-								<button id="tp-save" class="btn btn-info save-btn">저장</button>
-								<button id="tp-delete" class="btn btn-danger delete-btn">삭제</button>
+								<button id="tp-add" sec:authorize="hasAnyRole('1', '2', '3', '4')" class="btn custom-btn-blue add-btn">추가</button>
+								<button id="tp-save" sec:authorize="hasAnyRole('1', '2', '3', '4')" class="btn btn-info save-btn">저장</button>
+								<button id="tp-delete" sec:authorize="hasAnyRole('1', '2', '3', '4')" class="btn btn-danger delete-btn">삭제</button>
 							</div>
 						</div>
 						<div class="grid-area">

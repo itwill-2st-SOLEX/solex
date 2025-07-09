@@ -1,7 +1,7 @@
 // order.js
 
 let currentPage = 0;
-const pageSize = 20;
+const pageSize = 100;
 const gridHeight = 600;
 let isLoading = false; // 데이터 로딩 중인지 여부 (중복 요청 방지)
 let hasMoreData = true; // 더 불러올 데이터가 있는지 여부 (무한 스크롤 종료 조건)
@@ -32,7 +32,7 @@ const grid = new tui.Grid({
         { header: '굽', name: 'OPT_HEIGHT', width: 80, align: 'center', sortable: true },
         { header: '주문 수량', name: 'ODD_CNT', align: 'center', sortable: true },
         { header: '진행 현황', name: 'DET_NM', align: 'center', sortable: true },
-        { header: '원자재 재고 여부', name: 'PRODUCTION_STATUS', align: 'center', sortable: true },
+        { header: '원자재 재고 여부', name: 'PRODUCTION_STATUS', align: 'center', width: 200, sortable: true },
         { header: '납품 요청일', name: 'ORD_END_DATE', align: 'center', sortable: true }
     ],
 });
@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
 	fetchGridData(currentPage); // 초기 페이지와 (비어있는) 검색어 전달
 	
 	// 무한 스크롤 이벤트 리스너 추가
-	grid.on('scrollEnd', async ({ horz, vert }) => {
-    if (vert.isReachedBottom) { // 스크롤이 그리드 바닥에 도달했을 때
-      if (hasMoreData && !isLoading) { // 더 불러올 데이터가 있고, 현재 로딩 중이 아닐 때
-        currentPage++; // 다음 페이지 번호로 업데이트
-        await fetchGridData(currentPage); // 다음 페이지 데이터 로드
-      }
-    }
-	});
+	// grid.on('scrollEnd', async ({ horz, vert }) => {
+  //   if (vert.isReachedBottom) { // 스크롤이 그리드 바닥에 도달했을 때
+  //     if (hasMoreData && !isLoading) { // 더 불러올 데이터가 있고, 현재 로딩 중이 아닐 때
+  //       currentPage++; // 다음 페이지 번호로 업데이트
+  //       await fetchGridData(currentPage); // 다음 페이지 데이터 로드
+  //     }
+  //   }
+	// });
   
 	// grid.on('click', (ev) => {
   //   // 컬럼 id를 선택을 하여 모달을 띄운다.
@@ -70,12 +70,10 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
       
       const oddId = target.dataset.ordId;
       const action = target.dataset.action; // data-action 값을 가져옴
-
-      console.log(`[버튼 클릭] 주문 ID: ${oddId}, 액션: ${action}`);
       
       const result = await checkMaterial(oddId);
       if(!result) {
-        alert('자재가 등록되어 있지 않습니다.');
+        alert('자재가 창고에 등록되어 있지 않습니다.');
         return;
       }
 
@@ -85,6 +83,9 @@ document.addEventListener('DOMContentLoaded', async function() { // async 키워
       } else if (action === 'request') {
           // 자재 요청용 모달 열기
           openMaterialRequestModal(oddId);
+      } else if (action === 'materialRequest') {
+          // 자재 요청 완료
+          openMaterialRequestCompleteModal(oddId);
       }
     }
   });
@@ -112,15 +113,20 @@ async function fetchGridData(page = currentPage) {
     
     // 3. 응답 데이터를 JSON으로 파싱
     const data = await response.json();
-    console.log(data);
+    
+    
 
     data.map((item) => {
       // 자재 요청일 경우 자재요청완료?
       if(item.PRODUCTION_STATUS == '생산 가능') {
         // data-action="instruct" 추가
-        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시</button>`;
+        if(item.ODD_STS == 'odd_sts_01') {
+          item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시(자재 요청 완료)</button>`;
+        } else {
+          item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="instruct" data-ord-id="${item.ODD_ID}">작업 지시</button>`;
+        }
       } else if(item.ODD_STS == 'odd_sts_01') {
-        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn">자재 요청 완료</button>`;
+        item.PRODUCTION_STATUS = `<button class="btn btn-sm custom-btn-blue assign-btn" data-action="materialRequest" data-ord-id="${item.ODD_ID}">자재 요청 완료</button>`;
       } else {
         // data-action="request" 추가
         item.PRODUCTION_STATUS = `<button class="btn btn-sm btn-danger delete-btn assign-btn" data-action="request" data-ord-id="${item.ODD_ID}">자재 요청</button>`;
@@ -169,6 +175,7 @@ async function checkMaterial(selectedId) {
       const errorMessage = await res.text();
       throw new Error(errorMessage);
     }
+
     return true; // 모든 재료가 성공적으로 확인되었을 때 true 반환
 
   } catch (err) {
@@ -190,7 +197,6 @@ async function openWorkInstructionModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
   const commonInfo = data[0];
   // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
   document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
@@ -241,11 +247,54 @@ async function openWorkInstructionModal(selectedId) {
     submitForm(selectedId);
   });
 
+  const oldBtn2  = document.getElementById('rejectBtn');
+  // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
+  const newBtn2 = oldBtn2.cloneNode(true); 
+  // 2. 기존 버튼을 새로운 버튼으로 교체
+  oldBtn2.parentNode.replaceChild(newBtn2, oldBtn2);
+  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
+  newBtn2.textContent = '반려'; 
+  newBtn2.addEventListener('click', () => {
+    rejectForm(selectedId);
+  });
+
+  document.getElementById('submitBtn').style.display = 'block';
+  document.getElementById('rejectBtn').style.display = 'block';
+  
+
 
   const modal = document.getElementById('myModal');
   const modalInstance = new bootstrap.Modal(modal);
   modalInstance.show();
 
+}
+
+// rejectForm
+async function rejectForm(selectedId) {
+  try {
+    const res = await fetch(`/SOLEX/order-requests/reject`, {
+    method : 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      odd_id : selectedId
+    })
+  });
+
+  if (!res.ok) {
+    const errorMessage = await res.text(); 
+    throw new Error(errorMessage); 
+  }
+
+  const successMessage = await res.text(); // "정상적으로 처리되었습니다."
+  alert(successMessage + ' 🙌');
+  window.location.reload(); // 페이지 새로고침
+
+  } catch (err) {
+    console.error('작업 처리 중 오류 발생:', err);
+    alert(err.message);
+  }
 }
 
 async function openMaterialRequestModal(selectedId) {
@@ -259,7 +308,95 @@ async function openMaterialRequestModal(selectedId) {
   // 3. 응답 데이터를 JSON으로 파싱
   const data = await response.json();
 
-  console.log(data);
+  const commonInfo = data[0];
+  // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
+  document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
+  document.getElementById('PRD_NM').value = commonInfo.PRD_NM;
+  document.getElementById('OPT_COLOR').value = commonInfo.OPT_COLOR;
+  document.getElementById('OPT_SIZE').value = commonInfo.OPT_SIZE;
+  document.getElementById('STK_CNT').value = commonInfo.STK_CNT;
+  document.getElementById('OPT_HEIGHT').value = commonInfo.OPT_HEIGHT;
+  document.getElementById('ODD_CNT').value = commonInfo.ODD_CNT;
+  document.getElementById('ORD_END_DATE').value = commonInfo.ORD_END_DATE;
+  
+  const textArea = document.getElementById('MATERIAL_CNT');
+  const htmlLines = data.map(material => {
+    // 상태에 따라 글자색을 다르게 하기 위한 클래스 변수
+    const statusClass = material.STK_MATERIAL_STATUS.includes('부족') ? 'text-danger' : 'text-success';
+    // 불량율 계산 5%
+    const finalRequiredCnt = Math.ceil(material.TOTAL_BOM_CNT * 1.05); // 소수점이 나올 수 있으므로 올림(ceil) 처리
+    // 부족 갯수 계산
+    const shortageCnt = finalRequiredCnt - material.STK_MATERIAL_CNT;
+
+    // 각 자재 정보를 div로 감싸서 간격을 줍니다.
+    return `
+      <div style="margin-bottom: 10px;">
+        <strong>${material.MAT_NM}</strong>
+        <div style="padding-left: 15px;">
+          - 단위당 필요 갯수 : ${material.BOM_CNT}개
+          <br>
+          - 총 필요 갯수(+불량율 5%) : ${finalRequiredCnt}개
+          <br>
+          - 현 재고 : ${material.STK_MATERIAL_CNT}개
+          <br>
+          ${ shortageCnt > 0 ? `${shortageCnt}개 <strong class="text-danger">부족</strong>` : `<strong class="text-success">생산 가능</strong>` }
+        </div>
+      </div>
+    `;
+});
+
+  textArea.innerHTML = htmlLines.join('\n');
+  document.getElementById('submitBtn').style.display = 'block';
+  document.getElementById('rejectBtn').style.display = 'block';
+
+
+  // 자재 요청
+  const oldBtn  = document.getElementById('submitBtn');  
+  // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
+  const newBtn = oldBtn.cloneNode(true); 
+  // 2. 기존 버튼을 새로운 버튼으로 교체
+  oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
+
+  newBtn.textContent = '자재 요청'; 
+  newBtn.addEventListener('click', () => {
+    submitMaterialRequestForm(selectedId);
+  });
+
+  // 반려
+  const oldBtn2  = document.getElementById('rejectBtn');  
+  // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
+  const newBtn2 = oldBtn2.cloneNode(true); 
+  // 2. 기존 버튼을 새로운 버튼으로 교체
+  oldBtn2.parentNode.replaceChild(newBtn2, oldBtn2);
+  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
+
+  newBtn2.textContent = '반려'; 
+  newBtn2.addEventListener('click', () => {
+    rejectForm(selectedId);
+  });
+
+
+
+
+  const modal = document.getElementById('myModal');
+  const modalInstance = new bootstrap.Modal(modal);
+  modalInstance.show();
+
+}
+
+
+async function openMaterialRequestCompleteModal(selectedId) {
+  const url = `/SOLEX/order-requests/${selectedId}`;
+  const response = await fetch(url);
+
+  // 2. 응답 상태 확인
+  if (!response.ok) { // HTTP 상태 코드가 200-299 범위가 아니면 오류
+    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+  }
+  // 3. 응답 데이터를 JSON으로 파싱
+  const data = await response.json();
+
   const commonInfo = data[0];
   // id와 데이터의 key가 일치하는 공통 정보 필드에 값을 한 번만 설정
   document.getElementById('CLI_NM').value = commonInfo.CLI_NM;
@@ -299,20 +436,10 @@ async function openMaterialRequestModal(selectedId) {
 
   textArea.innerHTML = htmlLines.join('\n');
 
-
-  // 자재 요청
-  const oldBtn  = document.getElementById('submitBtn');  
-  // 1. 기존 버튼을 복제하여 이벤트 리스너를 모두 제거
-  const newBtn = oldBtn.cloneNode(true); 
-  // 2. 기존 버튼을 새로운 버튼으로 교체
-  oldBtn.parentNode.replaceChild(newBtn, oldBtn);
-  // 3. 이벤트가 없는 새 버튼에 클릭 이벤트를 등록
-
-  newBtn.textContent = '자재 요청'; 
-  newBtn.addEventListener('click', () => {
-    submitMaterialRequestForm(selectedId);
-  });
-
+  // TODO: 자재 요청 완료 모달
+  // 승인 반려 버튼 안보이게
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('rejectBtn').style.display = 'none';
 
 
 

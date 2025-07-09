@@ -38,16 +38,6 @@ const getClientTypeDisplayName = (type) => {
 
 
 
-// { header: '상세', name: 'detail',
-//     formatter: ({ value }) => { // value는 `processedData`에서 `client.cliId`로 설정됩니다.
-//         return `<button class="btn btn-link p-0 open-detail" style="width: 100%;" tabindex="-1" title="detail" onclick="openDetailModal('${value}')">
-//                   <span>⋮</span>
-//                 </button>`;
-//     }
-// }
-
-
-
 
 
 // =================================================================================================
@@ -237,9 +227,6 @@ function openCreateClientModal() {
 
 // '거래처 수정' 모달을 여는 함수
 window.openDetailModal = async (clientId) => { // TUI Grid formatter에서 호출되므로 window에 바인딩
-    console.log("상세 모달 열기 요청, 클라이언트 ID:", clientId);
-
-
     try {
         // API 엔드포인트에 맞게 URL 수정
         const response = await fetch(`/SOLEX/clients/${clientId}`); // /clients/{cli_id} API 호출
@@ -252,7 +239,6 @@ window.openDetailModal = async (clientId) => { // TUI Grid formatter에서 호�
         if (!data) {
             throw new Error("클라이언트 데이터가 응답에 포함되어 있지 않습니다.");
         }
-        console.log("받아온 상세 데이터:", data);
 
         // 모달 HTML 생성 (data 객체는 이미 camelCase 필드명을 가짐)
         modalContentContainer.innerHTML = generateModalHtml('update', data, clientId);
@@ -280,6 +266,14 @@ window.openDetailModal = async (clientId) => { // TUI Grid formatter에서 호�
         alert('거래처 정보를 불러오는 데 실패했습니다.');
     }
 };
+// 모달을 초기화하고 표시하는 함수
+function formatPhoneNumber(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 11); // 숫자만, 최대 11자리 제한
+
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
 
 
 // 동적으로 생성된 요소에 이벤트 리스너를 다시 연결하는 함수
@@ -297,19 +291,37 @@ function attachDynamicEventListeners() {
         };
     }
 
+    // 입력 중엔 숫자만 유지
+  const sanitizeInput = (el) => {
+    const digits = el.value.replace(/\D/g, '').slice(0, 11);
+    el.value = digits;
+  };
+   // 입력 중엔 숫자만 보이고
+  // 포커스 잃을 때만 하이픈 붙이기
+  const attachPhoneEvents = (inputEl) => {
+    if (!inputEl) return;
 
-    if (cliPhoneInput) {
-        cliPhoneInput.oninput = function() {
-            formatCliPhone(this);
-        };
-    }
-    if (cliMgrPhoneInput) {
-        cliMgrPhoneInput.oninput = function() {
-            formatCliPhone(this);
-        };
-    }
+    inputEl.addEventListener('input', function () {
+      sanitizeInput(this);
+    });
+
+    inputEl.addEventListener('blur', function () {
+      this.value = formatPhoneNumber(this.value);
+    });
+
+    inputEl.addEventListener('focus', function () {
+      // 하이픈 제거하고 숫자만 보여주기
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
+    });
+  };
+
+  
+  attachPhoneEvents(cliPhoneInput);
+  attachPhoneEvents(cliMgrPhoneInput);
+
+
+    
 }
-
 // =================================================================================================
 // 데이터 검증 및 전송 함수
 // =================================================================================================
@@ -466,13 +478,11 @@ async function submitClientForm() {
         method = 'PUT';
         successMessage = '거래처 수정이 완료되었습니다.';
         errorMessage = '거래처 수정 중 오류가 발생했습니다.';
-        console.log("전송할 수정 데이터:", clientData);
     } else { // 등록 모드
         url = '/SOLEX/clients'; // API 엔드포인트 수정
         method = 'POST';
         successMessage = '거래처 등록이 완료되었습니다.';
         errorMessage = '거래처 등록 중 오류가 발생했습니다.';
-        console.log("전송할 등록 데이터:", clientData);
     }
 
     try {
@@ -483,8 +493,6 @@ async function submitClientForm() {
         });
 
         const result = await response.json();
-        console.log("서버 응답 OK:", response.ok);
-        console.log("서버 응답 Result:", result);
 
         if (response.ok && result.status === "OK") { // `result.status`로 성공 여부 판단
             alert(result.message || successMessage);
@@ -510,7 +518,7 @@ async function scrollMoreClient(isInitialLoad = false) {
     // hasMoreData 변수 및 관련 조건은 제거합니다.
     // 무한 스크롤 종료는 grid.off('scrollEnd')로 제어합니다.
     // if ((isInitialLoad === false && hasMoreData === false)) {
-    //     console.log("데이터 로딩 중이거나 더 이상 불러올 데이터가 없습니다.");
+    //     ("데이터 로딩 중이거나 더 이상 불러올 데이터가 없습니다.");
     //     return;
     // }
 
@@ -537,7 +545,7 @@ async function scrollMoreClient(isInitialLoad = false) {
 
         const result = await response.json(); // 서버 응답 (Map<String, Object> 형태)
 
-        console.log(result);
+        (result);
 		
 
         if (result.status === "OK" && result.data) {
@@ -587,7 +595,7 @@ async function scrollMoreClient(isInitialLoad = false) {
         console.error("데이터 로딩 중 오류 발생:", error);
         alert("데이터를 불러오는 중 오류가 발생했습니다.");
         // hasMoreData = false; // 이 줄을 제거합니다.
-        console.log("데이터 로딩 중 예외 발생. 스크롤 이벤트를 해제합니다.");
+        ("데이터 로딩 중 예외 발생. 스크롤 이벤트를 해제합니다.");
         grid.off('scrollEnd'); // 오류 발생 시 스크롤 이벤트 해제
     }
 }
@@ -674,42 +682,11 @@ function toggleBizRegNoRelatedUI(isChecked) {
     }
 }
 
-// 전화번호 하이픈 포맷팅 함수
-function formatCliPhone(inputElem) {
-    let num = inputElem.value.replace(/[^0-9]/g, '');
 
-    if (num.substring(0, 2) === '02') {
-        if (num.length < 3) {
-            inputElem.value = num;
-        } else if (num.length < 6) {
-            inputElem.value = num.replace(/(\d{2})(\d{1,3})/, '$1-$2');
-        } else if (num.length < 10) {
-            inputElem.value = num.replace(/(\d{2})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
-        } else {
-            inputElem.value = num.replace(/(\d{2})(\d{4})(\d{4}).*/, '$1-$2-$3');
-        }
-    } else if (/^01[016789]/.test(num) || num.length >= 3) {
-        if (num.length < 4) {
-            inputElem.value = num;
-        } else if (num.length < 7) {
-            inputElem.value = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
-        } else if (num.length < 11) {
-            inputElem.value = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
-        } else {
-            inputElem.value = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
-        }
-    } else {
-        if (num.length < 4) {
-            inputElem.value = num;
-        } else if (num.length < 7) {
-            inputElem.value = num.replace(/(\d{3})(\d{1,3})/, '$1-$2');
-        } else if (num.length < 11) {
-            inputElem.value = num.replace(/(\d{3})(\d{3,4})(\d{0,4})/, '$1-$2-$3');
-        } else {
-            inputElem.value = num.replace(/(\d{3})(\d{4})(\d{4}).*/, '$1-$2-$3');
-        }
-    }
-}
+
+
+// HTML 예시:
+// <input type="text" id="phoneInput" oninput="formatCliPhone(this)">
 
 // 우편번호 찾기 (Daum Postcode API)
 function findPostCode() {
@@ -789,7 +766,6 @@ async function loadClientIsActive(selectedValue = null, selectedText = null) {
             throw new Error('거래처 사용여부를 불러오지 못했습니다.');
         }
         const clientIsActive = await response.json();
-        console.log("clientIsActive", clientIsActive);
 
         select.innerHTML = ''; // 기존 옵션 비우기
 
@@ -848,8 +824,6 @@ const debounce = (func, delay) => {
 // DOMContentLoaded 이벤트 리스너: 문서 로드 후 초기화
 // =================================================================================================
 document.addEventListener('DOMContentLoaded', () => {
-
-
 
 
     // 모달 관련 요소 초기화

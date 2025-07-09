@@ -95,6 +95,7 @@ public class MainRestController {
     	map.put("calId", id);
     	map.put("empId", empId);
     	
+    	System.out.println("ddddddddddddd " + map);
     	mainService.deleteEvent(map);
     }
 	// 공지사항 목록

@@ -52,7 +52,6 @@ public class InspectionService {
 
 	public List<Map<String, Object>> getDefectiveCountByWarehouse(Map<String, Object> map) {
 		List<Map<String, Object>> list = inspectionMapper.getDefectiveCountByWarehouse(map);
-		System.out.println(list);
 		
 		return list;
 		
@@ -76,25 +75,17 @@ public class InspectionService {
         Number actualOutQty = (Number) params.get("oActualOutQty"); // Oracle NUMBER는 Long 또는 BigDecimal로 매핑될 수 있음
 
         // 결과 로깅 (개발/디버깅 목적)
-        System.out.println("--- 프로시저 호출 결과 ---");
-        System.out.println("Status Code: " + statusCode);
-        System.out.println("Status Message: " + statusMessage);
-        System.out.println("Actual Out Quantity: " + actualOutQty);
-        System.out.println("-------------------------");
 
 
         // 프로시저 결과에 따른 비즈니스 로직 처리
         if ("SUCCESS".equals(statusCode)) {
             // 성공 로직: 예를 들어 추가적인 데이터 처리 또는 로그 기록
-            System.out.println("재고 출고 프로시저가 성공적으로 실행되었습니다.");
         } else if ("NOT_ENOUGH_STOCK".equals(statusCode)) {
             // 재고 부족 처리
-            System.out.println("재고가 부족하여 출고에 실패했습니다.");
             // 특정 예외를 던지거나, 클라이언트에게 오류 메시지를 전달하는 등의 추가 처리가 필요합니다.
             // throw new RuntimeException("재고 부족 오류: " + statusMessage);
         } else if ("NOT_FOUND_DATA".equals(statusCode)) {
             // 데이터 없음 처리
-            System.out.println("필요한 데이터를 찾을 수 없어 출고에 실패했습니다.");
             // throw new RuntimeException("데이터 없음 오류: " + statusMessage);
         } else {
             // 기타 오류 처리

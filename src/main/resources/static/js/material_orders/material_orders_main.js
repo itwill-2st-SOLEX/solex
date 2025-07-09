@@ -18,7 +18,7 @@ $(function() {
             { header: '발주ID', name: 'matOrdId', align: 'center', width: 89, sortable: true },
             { header: '자재ID', name: 'matId', align: 'center', width: 99, sortable: true },
             { header: '요청자ID', name: 'empId', align: 'center', width: 99, sortable: true },
-            { header: '발주설명', name: 'matComm', align: 'center', width: 600 },
+            { header: '발주설명', name: 'matComm', align: 'center', width: 650 },
             { header: '발주수량', name: 'matQty', align: 'center', width: 99},
             { header: '발주 요청일', name: 'matRegDate', align: 'center', width: 118, sortable: true },
             {
@@ -26,7 +26,7 @@ $(function() {
                 name: 'mat_ord_sts',
 				sortable: true,
                 align: 'center',
-                width: 230,
+                width: 200,
 				sortable: true,
                 formatter: ({ value, rowKey }) => {
                     if (value === 'mat_ord_sts_01') {
@@ -246,7 +246,6 @@ $(function() {
      * @param {number} rowKey - 그리드에서 선택된 행의 키.
      */
 	
-	
 
 	
     async function openModal(mode, rowKey) {
@@ -274,7 +273,7 @@ $(function() {
                     <div class="col"><label class="form-label">구역</label><select id="areId" class="form-select" name="are_id" disabled required><option value="">-- 구역 선택 --</option></select></div>
                 </div>
                 <div class="text-end mt-4">
-                    <button type="submit" id="approveBtn" class="btn btn-primary">승인</button>
+                    <button type="submit" id="approveBtn" class="btn custom-btn-blue">승인</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 </div>`;
             modalBody.appendChild(form);

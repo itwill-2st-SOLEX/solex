@@ -15,6 +15,21 @@ let requestType = '';
 // 페이지 로드 시 초기 표시
 updateMonthYearDisplay(); 
 
+
+// 페이지 로드가 완료된 후에 flatpickr를 초기화하도록 변경
+document.addEventListener('DOMContentLoaded', function() {
+    const myDatePickerElement = document.getElementById('my-datepicker');
+    if (myDatePickerElement) { // my-datepicker 요소가 존재할 때만 flatpickr 초기화
+        const myDatePicker = flatpickr(myDatePickerElement, {
+            enableTime: true,        // 시간 선택 활성화
+            dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
+            time_24hr: true,         // 24시간 형식 사용
+            locale: "ko"             // 한국어 로케일 적용
+        });
+    } else {
+        console.warn("Element with ID 'my-datepicker' not found. Flatpickr will not be initialized for it.");
+    }
+});
 // FlatpickrDateEditor.js (혹은 <script> 태그 안에 정의)
 class FlatpickrDateEditor {
     constructor(props) {
@@ -230,23 +245,44 @@ const grid = new tui.Grid({
 });
 
 // JavaScript에서 초기화
-const myDatePicker = flatpickr("#my-datepicker", {
-    // 옵션 객체
-    enableTime: true,        // 시간 선택 활성화
-    dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
-    time_24hr: true,         // 24시간 형식 사용
-    locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
-});
+//const myDatePicker = flatpickr("#my-datepicker", {
+//    // 옵션 객체
+//    enableTime: true,        // 시간 선택 활성화
+//    dateFormat: "Y-m-d H:i:S", // 날짜 및 시간 포맷 (예: 2025-06-12 12:34)
+//    time_24hr: true,         // 24시간 형식 사용
+//    locale: "ko"             // 한국어 로케일 적용 (위에서 ko.js 로드 필요)
+//});
 
 
 //무한 스크롤 이벤트
 function bindScrollEvent() {
 	// 검색으로 화면 목록이 변경되었을 경우를 대비해서 스크롤 초기화
-    grid.off('scrollEnd');
+//    grid.off('scrollEnd');
 	
-	//무한스크롤시 검색어 유지를 위해 재전달
-    grid.on('scrollEnd', () => {
-        const keyword = document.getElementById('searchInput').value.trim();
+//	//무한스크롤시 검색어 유지를 위해 재전달
+//    grid.on('scrollEnd', () => {
+//        const keyword = document.getElementById('searchInput').value.trim();
+//    });
+	grid.on('scrollEnd', async () => {
+        // 현재 스크롤 위치가 마지막 페이지에 도달했는지 확인 (필요에 따라 추가 로직)
+        // 예를 들어, grid.getPagination().getLastPage() 와 비교하거나
+        // 서버에서 받아온 총 데이터 개수와 현재 로드된 데이터 개수를 비교하여 더 이상 로드할 데이터가 없는지 확인
+        const currentDataLength = grid.getRowCount();
+        // totalCount는 attendanceLists에서 받아와야 합니다. 여기서는 임시로 사용하거나 전역 변수로 관리해야 합니다.
+        // 현재 코드에서는 totalCount가 attendanceLists에서만 처리되고 있습니다.
+        // 따라서, scrollEnd에서는 totalCount에 접근할 수 없으므로, attendanceLists가 반환하는 데이터의 길이를 이용해야 합니다.
+        // 또는 attendanceLists가 totalCount를 전역 변수에 저장하도록 수정합니다.
+
+        // 더 이상 로드할 데이터가 없으면 return
+        if (currentDataLength >= totalDataCountFromLastLoad) { // totalDataCountFromLastLoad는 마지막 API 호출 시 서버에서 전달받은 총 데이터 개수
+             console.log("더 이상 로드할 데이터가 없습니다.");
+             grid.off('scrollEnd'); // 더 이상 스크롤 이벤트를 듣지 않음
+             return;
+        }
+
+        const keyword = '';
+        // 다음 페이지 데이터 로드
+        await attendanceLists(currentDate.getFullYear(), currentDate.getMonth() + 1, requestType, keyword, currentPage);
     });
 }
 
@@ -264,17 +300,17 @@ function updateMonthYearDisplay() {
     
     if (currentPath.includes('/my_attendance_list')) {
         requestType = 'my';
-        console.log("현재 페이지는 '내 근태 현황' 페이지입니다.");
     } else if (currentPath.includes('/attendance_list')) {
         requestType = 'team';
-        console.log("현재 페이지는 '팀 근태 현황' 페이지입니다.");
     } else {
         requestType = 'default';
-        console.log("알 수 없는 근태 페이지입니다. 기본값을 사용합니다.");
     }
 
     attendanceLists(displayYear, displayMonth, requestType, '', currentPage); 
 }
+
+// 마지막으로 로드된 총 데이터 개수를 저장할 변수
+let totalDataCountFromLastLoad = 0;
 
 
 async function attendanceLists(year, month, requestType, keyword = '', page) {
@@ -290,11 +326,11 @@ async function attendanceLists(year, month, requestType, keyword = '', page) {
 		const attendanceArray = Array.isArray(data.teamAttendance) ? data.teamAttendance : [];
 		const totalCount = data.totalCount;
 		
+		totalDataCountFromLastLoad = totalCount; // 총 데이터 개수 업데이트
+		
 		if (requestType === 'my' && data.myAttendance && Array.isArray(data.myAttendance)) {
-			console.log('my');
 			displayMyAttendance(data.myAttendance);
 		} else if (requestType === 'team' && data.teamAttendance && Array.isArray(data.teamAttendance)) {
-			console.log('team');
 			displayTeamAttendance(data.teamAttendance);
 		} else {
 			console.warn("요청 타입에 맞는 데이터가 없거나, 정의되지 않은 요청 타입입니다.");
@@ -328,7 +364,6 @@ function displayMyAttendance(data) {
         grid.setRows([]); // 빈 배열을 설정하여 기존 데이터를 모두 지우고 emptyMessage를 표시
         return; 
     }
-	console.log('내 출퇴근근황의 data' + JSON.stringify(data));
 	
 	gridData = data.map((at, idx) => ({
 		emp_nm: at.EMP_NM,
@@ -342,7 +377,6 @@ function displayMyAttendance(data) {
 		att_id: at.ATT_ID
 		
 	}));
-	console.log('내 출퇴근근황의 gridData' + JSON.stringify(gridData));
 	
 	grid.appendRows(gridData);
 }
@@ -367,7 +401,6 @@ function displayTeamAttendance(data) {
 		att_id: at.ATT_ID
 		
 	}));
-	console.log('부하직원 출퇴근근황의 gridData' + JSON.stringify(gridData));
 	grid.appendRows(gridData);
 }
 
@@ -402,7 +435,7 @@ nextMonthBtn.addEventListener('click', goToNextMonth);
 // 검색기능
 function searchAttendance() {
 	grid.resetData([]); 
-	const keyword = document.getElementById('searchInput').value.trim();
+	const keyword = '';
 	currentPage = 0;
 		
 	bindScrollEvent();		//무한스크롤 초기화 후 실행
@@ -428,21 +461,16 @@ grid.on('afterChange', ev => {
 
             // 변경이 실제로 발생했는지 확인 (값은 같지만 타입이 다를 수 있으므로)
             if (newValue === prevValue) {
-                console.log(`값 변경 없음: RowKey=${rowKey}, Column=${columnName}`);
                 return; // 변경된 값이 이전 값과 동일하면 아무것도 하지 않음
             }
 
             // 해당 rowKey의 전체 데이터 조회
             const rowData = grid.getRow(rowKey);
-			console.log('rowData?? ' + JSON.stringify(rowData));
 			
             if (!rowData || !rowData.att_id) {
                 console.error(`행 데이터 또는 att_id를 찾을 수 없습니다. RowKey: ${rowKey}`);
                 return;
             }
-
-            console.log(`Grid 데이터 변경 감지: RowKey=${rowKey}, Column=${columnName}, NewValue=${newValue}, PrevValue=${prevValue}`);
-            console.log('업데이트할 전체 Row 데이터 (예시):', rowData);
 
             // TODO: 여기서 AJAX 요청을 통해 백엔드로 데이터를 업데이트
             // 백엔드로 보낼 데이터 구성: att_id와 변경된 컬럼 값만 전송함.
@@ -450,7 +478,6 @@ grid.on('afterChange', ev => {
                 ATT_ID: rowData.att_id, // 고유 식별자
                 [columnName]: newValue   // 변경된 컬럼의 이름과 새로운 값
             };
-			console.log('updateData? ' + JSON.stringify(updateData));
             // 만약 'det_nm' 컬럼이 특정 ID로 매핑되어야 한다면 추가 로직 필요
             // 예: if (columnName === 'det_nm') { updateData.DET_ID = getDetIdByDetNm(newValue); }
 
@@ -460,7 +487,6 @@ grid.on('afterChange', ev => {
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify(updateData),
                 success: function(response) {
-					console.log('response ?? ' + response);
 //                    if (response.status === 'success') {
 //                        console.log('서버 업데이트 성공:', response);
 //                        // 사용자에게 성공 메시지 표시 (옵션)

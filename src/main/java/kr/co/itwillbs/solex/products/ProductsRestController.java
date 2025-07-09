@@ -36,23 +36,18 @@ public class ProductsRestController {
 	@GetMapping("/productList")
 	@ResponseBody
 	public Map<String, Object> getProductList( 
-			@RequestParam(name = "page", defaultValue = "1") int page,
-		    @RequestParam(name = "perPage") int perPage,
 		    @RequestParam(name = "prd_yn", defaultValue = "", required = false) String prd_yn
 			) {
-		 int offset = (page - 1) * perPage;
 		    
 	    // 1) 페이징된 목록 가져오기
-	    List<Map<String, Object>> rows = productsService.getPagedProductList(offset, perPage, prd_yn);
+	    List<Map<String, Object>> rows = productsService.getPagedProductList(prd_yn);
 	    if (rows == null) rows = new ArrayList<>();	// 빈 배열 보장
 	    
 	    // 2) 전체 개수 가져오기
 	    int totalCount = productsService.getTotalProductCount(prd_yn);
-	    System.out.println("product count ?????? " + totalCount);
 	    
 	    // 3) 결과 구성20
 	    Map<String, Object> pagination = new HashMap<>();
-	    pagination.put("page", page);
 	    pagination.put("totalCount", totalCount);
 	    
 	    Map<String, Object> data = new HashMap<>();
@@ -70,7 +65,6 @@ public class ProductsRestController {
 	@GetMapping("/prdUnitTypes")
 	public Map<String, Object> getPrdUnitTypes(@RequestParam("groupCode") String groupCode) throws Exception {
 		
-		System.out.println("getCommonCodes API called with groupCode: " + groupCode);
  		List<Map<String, String>> prdUnitList = productsService.getPrdUnitTypesAsMap(groupCode);
 		Map<String, Object> result = new HashMap<>();
 		result.put("data", prdUnitList);
@@ -82,7 +76,6 @@ public class ProductsRestController {
 	// 제품 insert
 	@PostMapping("/productRegist")
 	public ResponseEntity<Map<String, String>> registerProduct(@RequestBody Map<String, Object> requestMap) {
-		System.out.println("requestMap 옵션보려고 보는 requestMap :" + requestMap);
         // 서비스 호출, Map을 그대로 넘김
         productsService.registerProduct(requestMap);
 
@@ -94,7 +87,6 @@ public class ProductsRestController {
 	// 제품 update
 	@PostMapping("/productUpdate")
 	public ResponseEntity<Map<String, String>> editProduct(@RequestBody Map<String, Object> productData) {
-		System.out.println("productData??? " + productData);
 		productsService.editProduct(productData);
 		
 		Map<String, String> response = new java.util.HashMap<>();
@@ -116,10 +108,8 @@ public class ProductsRestController {
             response.put("status", "success");
             response.put("data", options);
             response.put("opt_count", totalOptionCount);
-            System.out.println("response ?? " + response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.err.println("제품 옵션 조회 중 오류 발생: " + e.getMessage());
             response.put("status", "error");
             response.put("message", "제품 옵션을 불러오는 데 실패했습니다: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
@@ -130,7 +120,6 @@ public class ProductsRestController {
     @GetMapping("/processByPrdType")
     public ResponseEntity<List<Map<String, Object>>> getProcessByPrdType(
             @RequestParam("prd_type") String prd_type) {
-    	System.out.println("processByPrdType 콘트롤러에 잘 들어옴? " + prd_type +  " 파라미터 값 잘 들어옴? ");
         try {
             // Service 계층을 통해 공정 정보 조회
 //            List<Map<String, Object>> processList = bomsService.getProcessByPrdType(prd_type);
@@ -152,7 +141,6 @@ public class ProductsRestController {
         Map<String, Object> response = new HashMap<>();
         response.put("isDuplicate", isDuplicate);
 
-        System.out.println("checkPrdCode 결과: " + isDuplicate); // 결과도 출력
         return ResponseEntity.ok(response);
 
 	}

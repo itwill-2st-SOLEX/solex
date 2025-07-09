@@ -58,9 +58,9 @@ public class InspectionRestController {
 	// 모든 작업 목록 가져오기
 	@GetMapping("/data")
 	public Map<String, Object> getInspectionList(@RequestParam(name = "page", required = false) Integer page,
-								         @RequestParam(name = "size", required = false) Integer size,
-								         @RequestParam("empId") Long empId,
-								         @RequestParam("yearMonth") String yearMonth) {
+												@RequestParam(name = "size", required = false) Integer size,
+												@RequestParam("empId") Long empId,
+												@RequestParam("yearMonth") String yearMonth) {
 
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("offset", page * size);
@@ -84,7 +84,6 @@ public class InspectionRestController {
 	public ResponseEntity<?> getDefectiveCountByWarehouse(@RequestBody Map<String, Object> map) {
 		
 		List<Map<String, Object>> resultList = inspectionService.getDefectiveCountByWarehouse(map);
-		System.out.println(resultList.get(0).get("STATUS"));
 		// resultList의 status가 출고 가능한지 확인
 		if (resultList.isEmpty() || resultList.get(0).get("STATUS") == null || "출고 불가능".equals(resultList.get(0).get("STATUS"))) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("출고 불가능한 상태이거나 재고를 초과할 수 없습니다.");

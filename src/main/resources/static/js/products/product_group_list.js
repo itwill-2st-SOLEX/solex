@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	    scrollY: true,
 	    pageOptions: {
 	      useClient: false,
-	      type: 'scroll',
+	      type: 'scroll', // 무한 스크롤 유지
 	      perPage: 20
 	    },
 		data: {
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				const paginationInfo = res.data ? res.data.pagination || { page: 1, totalCount: dataArray.length } : { page: 1, totalCount: 0 };
 
 				return {
-                    data: dataArray, // ⭐ 여기서 res.data.contents를 사용
+                    data: dataArray,
                     pagination: {
                         page: paginationInfo.page,
                         totalCount: Number(paginationInfo.totalCount)
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		},
 	    columns: [
 		 
-		  { header: '상품코드', name: 'PRD_ID', hidden: true },
+		  { header: '제품코드', name: 'PRD_ID', hidden: true },
 		  { header: '옵션코드', name: 'OPT_ID', hidden: true },
 	      { header: '가격', name: 'PRD_PRICE', hidden: true },
 	      { header: '선택된유형', name: 'PRD_SELECTED_TYPE', hidden: true },
@@ -67,19 +67,60 @@ document.addEventListener('DOMContentLoaded', function() {
 		  { header: '선택된색상', name: 'OPT_COLOR', hidden: true },
 		  { header: '선택된굽', name: 'OPT_HEIGHT', hidden: true },
 		  { header: '선택된사이즈', name: 'OPT_SIZE', hidden: true },
-	      { header: '상품명', name: 'PRD_NM', align: 'left', sortable: true , width: 130, className: 'blue-text',
-			filter:
-			{
+	      { header: '제품명', name: 'PRD_NM', align: 'left', sortable: true , width: 130, className: 'blue-text',
+			filter: {
 	            type: 'text',
-	            showApplyBtn: true,
-	            showClearBtn: true
+	            showApplyBtn: true, // Apply 버튼을 보여줘서 사용자가 검색을 확정하도록 함
+	            showClearBtn: true,
+                // ⭐ 필터 적용 시 서버 데이터 재로드를 위한 readData 함수 추가
+                // 이 함수가 호출되면 TUI Grid는 현재 필터 상태를 _filters 파라미터로 서버에 보냄
+                readData: function(filterState) { // filterState 파라미터는 TUI Grid가 필터 정보를 전달할 때 사용
+                    window.prod_grid.readData(1, true); // 첫 페이지부터 데이터 재로드 (필터링된 데이터)
+                }
 	        }
 		  },
-	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true, filter: 'select'},
-	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true, filter: 'select'  },
-		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true, filter: 'select' },
-		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true, filter: 'select' },
-		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true, filter: 'select'}
+	      { header: '유형', name: 'PRD_TYPE', align: 'center', sortable: true, filter: 'select'
+          },
+	      { header: '단위', name: 'PRD_UNIT', align: 'center', sortable: true,
+            filter: {
+                type: 'select',
+                showApplyBtn: true,
+                showClearBtn: true,
+                readData: function(filterState) {
+                    window.prod_grid.readData(1, true);
+                }
+            }
+          },
+		  { header: '색상', name: 'PRD_COLOR', align: 'center', sortable: true,
+            filter: {
+                type: 'select',
+                showApplyBtn: true,
+                showClearBtn: true,
+                readData: function(filterState) {
+                    window.prod_grid.readData(1, true);
+                }
+            }
+          },
+		  { header: '사이즈', name: 'PRD_SIZE', align: 'center', sortable: true,
+            filter: {
+                type: 'select',
+                showApplyBtn: true,
+                showClearBtn: true,
+                readData: function(filterState) {
+                    window.prod_grid.readData(1, true);
+                }
+            }
+          },
+		  { header: '굽', name: 'PRD_HEIGHT', align: 'center', sortable: true,
+            filter: {
+                type: 'select',
+                showApplyBtn: true,
+                showClearBtn: true,
+                readData: function(filterState) {
+                    window.prod_grid.readData(1, true);
+                }
+            }
+          }
 	    ]
 	});
 
@@ -102,7 +143,6 @@ document.addEventListener('DOMContentLoaded', function() {
        	const rowData = prod_grid.getRow(rowKey);
 
        	if (rowData) {
-           	console.log('행 더블클릭됨:', rowData);
            	// 여기에 제품 수정 모달을 띄우는 함수를 호출하고, rowData를 넘겨줍니다.
            	showProductModal('edit', rowData); // 예시 함수
        	}
@@ -121,8 +161,6 @@ document.addEventListener('DOMContentLoaded', function() {
        	prod_grid.on('checkAll', updateBomButtonVisibility);
        	prod_grid.on('uncheckAll', updateBomButtonVisibility);
    	} else {
-       	// prod_grid가 나중에 초기화된다면, prod_grid 초기화 콜백에서 이 리스너들을 추가해야 합니다.
-       	console.warn("prod_grid가 아직 초기화되지 않았습니다. 체크박스 이벤트 리스너를 나중에 등록해야 할 수 있습니다.");
    	}
 	// 페이지 로드 시 초기 상태 설정
 	updateBomButtonVisibility();
@@ -130,20 +168,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	   
 	// 제품 체크박스 체크 이벤트 감지
 	window.prod_grid.on('check', ev => {
-	    // ev.rowKey는 체크된 행의 rowKey를 나타냅니다.
-	    // ev.columnName은 'rowHeader'로, 체크박스 컬럼임을 나타냅니다.
-	    console.log('체크됨:', ev.rowKey, '행 데이터:', window.prod_grid.getRow(ev.rowKey));
-
-	    // 필요하다면 체크된 행의 데이터를 가져와서 추가적인 로직을 수행할 수 있습니다.
 	    const checkedRowData = window.prod_grid.getRow(ev.rowKey);
-	    // 예시: 체크된 상품의 ID를 배열에 추가
-	    // checkedProductIds.push(checkedRowData.PRD_ID);
 	});
 
 	// 제품 체크박스 해제 이벤트 감지
 	window.prod_grid.on('uncheck', ev => {
 	    // ev.rowKey는 체크 해제된 행의 rowKey를 나타냅니다.
-	    console.log('체크 해제됨:', ev.rowKey, '행 데이터:', window.prod_grid.getRow(ev.rowKey));
 
 	    // 필요하다면 체크 해제된 행의 데이터를 가져와서 추가적인 로직을 수행할 수 있습니다.
 	    const uncheckedRowData = window.prod_grid.getRow(ev.rowKey);
@@ -153,7 +183,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// 제품 모두 체크
 	window.prod_grid.on('checkAll', ev => {
-	    console.log('모두 체크됨');
 	    // 모든 체크된 행의 데이터를 가져올 수 있습니다.
 	    const allCheckedRows = window.prod_grid.getCheckedRows();
 	    // console.log(allCheckedRows);
@@ -161,7 +190,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// 제품 모두 체크 해제 
 	window.prod_grid.on('uncheckAll', ev => {
-	    console.log('모두 체크 해제됨');
 	});
 	
 	// 첫화면에서는 저장버튼 숨김 
@@ -212,6 +240,20 @@ document.addEventListener('DOMContentLoaded', function() {
            	window.selectedOptId = null;
 	    }
 	}
+	
+	// ⭐ 중요한 변경: 페이지 로드 시 데이터를 초기화하고 다시 불러오도록 함
+    // 이렇게 하면 필터링 시에도 1페이지 데이터가 처음부터 로드됩니다.
+    // 기존의 `resetData`와 `scrollTo`는 필요 없거나 문제가 될 수 있으므로 제거했습니다.
+//	if (window.prod_grid) {
+	  // window.prod_grid.resetData([]); // 이 코드는 불필요하거나 문제 발생 가능성이 있어 제거
+//	  window.prod_grid.readData(1); // 페이지 로드 시 첫 페이지 데이터 로드
+	  // 스크롤 관련 코드는 필터링 문제와는 관련 없으므로 제거 (필요시 다시 추가)
+	  // setTimeout(() => {
+	  //   const rowCount = window.prod_grid.getRowCount();
+	  //   window.prod_grid.scrollTo(rowCount - 1);
+	  // }, 300);
+//	}
+
 });
 
 // API 호출 함수
@@ -221,7 +263,6 @@ async function fetchOptions(groupCode) {
     	const json = await res.json();
     	return json.data || [];
   	} catch (e) {
-    	console.error(`[${groupCode}] 옵션 로딩 실패`, e);
     	return [];
   	}
 }
@@ -260,5 +301,4 @@ async function initAllOptionSelects() {
   	sizeSelect.selectpicker('render').selectpicker('refresh');
   	heightSelect.selectpicker('render').selectpicker('refresh');
 
-  	console.log('✅ 드롭다운 초기화 완료');
 }

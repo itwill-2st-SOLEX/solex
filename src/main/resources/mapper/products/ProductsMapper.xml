@@ -48,7 +48,6 @@
 	        </if>
 	    </where>
 	    ORDER BY PRD_ID
-	    OFFSET #{offset} ROWS FETCH NEXT #{perPage} ROWS ONLY
 	    
 	</select>
 	<select id="selectTotalProductCount" resultType="int">
