@@ -44,7 +44,7 @@
 	    LEFT JOIN CODE_DETAIL DEP ON DEP.DET_ID = E.EMP_DEP_CD
 	    LEFT JOIN CODE_DETAIL TEAM ON TEAM.DET_ID = E.EMP_TEAM_CD
 	    WHERE	E.EMP_POS_CD != 'pos_05'
- 	    AND		E.EMP_STS_CD = 'sts_01' 
+ 	    AND		E.EMP_STS_CD = 'emp_sts_01' 
 	    ORDER BY E.EMP_NUM
 	</select>
 	
