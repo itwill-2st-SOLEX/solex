@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<title>SOLEX</title>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" th:href="@{/css/equipment_history/equipment_history.css}" />
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<h2 style="margin-bottom: 0;">설비 수리이력</h2>
+			<button type="button" 
+					class="btn custom-btn-blue float-end mb-4" 
+					data-bs-toggle="modal" 
+					data-bs-target="#equipmentHistoryModal">
+				수리이력 등록
+			</button>
+			
+			<!-- (2) 설비 수리이력 등록 모달 -->
+			<div class="modal fade" id="equipmentHistoryModal" tabindex="-1"
+				aria-labelledby="equipmentHistoryModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-scrollable modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h2 class="modal-title" id="equipmentHistoryModalLabel">설비 수리이력 등록</h2>
+						</div>
+
+						<div class="modal-body">
+  							<!-- ① 창고 기본 정보 -->
+							<div class="row mb-3">
+								<div class="col">
+								  	<label for="eqhName" class="form-label">설비 선택</label>
+								  	<select id="eqhName" class="form-control" name="eqh_nm" required>
+								    	<option value="">-- 설비를 선택하세요 --</option>
+									</select>
+								</div>
+								<div class="col">
+									<label for="eqhManager" class="form-label">수리 시작일 <span style="color:red">*</span></label>
+									<input type="date" class="form-control d-inline-block" id="eqhStart" 
+											name="eqh_start" required>
+								</div>
+								<div class="col">
+									<label for="eqhManager" class="form-label">수리 종료일 <span style="color:red">*</span></label>
+									<input type="date" class="form-control d-inline-block" id="eqhEnd"
+											name="eqh_end" required>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col">
+								  	<label for="eqhReason" class="form-label">수리 사유 <span style="color:red">*</span></label>
+								  	<input type="text" class="form-control" id="eqhReason"
+											name="eqh_reason" placeholder="사유 입력" style=" height: 100px; width: 100%;" required>
+								</div>
+							</div>
+							
+						</div>	
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+						          data-bs-dismiss="modal">닫기</button>
+							<button type="button" id="submitEquipmentHistory"
+						          class="btn custom-btn-blue">등록</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 상세 모달 -->
+			<div class="modal fade" id="detailModal" tabindex="-1"
+				aria-labelledby="detailModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h2 class="modal-title" id="detailModalLabel">
+								설비 상세 수리이력
+							</h2> <!-- ← JS에서 넣음 -->
+						</div>
+						<!-- 					상세조회 js에서 채움 -->
+						<div class="modal-body">
+							<div id="historyGrid" style="height:420px;"></div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+								data-bs-dismiss="modal">닫기</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- 본문 영역-->
+			<div class="custom-content">
+				<div id="grid"></div>
+			</div>
+		</div>
+	</th:block>
+	<th:block layout:fragment="script">
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script th:src="@{/js/equipment_history/equipment_history.js}"></script>
+		<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	</th:block>
+</body>
+</html>

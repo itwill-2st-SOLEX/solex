@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.quality.QualityMapper">
+
+	<select id="getQualityList" resultType="map">
+  		SELECT q.qua_id AS id,
+               q.qua_nm AS nm,
+               c.det_nm AS tp
+		FROM quality_item q
+		LEFT JOIN code_detail c
+		    ON q.qua_type = c.det_id
+  		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+   </select>
+   
+   <insert id="registerQuality" parameterType="map">
+		INSERT INTO quality_item (qua_type, qua_nm)
+		VALUES (#{qtyCat}, #{qtyNm})
+   </insert>
+   
+</mapper>

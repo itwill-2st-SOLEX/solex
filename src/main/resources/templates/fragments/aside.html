@@ -1,0 +1,348 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+		xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+		layout:fragment="aside">
+
+	<aside id="layout-menu" class="custom-side layout-menu menu-vertical menu bg-menu-theme">
+          <div class="app-brand demo">
+            <a href="/SOLEX" class="app-brand-link">
+              <span class="app-brand-logo demo">
+                <span class="text-primary">
+                	<img alt="logo" th:src="@{/assets/img/solex_logo.png}" class="logo-img">
+                </span>
+              </span>
+            </a>
+
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+              <i class="bx bx-chevron-left d-block d-xl-none align-middle"></i>
+            </a>
+          </div>
+
+         <!--  <div class="menu-divider mt-0"></div> -->
+
+          <div class="menu-inner-shadow"></div>
+
+          <ul class="menu-inner py-1">
+            <!-- ERP -->
+            <li class="menu-item">
+              <div class="menu-link ">
+                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                <div class="text-truncate" data-i18n="Dashboards">ERP</div>
+              </div>
+            </li>
+
+			
+	            <!-- 인사관리 -->
+	            <li class="menu-item">
+	              <a href="javascript:void(0);" class="menu-link menu-toggle">
+	              	<div class="side-div">
+		                <i class="menu-icon tf-icons bx bx-user-circle"></i>
+		                <div class="text-truncate" data-i18n="Layouts">인사관리</div>
+	              	</div>
+	              </a>
+					
+				  
+	              <ul class="menu-sub side-div">
+	                <li class="menu-item">
+	                  <a href="/SOLEX/emp/page" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without menu">인사등록</div>
+	                  </a>
+	                </li>
+	                <li class="menu-item">
+	                  <a href="/SOLEX/orgChart" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without navbar">조직도</div>
+	                  </a>
+	                </li>
+	              </ul>
+	            </li>
+	
+	            <!-- 근태관리 -->
+	            <li class="menu-item">
+	              <a href="javascript:void(0);" class="menu-link menu-toggle">
+	                <div class="side-div">
+		                <i class="menu-icon tf-icons bx bx-calendar"></i>
+		                <div class="text-truncate" data-i18n="Layouts">근태관리</div>
+	                </div>
+	              </a>
+	
+	              <ul class="menu-sub side-div">
+<!-- 	                <li class="menu-item"> -->
+<!-- 	                  <a href="/SOLEX/attendance/attendance_register" class="menu-link"> -->
+<!-- 	                    <div class="text-truncate" data-i18n="Without menu">출/퇴근 등록</div> -->
+<!-- 	                  </a> -->
+<!-- 	                </li> -->
+	                <li class="menu-item">
+	                  <a href="/SOLEX/attendance/my_attendance_list" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without menu">출/퇴근 현황</div>
+	                  </a>
+	                </li>
+	                <li class="menu-item">
+	                  <a th:href="@{/vacation/detail}" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without navbar">연차 현황</div>
+	                  </a>
+	                </li>
+	                 <li class="menu-item">
+	                  <a href="/SOLEX/attendance/attendance_list" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without menu">사원 출/퇴근 현황</div>
+	                  </a>
+	                </li>
+					<li class="menu-item">
+	                  <a th:href="@{/vacation/list}" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without navbar">사원 연차 현황</div>
+	                  </a>
+	                </li>
+	              </ul>
+	            </li>
+	
+	            <!-- 전자결제 -->
+	            <li class="menu-item">
+	              <a href="javascript:void(0);" class="menu-link menu-toggle">
+	                <div class="side-div">
+		                <i class="menu-icon tf-icons bx bx-file"></i>
+		                <div class="text-truncate" data-i18n="Layouts">전자결재</div>
+	                </div>
+	              </a>
+	
+	              <ul class="menu-sub side-div">
+	                <li class="menu-item">
+	                  <a href="/SOLEX/approval/drafts" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without menu">기안서 목록</div>
+	                  </a>
+	                </li>
+	                <li class="menu-item">
+	                  <a href="/SOLEX/approval/page" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without navbar">결재 승인</div>
+	                  </a>
+	                </li>
+	              </ul>
+	            </li>
+	            <!-- 영업관리 -->
+	            <li class="menu-item">
+	              <a href="javascript:void(0);" class="menu-link menu-toggle">
+	              	<div class="side-div">
+		                <i class="menu-icon tf-icons bx bx-briefcase"></i>
+		                <div class="text-truncate" data-i18n="Layouts">영업관리</div>
+		            </div>
+	              </a>
+	
+	              <ul class="menu-sub side-div">
+	                <li class="menu-item">
+	                  <a href="/SOLEX/clients" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without menu">거래처 목록</div>
+	                  </a>
+	                </li>
+	                <li class="menu-item">
+	                  <a href="/SOLEX/orders" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without navbar">수주 관리</div>
+	                  </a>
+	                </li>
+	                <li class="menu-item">
+	                  <a href="/SOLEX/shipments" class="menu-link">
+	                    <div class="text-truncate" data-i18n="Without navbar">출고 관리</div>
+	                  </a>
+	                </li>
+	              </ul>
+	            </li>
+
+			<!-- MES -->
+			<li class="menu-item">
+              <div class="menu-link ">
+                <i class="menu-icon tf-icons bx bx-bxs-cog"></i>
+                <div class="text-truncate" data-i18n="Dashboards">MES</div>
+              </div>
+            </li>
+            
+           	<!-- 제품관리 -->
+           	<li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div class="side-div">
+	                <i class="menu-icon tf-icons bx bx-archive"></i>
+	                <div class="text-truncate" data-i18n="Layouts">제품관리</div>
+	            </div>
+              </a>
+
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/products/productGroupList" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">제품/BOM정보</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/material/page" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">자재관리</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/material_orders" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">자재발주</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div class="side-div">
+	                <i class="menu-icon tf-icons bx bx-credit-card-front"></i>
+	                <div class="text-truncate" data-i18n="Layouts">재고관리</div>
+                </div>
+              </a>
+
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/stock/todo" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">재고현황</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/warehouse/todo" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">창고관리</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+           	<!-- 생산관리 -->
+           	<li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div class="side-div">
+	                <i class="menu-icon tf-icons bx bx-photo-album"></i>
+	                <div class="text-truncate" data-i18n="Layouts">생산관리</div>
+                </div>
+              </a>
+
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/order-requests" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">수주요청관리</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+           	<!-- 공정관리 -->
+           	<li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div class="side-div">
+	                <i class="menu-icon tf-icons bx bx-slider"></i>
+	                <div class="text-truncate" data-i18n="Layouts">공정관리</div>
+                </div>
+              </a>
+
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/workOrders" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">작업지시</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/workHistory" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">작업이력</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/lotTracking" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">LOT추적</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/processInfo" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">공정정보</div>
+                  </a>
+                </li>
+                
+              </ul>
+            </li>
+           	<!-- 품질관리 -->
+           	<li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div class="side-div">
+	                <i class="menu-icon tf-icons bx bx-chevron-down-square"></i>
+	                <div class="text-truncate" data-i18n="Layouts">품질관리</div>
+                </div>
+              </a>
+
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/quality/todo" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">품질검사항목</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/quality/inspection" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">품질 검사 요청</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+           	<!-- 설비관리 -->
+           	<li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div class="side-div">
+	                <i class="menu-icon tf-icons bx bx-wrench"></i>
+	                <div class="text-truncate" data-i18n="Layouts">설비관리</div>
+                </div>
+              </a>
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/equipment" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">설비정보</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/equipmenthistory/page" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without navbar">설비이력</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+           	<!-- 재고관리 -->
+           	
+           	<!-- 대시보드 -->
+            <li class="menu-item">
+              <a href="/SOLEX/dashboard" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bar-chart-square"></i>
+                <div class="text-truncate" data-i18n="Layouts">대시보드</div>
+              </a>
+            </li>
+            <!-- 공지사항 -->
+            <li class="menu-item">
+              <a th:href="@{/notice}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-bell"></i>
+                <div class="text-truncate" data-i18n="Layouts">공지사항</div>
+              </a>
+            </li>
+            
+			<!-- 공통코드 -->
+			<li class="menu-item">
+              <div class="menu-link ">
+                <i class="menu-icon tf-icons bx bx-bxs-category-alt"></i>
+                <a href="/SOLEX/code" class="text-truncate" data-i18n="Dashboards" style="color:#384551;">공통코드</a>
+              </div>
+            </li>
+            
+            <div class="bar menu-item"></div>
+            
+            <!-- 현장사원페이지 -->
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle operator-side">
+                <div class="menu-link">
+	                <i class="menu-icon tf-icons bx bx-user-check"></i>
+	                <div class="text-truncate" data-i18n="Dashboards">현장작업자</div>
+                </div>
+              </a>
+
+              <ul class="menu-sub side-div">
+                <li class="menu-item">
+                  <a href="/SOLEX/operator/manager" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">작업현황</div>
+                  </a>
+                </li>
+                <li class="menu-item">
+                  <a href="/SOLEX/operator/worker" class="menu-link">
+                    <div class="text-truncate" data-i18n="Without menu">실적등록</div>
+                  </a>
+                </li>
+                
+              </ul>
+            </li>
+          </ul>
+          
+        </aside>
+</th:block>

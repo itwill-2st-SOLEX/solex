@@ -1,0 +1,123 @@
+@charset "UTF-8";
+
+.content-area {
+	padding: 20px;
+}
+
+.search-area {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+#searchInput{
+	padding: 5px;
+    width: 250px;
+    height: 35px;
+}
+
+.controll-area {
+	display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.select-area {
+	display: flex;
+    flex-direction: row;
+    gap: 10px;
+	height: 100%;
+}
+
+.selectBox {
+	border-radius: 10px;
+	text-align: center;
+	width: 150px;
+	height: 100%;
+}
+
+.btn-area {
+	display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.lotArea {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.lotTree-area {
+	width: 50%;
+    height: 600px;
+    border: 2px solid #f2f2f2;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.title-area {
+    height: 50px;
+    padding: 10px;
+}
+
+.sub-title {
+	font-size: 20px;
+}
+
+.sub-area {
+	height: 520px;
+	overflow-y: auto;
+	border: 1px solid #ccc;
+	padding: 8px;
+}
+
+.lotDetail-area {
+	width: 50%;
+    height: 600px;
+    border: 2px solid #f2f2f2;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.detail-section {
+  background-color: #fdfdfd;
+  margin-bottom: 10px;
+}
+
+.detail-card {
+	padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-card p {
+	margin: 0px;
+}
+
+.detail-card span {
+	margin: 0px;
+	padding-left: 20px;
+}
+
+.half {
+	display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.single {
+    width: 40%;
+	display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.lotCode {
+	width: 170%;
+}

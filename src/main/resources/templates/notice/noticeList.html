@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/notice/notice.css}" />
+<style>
+</style>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+		<!-- 여기서 부터 작성하시면 됩니다  -->
+			<h2>공지사항</h2>
+
+			<!-- 본문 영역-->
+			<div class="custom-content">
+				<div class="search">
+					<input type="text"  class="form-control" name="searchInput" id="searchInput" placeholder="제목 또는 내용을 입력하세요">
+					<button type="button" class="btn btn-outline-dark" id="searchBtn"> 검색 </button>
+				</div>
+				
+				<button type="button" class="btn custom-btn-blue" data-bs-toggle="modal" data-bs-target="#exampleModal" id="writeBtn" sec:authorize="hasAnyRole('ROLE_1', 'ROLE_2', 'ROLE_3', 'ROLE_4')">
+				  공지사항 작성
+				</button>
+			</div>
+			<div id="grid"></div>
+        </div>
+		
+
+		<!-- Modal -->
+		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
+		  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel">공지사항</h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+			  <!-- 모달 내용 표시 -->
+		      <div class="modal-body big-box" id="showModal"></div>
+			  <!-- 모달 버튼 표시 -->
+		      <div class="modal-footer" id="modalFooter"> </div>
+		  </div>
+		</div>
+		</div>
+		
+		<script th:src="@{/js/notice/notice.js}"></script>
+		
+	</th:block>
+	
+	
+</body>
+</html>

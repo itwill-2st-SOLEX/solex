@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/dashBoard/dashBoard.css}" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<!-- 요약 카드 + 최근 생산 완료 -->
+			<div class="custom">
+				<div class="top-row">
+					<div class="dashboard-summary">
+						<div class="summary-card pink">
+							<p id="yesterdayLabel" class="label">전일 생산량</p>
+							<p class="value" id="yesterdayCount"></p>
+							<p class="rate up" id="yesterdayRate"></p>
+						</div>
+						<div class="summary-card green">
+							<p id="monthLabel" class="label">당월 누적 생산</p>
+							<p class="value" id="monthCount"></p>
+							<p class="rate down" id="monthRate"></p>
+						</div>
+						<div class="summary-card blue">
+							<p id="defectLabel" class="label">당월 불량률</p>
+							<p class="value" id="defectRate"></p>
+						</div>
+					</div>
+
+
+					<div class="chart-card chart-main">
+						<div class="chart-header">
+							<h3>생산량 추이</h3>
+							<div class="chart-toggle">
+								<button class="toggle-btn active" data-type="monthly">월별</button>
+								<button class="toggle-btn" data-type="weekly">주간</button>
+							</div>
+						</div>
+						<div class="chart-container">
+							<canvas id="lineChart"></canvas>
+						</div>
+					</div>
+				</div>
+
+				<!-- 최근 생산 완료된 것들 (세로로 길게) -->
+				<div class="recent-finished-box">
+					<h4>최근 생산 완료된 제품들</h4>
+					<ul class="recent-finished-list">
+					</ul>
+				</div>
+			</div>
+			<!-- 테이블 + 도넛 차트 -->
+			<div class="chart-row-wrap">
+				<div class="chart-left">
+					<div class="chart-cards">
+						<h3>최근 주문 요청 현황</h3>
+						<div id="orderGrid"></div>
+						<!-- 						JS에서 채움 -->
+					</div>
+				</div>
+				<div class="chart-right">
+					<div class="chart-table">
+						<div class="popluar">
+							<h3>인기 품목</h3>
+							<div class="dates">
+								<input class="form-control" type="date" id="startDate">
+								&nbsp;~&nbsp; <input class="form-control" type="date"
+									id="endDate">
+								<button id="filterBtn" class="btn btn-primary">조회</button>
+							</div>
+						</div>
+						<div class="chart-container">
+							<canvas id="donutChart"></canvas>
+							<p id="noDataMessage" class="text-muted"
+								style="display: none; text-align: center; margin-top: 20px;">
+								해당 날짜에 수주 요청이 없습니다.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</th:block>
+	<th:block layout:fragment="script">
+		<script th:src="@{/js/dashBoard/dashBoard.js}"></script>
+	</th:block>
+
+</body>
+</html>

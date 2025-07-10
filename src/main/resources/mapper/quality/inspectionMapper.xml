@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.itwillbs.solex.quality.InspectionMapper">	
+  
+  	
+  	<!-- 로그인한 사람에 해당하는 공정 정보 가져오기 -->
+  	<select id="getManagerSummary">
+		SELECT  DISTINCT
+		        pr.prc_code,
+		        pr.prc_nm,
+		        cd1.det_nm || ' ' || cd2.det_nm            AS dep_nm,
+		        qi.qua_nm,
+		        ve.emp_id,
+		        ve.emp_pos_nm
+		FROM   view_employee ve                                -- ① 기준 테이블
+				LEFT JOIN   code_detail   cd1 ON ve.emp_dep_nm  = cd1.det_nm
+				LEFT JOIN   code_detail   cd2 ON ve.emp_team_nm = cd2.det_nm
+				LEFT JOIN   process       pr  ON pr.det_id      = cd1.det_id
+				LEFT JOIN   work_order    wo  ON wo.prc_id      = pr.prc_id
+				LEFT JOIN   work_process  wp  ON wp.wrk_id      = wo.wrk_id
+				                               AND wp.wpo_team  = cd2.det_id
+				LEFT JOIN   quality_item  qi  ON qi.qua_id      = pr.qua_id
+		WHERE ve.emp_id = #{empId}		
+  	</select>
+  	
+  	<!-- 수주상세번호, 제품코드, 제품명, 컬러, 사이즈, 굽높이, 수주수량, 불량수량 나타내야됨 -->
+  	<select id="getInspectionList">
+		SELECT
+			odd.odd_id as oddId, -- 수주 상세 번호
+			prd.prd_code as prdId, -- 제품코드
+			prd.prd_nm as prdNm, -- 제품명
+			cd2.det_nm as prdColor, -- 컬러
+			cd3.det_nm as prdSize, -- 사이즈
+			cd4.det_nm as prdHeight, -- 굽높이
+			odd.odd_cnt as oddCnt, -- 수주수량
+			odd.odd_bcount as qhiBcount, -- 불량수량
+			odd.odd_sts as oddSts, -- 수주상태
+			TO_CHAR(ord.ord_mod_date, 'YYYY-MM-DD') AS ordModDate, -- 수정일
+			TO_CHAR(ord.ord_end_date, 'YYYY-MM-DD') AS ordEndDate -- 납품 예정일
+		FROM suju_order ord
+		left JOIN client cli ON ord.cli_id = cli.cli_id
+		left join suju_order_detail odd on odd.ord_id = ord.ord_id
+		left JOIN product_option opt ON opt.opt_id = odd.opt_id
+		left JOIN product prd ON prd.prd_id = opt.prd_id
+		left JOIN code_detail cd2 ON opt.opt_color = cd2.det_id
+		left JOIN code_detail cd3 ON opt.opt_size = cd3.det_id
+		left JOIN code_detail cd4 ON opt.opt_height = cd4.det_id
+		WHERE odd.odd_sts in ('odd_sts_07') -- '출고 검사' 상태인 것들만 조회
+		ORDER BY odd.odd_id asc
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+  	</select>
+  	
+  	<!-- 작업지시 전체 개수 가져오기(무한스크롤) -->
+  	<select id="getManagerCount">
+  		SELECT COUNT(*) AS ALLCOUNT
+		FROM
+		    work_order wo			<!-- 작업지시 -->
+		    JOIN process p ON wo.prc_id = p.prc_id			<!-- 공정-작업지시 -->
+		    JOIN work_process wp ON wp.wrk_id = wo.wrk_id		<!-- 공정-작업순서 -->
+		    JOIN vw_suju_summary vs ON wo.odd_id = vs.odd_id	<!-- 공정-제품상세(수주 뷰) -->
+		    LEFT JOIN code_detail cd ON wp.wpo_status = cd.det_id	<!-- 상세공코-작업상태 -->
+			LEFT JOIN quality_item qi ON p.qua_id = qi.qua_id AND qi.qua_type='qua_type_03'
+			LEFT JOIN quality_history qh ON qi.qua_id = qh.qua_id AND wp.wpo_id=qh.qhi_target_id		
+			
+		JOIN (			<!-- 접속한 사람의 부서와 팀에 해당하는 자료 조회하기 위한 서브쿼리 -->
+	        SELECT e.emp_dep_nm, e.emp_team_nm, emp.emp_dep_cd, emp.emp_team_cd
+	        FROM VIEW_EMPLOYEE e
+	        JOIN EMPLOYEE emp ON e.emp_id = emp.emp_id
+	        WHERE e.emp_id = #{empId}
+	    ) my_emp ON TRIM(LOWER(wp.wpo_team)) = TRIM(LOWER(my_emp.emp_team_cd))
+		             AND p.det_id = my_emp.emp_dep_cd
+		WHERE wp.wpo_status != 'wpo_sts_00'
+			AND wo.wrk_ord_date &gt;= TO_DATE(#{yearMonth}||'01','YYYYMMDD')
+    		AND wo.wrk_ord_date &lt;=  ADD_MONTHS(TO_DATE(#{yearMonth}||'01','YYYYMMDD'),1)
+		ORDER BY
+		    CASE WHEN wpo_status = 'wpo_sts_09' THEN 1 ELSE 0 END,
+    		wpo_id
+	</select>
+	
+	<!-- 사원이 작업수량 업데이트 하면, work_process 작업 수량도 업데이트 되도록 설정-->
+	<update id="updateJcount">
+		UPDATE work_process wp
+		SET wp.wpo_jcount = (
+			    SELECT NVL(SUM(wr.wre_jcount), 0)
+			    FROM work_report wr
+			    WHERE wr.wpo_id = #{wpoId}
+		)
+		WHERE wp.wpo_id = #{wpoId}
+	</update>
+	
+	<!-- 작업 상태 업데이트 -->
+	<!-- 상태 : wpo_sts_01 작업시작 -> 02 작업중 -->
+	<!-- 	>> 상태 변경, 공정 시작일 입력 -->
+	<update id="updateWpoSts02">
+		UPDATE work_process
+		SET wpo_status=#{wpoStatus}, wpo_start_date=#{wpoStartDate}
+		WHERE wpo_id = #{wpoId}
+	</update>
+	
+	<!-- 상태 : wpo_sts_02 작업중 -> 03 작업완료-->
+	<!-- 	 >> 작업 지시 수량과 사원 입력값 확인  -->
+	<select id="selectWpoSts03">
+		SELECT wpo_ocount, wpo_jcount
+		FROM work_process
+		WHERE wpo_id = #{wpoId}
+	</select>
+		<!-- 	 >> 작업 완료 상태로 변경 -->
+	<update id="updateWpoSts03">
+ 		UPDATE work_process
+		SET wpo_status=#{wpoStatus}
+		WHERE wpo_id=#{wpoId}
+	</update>
+	
+	<!-- 상태 : wpo_sts_03 작업완료 -> 04 품질검사중 --> 
+	<!-- 	>> 공정완료 -> 품질검사중으로 변경  -->
+	<update id="updateWpoSts04">
+ 		UPDATE work_process
+		SET wpo_status=#{wpoStatus}
+		WHERE wpo_id = #{wpoId}
+	</update>
+
+	<!-- 	>> 품질 이력 테이블에 추가하기 위해 품질검사 id, 작업프로세스 id 가져오기  -->
+	<select id="selectWpoSts04">
+ 		SELECT wp.wpo_id, pr.qua_id
+	    FROM work_process wp
+	    JOIN work_order wo ON wp.wrk_id = wo.wrk_id
+	    JOIN process pr ON wo.prc_id = pr.prc_id
+	    WHERE wpo_id = #{wpoId}
+	</select>
+	
+	<!-- 	>> 품질 이력 테이블에 추가  -->
+	<insert id="insertWpoSts04"  useGeneratedKeys="true" keyProperty="qhiId">
+ 		INSERT INTO quality_history(qhi_target_id, qua_id, qhi_start_date, qhi_emp_id)
+ 		VALUES (#{wpoId}, #{quaId}, #{qhiStartDate}, #{qhiEmpId})
+	</insert>
+	
+	<!-- 상태 : wpo_sts_04 품질검사중 -> 05 품질검사완료 -->
+	<!-- 	>> 불량개수, 상태 업데이트 -->
+	<update id="updateWpoSts05_wp">
+		UPDATE work_process
+		SET wpo_status=#{wpoStatus}
+		WHERE wpo_id = #{wpoId}
+	</update>
+	
+	<!--  	>> 검사 완료를 위해 품질검사id 찾아오기 -->
+	<select id="selectWpoSts05">
+		SELECT qh.qhi_id
+		FROM quality_history qh
+			JOIN work_process wp ON qh.qhi_target_id = wp.wpo_id
+			JoIN quality_item qi ON qh.qua_id = qi.qua_id
+		WHERE wp.wpo_id = #{wpoId} AND qi.qua_type='qua_type_03'
+	</select>
+	
+	<!-- 	>> 품질검사이력 테이블에도 업데이트 -->
+	<update id="updateWpoSts05_qh">
+		UPDATE quality_history
+		SET qhi_bcount=#{qhiBcount}, qhi_end_date = #{qhiEndDate}
+		WHERE qhi_id=#{qhiId}
+	</update>
+	
+	
+	<!-- 상태 : wpo_sts_05 품질검사완료 -> 09 공정이관완료 -->
+	<!-- 	>> 불량개수, 상태 업데이트 -->
+	<update id="updateWpoSts09_curr">
+		UPDATE work_process
+		SET wpo_status=#{wpoStatus}, wpo_end_date=#{wpoEndDate}
+		WHERE wpo_id=#{wpoId}
+	</update>
+	
+	<!--  	>> 다음 공정 상태 변경하기 -->
+	
+  	<!-- 현재 작업중인 공정의 총 공정단계 수, 주문id찾기 -->
+  	<select id="selectStepInfo">
+	    SELECT
+		    wp1.wpo_id,
+		    wp1.wrk_id,
+		    wo1.odd_id,
+		    
+		    <!-- 총 공정 개수 -->
+		    (SELECT COUNT(*)
+		     FROM work_process wpx
+		     JOIN work_order  wox ON wpx.wrk_id = wox.wrk_id
+		     WHERE wox.odd_id = wo1.odd_id)   AS total_steps,
+		    
+		    <!-- 현재 공정 순서 -->
+		    TO_NUMBER(wp1.wpo_step)           AS step,
+		    
+		    <!-- 다음 공정 번호 -->
+		    ( SELECT MIN(TO_NUMBER(wp2.wpo_step))
+		     FROM work_process wp2
+		     JOIN work_order   wo2 ON wp2.wrk_id = wo2.wrk_id
+		     WHERE wo2.odd_id = wo1.odd_id
+		       AND TO_NUMBER(wp2.wpo_step) = TO_NUMBER(wp1.wpo_step) + 1) AS next_step,
+		    
+		    wp1.wpo_jcount,
+		    NVL(qh.qhi_bcount,0)             AS bcount,
+		    
+		    <!-- 다음 공정 ID(한 건만 필요하면 MIN/ROWNUM)  -->
+		     (SELECT MIN(wp2.wpo_id)          
+		     FROM work_process wp2
+		     	JOIN work_order   wo2 ON wp2.wrk_id = wo2.wrk_id
+		     WHERE wo2.odd_id = wo1.odd_id
+		       AND TO_NUMBER(wp2.wpo_step) = TO_NUMBER(wp1.wpo_step) + 1) AS next_wpo_id
+		
+		FROM   work_process   wp1
+		JOIN   work_order     wo1 ON wp1.wrk_id = wo1.wrk_id
+		LEFT   JOIN quality_history qh ON qh.qhi_target_id = wp1.wpo_id
+		WHERE  wp1.wpo_id = #{wpoId}
+  	</select>
+  	
+  	<!-- 다음 공정의 시작일, 상태값, 작업지시수량 업데이트-->
+  	<update id="updateNextStep">
+  		UPDATE work_process
+  		SET wpo_status = #{wpoNewStatus}, wpo_start_date=#{wpoStartDate}, wpo_ocount=#{wpoOcount}
+  		WHERE wpo_id=#{wpoId}
+  	</update>
+  	
+  	<!-- 수주 테이블에 실제로 작업이 완료된 값을 업데이트하기 -->
+  	<update id="updateSujuDetail">
+      UPDATE suju_order_detail sod
+      SET sod.odd_actual_cnt = #{wpoOcount}, sod.odd_sts = 'odd_sts_04',
+         sod.odd_mod_date=#{oddModDate},
+         sod.odd_bcount = (                    
+	                         SELECT NVL(SUM(qh.qhi_bcount), 0)
+	                         FROM   quality_history qh
+	                         WHERE  qh.qhi_target_id IN (            
+	                                 SELECT wp2.wpo_id
+	                                 FROM   work_process wp2
+	                                 	JOIN work_order wo2 ON wo2.wrk_id = wp2.wrk_id
+	                                 WHERE  wo2.odd_id = sod.odd_id
+                           )
+                       )
+      WHERE sod.odd_id IN (
+               SELECT wo.odd_id
+               FROM work_order wo
+                  JOIN work_process wp ON wp.wrk_id = wo.wrk_id
+               WHERE wp.wpo_id = #{wpoId}
+      )
+     </update>
+     	
+	<!-- 	>> 수주 히스토리에 마지막 공정이 완료된 후 히스토리 추가 -->
+	<insert id="insertSujuHistory">
+		INSERT iNTO suju_history
+		VALUES(#{oddId}, 'odd_sts_04', #{oddModDate}, #{empID})
+	</insert>
+  	
+  	<!-- 그리드에서 현황 클릭했을 때 사원 작업 현황 표시하기 -->
+  	  	
+  	<!-- 사원별 생산량 목록 -->
+  	<select id="selectWorkerList">
+  		SELECT wp.wpo_id, wr.wre_id, wr.emp_id, ve.emp_num, ve.emp_nm, wr.wre_jcount, wr.wre_date, wr.wre_memo, wp.wpo_ocount
+        FROM work_report wr JOIN view_employee ve ON wr.emp_id=ve.emp_id
+        					JOIN   work_process   wp ON wr.wpo_id = wp.wpo_id
+        WHERE wr.wpo_id = #{wpoId}
+  	</select>
+	
+	<!-- 사원의 생산량 변경하기-->
+	<update id="updateWorkerCount">
+		UPDATE work_report
+		SET wre_jcount=#{newCount}, wre_date=#{wreDate}
+		WHERE wre_id=#{wreId}
+	</update>
+	
+	
+	<select id="getDefectiveCountByWarehouse">
+	<![CDATA[
+		SELECT
+		    sod.opt_id AS 옵션코드,
+		    sod.odd_cnt AS 주문수량,
+		    SUM(ad.are_det_qty) AS 총_구역상세현재수량,
+		    CASE
+		        WHEN (sod.odd_cnt + #{qhiBcount}) <= SUM(ad.are_det_qty) THEN '출고 가능'
+		        ELSE '출고 불가능'
+		    END AS status
+		FROM
+		    suju_order_detail sod
+		JOIN
+		    area_detail ad ON sod.opt_id = ad.item_id
+		WHERE
+		    sod.odd_id = #{oddId}
+		GROUP BY
+		    sod.opt_id, sod.odd_cnt
+	]]>
+	</select>
+	
+	<!-- 나이키 레볼루션 7 NIKE REVOLUTION 7	네이비	275	3 -->
+	
+	<select id="callFifoOutboundByOdd" statementType="CALLABLE" parameterType="map" resultType="map">
+        { CALL SP_FIFO_OUTBOUND_BY_ODD (
+            #{pOddId,         mode=IN,    jdbcType=NUMERIC},
+            #{pQhiBcount,     mode=IN,    jdbcType=NUMERIC},
+            #{oActualOutQty,  mode=OUT,   jdbcType=NUMERIC},
+            #{oStatusCode,    mode=OUT,   jdbcType=VARCHAR},
+            #{oStatusMessage, mode=OUT,   jdbcType=VARCHAR}
+        )}
+    </select>
+    
+    
+    <update id="updateStatus">
+    	UPDATE suju_order_detail
+    	set odd_mod_date = SYSDATE + 9/24, odd_sts = 'odd_sts_08'
+    	where odd_id = #{oddId}
+
+    </update>
+	
+	
+	
+  </mapper>
+	

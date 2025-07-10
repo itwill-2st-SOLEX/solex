@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.warehouse.WarehouseMapper">
+
+	<select id="selectStockList" resultType="map">
+  		SELECT wh.whs_id AS id, 
+               wh.whs_nm AS nm,
+               wh.whs_pc AS pc,
+               wh.whs_add AS adr,
+               wh.whs_da AS da,
+               wh.whs_add || ', ' || wh.whs_da AS full,
+               c.det_nm AS sts,
+               COUNT(ar.are_id) AS cnt,
+               emp.emp_nm || '(' || emp.emp_num || ')' as emp
+		FROM warehouse wh
+		LEFT  JOIN area ar   
+		ON ar.whs_id = wh.whs_id
+		LEFT  JOIN employee emp  
+		ON emp.emp_id = wh.emp_id
+		LEFT JOIN code_detail c
+		ON wh.whs_sts = c.det_id
+		GROUP BY
+			wh.whs_id, wh.whs_nm, wh.whs_pc, wh.whs_add, wh.whs_da, c.det_nm,
+			emp.emp_nm, emp.emp_num
+		ORDER BY wh.whs_id DESC
+  		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+   </select>
+   
+<!--    <select id="selectWarehouseDetail" resultType="map"> -->
+<!-- 		SELECT wh.whs_id AS whs_nm,  -->
+<!--   			   emp.emp_nm || '(' || emp.emp_num || ')' as mgr_nm, -->
+<!--   			   a.are_id, -->
+<!--   			   a.are_nm -->
+<!-- 		FROM warehouse wh -->
+<!-- 		LEFT  JOIN employee emp   -->
+<!-- 		ON emp.emp_id = wh.emp_id -->
+<!-- 		LEFT  JOIN area a ON a.whs_id = wh.whs_id -->
+<!-- 		WHERE wh.whs_id = #{whsId} -->
+<!-- 	</select> -->
+	
+<!-- 	<insert id="insertWarehouse"  -->
+<!-- 			parameterType="map" -->
+<!-- 			useGeneratedKeys="true" -->
+<!-- 			keyProperty="whs_id" -->
+<!-- 			keyColumn="whs_id"> -->
+<!-- 		INSERT INTO warehouse (whs_nm, whs_pc, whs_add, whs_da, emp_id, whs_sts) -->
+<!-- 		VALUES (#{whs_nm}, #{whs_pc}, #{whs_add}, #{whs_da}, #{emp_id}, 'whs_sts_01') -->
+<!--      </insert> -->
+     
+<!--      <update id="upadteWarehouse" parameterType="map"> -->
+<!-- 	    UPDATE warehouse -->
+<!-- 	    SET  -->
+<!-- 	      doc_sts = #{status}, -->
+<!-- 	      doc_app_day = SYSDATE -->
+<!-- 	    WHERE  -->
+<!-- 	      doc_id = #{docId} -->
+<!-- 	      AND -->
+<!-- 	</update> -->
+  
+</mapper>

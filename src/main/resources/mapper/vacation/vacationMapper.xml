@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="kr.co.itwillbs.solex.vacation.VacationMapper">	
+ 
+	<!-- with절 정의 -->
+	<!-- 연차 기준일 계산, 남은 일수 계산에 사용 -->
+	<!-- ① 모든 사원 기준정보 & 계산용 파생컬럼 -->
+	<sql id="empWith">
+	  WITH emp AS (
+	    SELECT  e.emp_id
+	          , e.emp_nm
+	          , e.emp_hire
+	          , e.emp_dep_cd
+	          , e.emp_team_cd
+	          , e.emp_pos_cd                                 -- 입사일
+	          , FLOOR(MONTHS_BETWEEN(TRUNC(#{sysdate}), e.emp_hire)) AS months_since      -- 근속 개월
+	          , FLOOR(MONTHS_BETWEEN(TRUNC(#{sysdate}), e.emp_hire)/12) AS years_since    -- 근속 년
+	          , ADD_MONTHS(e.emp_hire,
+	               12 * FLOOR(MONTHS_BETWEEN(TRUNC(#{sysdate}), e.emp_hire) / 12)) AS anniv_cur  -- 이번 주년일
+	          , ADD_MONTHS(e.emp_hire,
+	               12 * (FLOOR(MONTHS_BETWEEN(TRUNC(#{sysdate}), e.emp_hire) / 12) + 1)) AS anniv_next -- 다음 주년일
+	    FROM EMPLOYEE e
+	  )
+	</sql>
+	
+	<!-- ② 연차 요약 -->
+	<select id="getVacationSummary" resultType="map">
+	  <include refid="empWith"/>
+	
+	  SELECT  e.emp_id
+	        , e.emp_nm
+	        , e.emp_hire
+		      , v.vac_total
+		      , v.vac_used
+	 			, (v.vac_total - v.vac_used)                              AS vac_remain
+      , CASE
+          WHEN e.months_since &lt; 12
+               THEN ADD_MONTHS(e.emp_hire, e.months_since)          -- 월차 기준
+          ELSE e.anniv_cur                                          -- 연차 기준
+        END                                                         AS period_start
+
+      , CASE
+          WHEN e.months_since &lt; 12
+               THEN ADD_MONTHS(e.emp_hire, e.months_since + 1) - 1  -- 다음 달 전날
+          ELSE e.anniv_next - 1                                     -- 다음 주년 전날
+        END                                                         AS period_end
+
+      , CASE
+          WHEN e.months_since &lt; 12
+               THEN TRUNC(ADD_MONTHS(e.emp_hire, e.months_since + 1) - TRUNC(SYSDATE)-1)
+          ELSE TRUNC(e.anniv_next - TRUNC(SYSDATE))
+        END                                                         AS days_left
+	FROM   emp e
+	LEFT   JOIN vacation v  ON v.emp_id = e.emp_id
+	WHERE  e.emp_id = #{empId}
+	  ORDER BY e.emp_hire
+	</select>
+
+	
+	<!-- 내 연차 신청 개수 계산하기 (무한스크롤)-->
+	<select id="getVacationCount">
+		SELECT count(*)
+		FROM ( SELECT doc_id, emp_id, doc_type, doc_sts
+			   FROM document
+			   WHERE doc_type = 'doc_type_01' AND doc_sts = 'doc_sts_02' AND emp_id = #{empId}
+			  ) d JOIN leave_doc l ON d.doc_id = l.doc_id
+
+	</select>
+	
+	<!-- 내 휴가 상세 내역 조회 -->
+	<select id="getVacationDetail" resultType="map">
+		SELECT d.doc_id, d.emp_id, d.doc_type, d.doc_sts, l.lea_type, l.lea_start_date, l.lea_end_date, 
+			   (TO_DATE(l.lea_end_date, 'YYYY-MM-DD') - TO_DATE(l.lea_start_date, 'YYYY-MM-DD')+1) lea_used_day, l.lea_con
+		FROM ( SELECT doc_id, emp_id, doc_type, doc_sts
+			   FROM document
+			   WHERE doc_type = 'doc_type_01' AND doc_sts = 'doc_sts_02' AND emp_id = #{empId}
+			  ) d JOIN leave_doc l ON d.doc_id = l.doc_id
+		ORDER BY l.lea_start_date DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<!-- 직급별 각 담당 직원의 연차 확인하기 -->
+	<select id="getVacationList" resultType="map">
+		<include refid="empWith"/>
+	
+		SELECT e.emp_id, ve.emp_num, e.emp_nm, e.emp_hire,
+       		   v.vac_total, v.vac_used, v.vac_total - v.vac_used AS vac_remain,
+       		   ve.emp_cat_nm, ve.emp_dep_nm, ve.emp_team_nm, ve.emp_pos_nm,
+	    	CASE
+	          WHEN e.months_since &lt; 12
+	               THEN ADD_MONTHS(e.emp_hire, e.months_since + 1) - 1  -- 다음 달 전날
+	          ELSE e.anniv_next - 1                                     -- 다음 주년 전날
+        END                                                         AS period_end
+		FROM emp e
+		 		LEFT JOIN vacation v  ON e.emp_id = v.emp_id
+		        LEFT JOIN view_employee ve ON e.emp_id = ve.emp_id 
+				WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) >= TO_NUMBER(SUBSTR(#{empPosCd}, -2))
+					<choose>
+				<!-- 팀장 조건 -->
+				<when test="empTeamCd != 'team_00'">
+					AND e.emp_team_cd = #{empTeamCd} AND e.emp_dep_cd = #{empDepCd}
+				</when>
+				<!-- 부장 조건 -->
+				<when test="empDepCd != 'dep_00'">
+					AND e.emp_dep_cd = #{empDepCd}
+				</when>
+				<!-- 이사 조건 -->
+				<when test="empCatCd != 'cat_00'">
+					AND e.emp_cat_cd = #{empCatCd}
+				</when>
+			</choose>
+			<if test="keyword != null and keyword != ''">
+				AND (LOWER(e.emp_nm) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(e.emp_num) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
+		ORDER BY e.emp_dep_cd, e.emp_team_cd, e.emp_pos_cd
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<!-- 직급별 직원 총 인원수 세기(무한스크롤) -->
+	<select id="getVacationAllCount">
+		SELECT count(*)
+		FROM vacation v RIGHT JOIN employee e ON v.emp_id = e.emp_id
+                JOIN view_employee ve ON e.emp_id = ve.emp_id 
+		WHERE TO_NUMBER(SUBSTR(e.emp_pos_cd, -2)) > TO_NUMBER(SUBSTR(#{empPosCd}, -2))
+			<choose>
+				<!-- 팀장 조건 -->
+				<when test="empTeamCd != 'team_00'">
+					AND e.emp_team_cd = #{empTeamCd} AND e.emp_dep_cd = #{empDepCd}
+				</when>
+				<!-- 부장 조건 -->
+				<when test="empDepCd != 'dep_00'">
+					AND e.emp_dep_cd = #{empDepCd}
+				</when>
+				<!-- 이사 조건 -->
+				<when test="empCatCd != 'cat_00'">
+					AND e.emp_cat_cd = #{empCatCd}
+				</when>
+				<!-- 사장 조건 -->
+				<when test="empPosCd = 'pos_01'">
+					
+				</when>
+			</choose>
+			<if test="keyword != null and keyword != ''">
+				AND (LOWER(e.emp_nm) LIKE '%' || LOWER(#{keyword}) || '%'
+				OR LOWER(e.emp_num) LIKE '%' || LOWER(#{keyword}) || '%')
+			</if>
+	</select>
+	
+	<!-- 로그인한 사용자의 직급, 부서, 팀 등의 정보 가져오기 -->
+	<select id="getEmployeeInfo">
+		SELECT emp_id, emp_cat_cd, emp_dep_cd, emp_team_cd, emp_pos_cd
+		FROM employee
+		WHERE EMP_ID = #{empId}
+	</select>
+ </mapper>
+  
+  
+  
+  
+  
+  

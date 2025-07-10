@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!-- 개별페이지에서 레이아웃을 상속받기 위해서는 layout:decorate 속성을 통해 상속받을 레이아웃 파일을 지정 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+<head>
+<!-- 개별 페이지의 <meta> 태그는 불필요(레이아웃 페이지와 중복됨) -->
+<!-- <meta charset="UTF-8"> -->
+<title>SOLEX</title>
+<link rel="stylesheet" th:href="@{/css/workHistory/workHistory.css}" />
+</head>
+<body>
+	<!-- 레이아웃을 상속받아 특정 영역에 덮어쓸 프래그먼트 설정 -->
+	<th:block layout:fragment="content">
+		<div class="custom-body container-xxl flex-grow-1 container-p-y">
+			<!-- 여기서 부터 작성하시면 됩니다  -->
+			<h2>작업이력</h2>
+			<!-- 본문 영역-->
+			<div class="custom-content">
+				<!-- 				그리드 JS에서 만듬 -->
+				<div id="grid"></div>
+<!-- 				작업지시 모달 -->
+<!-- 				<div class="modal fade" id="WorkModal" tabindex="-1" -->
+<!-- 					aria-labelledby="detailModalLabel" aria-hidden="true"> -->
+<!-- 					<div class="modal-dialog modal-lg"> -->
+<!-- 						<div class="modal-content"> -->
+<!-- 							<div class="modal-header"> -->
+<!-- 								<h2 class="modal-title" id="detailModalLabel">작업지시 등록</h2> -->
+<!-- 							</div> -->
+<!-- 							<div class="approval-line"> -->
+<!-- 								<div class="modal-body"> -->
+<!-- 									 js에서 채움 -->
+<!-- 									<div id="process-steps-container" class="timeline-container"></div> -->
+<!-- 								</div> -->
+
+<!-- 							</div> -->
+<!-- 							 js에서 채움 -->
+<!-- 							<div class="modal-body"></div> -->
+<!-- 							<div class="modal-footer"> -->
+<!-- 								<button type="button" class="btn btn-secondary" -->
+<!-- 									data-bs-dismiss="modal">닫기</button> -->
+<!-- 								<button type="button" class="btn custom-btn-blue" -->
+<!-- 									id="submitWorkOrder">작업 지시 등록</button> -->
+<!-- 							</div> -->
+<!-- 						</div> -->
+<!-- 					</div> -->
+<!-- 				</div> -->
+<!-- 				창고배정 모달 -->
+				<div class="modal fade" id="WorkHistoryModal" tabindex="-1"
+					aria-labelledby="detailModalLabel" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-scrollable modal-lg">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">작업 상세 이력</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"
+									aria-label="닫기"></button>
+							</div>
+							<div class="modal-body"> 
+								<div class="row"> 
+									<!-- 왼쪽: 검색 + 창고 목록 -->
+									<div class="col-md-6"> 
+										<div id="infoList" class="list-group custom-scroll" style="overflow-y: auto;">
+											<div class="mb-4">
+												<label for="exampleFormControlReadOnlyInput1" class="form-label">주문 상세 번호</label>
+												<input class="form-control" type="text" id="exampleFormControlReadOnlyInput1" name="odd_id" value="" aria-label="readonly input example" readonly="">
+											</div>
+											<div class="mb-4">
+												<label for="exampleFormControlReadOnlyInput2" class="form-label">제품코드</label>
+												<input class="form-control" type="text" id="exampleFormControlReadOnlyInput2" name="prd_code" value="" aria-label="readonly input example" readonly="">
+											</div>
+											<div class="mb-4">
+												<label for="exampleFormControlReadOnlyInput3" class="form-label">제품명</label>
+												<input class="form-control" type="text" id="exampleFormControlReadOnlyInput3" name="prd_nm" value="" aria-label="readonly input example" readonly="">
+											</div>
+											<div class="mb-4">
+												<label for="exampleFormControlReadOnlyInput4" class="form-label">생산수량</label>
+												<input class="form-control" type="text" id="exampleFormControlReadOnlyInput4" name="odd_cnt" value="" aria-label="readonly input example" readonly="">
+											</div>
+											<div class="mb-4">
+												<label for="exampleFormControlReadOnlyInput5" class="form-label">컬러</label>
+												<input class="form-control" type="text" id="exampleFormControlReadOnlyInput5" name="prd_color" value="" aria-label="readonly input example" readonly="">
+											</div>
+											<div class="mb-4">
+												<label for="exampleFormControlReadOnlyInput6" class="form-label">사이즈</label>
+												<input class="form-control" type="text" id="exampleFormControlReadOnlyInput6" name="prd_size" value="" aria-label="readonly input example" readonly="">
+											</div>
+											<div class="mb-4">
+												<label for="exampleFormControlReadOnlyInput7" class="form-label">굽 높이</label>
+												<input class="form-control" type="text" id="exampleFormControlReadOnlyInput7" name="prd_height" value="" aria-label="readonly input example" readonly="">
+											</div>
+										</div>
+									</div>
+
+									<div class="col-md-6"> 
+										<div id="selectedWarehouseInfo" 
+											class="p-3 bg-light rounded border mb-3"> 
+											<h6 class="fw-bold">공정 이력</h6> 
+											<div id="StatusList">
+
+											</div>
+										</div>
+
+										
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer"> 
+								<!-- 숨겨진 값 저장용  -->
+								<input type="hidden" id="selectedWarehouseId" /> <input 
+									type="hidden" id="selectedOddId" /> 
+
+								<button type="button" class="btn btn-secondary" 
+									data-bs-dismiss="modal">닫기</button> 
+							</div> 
+						</div> 
+					</div> 
+				</div> 
+			</th:block>
+		<th:block layout:fragment="script">
+		<script th:src="@{/js/workHistory/workHistory.js}"></script>
+	</th:block>
+
+</body>
+</html>

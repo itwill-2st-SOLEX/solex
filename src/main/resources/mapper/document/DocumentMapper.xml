@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.itwillbs.solex.document.DocumentMapper">
+<!--	기안서 종류 공통코드-->
+	<select id="getdocTypeList" resultType="map">
+		SELECT det_id, det_nm
+		  FROM code_detail
+		 WHERE cod_id = 'doc_type'
+		   AND det_yn = 'y'
+	</select>
+	
+<!--	올린 기안서 목록-->
+	<select id="selectDraftList" resultType="map">
+		SELECT d.doc_id,
+			   c.det_id AS doc_type_code,
+		       c.det_nm AS doc_type,
+		       s.det_nm AS doc_sts,
+		       TO_CHAR(d.doc_reg_time, 'YYYY-MM-DD HH24:MI:SS') AS doc_reg_time
+		  FROM document d
+		  LEFT JOIN code_detail c
+		    ON d.doc_type = c.det_id
+		  LEFT JOIN code_detail s 
+		    ON d.doc_sts  = s.det_id
+		 WHERE emp_id = #{emp_id}
+		 ORDER BY doc_reg_time DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+  	</select>
+  
+<!--   직급 공통코드 불러오기  -->
+	<select id="getPosition" resultType="map" parameterType="string">
+		SELECT det_id, det_nm
+      FROM code_detail
+     WHERE cod_id = 
+       <choose>
+         <when test="group == 'dep_erp' or group == 'team'">
+           'dept'
+         </when>
+         <otherwise>
+           #{group}
+         </otherwise>
+       </choose>
+       AND det_yn = 'y'
+       <if test="group == 'dep_erp'">
+         AND det_id LIKE 'dept#___' ESCAPE '#'
+       </if>
+       <if test="group == 'team'">
+          AND det_nm like '%팀'
+       </if>
+	</select>
+	
+<!-- 	로그인한 사원 정보 들고오기 -->
+		<select id="getEmpInfo" resultType="map">
+			SELECT e.emp_id,
+					e.emp_num,
+				   e.emp_nm,
+			       pos.det_nm AS emp_pos_nm,
+			       dep.det_nm AS emp_dep_nm,
+			       team.det_nm AS emp_team_nm
+			FROM employee e
+			LEFT JOIN code_detail pos 
+			  ON e.emp_pos_cd = pos.det_id 
+			 AND pos.cod_id = 'pos'
+			LEFT JOIN code_detail dep 
+			  ON e.emp_dep_cd = dep.det_id 
+			 AND dep.cod_id IN ('dep_erp', 'dep_mes')
+			LEFT JOIN code_detail team 
+			  ON e.emp_team_cd = team.det_id 
+			 AND team.cod_id = 'team'
+			WHERE e.emp_id = #{emp_id}
+		</select>
+	
+<!-- 	기안서 등록  반연차 테이블에 doc_id를 넘겨줘야 해서 keyProperty 넘김-->
+	<insert id="registerDocument" parameterType="map">
+		<selectKey keyProperty="doc_id" resultType="int" order="BEFORE">
+		    SELECT doc_seq.NEXTVAL FROM dual
+		</selectKey>
+			INSERT INTO document (doc_id,
+								  doc_type,
+						          emp_id,
+						          doc_reg_time
+	    	) VALUES (#{doc_id},
+	  				  #{doc_type},
+			          #{emp_id},
+			          #{doc_reg_time}
+	    	)
+	</insert>
+	
+<!-- 	반연차 등록 -->
+	<insert id="registerLeaveDoc" parameterType="map">
+		INSERT INTO leave_doc (doc_id,
+							   lea_type,
+					           lea_start_date,
+					           lea_end_date,
+					           lea_tt,
+					           lea_con
+    	) VALUES (#{doc_id},
+    			  #{lea_type},
+		          TO_DATE(#{lea_start_date}, 'YYYY-MM-DD HH24:MI'),
+		          TO_DATE(#{lea_end_date}, 'YYYY-MM-DD HH24:MI'),
+		          #{lea_tt},
+		          #{lea_con}
+   		)
+	</insert>
+	
+<!--	출장/외근 등록-->
+	<insert id="registerbusinessOutworkDoc" parameterType="map">
+		INSERT INTO business_outwork_doc (doc_id,
+									 	  bus_type,
+							           	  bus_start_time,
+							          	  bus_end_time,
+							           	  bus_cost,
+							           	  bus_con
+    	) VALUES (#{doc_id},
+    			  #{bus_type},
+		          TO_DATE(#{bus_start_time}, 'YYYY-MM-DD HH24:MI'),
+		          TO_DATE(#{bus_end_time}, 'YYYY-MM-DD HH24:MI'),
+		          #{bus_cost},
+		          #{bus_con}
+   		)
+	</insert>
+	
+	<update id="addUsedDays">
+	     UPDATE vacation
+	     SET vac_used = vac_used + #{usedDays, jdbcType=INTEGER}
+	     WHERE emp_id = #{empId, jdbcType=INTEGER}
+	</update>
+	
+<!--	사직서 등록-->
+	<insert id="resignationDoc" parameterType="map">
+		INSERT INTO resignation_doc (doc_id,
+						           	 res_start_date,
+						          	 res_con
+    	) VALUES (#{doc_id},
+		          TO_DATE(#{res_start_date}, 'YYYY-MM-DD'),
+		          #{res_con}
+   		)
+	</insert>
+	
+<!--	반연차 기안서 상세조회-->
+	<select id="selectDetailLeave" resultType="map">
+		SELECT MAX(d.emp_id) AS emp_id,
+		       MAX(e.emp_nm) AS emp_nm,
+		       MAX(pos.det_nm) AS emp_pos_nm,
+		       MAX(dep.det_nm) AS emp_dep_nm,
+		       MAX(team.det_nm) AS emp_team_nm,
+		       MAX(l.lea_start_date) AS lea_start_date,
+       		   MAX(l.lea_end_date) AS lea_end_date,
+		       MAX(
+		         CASE 
+		           WHEN TO_CHAR(l.lea_start_date, 'HH24:MI:SS') != '00:00:00' THEN 
+		             TO_CHAR(l.lea_start_date, 'YYYY-MM-DD HH24:MI')
+		           ELSE 
+		             TO_CHAR(l.lea_start_date, 'YYYY-MM-DD')
+		         END
+		         || ' ~ ' ||
+		         CASE 
+		           WHEN TO_CHAR(l.lea_end_date, 'HH24:MI:SS') != '00:00:00' THEN 
+		             TO_CHAR(l.lea_end_date, 'YYYY-MM-DD HH24:MI')
+		           ELSE 
+		             TO_CHAR(l.lea_end_date, 'YYYY-MM-DD')
+		         END
+		       ) AS dbdateRange,
+		       MAX(l.lea_type) AS lea_type,
+		       MAX(l.lea_tt) AS lea_tt,
+		       MAX(l.lea_con) AS lea_con,
+		       LISTAGG(code.det_nm, ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_emp_pos_nm,
+		       MAX(al.apl_step_no) AS apl_step_no,
+		       LISTAGG(code_sts.det_nm, ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_sts,
+		       LISTAGG(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD'), ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_action_time,
+		       MAX(al.apl_rremark) AS apl_rremark,
+		       LISTAGG(code.det_nm, ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS app_auth_emp_nm
+		  FROM document d
+		  LEFT JOIN leave_doc l
+		    ON d.doc_id = l.doc_id
+		  LEFT JOIN approval_line al
+		    ON d.doc_id = al.doc_id
+		  LEFT JOIN employee e
+		    ON d.emp_id = e.emp_id
+		  LEFT JOIN code_detail pos
+		    ON e.emp_pos_cd = pos.det_id 
+		   AND pos.cod_id = 'pos'
+		  LEFT JOIN code_detail dep
+		    ON e.emp_dep_cd = dep.det_id
+		   AND dep.cod_id IN ('dep_erp', 'dep_mes')
+		  LEFT JOIN code_detail team
+		    ON e.emp_team_cd = team.det_id
+		   AND team.cod_id = 'team'
+		  LEFT JOIN code_detail code
+		    ON al.apl_emp_pos = code.det_id
+		  LEFT JOIN code_detail code_sts 
+		    ON al.apl_sts = code_sts.det_id 
+		   AND code_sts.cod_id = 'apl_sts'
+		 WHERE d.doc_id = #{doc_id}
+		 GROUP BY d.doc_id
+
+	</select>
+	
+<!--	출장/외근 기안서 상세조회-->	
+	<select id="selectDetailOutwork" resultType="map">
+		SELECT MAX(d.emp_id) AS emp_id,
+		       MAX(e.emp_nm) AS emp_nm,
+		       MAX(pos.det_nm) AS emp_pos_nm,
+		       MAX(dep.det_nm) AS emp_dep_nm,
+		       MAX(team.det_nm) AS emp_team_nm,
+		       MAX(b.bus_type) AS bus_type,
+		       MAX(
+		         CASE 
+		           WHEN TO_CHAR(b.bus_start_time, 'HH24:MI:SS') != '00:00:00' THEN 
+		             TO_CHAR(b.bus_start_time, 'YYYY-MM-DD HH24:MI')
+		           ELSE 
+		             TO_CHAR(b.bus_start_time, 'YYYY-MM-DD')
+		         END
+		         || ' ~ ' ||
+		         CASE 
+		           WHEN TO_CHAR(b.bus_end_time, 'HH24:MI:SS') != '00:00:00' THEN 
+		             TO_CHAR(b.bus_end_time, 'YYYY-MM-DD HH24:MI')
+		           ELSE 
+		             TO_CHAR(b.bus_end_time, 'YYYY-MM-DD')
+		         END
+		       ) AS dbdateRange,
+		       MAX(TO_CHAR(b.bus_cost, 'FM999,999,999')) AS bus_cost,
+		       MAX(b.bus_con) AS bus_con,
+		       MAX(al.apl_step_no) AS apl_step_no,
+		       MAX(al.apl_emp_pos) AS apl_emp_pos,
+		       LISTAGG(code_sts.det_nm, ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_sts,
+		       LISTAGG(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD'), ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_action_time,
+		       MAX(al.apl_rremark) AS apl_rremark,
+		       LISTAGG(code.det_nm, ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_emp_pos_nm,
+		       LISTAGG(code.det_nm, ',') 
+		         WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS app_auth_emp_nm  
+		  FROM document d
+		  LEFT JOIN business_outwork_doc b
+		    ON d.doc_id = b.doc_id
+		  LEFT JOIN approval_line al
+		    ON d.doc_id = al.doc_id
+		  LEFT JOIN employee e
+		    ON d.emp_id = e.emp_id
+		  LEFT JOIN code_detail pos
+		    ON e.emp_pos_cd = pos.det_id 
+		   AND pos.cod_id = 'pos'
+		  LEFT JOIN code_detail dep
+		    ON e.emp_dep_cd = dep.det_id
+		   AND dep.cod_id IN ('dep_erp', 'dep_mes')
+		  LEFT JOIN code_detail team
+		    ON e.emp_team_cd = team.det_id
+		   AND team.cod_id = 'team'
+		  LEFT JOIN code_detail code
+		    ON al.apl_emp_pos = code.det_id
+		  LEFT JOIN code_detail code_sts 
+		    ON al.apl_sts = code_sts.det_id 
+		   AND code_sts.cod_id = 'apl_sts'
+		 WHERE d.doc_id = #{doc_id}
+		 GROUP BY d.doc_id
+	</select>
+	
+<!--	사직서 기안서 상세조회-->	
+	<select id="selectDetailResignation" resultType="map">
+		SELECT MAX(d.emp_id) AS emp_id,
+			   MAX(e.emp_nm) AS emp_nm,
+			   MAX(pos.det_nm) AS emp_pos_nm,
+			   MAX(dep.det_nm) AS emp_dep_nm,
+			   MAX(team.det_nm) AS emp_team_nm,
+			   LISTAGG(code.det_nm, ',') WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_emp_pos_nm,
+			   MAX(TO_CHAR(r.res_start_date, 'YYYY-MM-DD')) AS dbdateRange,
+			   MAX(r.res_con) AS res_con,
+			   MAX(al.apl_step_no) AS apl_step_no,
+			   MAX(al.apl_emp_pos) AS apl_emp_pos,
+			   LISTAGG(code_sts.det_nm, ',') WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_sts,
+			   LISTAGG(TO_CHAR(al.apl_action_time, 'YYYY-MM-DD'), ',') WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS apl_action_time,
+			   MAX(al.apl_rremark) AS apl_rremark,
+			   LISTAGG(code.det_nm, ',') WITHIN GROUP (ORDER BY al.apl_step_no DESC) AS app_auth_emp_nm
+		  FROM document d
+		  LEFT JOIN resignation_doc r
+		    ON d.doc_id = r.doc_id
+		  LEFT JOIN approval_line al
+		    ON d.doc_id = al.doc_id
+		  LEFT JOIN employee e
+		    ON d.emp_id = e.emp_id
+		  LEFT JOIN code_detail pos
+		    ON e.emp_pos_cd = pos.det_id 
+		   AND pos.cod_id = 'pos'
+		  LEFT JOIN code_detail dep
+		    ON e.emp_dep_cd = dep.det_id
+		   AND dep.cod_id IN ('dep_erp', 'dep_mes')
+		  LEFT JOIN code_detail team
+		    ON e.emp_team_cd = team.det_id
+		   AND team.cod_id = 'team'
+		  LEFT JOIN code_detail code
+		    ON al.apl_emp_pos = code.det_id
+		  LEFT JOIN code_detail code_sts 
+		    ON al.apl_sts = code_sts.det_id 
+		   AND code_sts.cod_id = 'apl_sts' 
+		 WHERE d.doc_id = #{doc_id}
+		 GROUP BY d.doc_id
+
+	</select>
+	
+	<update id="updateDocumentStatus" parameterType="map">
+	    UPDATE document
+	    SET 
+	      doc_sts = #{status},
+	      doc_app_day = SYSDATE
+	    WHERE 
+	      doc_id = #{docId}
+	</update>
+	
+<!-- 	결재 유형별 결재선 찾아오기 -->
+	<select id="findSteps" resultType="java.lang.Integer">
+		SELECT upper_steps
+		 FROM doc_type_rule
+		 WHERE doc_type = #{docType}
+	</select>
+	
+</mapper>
