@@ -241,6 +241,52 @@ $(function() {
 	      <input type="hidden" name="doc_type" value="${selected}" />
 	      ${formHtml}
 	    `);
+		
+		try {
+			// 1. 선택된 기안서 종류에 맞는 기본 결재선 정보 가져오기
+			const response = await fetch(`/SOLEX/approval/select/base?doc_type_code=${selected}`);
+			if (!response.ok) throw new Error("결재선 조회 실패");
+
+			// 2. 응답을 JSON이 아닌 텍스트로 받습니다.
+			const textData = await response.text();
+
+			// 3. 등록 모달의 결재선 영역을 찾아 초기화하고, 새 결재선 정보 채우기
+			const exampleApprovalLineDiv = document.querySelector("#exampleModal .approval-line");
+			exampleApprovalLineDiv.innerHTML = ""; // 기존 내용 초기화
+
+            // 4. 텍스트 데이터를 쉼표 기준으로 분리하여 리스트를 만듭니다.
+			const nameList = (textData || "").split(",");
+	
+			// 5. 만약 nameList가 비어있거나, 첫번째 항목이 비어있으면 결재선이 없는 것으로 간주
+			if (nameList.length === 0 || (nameList.length === 1 && nameList[0] === '')) {
+				exampleApprovalLineDiv.innerHTML = "<p>결재선이 지정되지 않았습니다.</p>";
+			} else {
+				nameList.forEach((pos, i) => {
+					const exampleApproverBox = document.createElement("div");
+					exampleApproverBox.className = "approver-box";
+					// 결재자 직급(코드) 표시
+					exampleApproverBox.innerHTML = `
+						<div class="approver-position">${pos}</div>
+						<div class="approver-name-placeholder">(결재자)</div>
+					`;
+					exampleApprovalLineDiv.appendChild(exampleApproverBox);
+		
+					// 마지막 결재자가 아니면 화살표 추가
+					if (i < nameList.length - 1) {
+						const arrow = document.createElement('div');
+						arrow.className = 'approver-arrow';
+						arrow.innerHTML = `→`;
+						exampleApprovalLineDiv.appendChild(arrow);
+					}
+				});
+			}
+		} catch (err) {
+			console.error("결재선 조회 중 에러:", err);
+			// 결재선 조회 실패 시, 사용자에게 알리거나 영역을 비워둘 수 있습니다.
+			const exampleApprovalLineDiv = document.querySelector("#exampleModal .approval-line");
+			exampleApprovalLineDiv.innerHTML = "<p class='text-danger'>결재선을 불러오는데 실패했습니다.</p>";
+		}
+				
 		// 2. 사원 정보 채우기
 		fillEmployeeInfo();
 		attachDateRangeChange();
@@ -252,41 +298,7 @@ $(function() {
 			dateFormat: selected === 'doc_type_03' ? "Y-m-d" : "Y-m-d H:i",
 			minuteIncrement: 30
 		});
-		
-		try {
-			const response = await fetch(`/SOLEX/approval/select/base?doc_type_code=${selected}`);
-			if (!response.ok) throw new Error("조회 실패");
 
-			const data = await response.json();
-
-			// 결재선 부분 시작		
-			const exampleApprovalLineDiv = document.querySelector("#exampleModal .approval-line");
-			exampleApprovalLineDiv.innerHTML = ""; // Clear previous content
-	
-			const nameList = (data.APL_EMP_POS_NM || "").split(",");
-	
-			nameList.forEach((pos, i) => {
-	
-	
-				const exampleApproverBox = document.createElement("div");
-				exampleApproverBox.className = "approver-box";
-				exampleApproverBox.innerHTML = `
-					<div class="approver-position">${pos}</div>
-				`;
-				exampleApprovalLineDiv.appendChild(exampleApproverBox);
-	
-				// Add arrow separator if not the last item
-				if (i < nameList.length - 1) {
-					const arrow = document.createElement('div');
-					arrow.className = 'approver-arrow';
-					arrow.innerHTML = `→`;
-					exampleApprovalLineDiv.appendChild(arrow);
-				}
-			});
-		} catch (err) {
-					console.error("상세 조회 중 에러:", err);
-					alert("상세 조회에 실패했습니다.");
-		}
 	});
 
 	$('#docTypeSelect').trigger('change');

@@ -11,9 +11,11 @@ public interface EmployeeMapper {
     List<Map<String, Object>> selectOrgChartData();
 
 	Map<String, Object> selectJoinCodeDetail(long loginEmpId);
-
+	
 	List<Map<String, Object>> selectUpperPositions(int docEmployeePosSort);
 
+	List<Map<String, Object>> selectBaseUpperPositions(int docEmployeePosSort);
+	
 	Map<String, Object> findByEmpNum(long empNum);
 
 }

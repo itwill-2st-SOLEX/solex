@@ -133,7 +133,7 @@ public class DocumentService {
         Integer steps = documentMapper.findSteps(docTypeCode);
 		
 		// 상위 결재자 체인 탐색
-        List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
+        List<Map<String, Object>> upperRanks = employeeMapper.selectBaseUpperPositions(docEmployeePosSort);        
         List<String> posList = new ArrayList<>();
         int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
         
