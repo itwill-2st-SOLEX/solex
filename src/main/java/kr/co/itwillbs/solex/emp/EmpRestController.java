@@ -39,7 +39,7 @@ public class EmpRestController {
 
 	// 인사등록
 	@PostMapping("")
-//	@PreAuthorize("hasAnyRole('1','2','3','4','5')")
+	@PreAuthorize("hasAnyRole('1','2','3','4','5')")
 	public void registerEmployee(
 			@RequestPart("emp") Map<String, Object> empMap, 
 			@RequestPart("emp_img") MultipartFile file) throws IOException {

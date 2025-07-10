@@ -580,3 +580,9 @@ div.toastui-calendar-popup-section.toastui-calendar-dropdown-section.toastui-cal
 
 
 }
+
+/* 마이페이지 폼 비활성화 부분 회색처리 */
+input[readonly] {
+  background-color: #e9ecef; 
+  cursor: not-allowed;
+}
