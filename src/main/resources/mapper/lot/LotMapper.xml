@@ -160,13 +160,7 @@
 		    ON sod.odd_id = wo.odd_id
 		JOIN work_process wp
 		    ON wp.wrk_id = wo.wrk_id
-		   AND wpo_step = (
-		       SELECT MAX(wp1.wpo_step)
-		       FROM work_process wp1
-		       JOIN work_order wo1 ON wp1.wrk_id = wo1.wrk_id
-		       WHERE wp1.wrk_id = wo1.wrk_id
-		         AND prc_id = pl.prc_id
-		   )
+		   AND wo.prc_id = pl.prc_id
 		LEFT JOIN quality_history qh
 		    ON wp.wpo_id = qh.qhi_target_id
 		JOIN process prc
@@ -188,19 +182,22 @@
 	<!-- 자재 상세조회 -->
     <select id="selectMaterialLotDetail" parameterType="long" resultType="map">
         SELECT
-            ml.mat_lot_code AS "materialLot",
-            m.mat_nm AS "materialName",
-            m.mat_cd AS "materialCode",
-            smm.used_qty AS "materialCount",
-            ml.mat_date AS "materialDate",
-			c.cli_nm AS "materialPartner",
-			c.CLI_MGR_NAME AS "materialManager",
-			c.CLI_MGR_PHONE AS "materialPhone"
-        FROM material_lot ml
-        JOIN material m ON ml.mat_id = m.mat_id
-        JOIN sujuorddetail_matlot_mapping smm ON ml.mat_lot_id = smm.matlot_id
-        JOIN client c ON m.cli_id = c.cli_id
-        WHERE ml.mat_lot_id = #{matLotId}
+		    ml.mat_lot_code AS "materialLot",    -- 자재 LOT 코드
+		    m.mat_nm        AS "materialName",       -- 자재명
+		    m.mat_cd        AS "materialCode",       -- 자재코드
+		    pm.used_qty     AS "materialCount",       -- 사용량
+		    ml.mat_date     AS "materialDate",       -- 자재 LOT 생성일자
+		    c.cli_nm        AS "materialPartner",    -- 거래처명
+		    c.cli_mgr_name  AS "materialManager",    -- 거래처 담당자 이름
+		    c.cli_mgr_phone AS "materialPhone"       -- 거래처 담당자 연락처
+		FROM prdLot_matLot_mapping pm
+		JOIN material_lot ml
+		    ON pm.mat_lot_id = ml.mat_lot_id
+		JOIN material m
+		    ON ml.mat_id = m.mat_id
+		JOIN client c
+		    ON m.cli_id = c.cli_id
+		WHERE pm.mat_lot_id = #{matLotId}
     </select>
 
 	<!-- 설비 상세조회 -->
@@ -282,6 +279,29 @@
     	where	odd_id = #{odd_id}
     	and		prd_lot_sort = #{prd_lot_sort}
     </select>
+    
+    <select id="selectMaterialLotsByOddId" parameterType="long" resultType="map">
+	    SELECT
+	        ml.mat_lot_id   AS matLotId,
+	        SUM(smm.used_qty) AS usedQty
+	    FROM material_lot ml
+	    JOIN sujuorddetail_matlot_mapping smm
+	        ON ml.mat_lot_id = smm.matlot_id
+	    WHERE smm.odd_id = #{oddId}
+	    GROUP BY ml.mat_lot_id
+	</select>
+    
+    <insert id="insertProductMaterialMapping" parameterType="map">
+	    INSERT INTO prdLot_matLot_mapping (
+	        prd_lot_id,
+	        mat_lot_id,
+	        used_qty
+	    ) VALUES (
+	        #{prdLotId},
+	        #{matLotId},
+	        #{usedQty}
+	    )
+	</insert>
 
     <!-- ✅ 4. 작업지시 리스트 조회 -->
     <select id="selectWorkOrdersByOddId" parameterType="long" resultType="map">

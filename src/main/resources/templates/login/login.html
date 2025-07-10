@@ -32,21 +32,24 @@
 			</div>
 
 			<form th:action="@{/login}" class="login-form" method="post">
-				<input type="text"id= "empNo" name="emp_num" placeholder="사번" />
-				<input type="password" id="empPw" name="emp_pw" placeholder="비밀번호" />
+				<input type="text" id="empNo" name="emp_num" placeholder="사번" /> <input
+					type="password" id="empPw" name="emp_pw" placeholder="비밀번호" />
 				<div class="form-in">
-					<label class="small-label"><input type="checkbox" id="saveEmpNum" /> 사번 저장</label>
-					<div th:if="${param.error}" class="erorr">
-			    		사번과 비밀번호가 일치하지 않습니다.
-					</div>
+					<label class="small-label"><input type="checkbox"
+						id="saveEmpNum" /> 사번 저장</label>
+					<div th:if="${param.error}" class="erorr">사번과 비밀번호가 일치하지
+						않습니다.</div>
 				</div>
 				<button type="submit" id="loginBtn" class="login-btn">로그인</button>
 			</form>
-			
+
 			<div class="admin-login-buttons">
-				<button class="right-btn">일반 사원 로그인하기</button>
-				<button class="right-btn">중간 관리자 로그인하기</button>
-				<button class="right-btn">상위관리자 로그인하기</button>
+				<button type="button" class="right-btn" data-role="employee">일반
+					사원 로그인하기</button>
+				<button type="button" class="right-btn" data-role="manager">중간
+					관리자 로그인하기</button>
+				<button type="button" class="right-btn" data-role="admin">상위관리자
+					로그인하기</button>
 			</div>
 		</div>
 	</div>
