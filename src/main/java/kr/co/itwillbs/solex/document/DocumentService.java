@@ -2,8 +2,11 @@ package kr.co.itwillbs.solex.document;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,14 +49,12 @@ public class DocumentService {
 	// 기안서 등록
 	@Transactional
 	public void registerDarafts(Map<String, Object> map, int loginEmpId) {
-		map.put("emp_id", loginEmpId);
-		map.put("doc_reg_time", LocalDateTime.now());
-		
+		map.put("empId", loginEmpId);
+		map.put("docRegTime", LocalDateTime.now());	
 		documentMapper.registerDocument(map);
 		
-		long docId = ((Integer) map.get("doc_id")).longValue();
-		String docType = (String) map.get("doc_type");
-
+		long docId = ((Integer) map.get("docId")).longValue();
+		String docType = (String) map.get("docType");
 	    switch (docType) {
 	        case "doc_type_01":
 	            documentMapper.registerLeaveDoc(map);
@@ -66,69 +67,46 @@ public class DocumentService {
 	            break;
 	    }
 	    
-	    // 작성자 직급 sort 
         Map<String, Object> docEmployee = employeeMapper.selectJoinCodeDetail(loginEmpId);
-        
-        int docEmployeePosSort = ((BigDecimal) docEmployee.get("POS_SORT")).intValue();
-        // 필요 상위 단계 수
+        int docEmployeePosSort = ((BigDecimal) docEmployee.get("posSort")).intValue();
         Integer steps = documentMapper.findSteps(docType);
-		String catCd = (String) docEmployee.get("EMP_CAT_CD");
-		
+		String catCd = (String) docEmployee.get("empCatCd");
 		String depCd = null;
-		if (docEmployee.get("EMP_DEP_CD") != null) {
-			depCd = (String) docEmployee.get("EMP_DEP_CD");
+		if (docEmployee.get("empDepCd") != null) {
+			depCd = (String) docEmployee.get("empDepCd");
 		}
 		String teamCd = null;
-		if (docEmployee.get("EMP_DEP_CD") != null) {
-			teamCd = (String) docEmployee.get("EMP_TEAM_CD");
+		if (docEmployee.get("empDepCd") != null) {
+			teamCd = (String) docEmployee.get("empTeamCd");
 		}
-        
-        // 상위 결재자 체인 탐색
+		
         List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
         int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
         for (int i = 0; i < total; i++) {
             Map<String, Object> rank = upperRanks.get(i);
-            String posCd = (String) rank.get("POS_CD");
-
+            String posCd = (String) rank.get("posCd");
             int stepNo = total - i;
-
-            // 기본값은 ‘실제 코드’를 그대로 사용
-            String catParam  = catCd;
-            String depParam  = depCd;
+            String catParam  = catCd; 
+            String depParam  = depCd; 
             String teamParam = teamCd;
-
             switch (posCd) {
                 case "pos_01":
-                    // 사장 (예시) – 모두 공통 코드 00
                     catParam  = "cat_00";
                     depParam  = "dep_00";
                     teamParam = "team_00";
                     break;
-
                 case "pos_02":
-                    // 이사 – 부서·팀만 00
                     depParam  = "dep_00";
                     teamParam = "team_00";
                     break;
-
                 case "pos_03":
-                    // 부장 – 팀만 00
                     teamParam = "team_00";
                     break;
-
                 case "pos_04":
-                    // 팀장 – 그대로 사용
                     break;
             }
 
-            approvalMapper.insertApprovalLine(
-                docId,
-                stepNo,
-                catParam,
-                depParam,
-                teamParam,
-                posCd
-            );
+            approvalMapper.insertApprovalLine(docId, stepNo, catParam, depParam, teamParam, posCd);
         }
 	}
 	
@@ -144,5 +122,36 @@ public class DocumentService {
 	        default:
 	        	throw new IllegalArgumentException("알 수 없는 문서 타입입니다: " + docTypeCode);
 	    }
+	}
+
+	public String selectBaseDoc(String docTypeCode, Long empId) {
+		// 1. 기안자 정보 조회 (직급, 분류, 부서, 팀 코드 및 직급 정렬 순서 포함)
+		Map<String, Object> loginEmployee = employeeMapper.selectJoinCodeDetail(empId);
+
+		int docEmployeePosSort = ((BigDecimal) loginEmployee.get("POS_SORT")).intValue();
+        // 필요 상위 단계 수
+        Integer steps = documentMapper.findSteps(docTypeCode);
+		
+		// 상위 결재자 체인 탐색
+        List<Map<String, Object>> upperRanks = employeeMapper.selectBaseUpperPositions(docEmployeePosSort);        
+        List<String> posList = new ArrayList<>();
+        int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
+        
+        for (int i = 0; i < total; i++) {
+            Map<String, Object> rank = upperRanks.get(i);
+            String posCd = (String) rank.get("POS_CD");
+            posList.add(posCd);
+            int stepNo = total - i;
+        }
+        
+        String aplEmpPosNm2 = posList.stream()
+                .sorted(Collections.reverseOrder())
+                .collect(Collectors.joining(","));
+        
+        System.out.println(aplEmpPosNm2);
+        
+        return aplEmpPosNm2;
+        
+        
 	}
 }

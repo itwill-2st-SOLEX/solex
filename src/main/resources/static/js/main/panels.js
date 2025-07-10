@@ -102,11 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		
 	
 });
-
-
-
-
-
 		
 		// "마이페이지" 메뉴 클릭 시 실행
 		async function openMypagePopup(event) {
@@ -122,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				alert(error.message);
 			}
 		}
+		
 		
 		// 마이페이지 모달창을 데이터로 채우고 보여주는 함수
 		function openModalWithData(empData){

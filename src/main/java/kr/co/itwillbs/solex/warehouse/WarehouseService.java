@@ -32,7 +32,7 @@ public class WarehouseService {
 		return warehouseMapper.selectWarehouseList(offset, size);
 	}
 
-	public Map<String, Object> getWarehouseDetail(String whsId, Long loginEmpId) {
+	public Map<String, Object> getWarehouseDetail(String whsId) {
 		// TODO Auto-generated method stub
 		List<Map<String,Object>> rows = warehouseMapper.selectWarehouseDetail(whsId);
 		 
@@ -113,12 +113,12 @@ public class WarehouseService {
         
 	}
 
-	public void upadteWarehouse(Map<String, Object> warehouseRequest, Long loginEmpId) {
-		warehouseMapper.upadteWarehouse(warehouseRequest, loginEmpId);
+	public void upadteWarehouse(Map<String, Object> warehouseRequest) {
+		warehouseMapper.upadteWarehouse(warehouseRequest);
 		
 	}
 
-	public List<Map<String,Object>> getWarehouseAreaHistory(Long areaId, Long loginEmpId) {
+	public List<Map<String,Object>> getWarehouseAreaHistory(Long areaId) {
 		return areaMapper.getWarehouseAreaHistory(areaId);
 	}
 	

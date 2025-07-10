@@ -32,4 +32,8 @@ public interface DocumentMapper {
 	
 	void updateDocumentStatus(Map<String, Object> approvalRequest);
 	void addUsedDays(@Param("empId") long empId, @Param("usedDays") long usedDays);
+	
+	Map<String, Object> selectBaseLeave(String empId);
+	Map<String, Object> selectBaseOutwork(String empId);
+	Map<String, Object> selectBaseResignation(String empId);
 }
