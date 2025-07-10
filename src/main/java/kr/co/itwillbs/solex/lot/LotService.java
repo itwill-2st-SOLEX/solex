@@ -155,6 +155,22 @@ public class LotService {
         // 3. insert 이후 prd_lot_id 조회
         Long prdLotId = lotMapper.selectPrdLotId(lotInfo);
         if (prdLotId == null) return;
+        
+        // ✅ 추가: odd_id로 자재LOT 리스트 조회
+        List<Map<String, Object>> materialLots = lotMapper.selectMaterialLotsByOddId(oddId);
+        
+        System.out.println("materialLots : " + materialLots);
+        
+        for (Map<String, Object> matLot : materialLots) {
+            Map<String, Object> matMapping = new HashMap<>();
+            matMapping.put("prdLotId", prdLotId);
+            matMapping.put("matLotId", matLot.get("MATLOTID"));
+            matMapping.put("usedQty", matLot.get("USEDQTY")); // 투입량
+
+            System.out.println("matMapping : " + matMapping);
+            // ✅ 제품LOT-자재LOT 매핑 insert
+            lotMapper.insertProductMaterialMapping(matMapping);
+        }
 
         // 4. 작업지시 리스트 조회
         List<Map<String, Object>> workOrders = lotMapper.selectWorkOrdersByOddId(oddId);
