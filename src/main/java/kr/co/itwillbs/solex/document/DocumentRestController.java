@@ -56,10 +56,17 @@ public class DocumentRestController {
 		service.registerDarafts(map, emp_id);
 	}
 	
+	// 기안서 유형별 기본 결재선 조회 
+	@GetMapping("/select/base")
+	public String selectBaseDoc(@RequestParam("doc_type_code") String docTypeCode, HttpSession session) {
+		String empIdStr = (String) session.getAttribute("empId");
+		Long empId = Long.valueOf(empIdStr);
+		return service.selectBaseDoc(docTypeCode, empId);
+	}
+	
 	// 기안서 상세조회 
 	@GetMapping("/select/detail/{doc_id}")
 	public Map<String, Object> selectDetailDoc(@PathVariable("doc_id") String doc_id, @RequestParam("doc_type_code") String docTypeCode) {
 		return service.selectDetailDoc(doc_id, docTypeCode);
 	}
-	
 }

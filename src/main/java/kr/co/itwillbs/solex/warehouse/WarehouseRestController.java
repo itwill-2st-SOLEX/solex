@@ -26,58 +26,33 @@ public class WarehouseRestController {
 	// 창고 리스트
     @GetMapping("")
     public List<Map<String, Object>> getWarehouseList(@RequestParam("page") int page, @RequestParam("size") int size) {
-    	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	Long loginEmpId = 2L;
     	
     	int offset = page * size;
-		System.out.println("page:" + page + "size: " + size);
-    	
-    	List<Map<String, Object>> listMap = warehouseService.getWarehouseList(offset, size);
-    	System.out.println(listMap);
-    	return listMap;
+    	return warehouseService.getWarehouseList(offset, size);	
     }
     
     // 창고 상세보기 모달창
     @GetMapping("/{whsId}")
     public Map<String, Object> getWarehouseDetail(@PathVariable("whsId") String whsId) {
-    	System.out.println();
-    	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	Long loginEmpId = 2L;
-    	return warehouseService.getWarehouseDetail(whsId, loginEmpId);
+    	return warehouseService.getWarehouseDetail(whsId);
     }
     
     // 창고 구역의 히스토리
     @GetMapping("/area/{areaId}/history")
     public List<Map<String,Object>> getWarehouseAreaHistory(@PathVariable("areaId") Long areaId) {
-    	System.out.println();
-    	// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-    	Long loginEmpId = 2L;
-    	return warehouseService.getWarehouseAreaHistory(areaId, loginEmpId);
+    	return warehouseService.getWarehouseAreaHistory(areaId);
     }
     
     // 창고 등록
   	@PostMapping("")
   	public void approvalDocument(@RequestBody Map<String, Object> warehouseRequest) {
-  		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-      	Long loginEmpId = 2L;
-      	
-      	System.out.println("---------------------***********************----------------------");
-  		System.out.println(warehouseRequest);
-  		
   		warehouseService.registerWarehouse(warehouseRequest);
   	}
   	
   	// 창고 수정
   	@PatchMapping("")
-  	public String upadteWarehouse(@RequestBody Map<String, Object> warehouseRequest) {
-  		// 로그인 아이디 가져오기 - 나중에 Spring Security 이용해서 가져와야됨
-      	Long loginEmpId = 2L;
-      	
-      	System.out.println("---------------------***********************----------------------");
-  		System.out.println(warehouseRequest);
-  		
-  		warehouseService.upadteWarehouse(warehouseRequest, loginEmpId);
-  		return "";
+  	public void upadteWarehouse(@RequestBody Map<String, Object> warehouseRequest) {
+  		warehouseService.upadteWarehouse(warehouseRequest);
   	}
   	
 }

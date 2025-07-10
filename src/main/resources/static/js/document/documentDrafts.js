@@ -233,6 +233,7 @@ $(function() {
 
 	// 기안서 종류별로 제목 및 달력 시간표시 나타내기
 	$('#docTypeSelect').on('change', async function() {
+
 		const selected = $(this).val();
 
 		const formHtml = formTemplates[selected] || '<p>지원되지 않는 문서 유형입니다.</p>';
@@ -251,14 +252,41 @@ $(function() {
 			dateFormat: selected === 'doc_type_03' ? "Y-m-d" : "Y-m-d H:i",
 			minuteIncrement: 30
 		});
+		
+		try {
+			const response = await fetch(`/SOLEX/approval/select/base?doc_type_code=${selected}`);
+			if (!response.ok) throw new Error("조회 실패");
 
-//		if (selected === 'doc_type_03') {
-//			const positionOptions = await fetchCodeOptions('position');
-//			$('#docPositionSelect').html(`<option value="">선택하세요</option>${positionOptions}`);
-//
-//			const deptOptions = await fetchCodeOptions('dept');
-//			$('#docDeptSelect').html(`<option value="">선택하세요</option>${deptOptions}`);
-//		}
+			const data = await response.json();
+
+			// 결재선 부분 시작		
+			const exampleApprovalLineDiv = document.querySelector("#exampleModal .approval-line");
+			exampleApprovalLineDiv.innerHTML = ""; // Clear previous content
+	
+			const nameList = (data.APL_EMP_POS_NM || "").split(",");
+	
+			nameList.forEach((pos, i) => {
+	
+	
+				const exampleApproverBox = document.createElement("div");
+				exampleApproverBox.className = "approver-box";
+				exampleApproverBox.innerHTML = `
+					<div class="approver-position">${pos}</div>
+				`;
+				exampleApprovalLineDiv.appendChild(exampleApproverBox);
+	
+				// Add arrow separator if not the last item
+				if (i < nameList.length - 1) {
+					const arrow = document.createElement('div');
+					arrow.className = 'approver-arrow';
+					arrow.innerHTML = `→`;
+					exampleApprovalLineDiv.appendChild(arrow);
+				}
+			});
+		} catch (err) {
+					console.error("상세 조회 중 에러:", err);
+					alert("상세 조회에 실패했습니다.");
+		}
 	});
 
 	$('#docTypeSelect').trigger('change');

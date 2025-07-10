@@ -15,6 +15,6 @@ public interface WarehouseMapper {
 
 	void insertWarehouse(Map<String, Object> warehouseRequest);
 
-	void upadteWarehouse(Map<String, Object> warehouseRequest, Long loginEmpId);
+	void upadteWarehouse(Map<String, Object> warehouseRequest);
 
 }

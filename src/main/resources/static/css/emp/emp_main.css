@@ -16,32 +16,32 @@
   font-weight: bold; /* 선택 사항 */
 }
 
-#dateRange,
-#dept-nm,
-#dept-nms,
-#emp-nm,
-#docdept_position,
-#emp-id,
-#emp-nm,
-#curr-rank,
-#transfer-dept,
-#curr-rank,
-#transfer-posi,
-#emp-nms,
-#curr-nm,
-#cost-detail,
-#promotion-posi,
-#dept-team,
-.team,
-#curr-team,
-#promotion-team,
-#transfer-team,
-#curr-ranks,
-#dept-teams,
-#job-posit,
-#job-posits {
-	width: 310px;
-}
+/* #dateRange, */
+/* #dept-nm, */
+/* #dept-nms, */
+/* #emp-nm, */
+/* #docdept_position, */
+/* #emp-id, */
+/* #emp-nm, */
+/* #curr-rank, */
+/* #transfer-dept, */
+/* #curr-rank, */
+/* #transfer-posi, */
+/* #emp-nms, */
+/* #curr-nm, */
+/* #cost-detail, */
+/* #promotion-posi, */
+/* #dept-team, */
+/* .team, */
+/* #curr-team, */
+/* #promotion-team, */
+/* #transfer-team, */
+/* #curr-ranks, */
+/* #dept-teams, */
+/* #job-posit, */
+/* #job-posits { */
+/* 	width: 310px; */
+/* } */
 .doc-type01,
 .doc-type02,
 .doc-type04,

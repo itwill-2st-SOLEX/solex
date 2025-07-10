@@ -2,8 +2,11 @@ package kr.co.itwillbs.solex.document;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -144,5 +147,36 @@ public class DocumentService {
 	        default:
 	        	throw new IllegalArgumentException("알 수 없는 문서 타입입니다: " + docTypeCode);
 	    }
+	}
+
+	public String selectBaseDoc(String docTypeCode, Long empId) {
+		// 1. 기안자 정보 조회 (직급, 분류, 부서, 팀 코드 및 직급 정렬 순서 포함)
+		Map<String, Object> loginEmployee = employeeMapper.selectJoinCodeDetail(empId);
+
+		int docEmployeePosSort = ((BigDecimal) loginEmployee.get("POS_SORT")).intValue();
+        // 필요 상위 단계 수
+        Integer steps = documentMapper.findSteps(docTypeCode);
+		
+		// 상위 결재자 체인 탐색
+        List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
+        List<String> posList = new ArrayList<>();
+        int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
+        
+        for (int i = 0; i < total; i++) {
+            Map<String, Object> rank = upperRanks.get(i);
+            String posCd = (String) rank.get("POS_CD");
+            posList.add(posCd);
+            int stepNo = total - i;
+        }
+        
+        String aplEmpPosNm2 = posList.stream()
+                .sorted(Collections.reverseOrder())
+                .collect(Collectors.joining(","));
+        
+        System.out.println(aplEmpPosNm2);
+        
+        return aplEmpPosNm2;
+        
+        
 	}
 }
