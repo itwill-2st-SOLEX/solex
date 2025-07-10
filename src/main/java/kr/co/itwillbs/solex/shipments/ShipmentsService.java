@@ -20,7 +20,7 @@ public class ShipmentsService {
 	
 	public List<Map<String, Object>> getPagedGridDataAsMap(int page, int pageSize) {
 		int offset = page * pageSize;
-        List<Map<String, Object>> resultList = shipmentsMapper.selectPagedOrderDataAsMap(offset, pageSize);
+        List<Map<String, Object>> resultList = shipmentsMapper.selectPagedOrderDataAsMap();
 		return resultList;
 	}
 	

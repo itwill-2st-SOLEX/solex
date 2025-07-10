@@ -94,7 +94,7 @@ public class InspectionRestController {
 	
 	
 	@PostMapping("/outbound")
-    public ResponseEntity<Map<String, Object>> processStockOutbound(@RequestBody Map<String, Object> requestBody) {
+	public ResponseEntity<Map<String, Object>> processStockOutbound(@RequestBody Map<String, Object> requestBody) {
         try {
             // 요청 바디에서 oddId와 qhiBcount 추출
             // JSON Number는 Java에서 Integer, Long, Double 등으로 파싱될 수 있으므로,

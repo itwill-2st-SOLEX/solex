@@ -285,6 +285,8 @@
 	]]>
 	</select>
 	
+	<!-- 나이키 레볼루션 7 NIKE REVOLUTION 7	네이비	275	3 -->
+	
 	<select id="callFifoOutboundByOdd" statementType="CALLABLE" parameterType="map" resultType="map">
         { CALL SP_FIFO_OUTBOUND_BY_ODD (
             #{pOddId,         mode=IN,    jdbcType=NUMERIC},

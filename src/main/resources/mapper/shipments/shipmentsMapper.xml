@@ -21,9 +21,7 @@
 	left JOIN product_option opt ON opt.opt_id = odd.opt_id
 	left JOIN code_detail cd ON odd.odd_sts = cd.det_id
 	WHERE odd.odd_sts in ('odd_sts_05', 'odd_sts_06', 'odd_sts_07', 'odd_sts_08', 'odd_sts_09') -- '수주 등록' 상태인 것들만 조회
-    ORDER BY odd.odd_id asc
-    OFFSET #{offset} ROWS
-    FETCH NEXT #{limit} ROWS ONLY
+    ORDER BY odd.odd_id desc
 	</select>
 
 	<!-- 수주 상세 조회 -->
