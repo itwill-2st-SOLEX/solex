@@ -283,8 +283,9 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 	position: relative;
 }
 .panel.notice > span, .panel.approval > span {
+	z-index: 100;
 	position: absolute;
-	top: 15px;
+	bottom: 25px;
 	right: 20px;
 }
 .panel.notice > span > a, .panel.approval > span > a {
@@ -579,4 +580,10 @@ div.toastui-calendar-popup-section.toastui-calendar-dropdown-section.toastui-cal
 }
 
 
+}
+
+/* 마이페이지 폼 비활성화 부분 회색처리 */
+input[readonly] {
+  background-color: #e9ecef; 
+  cursor: not-allowed;
 }

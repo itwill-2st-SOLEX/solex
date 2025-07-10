@@ -17,9 +17,6 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("/emp")
 public class EmpController {
 
-	@Autowired
-	private EmpService empService;
-
 	@GetMapping("/page")
 	public String main(){
 

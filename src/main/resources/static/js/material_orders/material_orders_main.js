@@ -18,7 +18,7 @@ $(function() {
             { header: '발주ID', name: 'matOrdId', align: 'center', width: 89, sortable: true },
             { header: '자재ID', name: 'matId', align: 'center', width: 99, sortable: true },
             { header: '요청자ID', name: 'empId', align: 'center', width: 99, sortable: true },
-            { header: '발주설명', name: 'matComm', align: 'center', width: 600 },
+            { header: '발주설명', name: 'matComm', align: 'center', width: 650 },
             { header: '발주수량', name: 'matQty', align: 'center', width: 99},
             { header: '발주 요청일', name: 'matRegDate', align: 'center', width: 118, sortable: true },
             {
@@ -26,7 +26,7 @@ $(function() {
                 name: 'mat_ord_sts',
 				sortable: true,
                 align: 'center',
-                width: 230,
+                width: 200,
 				sortable: true,
                 formatter: ({ value, rowKey }) => {
                     if (value === 'mat_ord_sts_01') {

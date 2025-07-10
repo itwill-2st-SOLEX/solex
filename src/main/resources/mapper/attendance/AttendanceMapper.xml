@@ -88,7 +88,7 @@
 		  AND e.emp_pos_cd != 'pos_01' 
 		</when>
 	</choose>
-		ORDER BY e.emp_team_cd, e.emp_pos_cd
+		ORDER BY e.emp_team_cd, e.emp_pos_cd, att.att_day desc
 	   OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
     

@@ -10,10 +10,7 @@ import org.apache.ibatis.annotations.Param;
 public interface ShipmentsMapper {
 	
 	// 페이징된 주문 상세 목록 쿼리
-	List<Map<String, Object>> selectPagedOrderDataAsMap(
-	    @Param("offset") int offset,
-	    @Param("limit") int limit
-	);
+	List<Map<String, Object>> selectPagedOrderDataAsMap(	);
 
 	// 주문 생성 쿼리
 	int createOrderRequest(Map<String, Object> params);
