@@ -14,7 +14,7 @@ $(function() {
 	        { header: '부서', name: 'empDepCd', align : 'center', filter: 'select' },
 	        { header: '팀', name: 'empTeamCd', align : 'center', filter: 'select'},
 	        { header: '직급', name: 'empPosCd', align : 'center', filter: 'select'},
-	        { header: '사원명', name: 'empNm', align : 'center'},
+	        { header: '사원명', name: 'empNm', align : 'center', filter: 'select'},
 	        { header: '연락처', name: 'empPhone', align : 'center'},
 	        { header: '입사일', name: 'empHire', align : 'center' , sortable: true}
 		]

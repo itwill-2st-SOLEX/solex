@@ -1,5 +1,6 @@
 package kr.co.itwillbs.solex.emp;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public interface EmpMapper {
 	//수정하기 위한
 	Map<String, Object> getEmpDetail(@Param("empNum") String empNum);
 	
+	Long findSabun(@Param("emp_hire") LocalDate empHire);
 	//수정한 내용을 등록하기 위한 
 	int modifyMap(Map<String, Object> empModifyMap);
 

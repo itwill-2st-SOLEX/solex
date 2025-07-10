@@ -57,7 +57,6 @@ public class WorkOrderRestController {
 	public void warehousesInsert(@RequestBody Map<String, Object> prdInfo,
 								 HttpSession session) {
 		String empId = (String)session.getAttribute("empId");
-		System.out.println(prdInfo);
 		service.warehousesInsert(prdInfo, empId);
 	}
 }
