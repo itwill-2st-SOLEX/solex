@@ -36,8 +36,8 @@ $(function() {
 	          empPw = "930705";
 	          break;
 	        case "manager":
-	          empNo = "20240070";
-	          empPw = "000429";
+	          empNo = "20240001";
+	          empPw = "921205";
 	          break;
 	        case "admin":
 	          empNo = "20140001";

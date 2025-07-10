@@ -283,6 +283,7 @@ div.toastui-calendar-popup-section.toastui-calendar-section-header > div.toastui
 	position: relative;
 }
 .panel.notice > span, .panel.approval > span {
+	z-index: 100;
 	position: absolute;
 	bottom: 25px;
 	right: 20px;
