@@ -49,14 +49,12 @@ public class DocumentService {
 	// 기안서 등록
 	@Transactional
 	public void registerDarafts(Map<String, Object> map, int loginEmpId) {
-		map.put("emp_id", loginEmpId);
-		map.put("doc_reg_time", LocalDateTime.now());
-		
+		map.put("empId", loginEmpId);
+		map.put("docRegTime", LocalDateTime.now());	
 		documentMapper.registerDocument(map);
 		
-		long docId = ((Integer) map.get("doc_id")).longValue();
-		String docType = (String) map.get("doc_type");
-
+		long docId = ((Integer) map.get("docId")).longValue();
+		String docType = (String) map.get("docType");
 	    switch (docType) {
 	        case "doc_type_01":
 	            documentMapper.registerLeaveDoc(map);
@@ -69,69 +67,46 @@ public class DocumentService {
 	            break;
 	    }
 	    
-	    // 작성자 직급 sort 
         Map<String, Object> docEmployee = employeeMapper.selectJoinCodeDetail(loginEmpId);
-        
-        int docEmployeePosSort = ((BigDecimal) docEmployee.get("POS_SORT")).intValue();
-        // 필요 상위 단계 수
+        int docEmployeePosSort = ((BigDecimal) docEmployee.get("posSort")).intValue();
         Integer steps = documentMapper.findSteps(docType);
-		String catCd = (String) docEmployee.get("EMP_CAT_CD");
-		
+		String catCd = (String) docEmployee.get("empCatCd");
 		String depCd = null;
-		if (docEmployee.get("EMP_DEP_CD") != null) {
-			depCd = (String) docEmployee.get("EMP_DEP_CD");
+		if (docEmployee.get("empDepCd") != null) {
+			depCd = (String) docEmployee.get("empDepCd");
 		}
 		String teamCd = null;
-		if (docEmployee.get("EMP_DEP_CD") != null) {
-			teamCd = (String) docEmployee.get("EMP_TEAM_CD");
+		if (docEmployee.get("empDepCd") != null) {
+			teamCd = (String) docEmployee.get("empTeamCd");
 		}
-        
-        // 상위 결재자 체인 탐색
+		
         List<Map<String, Object>> upperRanks = employeeMapper.selectUpperPositions(docEmployeePosSort);        
         int total = Math.min(steps, upperRanks.size());   // 실제로 돌아야 할 횟수
         for (int i = 0; i < total; i++) {
             Map<String, Object> rank = upperRanks.get(i);
-            String posCd = (String) rank.get("POS_CD");
-
+            String posCd = (String) rank.get("posCd");
             int stepNo = total - i;
-
-            // 기본값은 ‘실제 코드’를 그대로 사용
-            String catParam  = catCd;
-            String depParam  = depCd;
+            String catParam  = catCd; 
+            String depParam  = depCd; 
             String teamParam = teamCd;
-
             switch (posCd) {
                 case "pos_01":
-                    // 사장 (예시) – 모두 공통 코드 00
                     catParam  = "cat_00";
                     depParam  = "dep_00";
                     teamParam = "team_00";
                     break;
-
                 case "pos_02":
-                    // 이사 – 부서·팀만 00
                     depParam  = "dep_00";
                     teamParam = "team_00";
                     break;
-
                 case "pos_03":
-                    // 부장 – 팀만 00
                     teamParam = "team_00";
                     break;
-
                 case "pos_04":
-                    // 팀장 – 그대로 사용
                     break;
             }
 
-            approvalMapper.insertApprovalLine(
-                docId,
-                stepNo,
-                catParam,
-                depParam,
-                teamParam,
-                posCd
-            );
+            approvalMapper.insertApprovalLine(docId, stepNo, catParam, depParam, teamParam, posCd);
         }
 	}
 	
