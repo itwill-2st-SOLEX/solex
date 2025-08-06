@@ -1,29 +1,8 @@
-# Getting Started
-
-### Reference Documentation
-For further reference, please consider the following sections:
-
-* [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/3.5.0/gradle-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/3.5.0/gradle-plugin/packaging-oci-image.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/3.5.0/reference/data/sql.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/3.5.0/reference/using/devtools.html)
-* [Thymeleaf](https://docs.spring.io/spring-boot/3.5.0/reference/web/servlet.html#web.servlet.spring-mvc.template-engines)
-* [Validation](https://docs.spring.io/spring-boot/3.5.0/reference/io/validation.html)
-* [Spring Web](https://docs.spring.io/spring-boot/3.5.0/reference/web/servlet.html)
-
-### Guides
-The following guides illustrate how to use some features concretely:
-
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Handling Form Submission](https://spring.io/guides/gs/handling-form-submission/)
-* [Validation](https://spring.io/guides/gs/validating-form-input/)
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
-
-### Additional Links
-These additional references should also help you:
-
-* [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
-
+<img width="1920" height="1080" alt="스크린샷(26)" src="https://github.com/user-attachments/assets/c4e48fdd-2e29-4c3d-a94b-7f9aa02c1e5b" />
+<img width="1920" height="1080" alt="스크린샷(6)" src="https://github.com/user-attachments/assets/3f2fbb4e-2afd-48d6-ac1f-03f742305ec7" />
+<img width="1920" height="1080" alt="스크린샷(7)" src="https://github.com/user-attachments/assets/6b7c6b22-5187-4ea1-93ab-75c0fc988a6f" />
+<img width="1920" height="1080" alt="스크린샷(8)" src="https://github.com/user-attachments/assets/2731609c-e051-4dcb-8aeb-06fbf05bd245" />
+<img width="1920" height="1080" alt="스크린샷(9)" src="https://github.com/user-attachments/assets/4b67508e-7733-4528-b16d-a225a96ed9fd" />
+<img width="1920" height="1080" alt="스크린샷(10)" src="https://github.com/user-attachments/assets/1ff56f31-3809-4bb1-81df-05485ab55764" />
+<img width="1920" height="1080" alt="스크린샷(28)" src="https://github.com/user-attachments/assets/9a6f8faa-6a0d-42d1-a2ea-31a94ccf3be7" />
+<img width="1920" height="1080" alt="스크린샷(29)" src="https://github.com/user-attachments/assets/daf2c070-0eff-4f63-b83f-b8439221fb74" />
